@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHECKLIST INFRA - V21 (Safe)</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; -webkit-print-color-adjust: exact; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        .font-sans { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media print {
+            @page { margin: 0; size: auto; }
+            body, html { background-color: white !important; color: black !important; }
+            body * { visibility: hidden; }
+            #receipt-area, #receipt-area * { visibility: visible; }
+            #receipt-area {
+                position: absolute; left: 0; top: 0; width: 100%; min-height: 100vh;
+                background: white !important; color: black !important; padding: 0; z-index: 9999;
+            }
+            .no-print { display: none !important; }
+            .print-color { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- CHAVES FIREBASE (CONFIGURADAS) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0G20h4IspBYh31PTbGmkeu9DyTKdofkI",
+            authDomain: "checklist-cobrecom.firebaseapp.com",
+            projectId: "checklist-cobrecom",
+            storageBucket: "checklist-cobrecom.firebasestorage.app",
+            messagingSenderId: "989920210918",
+            appId: "1:989920210918:web:576250bc600e016249f027"
+        };
+
+        // --- INICIALIZAÇÃO SEGURA DO BANCO ---
+        let db = null;
+        try {
+            if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                console.log("Status: CONECTADO AO FIREBASE");
+            } else if (typeof firebase !== 'undefined' && firebase.apps.length) {
+                db = firebase.firestore();
+            }
+        } catch (error) {
+            console.error("Erro na conexão (Usando modo Offline):", error);
+            db = null; // Força modo offline se der erro
+        }
+
+        const { useState, useEffect, useRef } = React;
+        
+        // --- ÍCONES ---
+        const Icons = {
+            User: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            Lock: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+            LogOut: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            Key: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>,
+            Plus: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            ArrowLeft: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>,
+            Printer: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
+            Save: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
+            Check: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
+            Image: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>,
+            Mail: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            Trash: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+            Globe: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>,
+            Shield: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>,
+            Settings: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Server: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
+            Json: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1"/><path d="M14 16a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/></svg>
+        };
+
+        const DEFAULT_USERS = [
+            { id: '01001440', name: 'KAUAN FERNANDES', pass: '1234' },
+            { id: '01001691', name: 'GUSTAVO LUI', pass: '1234' },
+            { id: '01001071', name: 'INACIO', pass: '1234' }
+        ];
+
+        const getTemplate = (type, tecnicoName) => {
+            const tmpl = {
+                meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' },
+                items: {}
+            };
+
+            if (type === 'formatacao') {
+                tmpl.items = {
+                    preventivas: { title: "Preventivas", icon: "Cpu", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
+                    preparacao: { title: "Backup", icon: "Save", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
+                    sistema: { title: "Sistema", icon: "Globe", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
+                    seguranca: { title: "Segurança", icon: "Shield", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
+                    configuracao: { title: "Config", icon: "Settings", tasks: [
+                        { id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, 
+                        { id: 'f_conf_2', label: 'Energia', checked: false }, 
+                        { id: 'f_conf_3', label: 'Config. Email', checked: false }, 
+                        { id: 'f_conf_4', label: 'Config. Spark', checked: false }, 
+                        { id: 'f_conf_5', label: 'Impressoras', checked: false }, 
+                        { id: 'f_conf_6', label: 'Map. Rede', checked: false },
+                        { id: 'f_conf_7', label: 'IP Fixo (Definir pelo MAC)', checked: false }
+                    ]},
+                    apps: { title: "Apps", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
+                    finalizacao: { title: "Final", icon: "Json", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
+                };
+            } else {
+                tmpl.items = {
+                    inspecao: { title: "Inspeção", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
+                    preventiva: { title: "Limpeza", icon: "Shield", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
+                    teste: { title: "Teste", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
+                };
+            }
+            return tmpl;
+        };
+
+        const Card = ({ children, className = "", ...props }) => (
+            <div 
+                {...props} 
+                className={`bg-slate-900 border border-slate-800 rounded-xl shadow-lg ${className}`}
+            >
+                {children}
+            </div>
+        );
+
+        const Input = (props) => <input {...props} className={`w-full p-3 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium text-white outline-none focus:border-blue-500 transition-colors ${props.className}`} />;
+        const Button = ({ children, variant = 'primary', className = "", ...props }) => {
+            const variants = {
+                primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20',
+                secondary: 'bg-slate-800 text-slate-300 hover:bg-slate-700',
+                success: 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            };
+            return <button {...props} className={`px-4 py-2 rounded-lg font-bold transition-all active:scale-95 flex items-center justify-center gap-2 ${variants[variant]} ${className}`}>{children}</button>;
+        };
+
+        const LoginScreen = ({ onLogin, users, logo }) => {
+            const [id, setId] = useState('');
+            const [pass, setPass] = useState('');
+            const [error, setError] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const user = users.find(u => u.id === id && u.pass === pass);
+                if (user) onLogin(user);
+                else setError('ID ou Senha inválidos');
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-6 bg-slate-950">
+                    <Card className="w-full max-w-sm p-8 fade-in border-slate-800 shadow-2xl">
+                        <div className="text-center mb-8">
+                            {logo && <img src={logo} className="h-20 mx-auto mb-6 object-contain" alt="Logo" />}
+                            <h1 className="text-2xl font-bold text-white tracking-tight uppercase">CHECKLIST INFRA</h1>
+                        </div>
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">ID Colaborador</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.User}</div>
+                                    <Input type="text" value={id} onChange={e => setId(e.target.value)} className="pl-10" placeholder="Ex: 01001440" inputMode="numeric" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Senha</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Lock}</div>
+                                    <Input type="password" value={pass} onChange={e => setPass(e.target.value)} className="pl-10" placeholder="••••" />
+                                </div>
+                            </div>
+                            {error && <p className="text-red-400 text-xs font-bold text-center bg-red-900/20 p-2 rounded">{error}</p>}
+                            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30">ENTRAR</button>
+                        </form>
+                    </Card>
+                </div>
+            );
+        };
+
+        const ChangePasswordModal = ({ onClose, currentUser, onChangePass }) => {
+            const [newPass, setNewPass] = useState('');
+            const [confirmPass, setConfirmPass] = useState('');
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (newPass !== confirmPass) return alert("As senhas não conferem");
+                if (newPass.length < 4) return alert("Senha muito curta");
+                onChangePass(newPass);
+                onClose();
+            };
+            return (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <Card className="w-full max-w-sm p-6 fade-in border-slate-700">
+                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-white">{Icons.Key} Alterar Senha</h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <Input type="password" required placeholder="Nova Senha" value={newPass} onChange={e => setNewPass(e.target.value)} />
+                            <Input type="password" required placeholder="Confirmar Nova Senha" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} />
+                            <div className="flex gap-3 justify-end pt-2">
+                                <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+                                <Button type="submit">Salvar</Button>
+                            </div>
+                        </form>
+                    </Card>
+                </div>
+            );
+        };
+
+        const ReceiptView = ({ ticket, onBack, onArchive, logo, currentUser }) => {
+            const [obs, setObs] = useState('');
+            const [isSaving, setIsSaving] = useState(false);
+            
+            // SE TICKET FOR NULO (FOI ARQUIVADO), NÃO RENDERIZA
+            if (!ticket) return null;
+
+            const meta = ticket.data.meta;
+            const identificador = meta.maquina || meta.equipamento || meta.setor || "N/A";
+            const tecnico = meta.tecnico || currentUser.name; 
+            let totalTasks = 0, checkedTasks = 0;
+            const pendingList = [];
+            const categorySummary = Object.values(ticket.data.items).map(group => {
+                const total = group.tasks.length;
+                const checked = group.tasks.filter(t => t.checked).length;
+                group.tasks.forEach(t => { if(!t.checked) pendingList.push(`- [${group.title}] ${t.label}`); });
+                totalTasks += total; checkedTasks += checked;
+                let status = "PENDENTE"; if (checked === total) status = "OK"; else if (checked > 0) status = "PARCIAL";
+                return { title: group.title, status };
+            });
+            const percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
+            const isFullyComplete = percent === 100;
+            const statusGlobal = isFullyComplete ? "CONCLUÍDO" : "PARCIAL";
+            
+            const handleSendAndArchive = () => {
+                setIsSaving(true);
+                const subject = `[${statusGlobal}] O.S. #${ticket.id} - ${identificador}`;
+                let pendingSection = "";
+                if(pendingList.length > 0) pendingSection = `\n⚠️ ITENS PENDENTES:\n${pendingList.join('\n')}\n----------------------------------------`;
+                const body = `RELATÓRIO TÉCNICO DE SERVIÇO\n----------------------------------------\nO.S.: #${ticket.id}\nATIVO: ${identificador}\nSTATUS: ${statusGlobal} (${percent}%)\nTÉCNICO: ${tecnico}\nDATA: ${new Date().toLocaleDateString()}\n----------------------------------------\nRESUMO POR CATEGORIA:\n${categorySummary.map(c => `${c.status === 'OK' ? '✅' : '⚠️'} ${c.title}`).join('\n')}\n----------------------------------------${pendingSection}\n📝 OBSERVAÇÕES TÉCNICAS:\n${obs || "Nenhuma observação registrada."}\n----------------------------------------\nCHECKLIST INFRA - COBRECOM`.trim();
+                
+                // Abre e-mail sem travar
+                const mailtoLink = `mailto:infra@cobrecom.com.br?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                const link = document.createElement('a');
+                link.href = mailtoLink;
+                link.click();
+
+                // Arquiva após delay seguro
+                setTimeout(() => { onArchive(); }, 1500);
+            };
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4 bg-slate-950">
+                    <Card className="mb-8 w-full max-w-2xl p-6 fade-in">
+                        <div className="w-full mb-6">
+                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Técnicas:</label>
+                            <textarea value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Detalhes extras..." className="w-full p-4 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none h-32 resize-none text-white"></textarea>
+                        </div>
+                        <div className="flex flex-col md:flex-row gap-3 justify-center">
+                            <Button variant="secondary" onClick={onBack} disabled={isSaving}>Voltar</Button>
+                            <Button className="bg-slate-700 text-white" onClick={() => window.print()} disabled={isSaving}>{Icons.Printer} Imprimir</Button>
+                            <Button onClick={handleSendAndArchive} disabled={isSaving}>{isSaving ? 'Processando...' : <>{Icons.Mail} 📧 Enviar e Arquivar</>}</Button>
+                        </div>
+                    </Card>
+                    <div id="receipt-area" className="bg-white shadow-2xl w-full max-w-[210mm] font-sans text-slate-800 relative overflow-hidden print-color min-h-[140mm] mx-auto rounded-sm">
+                        <div className="flex justify-between items-center p-8 border-b-4 border-yellow-400 print-color">
+                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-12 object-contain" />}<div><h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">Ordem de Serviço</h1><p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Departamento de Infraestrutura TI</p></div></div>
+                            <div className="text-right"><div className="text-4xl font-black text-slate-200">#{ticket.id}</div><div className="text-sm font-bold text-slate-500">{new Date().toLocaleDateString()}</div></div>
+                        </div>
+                        <div className="p-8">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 bg-slate-50 p-4 rounded-lg border border-slate-100 print-color">
+                                <div><span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Equipamento/Ativo</span><span className="font-bold text-slate-900 text-lg block break-words">{identificador}</span></div>
+                                <div><span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tipo</span><span className="font-semibold text-slate-700 uppercase">{ticket.type}</span></div>
+                                <div><span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Técnico</span><span className="font-semibold text-slate-700">{tecnico}</span></div>
+                                <div><span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status</span><span className={`inline-block px-2 py-0.5 rounded text-xs font-bold border ${isFullyComplete ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-orange-700 bg-orange-50 border-orange-200'} mt-1 print-color`}>{statusGlobal} ({percent}%)</span></div>
+                            </div>
+                            {obs && <div className="mb-8 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r print-color"><h3 className="text-xs font-bold uppercase text-yellow-700 mb-1">Observações Técnicas</h3><p className="text-sm text-slate-700 whitespace-pre-wrap">{obs}</p></div>}
+                            <h3 className="text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider border-b pb-1">Relatório de Execução</h3>
+                            <div className="grid grid-cols-2 gap-4 mb-12">{categorySummary.map((cat, idx) => (<div key={idx} className="flex items-center justify-between p-3 rounded border border-slate-100 bg-white"><div className="flex items-center gap-3"><div className={`w-2 h-2 rounded-full ${cat.status === 'OK' ? 'bg-emerald-500' : 'bg-orange-400'} print-color`}></div><span className="text-sm font-semibold text-slate-700">{cat.title}</span></div><span className={`text-[10px] font-bold px-2 py-0.5 rounded ${cat.status === 'OK' ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-600'} print-color`}>{cat.status}</span></div>))}</div>
+                            <div className="grid grid-cols-2 gap-12 mt-16 pt-8 border-t border-slate-200 break-inside-avoid"><div className="text-center"><div className="border-b border-slate-400 mb-2 h-8"></div><p className="text-xs font-bold text-slate-600 uppercase">Assinatura do Técnico</p></div><div className="text-center"><div className="border-b border-slate-400 mb-2 h-8"></div><p className="text-xs font-bold text-slate-600 uppercase">Visto do Usuário</p></div></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish, logo, onSave }) => {
+            if (!ticket) return null;
+            const { data, type } = ticket;
+            const handleMeta = (field, value) => onUpdate({ ...data, meta: { ...data.meta, [field]: value } });
+            const handleCheck = (section, taskId) => {
+                const newData = { ...data };
+                const newTasks = newData.items[section].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
+                newData.items = { ...newData.items, [section]: { ...newData.items[section], tasks: newTasks } };
+                onUpdate(newData);
+            };
+            let total = 0, checked = 0;
+            Object.values(data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
+            const progress = total === 0 ? 0 : Math.round((checked/total)*100);
+            
+            const handleFinishClick = () => {
+                if (progress < 100 && !confirm(`O checklist está em ${progress}%. Deseja finalizar como PARCIAL?`)) return;
+                onRequestFinish();
+            };
+
+            const handleSaveAndExit = () => {
+                onSave();
+                onBack();
+            };
+
+            return (
+                <div className="fade-in pb-12">
+                    <Card className="sticky top-4 z-40 mb-6 p-4 border-l-4 border-blue-500 shadow-xl bg-slate-900">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div className="flex items-center gap-4 w-full md:w-auto">
+                                <button onClick={handleSaveAndExit} className="p-2 -ml-2 text-slate-400 hover:text-white rounded-lg transition-colors flex items-center gap-2 text-xs font-bold">{Icons.ArrowLeft} Salvar e Sair</button>
+                                <div className="h-6 w-px bg-slate-800"></div>
+                                <div className="flex flex-col flex-1"><div className="flex items-center gap-2"><span className="text-xs font-bold uppercase text-slate-500">Progresso</span><span className="text-xs font-bold text-blue-400">{progress}%</span></div><div className="w-24 h-1.5 bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-blue-600 transition-all duration-500" style={{width: `${progress}%`}}></div></div></div>
+                            </div>
+                            <div className="flex gap-3 w-full md:w-auto">
+                                <Button onClick={handleSaveAndExit} variant="secondary" className="flex-1 md:flex-none">{Icons.Save} Salvar</Button>
+                                <Button onClick={handleFinishClick} variant={progress === 100 ? 'success' : 'primary'} className="flex-1 md:flex-none">{Icons.Check} Finalizar</Button>
+                            </div>
+                        </div>
+                    </Card>
+                    <Card className="mb-6 p-6 border-slate-800 bg-slate-900">
+                        <div className="flex justify-between items-start mb-6 border-b border-slate-800 pb-4">
+                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 w-auto object-contain bg-white rounded p-1" />}<div><h2 className="text-lg font-bold text-white uppercase tracking-tight">Checklist: {type}</h2><p className="text-xs text-slate-500">Dados do atendimento.</p></div></div>
+                            <div className="text-right"><span className="text-[10px] font-bold text-slate-500 uppercase block">ID</span><span className="text-2xl font-black text-slate-700">#{ticket.id}</span></div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {Object.keys(data.meta).map(field => (
+                                <div key={field}><label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">{field}</label><Input type={field === 'data' ? 'date' : 'text'} value={data.meta[field]} onChange={e => handleMeta(field, e.target.value)} autoComplete="off" /></div>
+                            ))}
+                        </div>
+                    </Card>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries(data.items).map(([key, group]) => (
+                            <Card key={key} className="overflow-hidden border-slate-800">
+                                <div className="bg-slate-800/50 px-4 py-3 border-b border-slate-800 flex items-center gap-2"><span className="text-blue-400">{Icons[group.icon]}</span><h3 className="font-bold text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3></div>
+                                <div className="p-2 space-y-1">
+                                    {group.tasks.map(task => (
+                                        <label key={task.id} className="flex items-start gap-3 p-3 hover:bg-slate-800 rounded-lg cursor-pointer group transition-colors select-none">
+                                            <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors ${task.checked ? 'bg-blue-600 border-blue-600' : 'border-slate-600 bg-slate-800'}`}>{task.checked && <span className="text-white text-xs">✓</span>}</div>
+                                            <input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="hidden" />
+                                            <span className={`text-sm font-medium leading-tight ${task.checked ? 'text-slate-500 line-through' : 'text-slate-300'}`}>{task.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [view, setView] = useState('login'); 
+            const [currentUser, setCurrentUser] = useState(null);
+            const [users, setUsers] = useState([]);
+            const [activeTickets, setActiveTickets] = useState([]);
+            const [currentTicketId, setCurrentTicketId] = useState(null);
+            const [history, setHistory] = useState([]);
+            const [globalSeq, setGlobalSeq] = useState(1);
+            const [logo, setLogo] = useState('image_0.png'); 
+            const [showPassModal, setShowPassModal] = useState(false);
+            const fileInputRef = useRef(null);
+
+            // --- SYNC ---
+            useEffect(() => {
+                if (db) {
+                    const unsubTickets = db.collection('tickets').orderBy('createdAt', 'desc').onSnapshot(snap => {
+                        const data = snap.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+                        setActiveTickets(data);
+                    });
+                    const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(20).onSnapshot(snap => {
+                        const data = snap.docs.map(doc => ({ ...doc.data(), docId: doc.id }));
+                        setHistory(data);
+                    });
+                    db.collection('config').doc('sequence').onSnapshot(doc => {
+                        if (doc.exists) setGlobalSeq(doc.data().value);
+                    });
+                    return () => { unsubTickets(); unsubHistory(); };
+                } else {
+                    const savedTickets = localStorage.getItem('sa_active_tickets');
+                    if (savedTickets) setActiveTickets(JSON.parse(savedTickets));
+                    const savedHistory = localStorage.getItem('sa_history');
+                    if (savedHistory) setHistory(JSON.parse(savedHistory));
+                    const savedSeq = localStorage.getItem('sa_global_seq');
+                    if (savedSeq) setGlobalSeq(parseInt(savedSeq));
+                }
+            }, []);
+
+            useEffect(() => {
+                const savedUsers = localStorage.getItem('sa_users');
+                if (savedUsers) setUsers(JSON.parse(savedUsers));
+                else { setUsers(DEFAULT_USERS); localStorage.setItem('sa_users', JSON.stringify(DEFAULT_USERS)); }
+                
+                const savedLogo = localStorage.getItem('sa_logo');
+                if (savedLogo) setLogo(savedLogo);
+            }, []);
+
+            useEffect(() => { if (!db) localStorage.setItem('sa_active_tickets', JSON.stringify(activeTickets)); }, [activeTickets]);
+            useEffect(() => { if (!db) localStorage.setItem('sa_history', JSON.stringify(history)); }, [history]);
+            useEffect(() => { if (!db) localStorage.setItem('sa_global_seq', globalSeq.toString()); }, [globalSeq]);
+
+            const handleLogin = (user) => { setCurrentUser(user); setView('dashboard'); };
+            const handleLogout = () => { setCurrentUser(null); setView('login'); };
+            const handleChangePassword = (newPass) => {
+                const updatedUsers = users.map(u => u.id === currentUser.id ? { ...u, pass: newPass } : u);
+                setUsers(updatedUsers);
+                localStorage.setItem('sa_users', JSON.stringify(updatedUsers));
+                alert("Senha alterada neste dispositivo.");
+            };
+
+            const handleCreateTicket = async (type) => {
+                let newId = globalSeq + 1;
+                
+                if (db) {
+                    await db.collection('config').doc('sequence').set({ value: newId });
+                    const ticket = { id: newId, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() };
+                    await db.collection('tickets').add(ticket);
+                    setCurrentTicketId(newId);
+                    setView('checklist');
+                } else {
+                    setGlobalSeq(newId);
+                    const ticket = { id: newId, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() };
+                    setActiveTickets([ticket, ...activeTickets]);
+                    setCurrentTicketId(newId);
+                    setView('checklist');
+                }
+            };
+
+            const handleUpdateTicket = (newData) => {
+                setActiveTickets(prev => prev.map(t => t.id === currentTicketId ? { ...t, data: newData } : t));
+            };
+
+            const handleManualSave = async () => {
+                const ticket = activeTickets.find(t => t.id === currentTicketId);
+                if (db && ticket.docId) {
+                    await db.collection('tickets').doc(ticket.docId).update(ticket);
+                    alert("Salvo na nuvem!");
+                } else {
+                    alert("Salvo localmente!");
+                }
+            };
+
+            const handleDeleteActive = async (e, ticket) => {
+                e.stopPropagation();
+                if(confirm("Cancelar este processo?")) {
+                    if (db && ticket.docId) {
+                        await db.collection('tickets').doc(ticket.docId).delete();
+                    } else {
+                        setActiveTickets(prev => prev.filter(t => t.id !== ticket.id));
+                    }
+                }
+            };
+
+            const handleArchive = async () => {
+                const ticket = activeTickets.find(t => t.id === currentTicketId);
+                // Proteção contra crash se o ticket já foi apagado
+                if(!ticket) { setView('dashboard'); return; }
+
+                const meta = ticket.data.meta;
+                const historyItem = { id: ticket.id, type: ticket.type, date: new Date().toLocaleString(), tecnico: meta.tecnico || currentUser.name, ativo: meta.maquina || meta.equipamento || meta.setor || "N/A", data: ticket.data };
+                
+                if (db && ticket.docId) {
+                    await db.collection('history').add(historyItem);
+                    await db.collection('tickets').doc(ticket.docId).delete();
+                } else {
+                    setHistory([historyItem, ...history]);
+                    setActiveTickets(prev => prev.filter(t => t.id !== currentTicketId));
+                }
+                setView('dashboard');
+            };
+
+            const handleLogoUpload = (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => { setLogo(reader.result); localStorage.setItem('sa_logo', reader.result); }; reader.readAsDataURL(file); } };
+
+            if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} logo={logo} />;
+
+            return (
+                <div className="min-h-screen pb-24 font-sans text-slate-300 bg-slate-950">
+                    <div className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-md no-print border-b border-slate-800">
+                        <div className="max-w-6xl mx-auto flex justify-between items-center">
+                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => fileInputRef.current.click()}>
+                                <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
+                                {logo ? <img src={logo} className="h-16 w-auto bg-white rounded p-0.5" alt="Logo" /> : Icons.Image}
+                                <h1 className="font-bold text-lg tracking-tight hidden md:block text-yellow-400">CHECKLIST INFRA</h1>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="text-right hidden md:block leading-tight"><p className="text-[10px] text-slate-500 uppercase font-bold">Logado como</p><p className="text-sm font-bold text-white truncate max-w-[150px]">{currentUser.name}</p></div>
+                                <button onClick={() => setShowPassModal(true)} className="p-2 hover:bg-slate-800 rounded text-slate-400 hover:text-white" title="Alterar Senha">{Icons.Key}</button>
+                                <button onClick={handleLogout} className="p-2 hover:bg-red-900/50 rounded text-slate-400 hover:text-white" title="Sair">{Icons.LogOut}</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {showPassModal && <ChangePasswordModal onClose={() => setShowPassModal(false)} currentUser={currentUser} onChangePass={handleChangePassword} />}
+
+                    <div className="max-w-6xl mx-auto p-4 md:p-6 fade-in">
+                        {view === 'dashboard' && (
+                            <div>
+                                <div className="flex justify-between items-end mb-6">
+                                    <div><h2 className="text-xl md:text-2xl font-bold text-white">Mesa de Trabalho</h2><p className="text-slate-500 text-sm">Gerencie seus atendimentos.</p></div>
+                                    <button onClick={() => setView('history')} className="text-sm font-bold text-blue-400 hover:underline">Ver Histórico</button>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+                                    <button onClick={() => handleCreateTicket('zebra')} className="bg-slate-900 border border-slate-800 hover:border-blue-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                                        <div className="flex items-center gap-3"><div className="p-2 bg-slate-800 rounded-lg text-slate-300 group-hover:text-blue-500">{Icons.Plus}</div><span className="font-bold text-slate-200">Novo Zebra</span></div>
+                                    </button>
+                                    <button onClick={() => handleCreateTicket('formatacao')} className="bg-blue-600 hover:bg-blue-700 p-4 rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-between text-white">
+                                        <div className="flex items-center gap-3"><div className="p-2 bg-white/20 rounded-lg">{Icons.Plus}</div><span className="font-bold">Nova Formatação</span></div>
+                                    </button>
+                                </div>
+                                
+                                {activeTickets.length === 0 ? <div className="border-2 border-dashed border-slate-800 rounded-xl p-12 text-center text-slate-500"><p>Mesa limpa. Inicie um novo atendimento.</p></div> : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {activeTickets.map(ticket => {
+                                            let total = 0, checked = 0;
+                                            Object.values(ticket.data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
+                                            const pct = total === 0 ? 0 : Math.round((checked/total)*100);
+                                            const meta = ticket.data.meta;
+                                            return (
+                                                <Card 
+                                                    key={ticket.id} 
+                                                    className="p-5 hover:border-blue-500 cursor-pointer relative group transition-all" 
+                                                    onClick={() => { setCurrentTicketId(ticket.id); setView('checklist'); }}
+                                                >
+                                                    <div className="flex justify-between items-start mb-3"><span className="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-800 text-slate-400">{ticket.type}</span><span className="text-xs font-bold text-slate-500">#{ticket.id}</span></div>
+                                                    <h3 className="font-bold text-white mb-1 truncate text-lg">{meta.maquina || meta.equipamento || "Sem Nome"}</h3>
+                                                    <p className="text-xs text-slate-500 mb-4">Técnico: {meta.tecnico}</p>
+                                                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2"><div className="bg-blue-500 h-full" style={{width: `${pct}%`}}></div></div>
+                                                    <div className="flex justify-between text-xs text-slate-500"><span>{pct}% concluído</span><span>{new Date(ticket.createdAt).toLocaleDateString()}</span></div>
+                                                    <button onClick={(e) => handleDeleteActive(e, ticket)} className="absolute top-4 right-4 text-slate-600 hover:text-red-500 opacity-0 group-hover:opacity-100 p-2 transition-all">{Icons.Trash}</button>
+                                                </Card>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={handleUpdateTicket} onBack={() => setView('dashboard')} onSave={handleManualSave} onRequestFinish={() => setView('receipt')} logo={logo} />}
+                        {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} currentUser={currentUser} />}
+                        {view === 'history' && (
+                            <Card className="p-6">
+                                <div className="flex justify-between mb-6 items-center"><h2 className="font-bold text-xl text-white">Histórico</h2><Button variant="secondary" onClick={()=>setView('dashboard')}>Voltar</Button></div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-left border-collapse text-slate-300">
+                                        <thead className="bg-slate-800 text-xs font-bold text-slate-400 uppercase"><tr><th className="p-3 rounded-l-lg">ID</th><th className="p-3">Data</th><th className="p-3">Ativo</th><th className="p-3 rounded-r-lg">Técnico</th></tr></thead>
+                                        <tbody>
+                                            {history.map((h, i) => (
+                                                <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/50">
+                                                    <td className="p-3 font-bold text-blue-400">#{h.id}</td>
+                                                    <td className="p-3">{h.date}</td>
+                                                    <td className="p-3 font-medium text-white">{h.ativo}</td>
+                                                    <td className="p-3">{h.tecnico}</td>
+                                                </tr>
+                                            ))}
+                                            {history.length === 0 && <tr><td colSpan="4" className="p-8 text-center text-slate-500">Nenhum histórico encontrado.</td></tr>}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
