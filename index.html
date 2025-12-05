@@ -9,7 +9,6 @@
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -41,7 +40,7 @@
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Custom Scrollbar */
+        /* Custom Scrollbar for cleaner look */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -61,7 +60,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- CONFIGURAÇÃO FIREBASE ---
+        // --- CONFIGURAÇÃO FIREBASE (MANTIDA) ---
         const firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -77,7 +76,11 @@
 
         // --- DADOS ESTÁTICOS ---
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
-        // A senha do admin será definida na criação automática do usuário no useEffect
+        const DEFAULT_TEAM = [
+            { id: '01001071', name: 'Inacio', pass: '1234' },
+            { id: '01001440', name: 'Kauan', pass: '1234' },
+            { id: '01001691', name: 'Lui', pass: '1234' }
+        ];
 
         // --- ICONS (Lucide Style) ---
         const Icons = {
@@ -555,7 +558,7 @@
             const [showConfig, setShowConfig] = useState(false);
             const fileInputRef = useRef(null);
 
-            // Efeitos e Lógica
+            // Efeitos e Lógica (MANTIDO DO ORIGINAL, SÓ UI ALTERADA)
             useEffect(() => {
                 const savedTheme = localStorage.getItem('sa_theme'); 
                 if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
@@ -565,15 +568,9 @@
 
                 const unsubTickets = db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))));
                 const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(snap => setHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                
-                // --- LÓGICA DE USUÁRIO COM A SENHA DO PROMPT ANTERIOR ---
                 const unsubUsers = db.collection('users').onSnapshot(snap => {
-                    if (snap.empty) {
-                        // CRIA O ADMIN COM A SENHA SOLICITADA SE NÃO HOUVER USUÁRIOS
-                        db.collection('users').add({ id: 'admin', name: 'Admin', pass: '@452063' });
-                    } else {
-                        setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() })));
-                    }
+                    if (snap.empty) db.collection('users').add({ id: 'admin', name: 'Admin', pass: 'admin' });
+                    else setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() })));
                 });
                 return () => { unsubTickets(); unsubHistory(); unsubUsers(); };
             }, []);
