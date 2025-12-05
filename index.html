@@ -74,6 +74,11 @@
         const db = firebase.firestore();
         const { useState, useEffect, useRef } = React;
 
+        // --- CONFIGURAÇÃO DO LOGO FIXO ---
+        // SUBSTITUA O CÓDIGO ABAIXO PELO BASE64 DO SEU LOGO.
+        // Exemplo atual: Um ícone de escudo azul.
+        const COMPANY_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAADTCAYAAAB3COGwAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjVENDg4QkZDNjhBOTExRUFBQjkzRkE2QTc3RUMzNDEzIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjVENDg4QkZENjhBOTExRUFBQjkzRkE2QTc3RUMzNDEzIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6NUQ0ODhCRkE2OEE5MTFFQUFCOTNGQTZBNzdFQzM0MTMiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6NUQ0ODhCRkI2OEE5MTFFQUFCOTNGQTZBNzdFQzM0MTMiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz42W6C7AAAhzUlEQVR42uyd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;
+
         // --- DADOS ESTÁTICOS ---
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
         const DEFAULT_TEAM = [
@@ -171,9 +176,7 @@
                 <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
                     <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden fade-in">
                         <div className="p-8 pb-6 text-center border-b border-slate-100 dark:border-slate-800">
-                            <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-brand-500/30">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                            </div>
+                            <img src={COMPANY_LOGO} alt="Logo" className="h-16 w-auto mx-auto mb-4" />
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
                             <p className="text-sm text-slate-500 mt-1">Acesso Administrativo</p>
                         </div>
@@ -190,7 +193,7 @@
                             <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
                         </form>
                         <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] text-slate-400">V2.1 ENTERPRISE • COBRECOM TI</p>
+                            <p className="text-[10px] text-slate-400">V2.2 ENTERPRISE • COBRECOM TI</p>
                         </div>
                     </div>
                 </div>
@@ -246,7 +249,7 @@
             );
         };
 
-        const ReceiptView = ({ ticket, onBack, onArchive, logo, currentUser }) => {
+        const ReceiptView = ({ ticket, onBack, onArchive, currentUser }) => {
             const [obs, setObs] = useState('');
             const meta = ticket.data.meta;
             const identificador = meta.maquina || meta.equipamento || "N/A";
@@ -304,7 +307,7 @@
                     {/* ÁREA DE IMPRESSÃO (Oculta na tela, visível no print) */}
                     <div id="receipt-area" className="hidden bg-white text-black font-sans text-xs border border-gray-300 p-0">
                          <div className="flex justify-between items-center p-6 border-b-2 border-black">
-                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Infraestrutura</p></div></div>
+                            <div className="flex items-center gap-4"><img src={COMPANY_LOGO} className="h-12 object-contain" /><div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Infraestrutura</p></div></div>
                             <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date().toLocaleDateString()}</div></div>
                         </div>
                         <div className="grid grid-cols-4 border-b border-black">
@@ -552,18 +555,15 @@
             const [users, setUsers] = useState([]);
             const [activeTickets, setActiveTickets] = useState([]);
             const [history, setHistory] = useState([]);
-            const [logo, setLogo] = useState('');
             const [currentTicketId, setCurrentTicketId] = useState(null);
             const [darkMode, setDarkMode] = useState(true);
             const [showConfig, setShowConfig] = useState(false);
-            const fileInputRef = useRef(null);
 
             // Efeitos e Lógica (MANTIDO DO ORIGINAL, SÓ UI ALTERADA)
             useEffect(() => {
                 const savedTheme = localStorage.getItem('sa_theme'); 
                 if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
                 
-                const savedLogo = localStorage.getItem('sa_logo'); if (savedLogo) setLogo(savedLogo);
                 const savedUser = localStorage.getItem('sa_user_session'); if (savedUser) { setCurrentUser(JSON.parse(savedUser)); setView('dashboard'); }
 
                 const unsubTickets = db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))));
@@ -612,7 +612,6 @@
             };
             
             const handleDeleteActive = (e, id) => { e.stopPropagation(); if(confirm("Cancelar chamado?")) db.collection('tickets').doc(id).delete(); };
-            const handleLogoUpload = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onloadend = () => { setLogo(r.result); localStorage.setItem('sa_logo', r.result); }; r.readAsDataURL(f); }};
 
             if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
 
@@ -621,9 +620,7 @@
                     {/* SIDEBAR */}
                     <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 z-20 shrink-0">
                         <div className="h-16 flex items-center gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800">
-                            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                            </div>
+                            <img src={COMPANY_LOGO} alt="Logo" className="h-8 w-auto object-contain" />
                             INFRA CHECK
                         </div>
                         <nav className="flex-1 py-6 px-3 space-y-1">
@@ -649,10 +646,6 @@
                                 <button onClick={() => setShowConfig(true)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
                                 <button onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
                             </div>
-                            <div className="mt-4 pt-4 border-t border-slate-800 text-center">
-                                <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={() => fileInputRef.current.click()}>Alterar Logo</p>
-                                <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
-                            </div>
                         </div>
                     </aside>
 
@@ -660,7 +653,10 @@
                     <main className="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950">
                         {/* Mobile Header */}
                         <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0">
-                            <span className="font-bold">INFRA CHECK</span>
+                            <div className="flex items-center gap-2">
+                                <img src={COMPANY_LOGO} alt="Logo" className="h-6 w-auto object-contain" />
+                                <span className="font-bold">INFRA CHECK</span>
+                            </div>
                             <div className="flex gap-2">
                                 <button onClick={() => setView('dashboard')} className="p-2">{Icons.Layout}</button>
                                 <button onClick={handleLogout} className="p-2">{Icons.LogOut}</button>
@@ -672,7 +668,7 @@
                             {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} />}
                             {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
                             {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={handleUpdateTicket} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
-                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} currentUser={currentUser} />}
+                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} currentUser={currentUser} />}
                             {view === 'history' && <HistoryView history={history} />}
                         </div>
                     </main>
