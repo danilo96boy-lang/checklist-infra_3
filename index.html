@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHECKLIST INFRA - CLOUD V19</title>
+    <title>CHECKLIST INFRA - V20</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -26,11 +26,7 @@
             body, html { background-color: white !important; color: black !important; }
             body * { visibility: hidden; }
             #receipt-area, #receipt-area * { visibility: visible; }
-            #receipt-area { 
-                position: absolute; left: 0; top: 0; width: 100%; 
-                background: white !important; color: black !important; 
-                padding: 0; border: none !important; z-index: 9999; 
-            }
+            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; background: white !important; color: black !important; padding: 0; border: none !important; z-index: 9999; }
             .no-print { display: none !important; }
             .print-bg-gray { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
         }
@@ -233,17 +229,17 @@
                 
                 const mailtoLink = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 
-                // --- TRUQUE DO IFRAME (EVITA CONGELAMENTO) ---
+                // Abre Outlook via Iframe (evita navegação da página)
                 const hiddenIframe = document.createElement('iframe');
                 hiddenIframe.style.display = 'none';
                 document.body.appendChild(hiddenIframe);
                 hiddenIframe.contentWindow.location.href = mailtoLink;
 
+                // Remove iframe e Arquiva Automaticamente (Fluxo Rápido)
                 setTimeout(() => {
                     document.body.removeChild(hiddenIframe);
-                    if(confirm("O Outlook abriu?\n\nClique em OK para arquivar e voltar ao menu.")) {
-                        onArchive();
-                    }
+                    onArchive(); 
+                    alert("O.S. enviada para Outlook e arquivada com sucesso!");
                 }, 1000);
             };
 
@@ -351,21 +347,19 @@
             const handleLogin = (user) => { setCurrentUser(user); localStorage.setItem('sa_user_session', JSON.stringify(user)); setView('dashboard'); };
             const handleLogout = () => { setCurrentUser(null); localStorage.removeItem('sa_user_session'); setView('login'); };
             
-            // --- GERAÇÃO DE ID SEQUENCIAL (NOVA LÓGICA) ---
+            // --- GERAÇÃO DE ID SEQUENCIAL COM PREFIXO ---
             const handleCreateTicket = async (type) => {
                 const prefix = type === 'formatacao' ? 'F' : 'Z';
                 const counterRef = db.collection('counters').doc(type);
                 
-                // Transação para garantir número único mesmo se 2 técnicos clicarem juntos
                 try {
                     await db.runTransaction(async (transaction) => {
                         const counterDoc = await transaction.get(counterRef);
-                        let nextSeq = 1001; // Começa em 1001
+                        let nextSeq = 1001;
                         if (counterDoc.exists) {
                             nextSeq = counterDoc.data().current + 1;
                         }
                         transaction.set(counterRef, { current: nextSeq }, { merge: true });
-                        
                         const visualId = `${prefix}-${nextSeq}`;
                         
                         const newTicketRef = db.collection('tickets').doc();
@@ -380,15 +374,13 @@
                         setView('checklist');
                     });
                 } catch (error) {
-                    console.error("Erro na transação: ", error);
-                    alert("Erro ao gerar ID sequencial. Tente novamente.");
+                    alert("Erro ao gerar ID. Tente novamente.");
                 }
             };
 
             const handleUpdateTicket = (newData) => { if (!currentTicketId) return; db.collection('tickets').doc(currentTicketId).update({ data: newData }); };
             const handleDeleteActive = (e, id) => { e.stopPropagation(); if(confirm("Cancelar chamado?")) db.collection('tickets').doc(id).delete(); };
             
-            // --- CORREÇÃO DA NAVEGAÇÃO APÓS ARQUIVAR ---
             const handleArchive = () => {
                 const ticket = activeTickets.find(t => t.id === currentTicketId);
                 if (!ticket) return;
@@ -399,7 +391,7 @@
                     .then(() => db.collection('tickets').doc(currentTicketId).delete())
                     .then(() => {
                         setCurrentTicketId(null);
-                        setView('dashboard'); // Força a volta para o Dashboard
+                        setView('dashboard');
                     });
             };
 
