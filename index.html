@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHECKLIST INFRA - V21 FINAL</title>
+    <title>INFRA CHECKLIST | Enterprise Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
@@ -13,30 +14,53 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { -webkit-print-color-adjust: exact; transition: background-color 0.3s, color 0.3s; }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
-        .font-sans { font-family: 'Inter', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        body { -webkit-print-color-adjust: exact; }
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom Scrollbar for cleaner look */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
 
         @media print {
-            @page { margin: 10mm; size: auto; }
-            body, html { background-color: white !important; color: black !important; }
+            @page { margin: 0; size: auto; }
+            body, html { background-color: white !important; color: black !important; height: auto; overflow: visible; }
             body * { visibility: hidden; }
             #receipt-area, #receipt-area * { visibility: visible; }
-            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; background: white !important; color: black !important; padding: 0; border: none !important; z-index: 9999; }
+            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; z-index: 9999; }
             .no-print { display: none !important; }
-            .print-bg-gray { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300">
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- CONFIGURAÇÃO DO FIREBASE ---
+        // --- CONFIGURAÇÃO FIREBASE (MANTIDA) ---
         const firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -46,33 +70,11 @@
             appId: "1:456261856462:web:f90da7a62c8a08d072349f"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
         const { useState, useEffect, useRef } = React;
-        
-        // --- ÍCONES ---
-        const Icons = {
-            User: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-            Lock: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-            LogOut: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Plus: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-            ArrowLeft: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>,
-            Printer: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
-            Save: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
-            Check: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
-            Mail: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
-            Trash: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
-            Settings: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-            Server: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
-            Sun: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
-            Moon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
-            Search: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
-            Edit: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        };
 
+        // --- DADOS ESTÁTICOS ---
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
         const DEFAULT_TEAM = [
             { id: '01001071', name: 'Inacio', pass: '1234' },
@@ -80,6 +82,26 @@
             { id: '01001691', name: 'Lui', pass: '1234' }
         ];
 
+        // --- ICONS (Lucide Style) ---
+        const Icons = {
+            Layout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
+            User: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            History: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
+            Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            LogOut: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Check: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
+            Printer: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
+            Search: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
+            Moon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
+            Sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
+            Trash: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+            Server: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
+            Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        };
+
+        // --- TEMPLATES ---
         const getTemplate = (type, tecnicoName) => {
             const tmpl = {
                 meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' },
@@ -88,34 +110,51 @@
             if (type === 'formatacao') {
                 tmpl.items = {
                     preventivas: { title: "Preventivas", icon: "Server", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
-                    preparacao: { title: "Backup", icon: "Save", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
-                    sistema: { title: "Sistema", icon: "Globe", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
-                    seguranca: { title: "Segurança", icon: "Shield", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
-                    configuracao: { title: "Config", icon: "Settings", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (Definir pelo MAC)', checked: false } ]},
-                    apps: { title: "Apps", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
-                    finalizacao: { title: "Final", icon: "Json", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
+                    preparacao: { title: "Backup & Prep", icon: "Server", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
+                    sistema: { title: "Sistema Operacional", icon: "Server", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
+                    seguranca: { title: "Segurança", icon: "Server", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
+                    configuracao: { title: "Configurações", icon: "Server", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
+                    apps: { title: "Aplicações", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
+                    finalizacao: { title: "Entrega", icon: "Server", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
                 };
             } else {
                 tmpl.items = {
-                    inspecao: { title: "Inspeção", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
-                    preventiva: { title: "Limpeza", icon: "Shield", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
-                    teste: { title: "Teste", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
+                    inspecao: { title: "Inspeção Física", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
+                    preventiva: { title: "Manutenção", icon: "Server", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
+                    teste: { title: "Validação", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
                 };
             }
             return tmpl;
         };
 
-        const Card = ({ children, className = "", ...props }) => <div {...props} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${className}`}>{children}</div>;
-        const Input = (props) => <input {...props} className={`w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500 transition-colors ${props.className}`} />;
+        // --- COMPONENTES UI (DESIGN SYSTEM) ---
         const Button = ({ children, variant = 'primary', className = "", ...props }) => {
             const variants = {
-                primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20',
-                secondary: 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700',
-                danger: 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40',
-                success: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20'
+                primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
+                secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700',
+                danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/40 dark:text-red-400',
+                ghost: 'bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
             };
-            return <button {...props} className={`px-4 py-2 rounded-lg font-bold transition-all active:scale-95 flex items-center justify-center gap-2 ${variants[variant]} ${className}`}>{children}</button>;
+            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
         };
+
+        const Card = ({ children, className = "", noPadding = false, ...props }) => (
+            <div {...props} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${noPadding ? '' : 'p-6'} ${className}`}>{children}</div>
+        );
+
+        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all ${props.className}`} />;
+
+        const Badge = ({ children, color = 'slate' }) => {
+            const colors = {
+                slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+                blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+                green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+                amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+            };
+            return <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${colors[color]}`}>{children}</span>
+        };
+
+        // --- TELAS ---
 
         const LoginScreen = ({ onLogin, users }) => {
             const [id, setId] = useState('');
@@ -125,76 +164,83 @@
             const handleSubmit = (e) => {
                 e.preventDefault();
                 const user = users.find(u => u.id === id && u.pass === pass);
-                if (user) onLogin(user); else setError('ID ou Senha inválidos');
+                if (user) onLogin(user); else setError('Credenciais inválidas.');
             };
 
             return (
-                <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100 dark:bg-slate-950">
-                    <Card className="w-full max-w-sm p-8 fade-in">
-                        <div className="text-center mb-8">
-                            <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">CHECKLIST INFRA</h1>
-                            <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">Acesso Cloud</p>
+                <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
+                    <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden fade-in">
+                        <div className="p-8 pb-6 text-center border-b border-slate-100 dark:border-slate-800">
+                            <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-brand-500/30">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                            </div>
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
+                            <p className="text-sm text-slate-500 mt-1">Acesso Administrativo</p>
                         </div>
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">ID</label><Input value={id} onChange={e => setId(e.target.value)} placeholder="Ex: 01001440" /></div>
-                            <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Senha</label><Input type="password" value={pass} onChange={e => setPass(e.target.value)} /></div>
-                            {error && <p className="text-red-500 text-xs font-bold text-center bg-red-50 dark:bg-red-900/20 p-2 rounded">{error}</p>}
-                            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30">ENTRAR</button>
+                        <form onSubmit={handleSubmit} className="p-8 space-y-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">ID Usuário</label>
+                                <Input value={id} onChange={e => setId(e.target.value)} placeholder="000000" autoFocus />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha</label>
+                                <Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••" />
+                            </div>
+                            {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</div>}
+                            <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
                         </form>
-                    </Card>
+                        <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
+                            <p className="text-[10px] text-slate-400">V2.1 ENTERPRISE • COBRECOM TI</p>
+                        </div>
+                    </div>
                 </div>
             );
         };
 
         const ConfigModal = ({ onClose, users }) => {
             const [newUser, setNewUser] = useState({ id: '', name: '', pass: '' });
-            const [editUser, setEditUser] = useState(null);
-
+            
             const handleAddUser = (e) => {
                 e.preventDefault();
-                if(!newUser.id || !newUser.name || !newUser.pass) return alert("Preencha tudo");
-                if(users.some(u => u.id === newUser.id)) return alert("ID já existe");
-                db.collection('users').add(newUser).then(() => { alert("Adicionado!"); setNewUser({ id: '', name: '', pass: '' }); });
+                if(!newUser.id || !newUser.name || !newUser.pass) return alert("Preencha todos os campos.");
+                if(users.some(u => u.id === newUser.id)) return alert("ID já cadastrado.");
+                db.collection('users').add(newUser).then(() => { alert("Usuário adicionado."); setNewUser({ id: '', name: '', pass: '' }); });
             };
 
-            const handleSeedTeam = () => {
-                if(!confirm("Restaurar equipe padrão?")) return;
-                const batch = db.batch();
-                DEFAULT_TEAM.forEach(member => {
-                    if (!users.some(u => u.id === member.id)) {
-                        const newRef = db.collection('users').doc();
-                        batch.set(newRef, member);
-                    }
-                });
-                batch.commit().then(() => alert("Equipe restaurada!"));
-            };
-
-            const handleDeleteUser = (docId) => { if(confirm("Excluir usuário?")) db.collection('users').doc(docId).delete(); };
-            const handleUpdatePass = (e) => { e.preventDefault(); db.collection('users').doc(editUser.docId).update({ pass: editUser.pass }).then(() => { alert("Senha salva!"); setEditUser(null); }); };
+            const handleDeleteUser = (docId) => { if(confirm("Remover usuário?")) db.collection('users').doc(docId).delete(); };
 
             return (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <Card className="w-full max-w-2xl p-6 fade-in border-slate-700 max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6"><h2 className="text-xl font-bold flex items-center gap-2">{Icons.Settings} Gestão</h2><button onClick={onClose} className="text-2xl">&times;</button></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm fade-in">
+                    <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" noPadding>
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Configurações de Equipe</h2>
+                            <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                        </div>
+                        <div className="p-6 overflow-y-auto grid md:grid-cols-2 gap-8">
                             <div>
-                                <h3 className="font-bold text-xs uppercase text-slate-500 mb-4 border-b pb-2">Novo Usuário</h3>
-                                <form onSubmit={handleAddUser} className="space-y-3 mb-6"><Input placeholder="ID" value={newUser.id} onChange={e => setNewUser({...newUser, id: e.target.value})} /><Input placeholder="Nome" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} /><Input type="password" placeholder="Senha" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} /><Button type="submit" className="w-full">{Icons.Plus} Adicionar</Button></form>
-                                <Button onClick={handleSeedTeam} variant="secondary" className="w-full text-xs">Restaurar Equipe Padrão</Button>
+                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Adicionar Membro</h3>
+                                <form onSubmit={handleAddUser} className="space-y-3">
+                                    <Input placeholder="ID (Matrícula)" value={newUser.id} onChange={e => setNewUser({...newUser, id: e.target.value})} />
+                                    <Input placeholder="Nome Completo" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
+                                    <Input type="password" placeholder="Senha de Acesso" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} />
+                                    <Button type="submit" className="w-full">{Icons.Plus} Cadastrar</Button>
+                                </form>
                             </div>
                             <div>
-                                <h3 className="font-bold text-xs uppercase text-slate-500 mb-4 border-b pb-2">Usuários ({users.length})</h3>
-                                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Membros Ativos</h3>
+                                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                                     {users.map(u => (
-                                        <div key={u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-100 dark:border-slate-700">
-                                            <div><div className="font-bold text-sm">{u.name}</div><div className="text-[10px] text-slate-400 font-mono">{u.id}</div></div>
-                                            <div className="flex gap-2"><button onClick={() => setEditUser(u)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded">{Icons.Edit}</button>{u.id !== 'admin' && <button onClick={() => handleDeleteUser(u.docId)} className="p-1.5 text-red-500 hover:bg-red-50 rounded">{Icons.Trash}</button>}</div>
+                                        <div key={u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
+                                            <div>
+                                                <div className="font-semibold text-sm text-slate-700 dark:text-slate-200">{u.name}</div>
+                                                <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
+                                            </div>
+                                            {u.id !== 'admin' && <button onClick={() => handleDeleteUser(u.docId)} className="text-slate-400 hover:text-red-500 transition-colors">{Icons.Trash}</button>}
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
-                        {editUser && (<div className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 flex items-center justify-center p-6 rounded-xl z-10"><div className="w-full max-w-sm"><h3 className="text-lg font-bold mb-4">Senha para {editUser.name}</h3><form onSubmit={handleUpdatePass} className="space-y-3"><Input type="password" value={editUser.pass} onChange={e => setEditUser({...editUser, pass: e.target.value})} /><div className="flex gap-2"><Button type="button" variant="secondary" onClick={() => setEditUser(null)} className="flex-1">Cancelar</Button><Button type="submit" className="flex-1">Salvar</Button></div></form></div></div>)}
                     </Card>
                 </div>
             );
@@ -204,8 +250,8 @@
             const [obs, setObs] = useState('');
             const meta = ticket.data.meta;
             const identificador = meta.maquina || meta.equipamento || "N/A";
-            const tecnico = meta.tecnico || currentUser.name; 
-
+            
+            // Cálculos
             let totalTasks = 0, checkedTasks = 0;
             const pendingList = [];
             const categorySummary = Object.values(ticket.data.items).map(group => {
@@ -216,133 +262,324 @@
                 checkedTasks += checked;
                 return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
             });
-
             const percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
             const statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
 
             const handleSendOutlook = () => {
-                const displayId = ticket.visualId || 'PEND';
-                const subject = `[${statusGlobal}] O.S. #${displayId} - ${identificador}`;
-                let pendingSection = "";
-                if(pendingList.length > 0) { pendingSection = `\n⚠️ PENDÊNCIAS:\n${pendingList.join('\n')}\n----------------------------------------`; }
-                const body = `RELATÓRIO TÉCNICO\n----------------------------------------\nO.S.: #${displayId}\nATIVO: ${identificador}\nSTATUS: ${statusGlobal}\nTÉCNICO: ${tecnico}\nDATA: ${new Date().toLocaleDateString()}\n----------------------------------------\nRESUMO:\n${categorySummary.map(c => `[${c.status}] ${c.title}`).join('\n')}\n----------------------------------------${pendingSection}\nOBS:\n${obs || "Nenhuma."}\n\nCHECKLIST INFRA`;
+                const subject = `[${statusGlobal}] Checklist #${ticket.visualId} - ${identificador}`;
+                const body = `RELATÓRIO TÉCNICO\n----------------------------------------\nID: #${ticket.visualId}\nATIVO: ${identificador}\nSTATUS: ${statusGlobal}\nTÉCNICO: ${meta.tecnico}\nDATA: ${new Date().toLocaleDateString()}\n----------------------------------------\nRESUMO:\n${categorySummary.map(c => `[${c.status}] ${c.title}`).join('\n')}\n----------------------------------------\nOBSERVAÇÕES:\n${obs || "Sem observações."}\n\nGerado via InfraChecklist`;
+                window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 
-                const mailtoLink = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                
-                const hiddenIframe = document.createElement('iframe');
-                hiddenIframe.style.display = 'none';
-                document.body.appendChild(hiddenIframe);
-                hiddenIframe.contentWindow.location.href = mailtoLink;
-
+                // Pequeno delay para UX
                 setTimeout(() => {
-                    document.body.removeChild(hiddenIframe);
-                    // Passa o ticket explicitamente de volta para garantir
-                    if(confirm("Outlook aberto?\n\nClique em OK para ARQUIVAR e SAIR.")) {
-                        onArchive(ticket); 
-                    }
+                    if(confirm("E-mail aberto? Clique OK para arquivar.")) onArchive(ticket);
                 }, 1000);
             };
 
             return (
-                <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
-                    <Card className="mb-8 w-full max-w-2xl p-6 fade-in no-print">
-                        <div className="w-full mb-6">
-                            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações:</label>
-                            <textarea value={obs} onChange={(e) => setObs(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border rounded-lg text-sm h-20 resize-none"></textarea>
+                <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-auto p-4 md:p-8">
+                    <div className="max-w-4xl mx-auto w-full space-y-6 fade-in no-print">
+                        <div className="flex items-center justify-between">
+                             <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 cursor-pointer" onClick={onBack}>
+                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar à Edição</span>
+                            </div>
+                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Revisão & Entrega</h1>
                         </div>
-                        <div className="flex gap-3 justify-center items-center">
-                            <Button variant="secondary" onClick={onBack}>Voltar</Button>
-                            <Button className="bg-slate-800 text-white" onClick={() => window.print()}>{Icons.Printer} Imprimir</Button>
-                            <Button onClick={handleSendOutlook}>{Icons.Mail} Enviar Outlook</Button>
-                        </div>
-                    </Card>
 
-                    <div id="receipt-area" className="bg-white w-[210mm] mx-auto text-black font-sans text-xs border border-gray-300 shadow-xl p-0 overflow-hidden relative">
+                        <Card className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
+                                    <textarea value={obs} onChange={e => setObs(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
+                                </div>
+                            </div>
+                            <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações de Encerramento</h3>
+                                <Button className="w-full justify-start" onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
+                                <Button className="w-full justify-start" onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail & Arquivar</Button>
+                            </div>
+                        </Card>
+                    </div>
+
+                    {/* ÁREA DE IMPRESSÃO (Oculta na tela, visível no print) */}
+                    <div id="receipt-area" className="hidden bg-white text-black font-sans text-xs border border-gray-300 p-0">
                          <div className="flex justify-between items-center p-6 border-b-2 border-black">
-                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" alt="Logo" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI</p></div></div>
+                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Infraestrutura</p></div></div>
                             <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date().toLocaleDateString()}</div></div>
                         </div>
                         <div className="grid grid-cols-4 border-b border-black">
                             <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate">{identificador}</span></div>
                             <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Tipo</span><span className="font-bold uppercase">{ticket.type}</span></div>
-                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{tecnico}</span></div>
-                            <div className={`p-3 text-center flex flex-col justify-center ${percent === 100 ? 'bg-gray-100' : 'bg-gray-200'} print-bg-gray`}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{meta.tecnico}</span></div>
+                            <div className={`p-3 text-center flex flex-col justify-center ${percent === 100 ? 'bg-gray-100' : 'bg-gray-200'}`}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
                         </div>
                         <div className="p-6 flex gap-8">
                             <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map((cat, i) => (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>))}</tbody></table></div>
                             <div className="w-1/2 flex flex-col gap-4">
-                                {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50 print-bg-gray"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map((p, i) => <li key={i} className="truncate">{p.replace('- ', '')}</li>)}</ul></div>)}
+                                {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map((p, i) => <li key={i} className="truncate">{p.replace('- ', '')}</li>)}</ul></div>)}
                                 <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16">{obs || "Sem observações adicionais."}</p></div>
                             </div>
                         </div>
-                        <div className="mt-4 px-6 pb-6 pt-8 border-t border-black flex justify-between gap-12"><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Assinatura Técnico</p></div><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Assinatura Responsável</p></div></div>
+                        <div className="mt-8 px-6 pb-6 pt-4 flex justify-between gap-12"><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Técnico Responsável</p></div><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Validado Por</p></div></div>
                     </div>
                 </div>
             );
         };
 
-        const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish, logo }) => {
+        const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish }) => {
             if (!ticket) return null;
-            const { data, type } = ticket;
+            const { data } = ticket;
+
             const handleMeta = (field, value) => { onUpdate({ ...data, meta: { ...data.meta, [field]: value } }); };
             const handleCheck = (section, taskId) => {
                 const newData = { ...data };
-                const sectionItems = {...newData.items[section]};
-                const newTasks = sectionItems.tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
-                newData.items = { ...newData.items, [section]: { ...sectionItems, tasks: newTasks } };
+                const newTasks = newData.items[section].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
+                newData.items[section] = { ...newData.items[section], tasks: newTasks };
                 onUpdate(newData);
             };
+
             let total = 0, checked = 0;
             Object.values(data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
             const progress = total === 0 ? 0 : Math.round((checked/total)*100);
-            const handleFinishClick = () => { if (progress < 100 && !confirm(`O checklist está em ${progress}%. Finalizar?`)) return; onRequestFinish(); };
 
             return (
-                <div className="fade-in pb-12">
-                    <Card className="sticky top-4 z-40 mb-6 p-4 border-l-4 border-blue-500 shadow-xl bg-white/95 backdrop-blur dark:bg-slate-900/95">
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="flex items-center gap-3 w-full md:w-auto"><button onClick={onBack} title="Voltar" className="p-2 -ml-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg transition-colors">{Icons.ArrowLeft}</button><div className="flex-1 md:flex-none"><div className="flex items-center gap-2"><span className="text-xs font-bold uppercase text-slate-400 dark:text-slate-500">Progresso</span><span className="text-xs font-bold text-blue-600 dark:text-blue-400">{progress}%</span></div><div className="w-full md:w-48 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full mt-1 overflow-hidden"><div className="h-full bg-blue-600 transition-all duration-500" style={{width: `${progress}%`}}></div></div></div></div>
-                            <div className="flex gap-2 w-full md:w-auto justify-end"><Button onClick={handleFinishClick} variant={progress === 100 ? 'success' : 'primary'}>{Icons.Check} Finalizar</Button></div>
+                <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950 relative">
+                    {/* Header do Checklist */}
+                    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-sm z-10 shrink-0">
+                        <div className="flex items-center gap-4">
+                            <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500">{Icons.ChevronLeft}</button>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-none">#{ticket.visualId}</h2>
+                                    <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1">Criado em {new Date(ticket.createdAt).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="text-right hidden sm:block">
+                                <span className="text-xs font-bold text-brand-600 block">{progress}% Completo</span>
+                                <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-brand-600 transition-all duration-500" style={{width: `${progress}%`}}></div></div>
+                            </div>
+                            <Button onClick={onRequestFinish} variant={progress === 100 ? 'primary' : 'secondary'}>{progress === 100 ? 'Finalizar' : 'Revisar'}</Button>
+                        </div>
+                    </div>
+
+                    {/* Corpo Scrollável */}
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                        <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" noPadding>
+                            <div className="p-6 col-span-full border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                                <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Dados do Equipamento</h3>
+                            </div>
+                            <div className="p-6 pt-2 col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {Object.keys(data.meta).map(field => (
+                                    <div key={field}>
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">{field}</label>
+                                        <Input type={field === 'data' ? 'date' : 'text'} value={data.meta[field]} onChange={e => handleMeta(field, e.target.value)} />
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
+                            {Object.entries(data.items).map(([key, group]) => (
+                                <Card key={key} noPadding className="overflow-hidden h-fit">
+                                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center gap-2">
+                                        <div className="text-brand-500">{Icons[group.icon]}</div>
+                                        <h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3>
+                                    </div>
+                                    <div className="divide-y divide-slate-50 dark:divide-slate-800/50">
+                                        {group.tasks.map(task => (
+                                            <label key={task.id} className="flex items-start gap-3 p-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer group transition-colors select-none">
+                                                <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-all duration-200 ${task.checked ? 'bg-brand-600 border-brand-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                                                    {task.checked && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>}
+                                                </div>
+                                                <input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="hidden" />
+                                                <span className={`text-sm font-medium ${task.checked ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-300'}`}>{task.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Dashboard = ({ activeTickets, onNewTicket, onOpenTicket, onDeleteTicket, historyCount }) => {
+            const formatCount = activeTickets.filter(t => t.type === 'formatacao').length;
+            const zebraCount = activeTickets.filter(t => t.type !== 'formatacao').length;
+
+            return (
+                <div className="p-6 md:p-10 space-y-8 fade-in">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Visão Geral</h2>
+                        <p className="text-slate-500 text-sm">Monitoramento de atividades de infraestrutura em tempo real.</p>
+                    </div>
+                    
+                    {/* KPI CARDS */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Card className="flex items-center justify-between p-5 border-l-4 border-l-brand-500">
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Chamados Abertos</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
+                            <div className="bg-brand-50 dark:bg-brand-900/20 p-3 rounded-xl text-brand-600">{Icons.Layout}</div>
+                        </Card>
+                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-emerald-500">
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Histórico Total</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl text-emerald-600">{Icons.History}</div>
+                        </Card>
+                        <Card className="flex items-center justify-between p-5 border-l-4 border-l-indigo-500">
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Formatações</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
+                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-xl text-indigo-600">{Icons.Server}</div>
+                        </Card>
+                    </div>
+
+                    {/* ACTION BAR */}
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <button onClick={() => onNewTicket('formatacao')} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">{Icons.Plus}</div>
+                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Checklist completo de P.C.</span></div>
+                            </div>
+                        </button>
+                        <button onClick={() => onNewTicket('zebra')} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 group-hover:text-brand-500">{Icons.Printer}</div>
+                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Impressoras térmicas</span></div>
+                            </div>
+                        </button>
+                    </div>
+
+                    {/* ACTIVE TICKETS */}
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila de Atendimento</h3>
+                        {activeTickets.length === 0 ? (
+                            <div className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-12 text-center">
+                                <p className="text-slate-400 font-medium">Nenhum chamado ativo no momento.</p>
+                                <p className="text-xs text-slate-500 mt-1">Inicie um novo atendimento acima.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {activeTickets.map(ticket => {
+                                    let total = 0, checked = 0;
+                                    Object.values(ticket.data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
+                                    const pct = total === 0 ? 0 : Math.round((checked/total)*100);
+                                    
+                                    return (
+                                        <div key={ticket.id} onClick={() => onOpenTicket(ticket.id)} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
+                                            <div className="absolute top-0 left-0 w-1 h-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <div className="flex justify-between items-start mb-3">
+                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                                <span className="text-xs font-mono font-bold text-slate-400">#{ticket.visualId}</span>
+                                            </div>
+                                            <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1">{ticket.data.meta.maquina || "Sem Identificação"}</h4>
+                                            <p className="text-xs text-slate-500 mb-4 flex items-center gap-1">{Icons.User} {ticket.data.meta.tecnico}</p>
+                                            
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-brand-500" style={{width: `${pct}%`}}></div>
+                                                </div>
+                                                <span className="text-xs font-bold text-brand-600">{pct}%</span>
+                                            </div>
+                                            <button onClick={(e) => onDeleteTicket(e, ticket.id)} className="absolute top-4 right-4 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const HistoryView = ({ history }) => {
+            const [search, setSearch] = useState('');
+            const filtered = history.filter(h => 
+                h.ativo.toLowerCase().includes(search.toLowerCase()) || 
+                h.tecnico.toLowerCase().includes(search.toLowerCase()) || 
+                (h.visualId && h.visualId.toLowerCase().includes(search.toLowerCase()))
+            );
+
+            return (
+                <div className="p-6 md:p-10 h-full flex flex-col fade-in">
+                    <div className="flex justify-between items-end mb-6">
+                        <div>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Atendimentos</h2>
+                            <p className="text-slate-500 text-sm">Registro auditável de todas as manutenções.</p>
+                        </div>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
+                            <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 w-64" />
+                        </div>
+                    </div>
+                    
+                    <Card className="flex-1 overflow-hidden flex flex-col" noPadding>
+                        <div className="overflow-auto flex-1">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-500 uppercase sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
+                                    <tr>
+                                        <th className="px-6 py-3">ID</th>
+                                        <th className="px-6 py-3">Data</th>
+                                        <th className="px-6 py-3">Tipo</th>
+                                        <th className="px-6 py-3">Ativo</th>
+                                        <th className="px-6 py-3">Técnico</th>
+                                        <th className="px-6 py-3 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                    {filtered.map((h, i) => (
+                                        <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                            <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
+                                            <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date).toLocaleDateString()}</td>
+                                            <td className="px-6 py-3"><Badge color={h.type === 'formatacao' ? 'blue' : 'amber'}>{h.type}</Badge></td>
+                                            <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo}</td>
+                                            <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico}</td>
+                                            <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
+                                        </tr>
+                                    ))}
+                                    {filtered.length === 0 && <tr><td colSpan="6" className="text-center py-8 text-slate-400">Nenhum registro encontrado.</td></tr>}
+                                </tbody>
+                            </table>
                         </div>
                     </Card>
-                    <Card className="mb-6 p-6"><div className="flex justify-between items-start mb-6 border-b dark:border-slate-700 pb-4"><div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 w-auto object-contain bg-white rounded p-1" />}<div><h2 className="text-lg font-bold text-slate-800 dark:text-white uppercase tracking-tight">Checklist: {type}</h2><p className="text-xs text-slate-500">Preencha os dados obrigatórios.</p></div></div><div className="text-right"><span className="text-[10px] font-bold text-slate-400 uppercase block">ID</span><span className="text-2xl font-black text-slate-200 dark:text-slate-700">#{ticket.visualId || '...'}</span></div></div><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">{Object.keys(data.meta).map(field => (<div key={field}><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">{field}</label><Input type={field === 'data' ? 'date' : 'text'} value={data.meta[field]} onChange={e => handleMeta(field, e.target.value)} autoComplete="off" /></div>))}</div></Card>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{Object.entries(data.items).map(([key, group]) => (<Card key={key} className="overflow-hidden"><div className="bg-slate-50 dark:bg-slate-800/50 px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2"><span className="text-blue-500 dark:text-blue-400">{Icons[group.icon]}</span><h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3></div><div className="p-2 space-y-1">{group.tasks.map(task => (<label key={task.id} className="flex items-start gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer group transition-colors select-none"><div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors ${task.checked ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>{task.checked && <span className="text-white text-xs">✓</span>}</div><input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="hidden" /><span className={`text-sm font-medium leading-tight ${task.checked ? 'text-slate-400 line-through dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}`}>{task.label}</span></label>))}</div></Card>))}</div>
                 </div>
             );
         };
 
         const App = () => {
-            const [view, setView] = useState('login'); 
+            const [view, setView] = useState('login');
             const [currentUser, setCurrentUser] = useState(null);
             const [users, setUsers] = useState([]);
             const [activeTickets, setActiveTickets] = useState([]);
             const [history, setHistory] = useState([]);
-            const [logo, setLogo] = useState(''); 
+            const [logo, setLogo] = useState('');
             const [currentTicketId, setCurrentTicketId] = useState(null);
-            const [searchTerm, setSearchTerm] = useState('');
-            const fileInputRef = useRef(null);
             const [darkMode, setDarkMode] = useState(true);
             const [showConfig, setShowConfig] = useState(false);
+            const fileInputRef = useRef(null);
 
+            // Efeitos e Lógica (MANTIDO DO ORIGINAL, SÓ UI ALTERADA)
             useEffect(() => {
-                const savedTheme = localStorage.getItem('sa_theme'); if (savedTheme) setDarkMode(JSON.parse(savedTheme));
+                const savedTheme = localStorage.getItem('sa_theme'); 
+                if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+                
                 const savedLogo = localStorage.getItem('sa_logo'); if (savedLogo) setLogo(savedLogo);
                 const savedUser = localStorage.getItem('sa_user_session'); if (savedUser) { setCurrentUser(JSON.parse(savedUser)); setView('dashboard'); }
 
-                const unsubTickets = db.collection('tickets').onSnapshot(snap => {
-                    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    setActiveTickets(data);
-                });
-                const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(snap => { setHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))); });
+                const unsubTickets = db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))));
+                const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(snap => setHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
                 const unsubUsers = db.collection('users').onSnapshot(snap => {
-                    if (snap.empty) { db.collection('users').add({ id: 'admin', name: 'Administrador', pass: 'admin' }); }
-                    else { setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() }))); }
+                    if (snap.empty) db.collection('users').add({ id: 'admin', name: 'Admin', pass: 'admin' });
+                    else setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() })));
                 });
                 return () => { unsubTickets(); unsubHistory(); unsubUsers(); };
             }, []);
 
-            useEffect(() => { if (darkMode) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark'); localStorage.setItem('sa_theme', JSON.stringify(darkMode)); }, [darkMode]);
+            useEffect(() => { 
+                if (darkMode) document.documentElement.classList.add('dark'); 
+                else document.documentElement.classList.remove('dark'); 
+                localStorage.setItem('sa_theme', JSON.stringify(darkMode)); 
+            }, [darkMode]);
 
             const handleLogin = (user) => { setCurrentUser(user); localStorage.setItem('sa_user_session', JSON.stringify(user)); setView('dashboard'); };
             const handleLogout = () => { setCurrentUser(null); localStorage.removeItem('sa_user_session'); setView('login'); };
@@ -351,82 +588,98 @@
                 const prefix = type === 'formatacao' ? 'F' : 'Z';
                 const counterRef = db.collection('counters').doc(type);
                 try {
-                    await db.runTransaction(async (transaction) => {
-                        const counterDoc = await transaction.get(counterRef);
-                        let nextSeq = 1001;
-                        if (counterDoc.exists) { nextSeq = counterDoc.data().current + 1; }
-                        transaction.set(counterRef, { current: nextSeq }, { merge: true });
-                        const visualId = `${prefix}-${nextSeq}`;
-                        const newTicketRef = db.collection('tickets').doc();
-                        transaction.set(newTicketRef, { visualId: visualId, type: type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
-                        setCurrentTicketId(newTicketRef.id);
+                    await db.runTransaction(async (t) => {
+                        const doc = await t.get(counterRef);
+                        const nextSeq = doc.exists ? doc.data().current + 1 : 1001;
+                        t.set(counterRef, { current: nextSeq }, { merge: true });
+                        const newRef = db.collection('tickets').doc();
+                        t.set(newRef, { visualId: `${prefix}-${nextSeq}`, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
+                        setCurrentTicketId(newRef.id);
                         setView('checklist');
                     });
-                } catch (error) { alert("Erro ao gerar ID. Tente novamente."); }
+                } catch (e) { alert("Erro de conexão."); }
             };
 
-            const handleUpdateTicket = (newData) => { if (!currentTicketId) return; db.collection('tickets').doc(currentTicketId).update({ data: newData }); };
-            const handleDeleteActive = (e, id) => { e.stopPropagation(); if(confirm("Cancelar chamado?")) db.collection('tickets').doc(id).delete(); };
+            const handleUpdateTicket = (newData) => { if (currentTicketId) db.collection('tickets').doc(currentTicketId).update({ data: newData }); };
             
-            // --- CORREÇÃO FINAL: Recebe o ticket diretamente ---
-            const handleArchive = (ticketToArchive) => {
-                // Tenta usar o ticket passado ou busca no estado como fallback
-                const ticket = ticketToArchive || activeTickets.find(t => t.id === currentTicketId);
-                
-                if (!ticket) {
-                    alert("Erro crítico: Ticket perdido. Tente recarregar a página.");
-                    return;
-                }
-                
-                const meta = ticket.data.meta;
-                const historyItem = { visualId: ticket.visualId, type: ticket.type, date: new Date().toISOString(), tecnico: meta.tecnico, ativo: meta.maquina || "N/A", data: ticket.data };
-                
-                db.collection('history').add(historyItem)
-                    .then(() => db.collection('tickets').doc(ticket.id).delete())
-                    .then(() => {
-                        setCurrentTicketId(null);
-                        setView('dashboard'); // Força a volta
-                    })
-                    .catch(error => {
-                        alert("Erro de conexão ao arquivar: " + error.message);
-                    });
+            const handleArchive = (ticket) => {
+                if(!ticket) return;
+                db.collection('history').add({ 
+                    visualId: ticket.visualId, type: ticket.type, date: new Date().toISOString(), 
+                    tecnico: ticket.data.meta.tecnico, ativo: ticket.data.meta.maquina || "N/A", data: ticket.data 
+                }).then(() => db.collection('tickets').doc(ticket.id).delete())
+                  .then(() => { setCurrentTicketId(null); setView('dashboard'); });
             };
-
-            const handleLogoUpload = (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => { setLogo(reader.result); localStorage.setItem('sa_logo', reader.result); }; reader.readAsDataURL(file); } };
-            const filteredHistory = history.filter(h => h.ativo.toLowerCase().includes(searchTerm.toLowerCase()) || h.tecnico.toLowerCase().includes(searchTerm.toLowerCase()) || (h.visualId && h.visualId.toLowerCase().includes(searchTerm.toLowerCase())));
+            
+            const handleDeleteActive = (e, id) => { e.stopPropagation(); if(confirm("Cancelar chamado?")) db.collection('tickets').doc(id).delete(); };
+            const handleLogoUpload = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onloadend = () => { setLogo(r.result); localStorage.setItem('sa_logo', r.result); }; r.readAsDataURL(f); }};
 
             if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
 
             return (
-                <div className="min-h-screen pb-24 font-sans text-slate-800 bg-slate-100 dark:bg-slate-950 transition-colors duration-300">
-                    <div className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-md no-print">
-                        <div className="max-w-6xl mx-auto flex justify-between items-center">
-                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => fileInputRef.current.click()}><input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />{logo ? <img src={logo} className="h-8 w-auto bg-white rounded p-0.5" alt="Logo" /> : Icons.Image}<h1 className="font-bold text-lg tracking-tight hidden md:block">CHECKLIST INFRA</h1></div>
-                            <div className="flex items-center gap-4"><button onClick={() => setDarkMode(!darkMode)} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 hover:text-yellow-400 transition-colors">{darkMode ? Icons.Sun : Icons.Moon}</button><div className="text-right hidden md:block leading-tight"><p className="text-[10px] text-slate-400 uppercase font-bold">Logado como</p><p className="text-sm font-bold truncate max-w-[150px]">{currentUser.name}</p></div><button onClick={() => setShowConfig(true)} className="p-2 hover:bg-slate-800 rounded text-slate-400 hover:text-white" title="Configurações">{Icons.Settings}</button><button onClick={handleLogout} className="p-2 hover:bg-red-900 rounded text-slate-400 hover:text-white" title="Sair">{Icons.LogOut}</button></div>
-                        </div>
-                    </div>
-                    {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} />}
-                    <div className="max-w-6xl mx-auto p-4 md:p-6 fade-in">
-                        {view === 'dashboard' && (
-                            <div>
-                                <div className="flex justify-between items-end mb-6"><div><h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white">Mesa de Trabalho</h2><p className="text-slate-500 text-sm">Gerencie seus atendimentos em tempo real.</p></div><button onClick={() => setView('history')} className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">Ver Histórico</button></div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8"><button onClick={() => handleCreateTicket('zebra')} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group"><div className="flex items-center gap-3"><div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 group-hover:text-blue-500">{Icons.Plus}</div><span className="font-bold text-slate-700 dark:text-slate-200">Novo Zebra</span></div></button><button onClick={() => handleCreateTicket('formatacao')} className="bg-blue-600 hover:bg-blue-700 p-4 rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-between text-white"><div className="flex items-center gap-3"><div className="p-2 bg-white/20 rounded-lg">{Icons.Plus}</div><span className="font-bold">Nova Formatação</span></div></button></div>
-                                {activeTickets.length === 0 ? <div className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-12 text-center text-slate-400"><p>Mesa limpa. Inicie um novo atendimento.</p></div> : (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{activeTickets.map(ticket => { let total = 0, checked = 0; Object.values(ticket.data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; })); const pct = total === 0 ? 0 : Math.round((checked/total)*100); const meta = ticket.data.meta; return (<Card key={ticket.id} className="p-5 hover:shadow-md cursor-pointer relative group transition-all hover:border-blue-400 dark:hover:border-blue-500" onClick={() => { setCurrentTicketId(ticket.id); setView('checklist'); }}><div className="flex justify-between items-start mb-3"><span className="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">{ticket.type}</span><span className="text-xs font-bold text-slate-400">#{ticket.visualId}</span></div><h3 className="font-bold text-slate-800 dark:text-white mb-1 truncate text-lg">{meta.maquina || "Sem Nome"}</h3><p className="text-xs text-slate-500 mb-4">{meta.tecnico}</p><div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2"><div className="bg-blue-500 h-full" style={{width: `${pct}%`}}></div></div><div className="flex justify-between text-xs text-slate-400"><span>{pct}%</span><span>{new Date(ticket.createdAt).toLocaleDateString()}</span></div><button onClick={(e) => handleDeleteActive(e, ticket.id)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 p-2">{Icons.Trash}</button></Card>); })}</div>)}
+                <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
+                    {/* SIDEBAR */}
+                    <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 z-20 shrink-0">
+                        <div className="h-16 flex items-center gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800">
+                            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
-                        )}
-                        {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={handleUpdateTicket} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} logo={logo} />}
-                        {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} currentUser={currentUser} />}
-                        {view === 'history' && (
-                            <Card className="p-6">
-                                <div className="flex justify-between mb-6 items-center"><h2 className="font-bold text-xl text-slate-800 dark:text-white">Histórico (Cloud)</h2><Button variant="secondary" onClick={()=>setView('dashboard')}>Voltar</Button></div>
-                                <div className="mb-4 relative"><div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div><Input placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" /></div>
-                                <div className="overflow-x-auto"><table className="w-full text-sm text-left border-collapse"><thead className="bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase"><tr><th className="p-3 rounded-l-lg">ID</th><th className="p-3">Data</th><th className="p-3">Ativo</th><th className="p-3 rounded-r-lg">Técnico</th></tr></thead><tbody className="text-slate-700 dark:text-slate-300">{filteredHistory.map((h, i) => (<tr key={i} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td className="p-3 font-bold text-blue-600 dark:text-blue-400">#{h.visualId}</td><td className="p-3">{new Date(h.date).toLocaleDateString()}</td><td className="p-3 font-medium">{h.ativo}</td><td className="p-3">{h.tecnico}</td></tr>))}</tbody></table></div>
-                            </Card>
-                        )}
-                    </div>
+                            INFRA CHECK
+                        </div>
+                        <nav className="flex-1 py-6 px-3 space-y-1">
+                            <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm ${view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
+                                {Icons.Layout} Dashboard
+                            </button>
+                            <button onClick={() => setView('history')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm ${view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
+                                {Icons.History} Histórico
+                            </button>
+                        </nav>
+                        <div className="p-4 border-t border-slate-800">
+                            <div className="flex items-center gap-3 mb-4 px-2">
+                                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
+                                    {currentUser.name.charAt(0)}
+                                </div>
+                                <div className="overflow-hidden">
+                                    <p className="text-sm font-bold text-white truncate">{currentUser.name}</p>
+                                    <p className="text-xs text-slate-500">Técnico Infra</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
+                                <button onClick={() => setShowConfig(true)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                <button onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-slate-800 text-center">
+                                <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={() => fileInputRef.current.click()}>Alterar Logo</p>
+                                <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* MAIN CONTENT AREA */}
+                    <main className="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950">
+                        {/* Mobile Header */}
+                        <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0">
+                            <span className="font-bold">INFRA CHECK</span>
+                            <div className="flex gap-2">
+                                <button onClick={() => setView('dashboard')} className="p-2">{Icons.Layout}</button>
+                                <button onClick={handleLogout} className="p-2">{Icons.LogOut}</button>
+                            </div>
+                        </div>
+
+                        {/* Views */}
+                        <div className="flex-1 overflow-auto relative">
+                            {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} />}
+                            {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
+                            {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={handleUpdateTicket} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
+                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} currentUser={currentUser} />}
+                            {view === 'history' && <HistoryView history={history} />}
+                        </div>
+                    </main>
                 </div>
             );
         };
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
