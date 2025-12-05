@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHECKLIST INFRA - CLOUD V17</title>
+    <title>CHECKLIST INFRA - CLOUD V18</title>
     
     <!-- Bibliotecas Externas -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -88,7 +88,7 @@
 
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
 
-        // Equipe padrão solicitada
+        // --- EQUIPE PADRÃO SOLICITADA ---
         const DEFAULT_TEAM = [
             { id: '01001071', name: 'Inacio', pass: '1234' },
             { id: '01001440', name: 'Kauan', pass: '1234' },
@@ -162,36 +162,31 @@
             );
         };
 
-        // --- MODAL DE CONFIGURAÇÃO MELHORADO ---
+        // --- MODAL DE CONFIGURAÇÃO (GERENCIAMENTO DE USUÁRIOS) ---
         const ConfigModal = ({ onClose, users, setUsers }) => {
             const [newUser, setNewUser] = useState({ id: '', name: '', pass: '' });
-            const [editUser, setEditUser] = useState(null); // Para edição de senha
+            const [editUser, setEditUser] = useState(null);
 
-            // Adicionar Usuário Manual
             const handleAddUser = (e) => {
                 e.preventDefault();
                 if(!newUser.id || !newUser.name || !newUser.pass) return alert("Preencha tudo");
                 if(users.some(u => u.id === newUser.id)) return alert("ID já existe");
-                
                 db.collection('users').add(newUser).then(() => {
                     alert("Usuário adicionado!");
                     setNewUser({ id: '', name: '', pass: '' });
                 });
             };
 
-            // Adicionar Equipe Padrão (Seed)
             const handleSeedTeam = () => {
                 if(!confirm("Deseja adicionar Inacio, Kauan e Lui ao sistema?")) return;
-                
                 const batch = db.batch();
                 DEFAULT_TEAM.forEach(member => {
                     if (!users.some(u => u.id === member.id)) {
-                        const newRef = db.collection('users').doc(); // Auto ID do Firestore
+                        const newRef = db.collection('users').doc();
                         batch.set(newRef, member);
                     }
                 });
-                
-                batch.commit().then(() => alert("Equipe adicionada com sucesso!"));
+                batch.commit().then(() => alert("Equipe padrão restaurada!"));
             };
 
             const handleDeleteUser = (docId) => {
@@ -212,9 +207,7 @@
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <Card className="w-full max-w-2xl p-6 fade-in border-slate-700 max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center mb-6"><h2 className="text-xl font-bold flex items-center gap-2">{Icons.Settings} Gestão de Acesso</h2><button onClick={onClose} className="text-2xl">&times;</button></div>
-                        
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Coluna 1: Adicionar */}
                             <div>
                                 <h3 className="font-bold text-xs uppercase text-slate-500 mb-4 border-b pb-2">Novo Usuário</h3>
                                 <form onSubmit={handleAddUser} className="space-y-3 mb-6">
@@ -223,23 +216,17 @@
                                     <Input type="password" placeholder="Senha" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} />
                                     <Button type="submit" className="w-full">{Icons.Plus} Adicionar</Button>
                                 </form>
-
                                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
                                     <p className="text-xs text-blue-700 dark:text-blue-300 mb-2 font-bold">Ações Rápidas</p>
                                     <Button onClick={handleSeedTeam} variant="secondary" className="w-full text-xs">Restaurar Equipe Padrão</Button>
                                 </div>
                             </div>
-
-                            {/* Coluna 2: Lista */}
                             <div>
-                                <h3 className="font-bold text-xs uppercase text-slate-500 mb-4 border-b pb-2">Usuários Cadastrados ({users.length})</h3>
+                                <h3 className="font-bold text-xs uppercase text-slate-500 mb-4 border-b pb-2">Usuários ({users.length})</h3>
                                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                                     {users.map(u => (
                                         <div key={u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-100 dark:border-slate-700">
-                                            <div>
-                                                <div className="font-bold text-sm">{u.name}</div>
-                                                <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
-                                            </div>
+                                            <div><div className="font-bold text-sm">{u.name}</div><div className="text-[10px] text-slate-400 font-mono">{u.id}</div></div>
                                             <div className="flex gap-2">
                                                 <button onClick={() => setEditUser(u)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded" title="Alterar Senha">{Icons.Edit}</button>
                                                 {u.id !== 'admin' && <button onClick={() => handleDeleteUser(u.docId)} className="p-1.5 text-red-500 hover:bg-red-50 rounded" title="Excluir">{Icons.Trash}</button>}
@@ -249,18 +236,13 @@
                                 </div>
                             </div>
                         </div>
-
-                        {/* Modal de Edição de Senha (Overlay interno) */}
                         {editUser && (
                             <div className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 flex items-center justify-center p-6 rounded-xl z-10">
                                 <div className="w-full max-w-sm">
                                     <h3 className="text-lg font-bold mb-4">Nova Senha para {editUser.name}</h3>
                                     <form onSubmit={handleUpdatePass} className="space-y-3">
                                         <Input type="password" placeholder="Nova Senha" value={editUser.pass} onChange={e => setEditUser({...editUser, pass: e.target.value})} />
-                                        <div className="flex gap-2">
-                                            <Button type="button" variant="secondary" onClick={() => setEditUser(null)} className="flex-1">Cancelar</Button>
-                                            <Button type="submit" className="flex-1">Salvar</Button>
-                                        </div>
+                                        <div className="flex gap-2"><Button type="button" variant="secondary" onClick={() => setEditUser(null)} className="flex-1">Cancelar</Button><Button type="submit" className="flex-1">Salvar</Button></div>
                                     </form>
                                 </div>
                             </div>
@@ -290,7 +272,7 @@
             const percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
             const statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
 
-            // --- CORREÇÃO DO TRAVAMENTO DE E-MAIL ---
+            // --- CORREÇÃO ANTI-CONGELAMENTO (IFRAME) ---
             const handleSendOutlook = () => {
                 const displayId = ticket.visualId || 'PEND';
                 const subject = `[${statusGlobal}] O.S. #${displayId} - ${identificador}`;
@@ -300,19 +282,18 @@
                 
                 const mailtoLink = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 
-                // Truque: Cria um elemento invisível e clica nele.
-                // Isso evita que a janela atual tente navegar para o mailto e cancele os scripts.
-                const link = document.createElement('a');
-                link.href = mailtoLink;
-                link.target = '_blank'; // Tenta forçar nova aba/janela, embora mailto geralmente ignore
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Pequeno delay para garantir que o cliente de email abriu antes do confirm
-                setTimeout(() => { 
-                    if(confirm("Deseja arquivar esta O.S. agora?")) onArchive(); 
+                // Cria iframe invisível para abrir o mailto sem navegar a página principal
+                const hiddenIframe = document.createElement('iframe');
+                hiddenIframe.style.display = 'none';
+                document.body.appendChild(hiddenIframe);
+                hiddenIframe.contentWindow.location.href = mailtoLink;
+
+                // Remove o iframe após um tempo e pede confirmação
+                setTimeout(() => {
+                    document.body.removeChild(hiddenIframe);
+                    if(confirm("O Outlook foi aberto?\n\nClique em OK para arquivar este chamado.")) {
+                        onArchive();
+                    }
                 }, 1000);
             };
 
@@ -409,7 +390,7 @@
                 const savedTheme = localStorage.getItem('sa_theme'); if (savedTheme) setDarkMode(JSON.parse(savedTheme));
                 const savedLogo = localStorage.getItem('sa_logo'); if (savedLogo) setLogo(savedLogo);
                 
-                // --- SESSÃO PERSISTENTE ---
+                // SESSÃO PERSISTENTE
                 const savedUser = localStorage.getItem('sa_user_session');
                 if (savedUser) {
                     setCurrentUser(JSON.parse(savedUser));
