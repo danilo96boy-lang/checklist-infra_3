@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHECKLIST INFRA - V20</title>
+    <title>CHECKLIST INFRA - V21 FINAL</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -229,17 +229,17 @@
                 
                 const mailtoLink = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 
-                // Abre Outlook via Iframe (evita navegação da página)
                 const hiddenIframe = document.createElement('iframe');
                 hiddenIframe.style.display = 'none';
                 document.body.appendChild(hiddenIframe);
                 hiddenIframe.contentWindow.location.href = mailtoLink;
 
-                // Remove iframe e Arquiva Automaticamente (Fluxo Rápido)
                 setTimeout(() => {
                     document.body.removeChild(hiddenIframe);
-                    onArchive(); 
-                    alert("O.S. enviada para Outlook e arquivada com sucesso!");
+                    // Passa o ticket explicitamente de volta para garantir
+                    if(confirm("Outlook aberto?\n\nClique em OK para ARQUIVAR e SAIR.")) {
+                        onArchive(ticket); 
+                    }
                 }, 1000);
             };
 
@@ -347,51 +347,48 @@
             const handleLogin = (user) => { setCurrentUser(user); localStorage.setItem('sa_user_session', JSON.stringify(user)); setView('dashboard'); };
             const handleLogout = () => { setCurrentUser(null); localStorage.removeItem('sa_user_session'); setView('login'); };
             
-            // --- GERAÇÃO DE ID SEQUENCIAL COM PREFIXO ---
             const handleCreateTicket = async (type) => {
                 const prefix = type === 'formatacao' ? 'F' : 'Z';
                 const counterRef = db.collection('counters').doc(type);
-                
                 try {
                     await db.runTransaction(async (transaction) => {
                         const counterDoc = await transaction.get(counterRef);
                         let nextSeq = 1001;
-                        if (counterDoc.exists) {
-                            nextSeq = counterDoc.data().current + 1;
-                        }
+                        if (counterDoc.exists) { nextSeq = counterDoc.data().current + 1; }
                         transaction.set(counterRef, { current: nextSeq }, { merge: true });
                         const visualId = `${prefix}-${nextSeq}`;
-                        
                         const newTicketRef = db.collection('tickets').doc();
-                        transaction.set(newTicketRef, {
-                            visualId: visualId,
-                            type: type,
-                            data: getTemplate(type, currentUser.name),
-                            createdAt: new Date().toISOString()
-                        });
-                        
+                        transaction.set(newTicketRef, { visualId: visualId, type: type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
                         setCurrentTicketId(newTicketRef.id);
                         setView('checklist');
                     });
-                } catch (error) {
-                    alert("Erro ao gerar ID. Tente novamente.");
-                }
+                } catch (error) { alert("Erro ao gerar ID. Tente novamente."); }
             };
 
             const handleUpdateTicket = (newData) => { if (!currentTicketId) return; db.collection('tickets').doc(currentTicketId).update({ data: newData }); };
             const handleDeleteActive = (e, id) => { e.stopPropagation(); if(confirm("Cancelar chamado?")) db.collection('tickets').doc(id).delete(); };
             
-            const handleArchive = () => {
-                const ticket = activeTickets.find(t => t.id === currentTicketId);
-                if (!ticket) return;
+            // --- CORREÇÃO FINAL: Recebe o ticket diretamente ---
+            const handleArchive = (ticketToArchive) => {
+                // Tenta usar o ticket passado ou busca no estado como fallback
+                const ticket = ticketToArchive || activeTickets.find(t => t.id === currentTicketId);
+                
+                if (!ticket) {
+                    alert("Erro crítico: Ticket perdido. Tente recarregar a página.");
+                    return;
+                }
+                
                 const meta = ticket.data.meta;
                 const historyItem = { visualId: ticket.visualId, type: ticket.type, date: new Date().toISOString(), tecnico: meta.tecnico, ativo: meta.maquina || "N/A", data: ticket.data };
                 
                 db.collection('history').add(historyItem)
-                    .then(() => db.collection('tickets').doc(currentTicketId).delete())
+                    .then(() => db.collection('tickets').doc(ticket.id).delete())
                     .then(() => {
                         setCurrentTicketId(null);
-                        setView('dashboard');
+                        setView('dashboard'); // Força a volta
+                    })
+                    .catch(error => {
+                        alert("Erro de conexão ao arquivar: " + error.message);
                     });
             };
 
