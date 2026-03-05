@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFRA CHECKLIST & ESTOQUE | Enterprise</title>
+    <title>INFRA SYS | Checklist & Estoque</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -30,16 +30,12 @@
         body { -webkit-print-color-adjust: exact; }
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
         @media print {
-            @page { margin: 0; size: auto; }
-            body, html { background-color: white !important; color: black !important; height: auto; overflow: visible; }
-            body * { visibility: hidden; }
-            #receipt-area, #receipt-area * { visibility: visible; }
-            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; z-index: 9999; }
             .no-print { display: none !important; }
+            #receipt-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
         }
     </style>
 </head>
@@ -47,6 +43,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -69,139 +66,51 @@
             Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
             LogOut: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
             Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-            Check: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
+            Package: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
             Printer: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
-            Search: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
-            Moon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
-            Sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
-            Trash: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
-            Server: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
             Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"/></svg>,
-            ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
-            Package: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         };
 
         const getTemplate = (type, tecnicoName) => {
             const tmpl = { meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' }, items: {} };
             if (type === 'formatacao') {
                 tmpl.items = {
-                    preventivas: { title: "Preventivas", icon: "Server", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
-                    preparacao: { title: "Backup & Prep", icon: "Server", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
-                    sistema: { title: "Sistema Operacional", icon: "Server", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
-                    seguranca: { title: "Segurança", icon: "Server", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
-                    configuracao: { title: "Configurações", icon: "Server", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
-                    apps: { title: "Aplicações", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
-                    finalizacao: { title: "Entrega", icon: "Server", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
+                    preventivas: { title: "Preventivas", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
+                    preparacao: { title: "Backup & Prep", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
+                    sistema: { title: "Sistema Operacional", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
+                    seguranca: { title: "Segurança", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
+                    configuracao: { title: "Configurações", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
+                    apps: { title: "Aplicações", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
+                    finalizacao: { title: "Entrega", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
                 };
             } else {
                 tmpl.items = {
-                    inspecao: { title: "Inspeção Física", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
-                    preventiva: { title: "Manutenção", icon: "Server", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
-                    teste: { title: "Validação", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
+                    inspecao: { title: "Inspeção Física", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
+                    preventiva: { title: "Manutenção", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
+                    teste: { title: "Validação", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
                 };
             }
             return tmpl;
         };
 
+        const Card = ({ children, className = "" }) => <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 ${className}`}>{children}</div>;
+        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-brand-500/20 outline-none ${props.className}`} />;
         const Button = ({ children, variant = 'primary', className = "", ...props }) => {
-            const variants = {
-                primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
-                secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700',
-                danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/40 dark:text-red-400',
-                ghost: 'bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+            const styles = {
+                primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm',
+                secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50',
+                danger: 'bg-red-500 hover:bg-red-600 text-white',
+                ghost: 'bg-transparent text-slate-500 hover:bg-slate-100'
             };
-            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
+            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 ${styles[variant]} ${className}`}>{children}</button>;
         };
 
-        const Card = ({ children, className = "", noPadding = false, ...props }) => (
-            <div {...props} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${noPadding ? '' : 'p-6'} ${className}`}>{children}</div>
-        );
-
-        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all ${props.className}`} />;
-
-        const Badge = ({ children, color = 'slate' }) => {
-            const colors = {
-                slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
-                blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-                green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-                amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-            };
-            return <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${colors[color]}`}>{children}</span>
-        };
-
-        // --- TELAS ---
-
-        const LoginScreen = ({ onLogin, users }) => {
-            const [id, setId] = useState('');
-            const [pass, setPass] = useState('');
-            const [error, setError] = useState('');
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                const user = users.find(u => u.id === id && u.pass === pass);
-                if (user) onLogin(user); else setError('Credenciais inválidas.');
-            };
-            return (
-                <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
-                    <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden fade-in">
-                        <div className="p-8 pb-6 text-center border-b border-slate-100 dark:border-slate-800">
-                            <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-brand-500/30">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                            </div>
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
-                            <p className="text-sm text-slate-500 mt-1">Acesso Administrativo</p>
-                        </div>
-                        <form onSubmit={handleSubmit} className="p-8 space-y-4">
-                            <div><label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">ID Usuário</label><Input value={id} onChange={e => setId(e.target.value)} placeholder="000000" autoFocus /></div>
-                            <div><label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha</label><Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••" /></div>
-                            {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</div>}
-                            <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
-                        </form>
-                    </div>
-                </div>
-            );
-        };
-
-        const ConfigModal = ({ onClose, users }) => {
-            const [newUser, setNewUser] = useState({ id: '', name: '', pass: '' });
-            const handleAddUser = (e) => {
-                e.preventDefault();
-                if(!newUser.id || !newUser.name || !newUser.pass) return alert("Preencha todos os campos.");
-                db.collection('users').add(newUser).then(() => { alert("Usuário adicionado."); setNewUser({ id: '', name: '', pass: '' }); });
-            };
-            const handleDeleteUser = (docId) => { if(confirm("Remover usuário?")) db.collection('users').doc(docId).delete(); };
-            return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm fade-in">
-                    <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" noPadding>
-                        <div className="p-4 border-b border-slate-100 flex justify-between items-center">
-                            <h2 className="font-bold flex items-center gap-2">{Icons.Settings} Configurações</h2>
-                            <button onClick={onClose} className="text-2xl leading-none">&times;</button>
-                        </div>
-                        <div className="p-6 grid md:grid-cols-2 gap-8">
-                            <form onSubmit={handleAddUser} className="space-y-3">
-                                <Input placeholder="ID" value={newUser.id} onChange={e => setNewUser({...newUser, id: e.target.value})} />
-                                <Input placeholder="Nome" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
-                                <Input type="password" placeholder="Senha" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} />
-                                <Button type="submit" className="w-full">Cadastrar</Button>
-                            </form>
-                            <div className="space-y-2">
-                                {users.map(u => (
-                                    <div key={u.id} className="flex justify-between p-2 border rounded">
-                                        <span>{u.name}</span>
-                                        {u.id !== 'admin' && <button onClick={() => handleDeleteUser(u.docId)} className="text-red-500">{Icons.Trash}</button>}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </Card>
-                </div>
-            );
-        };
-
-        // --- MÓDULO DE ESTOQUE (APPSHEET STYLE) ---
+        // --- MÓDULO ESTOQUE ---
         const InventoryView = ({ currentUser }) => {
             const [products, setProducts] = useState([]);
             const [showAdd, setShowAdd] = useState(false);
-            const [newProd, setNewProd] = useState({ name: '', sku: '', quantity: 0 });
+            const [newP, setNewP] = useState({ name: '', quantity: 0 });
             const [move, setMove] = useState({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
 
             useEffect(() => {
@@ -209,80 +118,80 @@
                 return unsub;
             }, []);
 
-            const handleTransaction = async (e) => {
+            const handleMove = async (e) => {
                 e.preventDefault();
                 const prod = products.find(p => p.id === move.prodId);
                 if (!prod) return;
                 const newQty = move.type === 'ENTRADA' ? prod.quantity + Number(move.qty) : prod.quantity - Number(move.qty);
-                if (newQty < 0) return alert("Estoque insuficiente!");
-                
+                if (newQty < 0) return alert("Sem estoque!");
+
                 await db.collection('inventory').doc(prod.id).update({ quantity: newQty });
                 await db.collection('stock_logs').add({ ...move, prodName: prod.name, date: new Date().toISOString(), tecnico: currentUser.name });
 
                 if (move.type === 'SAIDA') {
                     const subject = `[ESTOQUE] Saída: ${prod.name}`;
-                    const body = `SAÍDA DE ESTOQUE\nPRODUTO: ${prod.name}\nQTD: ${move.qty}\nUSUÁRIO: ${move.user}\nCRACHÁ: ${move.badge}\nTÉCNICO: ${currentUser.name}`;
+                    const body = `SAÍDA DE MATERIAL\nITEM: ${prod.name}\nQTD: ${move.qty}\nRETIRADO POR: ${move.user}\nCRACHÁ: ${move.badge}\nTÉCNICO: ${currentUser.name}`;
                     window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 }
-                alert("Movimentação registrada!");
                 setMove({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
+                alert("Sucesso!");
             };
 
             return (
-                <div className="p-6 md:p-10 space-y-6 fade-in">
+                <div className="p-6 space-y-6 fade-in">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-bold">Controle de Estoque</h2>
-                        <Button onClick={() => setShowAdd(true)}>{Icons.Plus} Novo Produto</Button>
+                        <h2 className="text-2xl font-bold flex items-center gap-2">{Icons.Package} Estoque</h2>
+                        <Button onClick={() => setShowAdd(true)}>{Icons.Plus} Novo Item</Button>
                     </div>
                     <div className="grid md:grid-cols-3 gap-6">
-                        <Card className="md:col-span-2 overflow-hidden" noPadding>
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-50 border-b">
-                                    <tr><th className="px-6 py-3">Item</th><th className="px-6 py-3">Saldo</th></tr>
+                        <Card className="md:col-span-2 overflow-auto">
+                            <table className="w-full text-sm text-left">
+                                <thead className="border-b bg-slate-50 dark:bg-slate-800">
+                                    <tr><th className="px-4 py-2">Item</th><th className="px-4 py-2 text-right">Saldo</th></tr>
                                 </thead>
                                 <tbody>
                                     {products.map(p => (
-                                        <tr key={p.id} className="border-b">
-                                            <td className="px-6 py-4 font-medium">{p.name}</td>
-                                            <td className={`px-6 py-4 font-bold ${p.quantity < 3 ? 'text-red-500' : 'text-emerald-500'}`}>{p.quantity}</td>
+                                        <tr key={p.id} className="border-b hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                            <td className="px-4 py-3">{p.name}</td>
+                                            <td className={`px-4 py-3 text-right font-bold ${p.quantity < 3 ? 'text-red-500' : 'text-emerald-500'}`}>{p.quantity}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </Card>
                         <Card>
-                            <h3 className="font-bold mb-4">Movimentação</h3>
-                            <form onSubmit={handleTransaction} className="space-y-4">
-                                <select className="w-full h-10 px-3 bg-white dark:bg-slate-950 border rounded-lg" value={move.prodId} onChange={e => setMove({...move, prodId: e.target.value})} required>
+                            <h3 className="font-bold mb-4 uppercase text-xs text-slate-400">Registrar Movimento</h3>
+                            <form onSubmit={handleMove} className="space-y-4">
+                                <select className="w-full h-10 px-3 border rounded-lg bg-white dark:bg-slate-950" value={move.prodId} onChange={e => setMove({...move, prodId: e.target.value})} required>
                                     <option value="">Produto...</option>
                                     {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                 </select>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <select className="w-full h-10 px-3 bg-white dark:bg-slate-950 border rounded-lg" value={move.type} onChange={e => setMove({...move, type: e.target.value})}>
+                                    <select className="w-full h-10 px-3 border rounded-lg bg-white dark:bg-slate-950" value={move.type} onChange={e => setMove({...move, type: e.target.value})}>
                                         <option value="SAIDA">Saída</option><option value="ENTRADA">Entrada</option>
                                     </select>
                                     <Input type="number" value={move.qty} onChange={e => setMove({...move, qty: e.target.value})} />
                                 </div>
                                 {move.type === 'SAIDA' && (
                                     <>
-                                        <Input placeholder="Usuário" value={move.user} onChange={e => setMove({...move, user: e.target.value})} required />
+                                        <Input placeholder="Usuário que pegou" value={move.user} onChange={e => setMove({...move, user: e.target.value})} required />
                                         <Input placeholder="Crachá" value={move.badge} onChange={e => setMove({...move, badge: e.target.value})} required />
                                     </>
                                 )}
-                                <Button type="submit" className="w-full">Confirmar</Button>
+                                <Button type="submit" className="w-full">Registrar</Button>
                             </form>
                         </Card>
                     </div>
                     {showAdd && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                             <Card className="w-full max-w-sm">
-                                <h3 className="font-bold mb-4">Novo Item</h3>
-                                <form onSubmit={(e) => { e.preventDefault(); db.collection('inventory').add({...newProd, quantity: Number(newProd.quantity)}); setShowAdd(false); }} className="space-y-4">
-                                    <Input placeholder="Nome" value={newProd.name} onChange={e => setNewProd({...newProd, name: e.target.value})} />
-                                    <Input type="number" placeholder="Inicial" value={newProd.quantity} onChange={e => setNewProd({...newProd, quantity: e.target.value})} />
-                                    <Button type="submit" className="w-full">Salvar</Button>
-                                    <Button type="button" variant="secondary" className="w-full" onClick={() => setShowAdd(false)}>Cancelar</Button>
-                                </form>
+                                <h3 className="font-bold mb-4">Novo Produto</h3>
+                                <div className="space-y-4">
+                                    <Input placeholder="Nome" value={newP.name} onChange={e => setNewP({...newP, name: e.target.value})} />
+                                    <Input type="number" placeholder="Inicial" value={newP.quantity} onChange={e => setNewP({...newP, quantity: Number(e.target.value)})} />
+                                    <Button className="w-full" onClick={() => { db.collection('inventory').add(newP); setShowAdd(false); }}>Salvar</Button>
+                                    <Button className="w-full" variant="secondary" onClick={() => setShowAdd(false)}>Cancelar</Button>
+                                </div>
                             </Card>
                         </div>
                     )}
@@ -290,85 +199,36 @@
             );
         };
 
-        const ReceiptView = ({ ticket, onBack, onArchive, logo, currentUser }) => {
-            const [obs, setObs] = useState('');
-            const meta = ticket.data.meta;
-            const identificador = meta.maquina || meta.equipamento || "N/A";
-            
-            let totalTasks = 0, checkedTasks = 0;
-            const pendingList = [];
-            const categorySummary = Object.values(ticket.data.items).map(group => {
-                const total = group.tasks.length;
-                const checked = group.tasks.filter(t => t.checked).length;
-                group.tasks.forEach(t => { if(!t.checked) pendingList.push(`- [${group.title}] ${t.label}`); });
-                totalTasks += total; checkedTasks += checked;
-                return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
-            });
-            const percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
-            const statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
-
-            const handleSendOutlook = () => {
-                const subject = `[${statusGlobal}] Checklist #${ticket.visualId} - ${identificador}`;
-                const body = `RELATÓRIO TÉCNICO\nID: #${ticket.visualId}\nATIVO: ${identificador}\nSTATUS: ${statusGlobal}\nTÉCNICO: ${meta.tecnico}\nOBS: ${obs}`;
-                window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                setTimeout(() => { if(confirm("Arquivar?")) onArchive(ticket); }, 1000);
-            };
-
-            return (
-                <div className="flex flex-col h-full bg-slate-100 p-8 overflow-auto">
-                    <div className="max-w-4xl mx-auto w-full space-y-6 no-print">
-                        <Button variant="ghost" onClick={onBack}>{Icons.ChevronLeft} Voltar</Button>
-                        <Card className="grid md:grid-cols-2 gap-6">
-                            <textarea className="w-full p-3 h-32 border rounded" value={obs} onChange={e => setObs(e.target.value)} placeholder="Observações..."></textarea>
-                            <div className="flex flex-col gap-2">
-                                <Button onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir</Button>
-                                <Button onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail</Button>
-                            </div>
-                        </Card>
-                    </div>
-                    <div id="receipt-area" className="hidden bg-white text-black p-10">
-                        <h1 className="text-xl font-bold uppercase">Checklist Técnico #{ticket.visualId}</h1>
-                        <p>Ativo: {identificador} | Técnico: {meta.tecnico}</p>
-                        <div className="mt-4 border-t pt-4">
-                            {categorySummary.map((c, i) => <p key={i}>[{c.status}] {c.title}</p>)}
-                            <p className="mt-4"><b>Observações:</b> {obs}</p>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish }) => {
+        const ActiveChecklist = ({ ticket, onUpdate, onBack, onFinish }) => {
             if (!ticket) return null;
-            const handleMeta = (field, value) => { onUpdate({ ...ticket.data, meta: { ...ticket.data.meta, [field]: value } }); };
-            const handleCheck = (section, taskId) => {
+            const handleCheck = (sec, taskId) => {
                 const newData = { ...ticket.data };
-                newData.items[section].tasks = newData.items[section].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
+                newData.items[sec].tasks = newData.items[sec].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
                 onUpdate(newData);
             };
             return (
-                <div className="flex flex-col h-full overflow-hidden bg-slate-100">
-                    <div className="bg-white p-4 flex justify-between items-center border-b">
-                        <Button variant="ghost" onClick={onBack}>{Icons.ChevronLeft}</Button>
-                        <h2 className="font-bold">#{ticket.visualId}</h2>
-                        <Button onClick={onRequestFinish}>Finalizar</Button>
+                <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950">
+                    <div className="p-4 bg-white dark:bg-slate-900 border-b flex justify-between items-center shadow-sm">
+                        <Button variant="ghost" onClick={onBack}>{Icons.ChevronLeft} Dashboard</Button>
+                        <span className="font-bold font-mono">#{ticket.visualId}</span>
+                        <Button onClick={onFinish}>Revisar e Enviar</Button>
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
                         <Card className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {Object.keys(ticket.data.meta).map(f => (
                                 <div key={f}><label className="text-[10px] font-bold uppercase text-slate-400">{f}</label>
-                                <Input value={ticket.data.meta[f]} onChange={e => handleMeta(f, e.target.value)} /></div>
+                                <Input value={ticket.data.meta[f]} onChange={e => onUpdate({...ticket.data, meta: {...ticket.data.meta, [f]: e.target.value}})} /></div>
                             ))}
                         </Card>
                         <div className="grid md:grid-cols-2 gap-4">
                             {Object.entries(ticket.data.items).map(([key, group]) => (
-                                <Card key={key} noPadding className="overflow-hidden">
-                                    <div className="px-4 py-2 bg-slate-50 font-bold text-xs uppercase border-b">{group.title}</div>
-                                    <div className="divide-y">
-                                        {group.tasks.map(task => (
-                                            <label key={task.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 cursor-pointer">
-                                                <input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
-                                                <span className={`text-sm ${task.checked ? 'text-slate-400 line-through' : ''}`}>{task.label}</span>
+                                <Card key={key} className="overflow-hidden !p-0">
+                                    <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-b font-bold text-xs uppercase">{group.title}</div>
+                                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                        {group.tasks.map(t => (
+                                            <label key={t.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
+                                                <input type="checkbox" checked={t.checked} onChange={() => handleCheck(key, t.id)} className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                                                <span className={`text-sm ${t.checked ? 'line-through text-slate-400' : ''}`}>{t.label}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -380,141 +240,120 @@
             );
         };
 
-        const Dashboard = ({ activeTickets, onNewTicket, onOpenTicket, onDeleteTicket, historyCount }) => (
-            <div className="p-6 md:p-10 space-y-8 fade-in">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="border-l-4 border-l-brand-500">
-                        <p className="text-xs font-bold uppercase text-slate-500">Abertos</p>
-                        <h3 className="text-3xl font-bold">{activeTickets.length}</h3>
-                    </Card>
-                    <Card className="border-l-4 border-l-emerald-500">
-                        <p className="text-xs font-bold uppercase text-slate-500">Histórico</p>
-                        <h3 className="text-3xl font-bold">{historyCount}</h3>
-                    </Card>
-                </div>
-                <div className="flex gap-4">
-                    <button onClick={() => onNewTicket('formatacao')} className="flex-1 p-6 bg-brand-600 text-white rounded-xl shadow-lg hover:bg-brand-700 text-left">
-                        <div className="mb-4">{Icons.Plus}</div><span className="font-bold block text-lg">Nova Formatação</span><span className="text-sm opacity-80">Checklist completo de P.C.</span>
-                    </button>
-                    <button onClick={() => onNewTicket('zebra')} className="flex-1 p-6 bg-white border rounded-xl shadow hover:border-brand-500 text-left">
-                        <div className="mb-4 text-brand-600">{Icons.Printer}</div><span className="font-bold block text-lg">Manutenção Zebra</span><span className="text-sm text-slate-500">Impressoras térmicas</span>
-                    </button>
-                </div>
-                <div className="grid md:grid-cols-3 gap-4">
-                    {activeTickets.map(t => (
-                        <div key={t.id} onClick={() => onOpenTicket(t.id)} className="p-4 bg-white border rounded-xl relative hover:shadow-md cursor-pointer group">
-                            <Badge color={t.type === 'formatacao' ? 'blue' : 'amber'}>{t.type}</Badge>
-                            <h4 className="font-bold mt-2">{t.data.meta.maquina || "Sem ID"}</h4>
-                            <p className="text-xs text-slate-500">{t.data.meta.tecnico}</p>
-                            <button onClick={(e) => { e.stopPropagation(); onDeleteTicket(e, t.id); }} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-
-        const HistoryView = ({ history }) => (
-            <div className="p-6 md:p-10 h-full flex flex-col fade-in">
-                <h2 className="text-2xl font-bold mb-6">Histórico</h2>
-                <Card className="flex-1 overflow-auto" noPadding>
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50 sticky top-0 border-b">
-                            <tr><th className="px-6 py-3">ID</th><th className="px-6 py-3">Data</th><th className="px-6 py-3">Ativo</th><th className="px-6 py-3">Técnico</th></tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {history.map((h, i) => (
-                                <tr key={i} className="hover:bg-slate-50 transition-colors">
-                                    <td className="px-6 py-3 font-mono">#{h.visualId}</td>
-                                    <td className="px-6 py-3 text-slate-500">{new Date(h.date).toLocaleDateString()}</td>
-                                    <td className="px-6 py-4 font-bold">{h.ativo}</td>
-                                    <td className="px-6 py-3">{h.tecnico}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </Card>
-            </div>
-        );
-
-        const App = () => {
+        const MainApp = () => {
             const [view, setView] = useState('login');
             const [currentUser, setCurrentUser] = useState(null);
             const [users, setUsers] = useState([]);
             const [activeTickets, setActiveTickets] = useState([]);
-            const [history, setHistory] = useState([]);
-            const [logo, setLogo] = useState('');
-            const [currentTicketId, setCurrentTicketId] = useState(null);
+            const [historyCount, setHistoryCount] = useState(0);
+            const [currentTid, setCurrentTid] = useState(null);
             const [darkMode, setDarkMode] = useState(true);
             const [showConfig, setShowConfig] = useState(false);
 
             useEffect(() => {
-                const unsubTickets = db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(snap => setHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                const unsubUsers = db.collection('users').onSnapshot(snap => {
-                    if (snap.empty) db.collection('users').add({ id: 'admin', name: 'Admin', pass: 'admin' });
-                    else setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() })));
-                });
-                return () => { unsubTickets(); unsubHistory(); unsubUsers(); };
+                const unsubU = db.collection('users').onSnapshot(snap => setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() }))));
+                const unsubT = db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+                const unsubH = db.collection('history').onSnapshot(snap => setHistoryCount(snap.size));
+                return () => { unsubU(); unsubT(); unsubH(); };
             }, []);
 
             useEffect(() => { darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark'); }, [darkMode]);
 
-            const handleLogin = (user) => { setCurrentUser(user); setView('dashboard'); };
-            const handleLogout = () => { setCurrentUser(null); setView('login'); };
-            
-            const handleCreateTicket = async (type) => {
+            const handleCreate = async (type) => {
                 const prefix = type === 'formatacao' ? 'F' : 'Z';
+                const nextSeq = Math.floor(Math.random() * 9000) + 1000;
                 const newRef = db.collection('tickets').doc();
-                await newRef.set({ visualId: `${prefix}-${Math.floor(Math.random() * 9000) + 1000}`, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
-                setCurrentTicketId(newRef.id);
-                setView('checklist');
+                await newRef.set({ visualId: `${prefix}-${nextSeq}`, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
+                setCurrentTid(newRef.id); setView('checklist');
             };
 
-            const handleUpdateTicket = (newData) => { if (currentTicketId) db.collection('tickets').doc(currentTicketId).update({ data: newData }); };
-            
-            const handleArchive = (ticket) => {
-                db.collection('history').add({ visualId: ticket.visualId, date: new Date().toISOString(), tecnico: ticket.data.meta.tecnico, ativo: ticket.data.meta.maquina || "N/A" })
-                .then(() => db.collection('tickets').doc(ticket.id).delete())
-                .then(() => { setView('dashboard'); });
+            const handleArchive = (t) => {
+                db.collection('history').add({ visualId: t.visualId, date: new Date().toISOString(), tecnico: t.data.meta.tecnico, ativo: t.data.meta.maquina || "N/A" })
+                .then(() => db.collection('tickets').doc(t.id).delete())
+                .then(() => setView('dashboard'));
             };
 
-            if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
+            if (view === 'login') return (
+                <div className="h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
+                    <Card className="w-full max-w-sm">
+                        <div className="text-center mb-6">
+                            <div className="w-12 h-12 bg-brand-600 rounded-xl mx-auto mb-4 flex items-center justify-center text-white shadow-lg font-bold italic">I</div>
+                            <h1 className="text-xl font-bold uppercase tracking-tighter dark:text-white">Infra Checklist</h1>
+                        </div>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const u = users.find(u => u.id === e.target.id.value && u.pass === e.target.pass.value);
+                            if (u) { setCurrentUser(u); setView('dashboard'); } else alert("Erro!");
+                        }} className="space-y-4">
+                            <Input name="id" placeholder="Matrícula" required />
+                            <Input name="pass" type="password" placeholder="Senha" required />
+                            <Button type="submit" className="w-full">Entrar</Button>
+                        </form>
+                    </Card>
+                </div>
+            );
 
             return (
-                <div className="flex h-screen bg-slate-100 dark:bg-slate-950 font-sans">
-                    <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 shrink-0">
-                        <div className="h-16 flex items-center gap-3 px-6 font-bold text-white border-b border-slate-800">
-                            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">INFRA</div>
-                            CHECK
-                        </div>
+                <div className="flex h-screen bg-slate-100 dark:bg-slate-950 overflow-hidden">
+                    <aside className="w-64 bg-slate-900 text-slate-400 hidden md:flex flex-col border-r border-slate-800 shrink-0">
+                        <div className="h-16 flex items-center gap-3 px-6 font-bold text-white border-b border-slate-800">INFRA CHECK</div>
                         <nav className="flex-1 py-6 px-3 space-y-1">
-                            <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${view === 'dashboard' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Layout} Dashboard</button>
-                            <button onClick={() => setView('inventory')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${view === 'inventory' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Package} Estoque</button>
-                            <button onClick={() => setView('history')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${view === 'history' ? 'bg-brand-600 text-white' : ''}`}>{Icons.History} Histórico</button>
+                            <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg ${view === 'dashboard' ? 'bg-brand-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Layout} Dashboard</button>
+                            <button onClick={() => setView('inventory')} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg ${view === 'inventory' ? 'bg-brand-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Package} Estoque</button>
                         </nav>
                         <div className="p-4 border-t border-slate-800 flex gap-2">
-                            <button onClick={() => setDarkMode(!darkMode)} className="p-2 bg-slate-800 rounded">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                            <button onClick={() => setShowConfig(true)} className="p-2 bg-slate-800 rounded">{Icons.Settings}</button>
-                            <button onClick={handleLogout} className="p-2 bg-red-900/20 text-red-400 rounded">{Icons.LogOut}</button>
+                            <button onClick={() => setDarkMode(!darkMode)} className="p-2 hover:text-white">{darkMode ? Icons.Sun : Icons.Moon}</button>
+                            <button onClick={() => setView('login')} className="p-2 hover:text-red-400 ml-auto">{Icons.LogOut}</button>
                         </div>
                     </aside>
-
-                    <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                        <div className="flex-1 overflow-auto relative">
-                            {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} />}
-                            {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={(e,id) => db.collection('tickets').doc(id).delete()} historyCount={history.length} />}
-                            {view === 'inventory' && <InventoryView currentUser={currentUser} />}
-                            {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={handleUpdateTicket} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
-                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} currentUser={currentUser} />}
-                            {view === 'history' && <HistoryView history={history} />}
-                        </div>
+                    <main className="flex-1 overflow-auto relative">
+                        {view === 'dashboard' && (
+                            <div className="p-10 space-y-8 fade-in">
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <button onClick={() => handleCreate('formatacao')} className="p-8 bg-brand-600 text-white rounded-2xl text-left shadow-xl hover:scale-[1.02] transition-all">
+                                        <div className="mb-4">{Icons.Plus}</div><span className="font-bold block text-lg">Nova Formatação</span><span className="text-sm opacity-70">Checklist P.C. completo</span>
+                                    </button>
+                                    <button onClick={() => handleCreate('zebra')} className="p-8 bg-white dark:bg-slate-900 border rounded-2xl text-left shadow-sm hover:border-brand-500 transition-all">
+                                        <div className="mb-4 text-brand-600">{Icons.Printer}</div><span className="font-bold block text-lg">Manutenção Zebra</span><span className="text-sm text-slate-500">Impressoras térmicas</span>
+                                    </button>
+                                </div>
+                                <div className="grid md:grid-cols-3 gap-4">
+                                    {activeTickets.map(t => (
+                                        <Card key={t.id} onClick={() => { setCurrentTid(t.id); setView('checklist'); }} className="cursor-pointer hover:border-brand-500 relative group transition-all">
+                                            <span className="text-[10px] font-bold uppercase text-brand-500">{t.type}</span>
+                                            <h4 className="font-bold block text-lg">{t.data.meta.maquina || "Sem ID"}</h4>
+                                            <p className="text-xs text-slate-500">{t.data.meta.tecnico}</p>
+                                            <button onClick={(e) => { e.stopPropagation(); db.collection('tickets').doc(t.id).delete(); }} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
+                                        </Card>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {view === 'inventory' && <InventoryView currentUser={currentUser} />}
+                        {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTid)} onUpdate={(d) => db.collection('tickets').doc(currentTid).update({ data: d })} onBack={() => setView('dashboard')} onFinish={() => setView('receipt')} />}
+                        {view === 'receipt' && (
+                            <div className="p-10 max-w-2xl mx-auto space-y-6 fade-in">
+                                <Button variant="ghost" onClick={() => setView('checklist')}>{Icons.ChevronLeft} Voltar</Button>
+                                <Card className="text-center space-y-4">
+                                    <h3 className="text-xl font-bold">Relatório Pronto</h3>
+                                    <p className="text-sm text-slate-500">Clique abaixo para disparar o e-mail técnico e arquivar o chamado.</p>
+                                    <Button className="w-full h-12" onClick={() => {
+                                        const t = activeTickets.find(x => x.id === currentTid);
+                                        const subject = `Checklist #${t.visualId} - ${t.data.meta.maquina}`;
+                                        const body = `RELATÓRIO TI\n----------------\nID: #${t.visualId}\nATIVO: ${t.data.meta.maquina}\nTÉCNICO: ${t.data.meta.tecnico}\nSTATUS: CONCLUÍDO`;
+                                        window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                        setTimeout(() => { if(confirm("Deseja arquivar agora?")) handleArchive(t); }, 1000);
+                                    }}>{Icons.Mail} Enviar e-mail</Button>
+                                </Card>
+                            </div>
+                        )}
                     </main>
                 </div>
             );
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        root.render(<MainApp />);
     </script>
 </body>
 </html>
