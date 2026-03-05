@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFRA CHECKLIST | Enterprise Edition</title>
+    <title>INFRA CHECKLIST & ESTOQUE | Enterprise</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -35,7 +35,7 @@
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
         @media print {
             @page { margin: 0; size: auto; }
-            body, html { background-color: white !important; color: black !important; }
+            body, html { background-color: white !important; color: black !important; height: auto; overflow: visible; }
             body * { visibility: hidden; }
             #receipt-area, #receipt-area * { visibility: visible; }
             #receipt-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; z-index: 9999; }
@@ -76,9 +76,9 @@
             Sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
             Trash: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
             Server: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
-            Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"/></svg>,
             ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
-            Package: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            Package: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
         };
 
         const getTemplate = (type, tecnicoName) => {
@@ -151,14 +151,8 @@
                             <p className="text-sm text-slate-500 mt-1">Acesso Administrativo</p>
                         </div>
                         <form onSubmit={handleSubmit} className="p-8 space-y-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">ID Usuário</label>
-                                <Input value={id} onChange={e => setId(e.target.value)} placeholder="000000" autoFocus />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha</label>
-                                <Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••" />
-                            </div>
+                            <div><label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">ID Usuário</label><Input value={id} onChange={e => setId(e.target.value)} placeholder="000000" autoFocus /></div>
+                            <div><label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha</label><Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••" /></div>
                             {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</div>}
                             <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
                         </form>
@@ -178,26 +172,24 @@
             return (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm fade-in">
                     <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" noPadding>
-                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Equipe</h2>
-                            <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                        <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+                            <h2 className="font-bold flex items-center gap-2">{Icons.Settings} Configurações</h2>
+                            <button onClick={onClose} className="text-2xl leading-none">&times;</button>
                         </div>
-                        <div className="p-6 overflow-y-auto grid md:grid-cols-2 gap-8">
+                        <div className="p-6 grid md:grid-cols-2 gap-8">
                             <form onSubmit={handleAddUser} className="space-y-3">
-                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Membro</h3>
                                 <Input placeholder="ID" value={newUser.id} onChange={e => setNewUser({...newUser, id: e.target.value})} />
                                 <Input placeholder="Nome" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
                                 <Input type="password" placeholder="Senha" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} />
                                 <Button type="submit" className="w-full">Cadastrar</Button>
                             </form>
-                            <div>
-                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Ativos</h3>
-                                <div className="space-y-2">{users.map(u => (
-                                    <div key={u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200">
-                                        <div className="text-sm font-semibold">{u.name}</div>
-                                        {u.id !== 'admin' && <button onClick={() => handleDeleteUser(u.docId)} className="text-slate-400 hover:text-red-500">{Icons.Trash}</button>}
+                            <div className="space-y-2">
+                                {users.map(u => (
+                                    <div key={u.id} className="flex justify-between p-2 border rounded">
+                                        <span>{u.name}</span>
+                                        {u.id !== 'admin' && <button onClick={() => handleDeleteUser(u.docId)} className="text-red-500">{Icons.Trash}</button>}
                                     </div>
-                                ))}</div>
+                                ))}
                             </div>
                         </div>
                     </Card>
@@ -208,105 +200,88 @@
         // --- MÓDULO DE ESTOQUE (APPSHEET STYLE) ---
         const InventoryView = ({ currentUser }) => {
             const [products, setProducts] = useState([]);
-            const [showAddModal, setShowAddModal] = useState(false);
+            const [showAdd, setShowAdd] = useState(false);
             const [newProd, setNewProd] = useState({ name: '', sku: '', quantity: 0 });
-            const [transaction, setTransaction] = useState({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
+            const [move, setMove] = useState({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
 
             useEffect(() => {
-                const unsub = db.collection('inventory').onSnapshot(snap => {
-                    setProducts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-                });
+                const unsub = db.collection('inventory').onSnapshot(snap => setProducts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
                 return unsub;
             }, []);
 
-            const handleAddProduct = (e) => {
-                e.preventDefault();
-                db.collection('inventory').add({ ...newProd, quantity: Number(newProd.quantity) });
-                setShowAddModal(false);
-                setNewProd({ name: '', sku: '', quantity: 0 });
-            };
-
             const handleTransaction = async (e) => {
                 e.preventDefault();
-                const prod = products.find(p => p.id === transaction.prodId);
+                const prod = products.find(p => p.id === move.prodId);
                 if (!prod) return;
-
-                const newQty = transaction.type === 'ENTRADA' ? prod.quantity + Number(transaction.qty) : prod.quantity - Number(transaction.qty);
+                const newQty = move.type === 'ENTRADA' ? prod.quantity + Number(move.qty) : prod.quantity - Number(move.qty);
                 if (newQty < 0) return alert("Estoque insuficiente!");
-
+                
                 await db.collection('inventory').doc(prod.id).update({ quantity: newQty });
-                await db.collection('stock_transactions').add({ ...transaction, prodName: prod.name, date: new Date().toISOString(), recordedBy: currentUser.name });
+                await db.collection('stock_logs').add({ ...move, prodName: prod.name, date: new Date().toISOString(), tecnico: currentUser.name });
 
-                if (transaction.type === 'SAIDA') {
-                    const subject = `[ESTOQUE] Saída de Material - ${prod.name}`;
-                    const body = `CONTROLE DE SAÍDA DE MATERIAL\n--------------------------\nPRODUTO: ${prod.name}\nQUANTIDADE: ${transaction.qty}\nRETIRADO POR: ${transaction.user}\nCRACHÁ: ${transaction.badge}\nDATA: ${new Date().toLocaleString()}\nTÉCNICO: ${currentUser.name}`;
+                if (move.type === 'SAIDA') {
+                    const subject = `[ESTOQUE] Saída: ${prod.name}`;
+                    const body = `SAÍDA DE ESTOQUE\nPRODUTO: ${prod.name}\nQTD: ${move.qty}\nUSUÁRIO: ${move.user}\nCRACHÁ: ${move.badge}\nTÉCNICO: ${currentUser.name}`;
                     window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 }
                 alert("Movimentação registrada!");
-                setTransaction({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
+                setMove({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
             };
 
             return (
                 <div className="p-6 md:p-10 space-y-6 fade-in">
                     <div className="flex justify-between items-center">
-                        <div>
-                            <h2 className="text-2xl font-bold dark:text-white">Controle de Estoque</h2>
-                            <p className="text-slate-500 text-sm">Gerenciamento de periféricos e peças.</p>
-                        </div>
-                        <Button onClick={() => setShowAddModal(true)}>{Icons.Plus} Novo Produto</Button>
+                        <h2 className="text-2xl font-bold">Controle de Estoque</h2>
+                        <Button onClick={() => setShowAdd(true)}>{Icons.Plus} Novo Produto</Button>
                     </div>
-
                     <div className="grid md:grid-cols-3 gap-6">
                         <Card className="md:col-span-2 overflow-hidden" noPadding>
-                            <table className="w-full text-sm text-left">
-                                <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-bold uppercase text-slate-500 border-b border-slate-200">
-                                    <tr><th className="px-6 py-3">Produto</th><th className="px-6 py-3 text-center">SKU</th><th className="px-6 py-3 text-right">Saldo</th></tr>
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50 border-b">
+                                    <tr><th className="px-6 py-3">Item</th><th className="px-6 py-3">Saldo</th></tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                <tbody>
                                     {products.map(p => (
-                                        <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                            <td className="px-6 py-4 font-medium dark:text-white">{p.name}</td>
-                                            <td className="px-6 py-4 text-center text-slate-400">{p.sku}</td>
-                                            <td className={`px-6 py-4 text-right font-bold ${p.quantity < 3 ? 'text-red-500' : 'text-emerald-500'}`}>{p.quantity}</td>
+                                        <tr key={p.id} className="border-b">
+                                            <td className="px-6 py-4 font-medium">{p.name}</td>
+                                            <td className={`px-6 py-4 font-bold ${p.quantity < 3 ? 'text-red-500' : 'text-emerald-500'}`}>{p.quantity}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </Card>
-
                         <Card>
-                            <h3 className="text-sm font-bold uppercase text-slate-500 mb-4">Registrar Movimento</h3>
+                            <h3 className="font-bold mb-4">Movimentação</h3>
                             <form onSubmit={handleTransaction} className="space-y-4">
-                                <select className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm dark:text-white" value={transaction.prodId} onChange={e => setTransaction({...transaction, prodId: e.target.value})} required>
-                                    <option value="">Selecione...</option>
+                                <select className="w-full h-10 px-3 bg-white dark:bg-slate-950 border rounded-lg" value={move.prodId} onChange={e => setMove({...move, prodId: e.target.value})} required>
+                                    <option value="">Produto...</option>
                                     {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                 </select>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <select className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm dark:text-white" value={transaction.type} onChange={e => setTransaction({...transaction, type: e.target.value})}>
+                                    <select className="w-full h-10 px-3 bg-white dark:bg-slate-950 border rounded-lg" value={move.type} onChange={e => setMove({...move, type: e.target.value})}>
                                         <option value="SAIDA">Saída</option><option value="ENTRADA">Entrada</option>
                                     </select>
-                                    <Input type="number" value={transaction.qty} onChange={e => setTransaction({...transaction, qty: e.target.value})} required />
+                                    <Input type="number" value={move.qty} onChange={e => setMove({...move, qty: e.target.value})} />
                                 </div>
-                                {transaction.type === 'SAIDA' && (
+                                {move.type === 'SAIDA' && (
                                     <>
-                                        <Input placeholder="Nome do usuário" value={transaction.user} onChange={e => setTransaction({...transaction, user: e.target.value})} required />
-                                        <Input placeholder="Crachá" value={transaction.badge} onChange={e => setTransaction({...transaction, badge: e.target.value})} required />
+                                        <Input placeholder="Usuário" value={move.user} onChange={e => setMove({...move, user: e.target.value})} required />
+                                        <Input placeholder="Crachá" value={move.badge} onChange={e => setMove({...move, badge: e.target.value})} required />
                                     </>
                                 )}
-                                <Button type="submit" className="w-full" variant={transaction.type === 'SAIDA' ? 'danger' : 'primary'}>Confirmar</Button>
+                                <Button type="submit" className="w-full">Confirmar</Button>
                             </form>
                         </Card>
                     </div>
-
-                    {showAddModal && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                            <Card className="w-full max-w-md">
-                                <h3 className="font-bold mb-4">Novo Produto</h3>
-                                <form onSubmit={handleAddProduct} className="space-y-4">
-                                    <Input placeholder="Nome" value={newProd.name} onChange={e => setNewProd({...newProd, name: e.target.value})} required />
-                                    <Input placeholder="SKU" value={newProd.sku} onChange={e => setNewProd({...newProd, sku: e.target.value})} />
-                                    <Input type="number" placeholder="Inicial" value={newProd.quantity} onChange={e => setNewProd({...newProd, quantity: e.target.value})} required />
-                                    <div className="flex gap-2"><Button type="button" variant="secondary" className="flex-1" onClick={() => setShowAddModal(false)}>Cancelar</Button><Button type="submit" className="flex-1">Salvar</Button></div>
+                    {showAdd && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                            <Card className="w-full max-w-sm">
+                                <h3 className="font-bold mb-4">Novo Item</h3>
+                                <form onSubmit={(e) => { e.preventDefault(); db.collection('inventory').add({...newProd, quantity: Number(newProd.quantity)}); setShowAdd(false); }} className="space-y-4">
+                                    <Input placeholder="Nome" value={newProd.name} onChange={e => setNewProd({...newProd, name: e.target.value})} />
+                                    <Input type="number" placeholder="Inicial" value={newProd.quantity} onChange={e => setNewProd({...newProd, quantity: e.target.value})} />
+                                    <Button type="submit" className="w-full">Salvar</Button>
+                                    <Button type="button" variant="secondary" className="w-full" onClick={() => setShowAdd(false)}>Cancelar</Button>
                                 </form>
                             </Card>
                         </div>
@@ -315,32 +290,49 @@
             );
         };
 
-        const ReceiptView = ({ ticket, onBack, onArchive, logo }) => {
+        const ReceiptView = ({ ticket, onBack, onArchive, logo, currentUser }) => {
             const [obs, setObs] = useState('');
             const meta = ticket.data.meta;
+            const identificador = meta.maquina || meta.equipamento || "N/A";
+            
+            let totalTasks = 0, checkedTasks = 0;
+            const pendingList = [];
+            const categorySummary = Object.values(ticket.data.items).map(group => {
+                const total = group.tasks.length;
+                const checked = group.tasks.filter(t => t.checked).length;
+                group.tasks.forEach(t => { if(!t.checked) pendingList.push(`- [${group.title}] ${t.label}`); });
+                totalTasks += total; checkedTasks += checked;
+                return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
+            });
+            const percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
+            const statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
+
             const handleSendOutlook = () => {
-                const subject = `Checklist #${ticket.visualId} - ${meta.maquina || 'TI'}`;
-                const body = `RELATÓRIO TÉCNICO\nID: #${ticket.visualId}\nATIVO: ${meta.maquina}\nTÉCNICO: ${meta.tecnico}\nOBS: ${obs}`;
+                const subject = `[${statusGlobal}] Checklist #${ticket.visualId} - ${identificador}`;
+                const body = `RELATÓRIO TÉCNICO\nID: #${ticket.visualId}\nATIVO: ${identificador}\nSTATUS: ${statusGlobal}\nTÉCNICO: ${meta.tecnico}\nOBS: ${obs}`;
                 window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 setTimeout(() => { if(confirm("Arquivar?")) onArchive(ticket); }, 1000);
             };
+
             return (
-                <div className="p-8 max-w-4xl mx-auto space-y-6 fade-in">
-                    <div className="flex justify-between items-center no-print">
-                        <Button onClick={onBack} variant="secondary">{Icons.ChevronLeft} Voltar</Button>
-                        <h2 className="text-xl font-bold uppercase">Finalização</h2>
+                <div className="flex flex-col h-full bg-slate-100 p-8 overflow-auto">
+                    <div className="max-w-4xl mx-auto w-full space-y-6 no-print">
+                        <Button variant="ghost" onClick={onBack}>{Icons.ChevronLeft} Voltar</Button>
+                        <Card className="grid md:grid-cols-2 gap-6">
+                            <textarea className="w-full p-3 h-32 border rounded" value={obs} onChange={e => setObs(e.target.value)} placeholder="Observações..."></textarea>
+                            <div className="flex flex-col gap-2">
+                                <Button onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir</Button>
+                                <Button onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail</Button>
+                            </div>
+                        </Card>
                     </div>
-                    <Card>
-                        <textarea className="w-full p-4 h-32 bg-slate-50 dark:bg-slate-800 rounded-lg resize-none" placeholder="Observações..." value={obs} onChange={e => setObs(e.target.value)}></textarea>
-                        <div className="mt-4 flex gap-4">
-                            <Button className="flex-1" onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir</Button>
-                            <Button className="flex-1" onClick={handleSendOutlook}>{Icons.Mail} Enviar & Arquivar</Button>
+                    <div id="receipt-area" className="hidden bg-white text-black p-10">
+                        <h1 className="text-xl font-bold uppercase">Checklist Técnico #{ticket.visualId}</h1>
+                        <p>Ativo: {identificador} | Técnico: {meta.tecnico}</p>
+                        <div className="mt-4 border-t pt-4">
+                            {categorySummary.map((c, i) => <p key={i}>[{c.status}] {c.title}</p>)}
+                            <p className="mt-4"><b>Observações:</b> {obs}</p>
                         </div>
-                    </Card>
-                    <div id="receipt-area" className="hidden bg-white text-black p-10 border-2 border-black">
-                        <h1 className="text-2xl font-bold uppercase">Relatório Técnico #{ticket.visualId}</h1>
-                        <p>Ativo: {meta.maquina} | Técnico: {meta.tecnico}</p>
-                        <p className="mt-4 border-t pt-4">Observações: {obs}</p>
                     </div>
                 </div>
             );
@@ -348,34 +340,35 @@
 
         const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish }) => {
             if (!ticket) return null;
+            const handleMeta = (field, value) => { onUpdate({ ...ticket.data, meta: { ...ticket.data.meta, [field]: value } }); };
             const handleCheck = (section, taskId) => {
                 const newData = { ...ticket.data };
                 newData.items[section].tasks = newData.items[section].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
                 onUpdate(newData);
             };
             return (
-                <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
-                    <div className="p-4 bg-white dark:bg-slate-900 border-b flex justify-between items-center">
-                        <Button onClick={onBack} variant="ghost">{Icons.ChevronLeft}</Button>
-                        <span className="font-bold">Checklist #{ticket.visualId}</span>
-                        <Button onClick={onRequestFinish}>Revisar</Button>
+                <div className="flex flex-col h-full overflow-hidden bg-slate-100">
+                    <div className="bg-white p-4 flex justify-between items-center border-b">
+                        <Button variant="ghost" onClick={onBack}>{Icons.ChevronLeft}</Button>
+                        <h2 className="font-bold">#{ticket.visualId}</h2>
+                        <Button onClick={onRequestFinish}>Finalizar</Button>
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
                         <Card className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {Object.keys(ticket.data.meta).map(f => (
                                 <div key={f}><label className="text-[10px] font-bold uppercase text-slate-400">{f}</label>
-                                <Input value={ticket.data.meta[f]} onChange={e => onUpdate({...ticket.data, meta: {...ticket.data.meta, [f]: e.target.value}})} /></div>
+                                <Input value={ticket.data.meta[f]} onChange={e => handleMeta(f, e.target.value)} /></div>
                             ))}
                         </Card>
                         <div className="grid md:grid-cols-2 gap-4">
                             {Object.entries(ticket.data.items).map(([key, group]) => (
                                 <Card key={key} noPadding className="overflow-hidden">
-                                    <div className="p-3 bg-slate-50 dark:bg-slate-800 font-bold text-xs uppercase border-b">{group.title}</div>
-                                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                                        {group.tasks.map(t => (
-                                            <label key={t.id} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-slate-50">
-                                                <input type="checkbox" checked={t.checked} onChange={() => handleCheck(key, t.id)} className="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
-                                                <span className={`text-sm ${t.checked ? 'line-through text-slate-400' : ''}`}>{t.label}</span>
+                                    <div className="px-4 py-2 bg-slate-50 font-bold text-xs uppercase border-b">{group.title}</div>
+                                    <div className="divide-y">
+                                        {group.tasks.map(task => (
+                                            <label key={task.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 cursor-pointer">
+                                                <input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                                                <span className={`text-sm ${task.checked ? 'text-slate-400 line-through' : ''}`}>{task.label}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -390,24 +383,30 @@
         const Dashboard = ({ activeTickets, onNewTicket, onOpenTicket, onDeleteTicket, historyCount }) => (
             <div className="p-6 md:p-10 space-y-8 fade-in">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="border-l-4 border-l-brand-500 flex justify-between items-center"><div><p className="text-xs font-bold text-slate-500 uppercase">Ativos</p><h3 className="text-3xl font-bold">{activeTickets.length}</h3></div>{Icons.Layout}</Card>
-                    <Card className="border-l-4 border-l-emerald-500 flex justify-between items-center"><div><p className="text-xs font-bold text-slate-500 uppercase">Histórico</p><h3 className="text-3xl font-bold">{historyCount}</h3></div>{Icons.History}</Card>
+                    <Card className="border-l-4 border-l-brand-500">
+                        <p className="text-xs font-bold uppercase text-slate-500">Abertos</p>
+                        <h3 className="text-3xl font-bold">{activeTickets.length}</h3>
+                    </Card>
+                    <Card className="border-l-4 border-l-emerald-500">
+                        <p className="text-xs font-bold uppercase text-slate-500">Histórico</p>
+                        <h3 className="text-3xl font-bold">{historyCount}</h3>
+                    </Card>
                 </div>
                 <div className="flex gap-4">
-                    <button onClick={() => onNewTicket('formatacao')} className="flex-1 p-6 bg-brand-600 text-white rounded-xl shadow-lg hover:bg-brand-700 transition-all text-left">
-                        <div className="mb-4">{Icons.Plus}</div><span className="font-bold block">Formatação</span><span className="text-xs opacity-75">Checklist P.C.</span>
+                    <button onClick={() => onNewTicket('formatacao')} className="flex-1 p-6 bg-brand-600 text-white rounded-xl shadow-lg hover:bg-brand-700 text-left">
+                        <div className="mb-4">{Icons.Plus}</div><span className="font-bold block text-lg">Nova Formatação</span><span className="text-sm opacity-80">Checklist completo de P.C.</span>
                     </button>
-                    <button onClick={() => onNewTicket('zebra')} className="flex-1 p-6 bg-white dark:bg-slate-800 border rounded-xl shadow hover:border-brand-500 transition-all text-left">
-                        <div className="mb-4 text-brand-600">{Icons.Printer}</div><span className="font-bold block">Manutenção Zebra</span><span className="text-xs text-slate-500">Impressoras</span>
+                    <button onClick={() => onNewTicket('zebra')} className="flex-1 p-6 bg-white border rounded-xl shadow hover:border-brand-500 text-left">
+                        <div className="mb-4 text-brand-600">{Icons.Printer}</div><span className="font-bold block text-lg">Manutenção Zebra</span><span className="text-sm text-slate-500">Impressoras térmicas</span>
                     </button>
                 </div>
                 <div className="grid md:grid-cols-3 gap-4">
                     {activeTickets.map(t => (
-                        <div key={t.id} onClick={() => onOpenTicket(t.id)} className="p-4 bg-white dark:bg-slate-900 border rounded-xl hover:shadow-md cursor-pointer relative">
+                        <div key={t.id} onClick={() => onOpenTicket(t.id)} className="p-4 bg-white border rounded-xl relative hover:shadow-md cursor-pointer group">
                             <Badge color={t.type === 'formatacao' ? 'blue' : 'amber'}>{t.type}</Badge>
                             <h4 className="font-bold mt-2">{t.data.meta.maquina || "Sem ID"}</h4>
                             <p className="text-xs text-slate-500">{t.data.meta.tecnico}</p>
-                            <button onClick={(e) => onDeleteTicket(e, t.id)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500">{Icons.Trash}</button>
+                            <button onClick={(e) => { e.stopPropagation(); onDeleteTicket(e, t.id); }} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
                         </div>
                     ))}
                 </div>
@@ -415,19 +414,19 @@
         );
 
         const HistoryView = ({ history }) => (
-            <div className="p-6 md:p-10 h-full overflow-hidden flex flex-col fade-in">
-                <h2 className="text-2xl font-bold mb-6 uppercase tracking-tight">Histórico Auditável</h2>
+            <div className="p-6 md:p-10 h-full flex flex-col fade-in">
+                <h2 className="text-2xl font-bold mb-6">Histórico</h2>
                 <Card className="flex-1 overflow-auto" noPadding>
-                    <table className="w-full text-sm">
-                        <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0">
-                            <tr><th className="px-6 py-3 text-left">Data</th><th className="px-6 py-3 text-left">ID</th><th className="px-6 py-3 text-left">Ativo</th><th className="px-6 py-3 text-left">Técnico</th></tr>
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-slate-50 sticky top-0 border-b">
+                            <tr><th className="px-6 py-3">ID</th><th className="px-6 py-3">Data</th><th className="px-6 py-3">Ativo</th><th className="px-6 py-3">Técnico</th></tr>
                         </thead>
                         <tbody className="divide-y">
                             {history.map((h, i) => (
-                                <tr key={i} className="hover:bg-slate-50">
-                                    <td className="px-6 py-3">{new Date(h.date).toLocaleDateString()}</td>
+                                <tr key={i} className="hover:bg-slate-50 transition-colors">
                                     <td className="px-6 py-3 font-mono">#{h.visualId}</td>
-                                    <td className="px-6 py-3 font-bold">{h.ativo}</td>
+                                    <td className="px-6 py-3 text-slate-500">{new Date(h.date).toLocaleDateString()}</td>
+                                    <td className="px-6 py-4 font-bold">{h.ativo}</td>
                                     <td className="px-6 py-3">{h.tecnico}</td>
                                 </tr>
                             ))}
@@ -443,6 +442,7 @@
             const [users, setUsers] = useState([]);
             const [activeTickets, setActiveTickets] = useState([]);
             const [history, setHistory] = useState([]);
+            const [logo, setLogo] = useState('');
             const [currentTicketId, setCurrentTicketId] = useState(null);
             const [darkMode, setDarkMode] = useState(true);
             const [showConfig, setShowConfig] = useState(false);
@@ -461,15 +461,17 @@
 
             const handleLogin = (user) => { setCurrentUser(user); setView('dashboard'); };
             const handleLogout = () => { setCurrentUser(null); setView('login'); };
+            
             const handleCreateTicket = async (type) => {
                 const prefix = type === 'formatacao' ? 'F' : 'Z';
-                const nextSeq = Math.floor(Math.random() * 9000) + 1000;
                 const newRef = db.collection('tickets').doc();
-                await newRef.set({ visualId: `${prefix}-${nextSeq}`, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
+                await newRef.set({ visualId: `${prefix}-${Math.floor(Math.random() * 9000) + 1000}`, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
                 setCurrentTicketId(newRef.id);
                 setView('checklist');
             };
+
             const handleUpdateTicket = (newData) => { if (currentTicketId) db.collection('tickets').doc(currentTicketId).update({ data: newData }); };
+            
             const handleArchive = (ticket) => {
                 db.collection('history').add({ visualId: ticket.visualId, date: new Date().toISOString(), tecnico: ticket.data.meta.tecnico, ativo: ticket.data.meta.maquina || "N/A" })
                 .then(() => db.collection('tickets').doc(ticket.id).delete())
@@ -479,13 +481,16 @@
             if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
 
             return (
-                <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950">
-                    <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800">
-                        <div className="h-16 flex items-center px-6 font-bold text-white border-b border-slate-800">INFRA CHECK</div>
+                <div className="flex h-screen bg-slate-100 dark:bg-slate-950 font-sans">
+                    <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 shrink-0">
+                        <div className="h-16 flex items-center gap-3 px-6 font-bold text-white border-b border-slate-800">
+                            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">INFRA</div>
+                            CHECK
+                        </div>
                         <nav className="flex-1 py-6 px-3 space-y-1">
-                            <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${view === 'dashboard' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Layout} Home</button>
-                            <button onClick={() => setView('inventory')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${view === 'inventory' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Package} Estoque</button>
-                            <button onClick={() => setView('history')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${view === 'history' ? 'bg-brand-600 text-white' : ''}`}>{Icons.History} Histórico</button>
+                            <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${view === 'dashboard' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Layout} Dashboard</button>
+                            <button onClick={() => setView('inventory')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${view === 'inventory' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Package} Estoque</button>
+                            <button onClick={() => setView('history')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${view === 'history' ? 'bg-brand-600 text-white' : ''}`}>{Icons.History} Histórico</button>
                         </nav>
                         <div className="p-4 border-t border-slate-800 flex gap-2">
                             <button onClick={() => setDarkMode(!darkMode)} className="p-2 bg-slate-800 rounded">{darkMode ? Icons.Sun : Icons.Moon}</button>
@@ -493,13 +498,14 @@
                             <button onClick={handleLogout} className="p-2 bg-red-900/20 text-red-400 rounded">{Icons.LogOut}</button>
                         </div>
                     </aside>
-                    <main className="flex-1 flex flex-col min-w-0">
-                        <div className="flex-1 overflow-auto">
+
+                    <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                        <div className="flex-1 overflow-auto relative">
                             {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} />}
-                            {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={(e,id)=>{e.stopPropagation(); db.collection('tickets').doc(id).delete();}} historyCount={history.length} />}
+                            {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={(e,id) => db.collection('tickets').doc(id).delete()} historyCount={history.length} />}
                             {view === 'inventory' && <InventoryView currentUser={currentUser} />}
                             {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={handleUpdateTicket} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
-                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} />}
+                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} currentUser={currentUser} />}
                             {view === 'history' && <HistoryView history={history} />}
                         </div>
                     </main>
