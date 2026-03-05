@@ -3,47 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFRA SYS | Checklist & Estoque</title>
+    <title>INFRA SYS | Enterprise Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-                    colors: { brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' } }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { brand: { 500: '#3b82f6', 600: '#2563eb' } }
                 }
             }
         }
     </script>
 
     <style>
-        body { -webkit-print-color-adjust: exact; }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        @media print {
-            .no-print { display: none !important; }
-            #receipt-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
-        }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        @media print { .no-print { display: none !important; } #print-area { display: block !important; } }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- FIREBASE CONFIG ---
+        // --- INICIALIZAÇÃO FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -55,296 +50,231 @@
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
 
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
 
+        // --- ÍCONES ---
         const Icons = {
-            Layout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
-            User: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-            History: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
-            Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-            LogOut: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-            Package: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
-            Printer: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
-            Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"/></svg>,
-            ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Box: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
+            Checklist: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg>,
+            Logout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>,
+            Trash: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         };
 
-        const getTemplate = (type, tecnicoName) => {
-            const tmpl = { meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' }, items: {} };
+        // --- TEMPLATES COMPLETOS ---
+        const getChecklistTemplate = (type, tech) => {
+            const base = { meta: { tecnico: tech, data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' }, items: {} };
             if (type === 'formatacao') {
-                tmpl.items = {
-                    preventivas: { title: "Preventivas", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
-                    preparacao: { title: "Backup & Prep", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
-                    sistema: { title: "Sistema Operacional", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
-                    seguranca: { title: "Segurança", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
-                    configuracao: { title: "Configurações", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
-                    apps: { title: "Aplicações", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
-                    finalizacao: { title: "Entrega", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
+                base.items = {
+                    preventivas: { title: "Preventivas", tasks: ["Limpeza interna", "Pasta térmica", "Limpeza memórias", "Limpa contato"] },
+                    preparacao: { title: "Backup & Prep", tasks: ["Verif. Nome/Partições", "Backup Arquivos", "Chave Office", "Backup Navegador", "Backup Outlook/Spark"] },
+                    sistema: { title: "Sistema Operacional", tasks: ["Formatação", "Domínio", "Proxy/DNS", "WINS/Hosts", "Drivers"] },
+                    seguranca: { title: "Segurança", tasks: ["Wazuh", "ESET", "VNC + Firewall", "GPEDIT/Permissões"] },
+                    configuracao: { title: "Configurações", tasks: ["Ativar Win/Office", "Energia", "Config. Email", "Config. Spark", "Impressoras", "Map. Rede", "IP Fixo (MAC)"] },
+                    apps: { title: "Aplicações", tasks: ["TOTVS", "TOTVS-MES"] },
+                    entrega: { title: "Entrega", tasks: ["Restore Navegador", "Restore Email", "Etiqueta Ativo", "Desempenho"] }
                 };
             } else {
-                tmpl.items = {
-                    inspecao: { title: "Inspeção Física", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
-                    preventiva: { title: "Manutenção", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
-                    teste: { title: "Validação", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
+                base.items = {
+                    inspecao: { title: "Inspeção Física", tasks: ["Rolete", "Cabeça Impressão", "Suporte Etiqueta", "Qualidade Inicial"] },
+                    manutencao: { title: "Manutenção", tasks: ["Limpeza Rolete", "Limpeza Cabeça", "Limpeza Geral"] },
+                    validacao: { title: "Validação", tasks: ["Teste Final"] }
                 };
             }
-            return tmpl;
+            Object.keys(base.items).forEach(k => {
+                base.items[k].tasks = base.items[k].tasks.map((t, i) => ({ id: `${k}_${i}`, label: t, checked: false }));
+            });
+            return base;
         };
 
+        // --- COMPONENTES UI ---
         const Card = ({ children, className = "" }) => <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 ${className}`}>{children}</div>;
-        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-brand-500/20 outline-none ${props.className}`} />;
-        const Button = ({ children, variant = 'primary', className = "", ...props }) => {
-            const styles = {
-                primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm',
-                secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50',
-                danger: 'bg-red-500 hover:bg-red-600 text-white',
-                ghost: 'bg-transparent text-slate-500 hover:bg-slate-100'
-            };
-            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 ${styles[variant]} ${className}`}>{children}</button>;
+        const Input = (props) => <input {...props} className="w-full h-10 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-transparent focus:ring-2 focus:ring-brand-500 outline-none" />;
+        const Button = ({ children, variant = 'primary', ...props }) => {
+            const color = variant === 'primary' ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200';
+            return <button {...props} className={`px-4 py-2 rounded-lg font-bold transition-all hover:opacity-90 flex items-center justify-center gap-2 ${color} ${props.className}`}>{children}</button>;
         };
 
-        // --- MÓDULO ESTOQUE ---
-        const InventoryView = ({ currentUser }) => {
+        // --- VIEW: ESTOQUE (AppSheet Style) ---
+        const InventoryView = ({ user }) => {
             const [products, setProducts] = useState([]);
-            const [showAdd, setShowAdd] = useState(false);
-            const [newP, setNewP] = useState({ name: '', quantity: 0 });
-            const [move, setMove] = useState({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
+            const [move, setMove] = useState({ prodId: '', type: 'SAIDA', qty: 1, targetUser: '', badge: '' });
 
             useEffect(() => {
-                const unsub = db.collection('inventory').onSnapshot(snap => setProducts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                return unsub;
+                return db.collection('inventory').onSnapshot(s => setProducts(s.docs.map(d => ({ id: d.id, ...d.data() }))));
             }, []);
 
             const handleMove = async (e) => {
                 e.preventDefault();
-                const prod = products.find(p => p.id === move.prodId);
-                if (!prod) return;
-                const newQty = move.type === 'ENTRADA' ? prod.quantity + Number(move.qty) : prod.quantity - Number(move.qty);
-                if (newQty < 0) return alert("Sem estoque!");
+                const p = products.find(x => x.id === move.prodId);
+                if (!p) return;
+                const newQty = move.type === 'ENTRADA' ? p.quantity + Number(move.qty) : p.quantity - Number(move.qty);
+                if (newQty < 0) return alert("Estoque insuficiente");
 
-                await db.collection('inventory').doc(prod.id).update({ quantity: newQty });
-                await db.collection('stock_logs').add({ ...move, prodName: prod.name, date: new Date().toISOString(), tecnico: currentUser.name });
-
+                await db.collection('inventory').doc(p.id).update({ quantity: newQty });
                 if (move.type === 'SAIDA') {
-                    const subject = `[ESTOQUE] Saída: ${prod.name}`;
-                    const body = `SAÍDA DE MATERIAL\nITEM: ${prod.name}\nQTD: ${move.qty}\nRETIRADO POR: ${move.user}\nCRACHÁ: ${move.badge}\nTÉCNICO: ${currentUser.name}`;
-                    window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    const sub = `[ESTOQUE] Saída: ${p.name}`;
+                    const body = `SAÍDA DE MATERIAL\nItem: ${p.name}\nQtd: ${move.qty}\nRetirado por: ${move.targetUser}\nCrachá: ${move.badge}\nTécnico: ${user.name}`;
+                    window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
                 }
-                setMove({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
-                alert("Sucesso!");
+                setMove({ prodId: '', type: 'SAIDA', qty: 1, targetUser: '', badge: '' });
             };
 
             return (
                 <div className="p-6 space-y-6 fade-in">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-bold flex items-center gap-2">{Icons.Package} Estoque</h2>
-                        <Button onClick={() => setShowAdd(true)}>{Icons.Plus} Novo Item</Button>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-6">
-                        <Card className="md:col-span-2 overflow-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead className="border-b bg-slate-50 dark:bg-slate-800">
-                                    <tr><th className="px-4 py-2">Item</th><th className="px-4 py-2 text-right">Saldo</th></tr>
-                                </thead>
-                                <tbody>
-                                    {products.map(p => (
-                                        <tr key={p.id} className="border-b hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                            <td className="px-4 py-3">{p.name}</td>
-                                            <td className={`px-4 py-3 text-right font-bold ${p.quantity < 3 ? 'text-red-500' : 'text-emerald-500'}`}>{p.quantity}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                    <h2 className="text-2xl font-bold flex items-center gap-2">{Icons.Box} Estoque</h2>
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <Card>
+                            <h3 className="font-bold mb-4">Saldos</h3>
+                            <div className="space-y-2 max-h-96 overflow-auto">
+                                {products.map(p => (
+                                    <div key={p.id} className="flex justify-between p-3 border rounded-lg mb-2">
+                                        <span className="font-medium">{p.name}</span>
+                                        <span className={`font-bold ${p.quantity < 3 ? 'text-red-500' : 'text-emerald-500'}`}>{p.quantity}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <Button className="w-full mt-4" onClick={() => {
+                                const n = prompt("Nome do item:");
+                                if(n) db.collection('inventory').add({ name: n, quantity: 0 });
+                            }}>+ Novo Produto</Button>
                         </Card>
                         <Card>
-                            <h3 className="font-bold mb-4 uppercase text-xs text-slate-400">Registrar Movimento</h3>
+                            <h3 className="font-bold mb-4 uppercase text-xs text-slate-400">Movimentação</h3>
                             <form onSubmit={handleMove} className="space-y-4">
-                                <select className="w-full h-10 px-3 border rounded-lg bg-white dark:bg-slate-950" value={move.prodId} onChange={e => setMove({...move, prodId: e.target.value})} required>
-                                    <option value="">Produto...</option>
+                                <select className="w-full h-10 border rounded-lg bg-white dark:bg-slate-950 px-2" value={move.prodId} onChange={e => setMove({...move, prodId: e.target.value})} required>
+                                    <option value="">Selecione o Item...</option>
                                     {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                 </select>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <select className="w-full h-10 px-3 border rounded-lg bg-white dark:bg-slate-950" value={move.type} onChange={e => setMove({...move, type: e.target.value})}>
+                                <div className="flex gap-2">
+                                    <select className="flex-1 h-10 border rounded-lg bg-white dark:bg-slate-950" value={move.type} onChange={e => setMove({...move, type: e.target.value})}>
                                         <option value="SAIDA">Saída</option><option value="ENTRADA">Entrada</option>
                                     </select>
-                                    <Input type="number" value={move.qty} onChange={e => setMove({...move, qty: e.target.value})} />
+                                    <Input type="number" className="w-24" value={move.qty} onChange={e => setMove({...move, qty: e.target.value})} />
                                 </div>
                                 {move.type === 'SAIDA' && (
                                     <>
-                                        <Input placeholder="Usuário que pegou" value={move.user} onChange={e => setMove({...move, user: e.target.value})} required />
+                                        <Input placeholder="Quem retirou?" value={move.targetUser} onChange={e => setMove({...move, targetUser: e.target.value})} required />
                                         <Input placeholder="Crachá" value={move.badge} onChange={e => setMove({...move, badge: e.target.value})} required />
                                     </>
                                 )}
-                                <Button type="submit" className="w-full">Registrar</Button>
+                                <Button type="submit" className="w-full">Registrar e Notificar</Button>
                             </form>
                         </Card>
                     </div>
-                    {showAdd && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                            <Card className="w-full max-w-sm">
-                                <h3 className="font-bold mb-4">Novo Produto</h3>
-                                <div className="space-y-4">
-                                    <Input placeholder="Nome" value={newP.name} onChange={e => setNewP({...newP, name: e.target.value})} />
-                                    <Input type="number" placeholder="Inicial" value={newP.quantity} onChange={e => setNewP({...newP, quantity: Number(e.target.value)})} />
-                                    <Button className="w-full" onClick={() => { db.collection('inventory').add(newP); setShowAdd(false); }}>Salvar</Button>
-                                    <Button className="w-full" variant="secondary" onClick={() => setShowAdd(false)}>Cancelar</Button>
-                                </div>
-                            </Card>
-                        </div>
-                    )}
                 </div>
             );
         };
 
-        const ActiveChecklist = ({ ticket, onUpdate, onBack, onFinish }) => {
-            if (!ticket) return null;
-            const handleCheck = (sec, taskId) => {
-                const newData = { ...ticket.data };
-                newData.items[sec].tasks = newData.items[sec].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
-                onUpdate(newData);
-            };
-            return (
-                <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950">
-                    <div className="p-4 bg-white dark:bg-slate-900 border-b flex justify-between items-center shadow-sm">
-                        <Button variant="ghost" onClick={onBack}>{Icons.ChevronLeft} Dashboard</Button>
-                        <span className="font-bold font-mono">#{ticket.visualId}</span>
-                        <Button onClick={onFinish}>Revisar e Enviar</Button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                        <Card className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {Object.keys(ticket.data.meta).map(f => (
-                                <div key={f}><label className="text-[10px] font-bold uppercase text-slate-400">{f}</label>
-                                <Input value={ticket.data.meta[f]} onChange={e => onUpdate({...ticket.data, meta: {...ticket.data.meta, [f]: e.target.value}})} /></div>
-                            ))}
-                        </Card>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {Object.entries(ticket.data.items).map(([key, group]) => (
-                                <Card key={key} className="overflow-hidden !p-0">
-                                    <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-b font-bold text-xs uppercase">{group.title}</div>
-                                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                                        {group.tasks.map(t => (
-                                            <label key={t.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
-                                                <input type="checkbox" checked={t.checked} onChange={() => handleCheck(key, t.id)} className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
-                                                <span className={`text-sm ${t.checked ? 'line-through text-slate-400' : ''}`}>{t.label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const MainApp = () => {
+        // --- APP PRINCIPAL ---
+        const App = () => {
             const [view, setView] = useState('login');
-            const [currentUser, setCurrentUser] = useState(null);
-            const [users, setUsers] = useState([]);
-            const [activeTickets, setActiveTickets] = useState([]);
-            const [historyCount, setHistoryCount] = useState(0);
-            const [currentTid, setCurrentTid] = useState(null);
-            const [darkMode, setDarkMode] = useState(true);
-            const [showConfig, setShowConfig] = useState(false);
+            const [user, setUser] = useState(null);
+            const [tickets, setTickets] = useState([]);
+            const [activeId, setActiveId] = useState(null);
 
             useEffect(() => {
-                const unsubU = db.collection('users').onSnapshot(snap => setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() }))));
-                const unsubT = db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                const unsubH = db.collection('history').onSnapshot(snap => setHistoryCount(snap.size));
-                return () => { unsubU(); unsubT(); unsubH(); };
+                return db.collection('tickets').onSnapshot(s => setTickets(s.docs.map(d => ({ id: d.id, ...d.data() }))));
             }, []);
 
-            useEffect(() => { darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark'); }, [darkMode]);
-
-            const handleCreate = async (type) => {
-                const prefix = type === 'formatacao' ? 'F' : 'Z';
-                const nextSeq = Math.floor(Math.random() * 9000) + 1000;
-                const newRef = db.collection('tickets').doc();
-                await newRef.set({ visualId: `${prefix}-${nextSeq}`, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
-                setCurrentTid(newRef.id); setView('checklist');
-            };
-
-            const handleArchive = (t) => {
-                db.collection('history').add({ visualId: t.visualId, date: new Date().toISOString(), tecnico: t.data.meta.tecnico, ativo: t.data.meta.maquina || "N/A" })
-                .then(() => db.collection('tickets').doc(t.id).delete())
-                .then(() => setView('dashboard'));
-            };
-
             if (view === 'login') return (
-                <div className="h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
+                <div className="h-screen flex items-center justify-center">
                     <Card className="w-full max-w-sm">
-                        <div className="text-center mb-6">
-                            <div className="w-12 h-12 bg-brand-600 rounded-xl mx-auto mb-4 flex items-center justify-center text-white shadow-lg font-bold italic">I</div>
-                            <h1 className="text-xl font-bold uppercase tracking-tighter dark:text-white">Infra Checklist</h1>
-                        </div>
+                        <h2 className="text-xl font-bold mb-6 text-center">INFRA CHECK & STOCK</h2>
                         <form onSubmit={(e) => {
                             e.preventDefault();
-                            const u = users.find(u => u.id === e.target.id.value && u.pass === e.target.pass.value);
-                            if (u) { setCurrentUser(u); setView('dashboard'); } else alert("Erro!");
+                            const tech = e.target.tech.value;
+                            if(tech) { setUser({name: tech}); setView('dash'); }
                         }} className="space-y-4">
-                            <Input name="id" placeholder="Matrícula" required />
-                            <Input name="pass" type="password" placeholder="Senha" required />
-                            <Button type="submit" className="w-full">Entrar</Button>
+                            <Input name="tech" placeholder="Nome do Técnico" required />
+                            <Button type="submit" className="w-full">Acessar</Button>
                         </form>
                     </Card>
                 </div>
             );
 
             return (
-                <div className="flex h-screen bg-slate-100 dark:bg-slate-950 overflow-hidden">
-                    <aside className="w-64 bg-slate-900 text-slate-400 hidden md:flex flex-col border-r border-slate-800 shrink-0">
-                        <div className="h-16 flex items-center gap-3 px-6 font-bold text-white border-b border-slate-800">INFRA CHECK</div>
-                        <nav className="flex-1 py-6 px-3 space-y-1">
-                            <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg ${view === 'dashboard' ? 'bg-brand-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Layout} Dashboard</button>
-                            <button onClick={() => setView('inventory')} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg ${view === 'inventory' ? 'bg-brand-600 text-white' : 'hover:bg-slate-800'}`}>{Icons.Package} Estoque</button>
+                <div className="flex h-screen overflow-hidden">
+                    <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800 no-print">
+                        <div className="p-6 text-white font-bold border-b border-slate-800 tracking-tighter text-xl">INFRA SYS</div>
+                        <nav className="flex-1 p-4 space-y-2">
+                            <button onClick={() => setView('dash')} className={`w-full flex p-3 rounded-lg ${view === 'dash' ? 'bg-brand-600 text-white' : 'text-slate-400'}`}>{Icons.Checklist} Dashboard</button>
+                            <button onClick={() => setView('stock')} className={`w-full flex p-3 rounded-lg ${view === 'stock' ? 'bg-brand-600 text-white' : 'text-slate-400'}`}>{Icons.Box} Estoque</button>
                         </nav>
-                        <div className="p-4 border-t border-slate-800 flex gap-2">
-                            <button onClick={() => setDarkMode(!darkMode)} className="p-2 hover:text-white">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                            <button onClick={() => setView('login')} className="p-2 hover:text-red-400 ml-auto">{Icons.LogOut}</button>
-                        </div>
+                        <button onClick={() => setView('login')} className="p-6 text-red-400 flex gap-2 border-t border-slate-800">{Icons.Logout} Sair</button>
                     </aside>
-                    <main className="flex-1 overflow-auto relative">
-                        {view === 'dashboard' && (
-                            <div className="p-10 space-y-8 fade-in">
+
+                    <main className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-950">
+                        {view === 'dash' && (
+                            <div className="p-8 space-y-8 fade-in">
                                 <div className="grid md:grid-cols-2 gap-4">
-                                    <button onClick={() => handleCreate('formatacao')} className="p-8 bg-brand-600 text-white rounded-2xl text-left shadow-xl hover:scale-[1.02] transition-all">
-                                        <div className="mb-4">{Icons.Plus}</div><span className="font-bold block text-lg">Nova Formatação</span><span className="text-sm opacity-70">Checklist P.C. completo</span>
-                                    </button>
-                                    <button onClick={() => handleCreate('zebra')} className="p-8 bg-white dark:bg-slate-900 border rounded-2xl text-left shadow-sm hover:border-brand-500 transition-all">
-                                        <div className="mb-4 text-brand-600">{Icons.Printer}</div><span className="font-bold block text-lg">Manutenção Zebra</span><span className="text-sm text-slate-500">Impressoras térmicas</span>
-                                    </button>
+                                    <button onClick={() => { setActiveId(null); setView('new_checklist'); }} className="p-8 bg-brand-600 text-white rounded-2xl text-left shadow-lg">Nova Atividade</button>
+                                    <Card className="flex items-center justify-center text-slate-400 border-dashed border-2">Histórico (Em Breve)</Card>
                                 </div>
                                 <div className="grid md:grid-cols-3 gap-4">
-                                    {activeTickets.map(t => (
-                                        <Card key={t.id} onClick={() => { setCurrentTid(t.id); setView('checklist'); }} className="cursor-pointer hover:border-brand-500 relative group transition-all">
-                                            <span className="text-[10px] font-bold uppercase text-brand-500">{t.type}</span>
-                                            <h4 className="font-bold block text-lg">{t.data.meta.maquina || "Sem ID"}</h4>
-                                            <p className="text-xs text-slate-500">{t.data.meta.tecnico}</p>
-                                            <button onClick={(e) => { e.stopPropagation(); db.collection('tickets').doc(t.id).delete(); }} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
+                                    {tickets.map(t => (
+                                        <Card key={t.id} onClick={() => { setActiveId(t.id); setView('checklist'); }} className="cursor-pointer hover:border-brand-500 relative group">
+                                            <div className="flex justify-between font-bold text-xs text-brand-500 uppercase">
+                                                <span>{t.type}</span>
+                                                <button onClick={(e) => { e.stopPropagation(); db.collection('tickets').doc(t.id).delete(); }} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
+                                            </div>
+                                            <h4 className="font-bold text-lg">#{t.visualId} - {t.data.meta.maquina || 'TI'}</h4>
                                         </Card>
                                     ))}
                                 </div>
                             </div>
                         )}
-                        {view === 'inventory' && <InventoryView currentUser={currentUser} />}
-                        {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTid)} onUpdate={(d) => db.collection('tickets').doc(currentTid).update({ data: d })} onBack={() => setView('dashboard')} onFinish={() => setView('receipt')} />}
-                        {view === 'receipt' && (
-                            <div className="p-10 max-w-2xl mx-auto space-y-6 fade-in">
-                                <Button variant="ghost" onClick={() => setView('checklist')}>{Icons.ChevronLeft} Voltar</Button>
-                                <Card className="text-center space-y-4">
-                                    <h3 className="text-xl font-bold">Relatório Pronto</h3>
-                                    <p className="text-sm text-slate-500">Clique abaixo para disparar o e-mail técnico e arquivar o chamado.</p>
-                                    <Button className="w-full h-12" onClick={() => {
-                                        const t = activeTickets.find(x => x.id === currentTid);
-                                        const subject = `Checklist #${t.visualId} - ${t.data.meta.maquina}`;
-                                        const body = `RELATÓRIO TI\n----------------\nID: #${t.visualId}\nATIVO: ${t.data.meta.maquina}\nTÉCNICO: ${t.data.meta.tecnico}\nSTATUS: CONCLUÍDO`;
-                                        window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                                        setTimeout(() => { if(confirm("Deseja arquivar agora?")) handleArchive(t); }, 1000);
-                                    }}>{Icons.Mail} Enviar e-mail</Button>
+
+                        {view === 'new_checklist' && (
+                            <div className="p-10 flex gap-4 fade-in">
+                                <Button className="h-32 flex-1" onClick={() => {
+                                    const t = getChecklistTemplate('formatacao', user.name);
+                                    db.collection('tickets').add({ type: 'formatacao', visualId: Math.floor(1000+Math.random()*9000), data: t }).then(ref => { setActiveId(ref.id); setView('checklist'); });
+                                }}>Nova Formatação</Button>
+                                <Button className="h-32 flex-1" variant="secondary" onClick={() => {
+                                    const t = getChecklistTemplate('zebra', user.name);
+                                    db.collection('tickets').add({ type: 'zebra', visualId: Math.floor(1000+Math.random()*9000), data: t }).then(ref => { setActiveId(ref.id); setView('checklist'); });
+                                }}>Manutenção Zebra</Button>
+                            </div>
+                        )}
+
+                        {view === 'stock' && <InventoryView user={user} />}
+
+                        {view === 'checklist' && activeId && (
+                            <div className="p-6 space-y-6 fade-in">
+                                <div className="flex justify-between"><Button onClick={() => setView('dash')}>Voltar</Button><Button onClick={() => {
+                                    const t = tickets.find(x => x.id === activeId);
+                                    const sub = `Finalizado: #${t.visualId} - ${t.data.meta.maquina}`;
+                                    window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(sub)}&body=Checklist Finalizado.`;
+                                }}>Enviar Relatório</Button></div>
+                                <Card className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {Object.keys(tickets.find(x => x.id === activeId).data.meta).map(m => (
+                                        <div key={m}><label className="text-[10px] uppercase font-bold text-slate-400">{m}</label>
+                                        <Input value={tickets.find(x => x.id === activeId).data.meta[m]} onChange={e => {
+                                            const newData = {...tickets.find(x => x.id === activeId).data};
+                                            newData.meta[m] = e.target.value;
+                                            db.collection('tickets').doc(activeId).update({ data: newData });
+                                        }} /></div>
+                                    ))}
                                 </Card>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    {Object.entries(tickets.find(x => x.id === activeId).data.items).map(([k, g]) => (
+                                        <Card key={k} className="p-0 overflow-hidden">
+                                            <div className="bg-slate-100 dark:bg-slate-800 p-2 text-xs font-bold uppercase">{g.title}</div>
+                                            {g.tasks.map(t => (
+                                                <label key={t.id} className="flex p-3 gap-3 border-b dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                                    <input type="checkbox" checked={t.checked} onChange={() => {
+                                                        const newData = {...tickets.find(x => x.id === activeId).data};
+                                                        newData.items[k].tasks = g.tasks.map(task => task.id === t.id ? {...task, checked: !task.checked} : task);
+                                                        db.collection('tickets').doc(activeId).update({ data: newData });
+                                                    }} className="w-5 h-5" />
+                                                    <span className={t.checked ? 'line-through text-slate-400' : ''}>{t.label}</span>
+                                                </label>
+                                            ))}
+                                        </Card>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </main>
@@ -353,7 +283,7 @@
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<MainApp />);
+        root.render(<App />);
     </script>
 </body>
 </html>
