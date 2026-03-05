@@ -2,43 +2,28 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFRA SYS | Enterprise Edition</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFRA SYS | Checklist & Estoque</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { 500: '#3b82f6', 600: '#2563eb' } }
-                }
-            }
-        }
-    </script>
-
     <style>
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.2s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        @media print { .no-print { display: none !important; } #print-area { display: block !important; } }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- INICIALIZAÇÃO FIREBASE ---
+        // --- CONFIGURAÇÃO ---
         const firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -47,231 +32,193 @@
             messagingSenderId: "456261856462",
             appId: "1:456261856462:web:f90da7a62c8a08d072349f"
         };
-
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const { useState, useEffect } = React;
-
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
 
-        // --- ÍCONES ---
+        // --- ICONS ---
         const Icons = {
-            Box: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
-            Checklist: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg>,
-            Logout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>,
-            Trash: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Box: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>,
+            Check: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg>,
+            Home: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         };
 
-        // --- TEMPLATES COMPLETOS ---
-        const getChecklistTemplate = (type, tech) => {
-            const base = { meta: { tecnico: tech, data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' }, items: {} };
-            if (type === 'formatacao') {
-                base.items = {
-                    preventivas: { title: "Preventivas", tasks: ["Limpeza interna", "Pasta térmica", "Limpeza memórias", "Limpa contato"] },
-                    preparacao: { title: "Backup & Prep", tasks: ["Verif. Nome/Partições", "Backup Arquivos", "Chave Office", "Backup Navegador", "Backup Outlook/Spark"] },
-                    sistema: { title: "Sistema Operacional", tasks: ["Formatação", "Domínio", "Proxy/DNS", "WINS/Hosts", "Drivers"] },
-                    seguranca: { title: "Segurança", tasks: ["Wazuh", "ESET", "VNC + Firewall", "GPEDIT/Permissões"] },
-                    configuracao: { title: "Configurações", tasks: ["Ativar Win/Office", "Energia", "Config. Email", "Config. Spark", "Impressoras", "Map. Rede", "IP Fixo (MAC)"] },
-                    apps: { title: "Aplicações", tasks: ["TOTVS", "TOTVS-MES"] },
-                    entrega: { title: "Entrega", tasks: ["Restore Navegador", "Restore Email", "Etiqueta Ativo", "Desempenho"] }
-                };
-            } else {
-                base.items = {
-                    inspecao: { title: "Inspeção Física", tasks: ["Rolete", "Cabeça Impressão", "Suporte Etiqueta", "Qualidade Inicial"] },
-                    manutencao: { title: "Manutenção", tasks: ["Limpeza Rolete", "Limpeza Cabeça", "Limpeza Geral"] },
-                    validacao: { title: "Validação", tasks: ["Teste Final"] }
-                };
+        // --- TEMPLATE ENGINE ---
+        const createTicket = (type, tech) => ({
+            type, tech, 
+            meta: { maquina: '', ativo: '', data: new Date().toLocaleDateString() },
+            items: type === 'formatacao' ? {
+                "Preventivas": ["Limpeza interna", "Pasta térmica", "Limpeza memórias", "Limpa contato"],
+                "Backup": ["Partições", "Arquivos", "Chave Office", "Navegador", "Outlook/Spark"],
+                "Sistema": ["Formatação", "Domínio", "Proxy/DNS", "WINS/Hosts", "Drivers"],
+                "Segurança": ["Wazuh", "ESET", "VNC/FW", "GPEDIT"],
+                "Configuração": ["Ativar Win/Off", "Energia", "Email", "Impressoras", "IP Fixo"],
+                "Apps": ["TOTVS", "TOTVS-MES"],
+                "Entrega": ["Restore Dados", "Etiqueta", "Desempenho"]
+            } : {
+                "Inspeção": ["Rolete", "Cabeça", "Suporte"],
+                "Limpeza": ["Limpeza Geral", "Limpeza Cabeça"],
+                "Teste": ["Teste de Impressão"]
             }
-            Object.keys(base.items).forEach(k => {
-                base.items[k].tasks = base.items[k].tasks.map((t, i) => ({ id: `${k}_${i}`, label: t, checked: false }));
-            });
-            return base;
-        };
+        });
 
-        // --- COMPONENTES UI ---
-        const Card = ({ children, className = "" }) => <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 ${className}`}>{children}</div>;
-        const Input = (props) => <input {...props} className="w-full h-10 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-transparent focus:ring-2 focus:ring-brand-500 outline-none" />;
-        const Button = ({ children, variant = 'primary', ...props }) => {
-            const color = variant === 'primary' ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200';
-            return <button {...props} className={`px-4 py-2 rounded-lg font-bold transition-all hover:opacity-90 flex items-center justify-center gap-2 ${color} ${props.className}`}>{children}</button>;
-        };
+        // --- COMPONENTES COMPACTOS ---
+        const Card = ({ title, children }) => (
+            <div className="bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                {title && <div className="bg-slate-50 dark:bg-slate-800 px-4 py-2 text-xs font-bold uppercase border-b dark:border-slate-700">{title}</div>}
+                <div className="p-4">{children}</div>
+            </div>
+        );
 
-        // --- VIEW: ESTOQUE (AppSheet Style) ---
-        const InventoryView = ({ user }) => {
-            const [products, setProducts] = useState([]);
-            const [move, setMove] = useState({ prodId: '', type: 'SAIDA', qty: 1, targetUser: '', badge: '' });
+        // --- VIEW: ESTOQUE ---
+        const Inventory = ({ user }) => {
+            const [prods, setProds] = useState([]);
+            const [form, setForm] = useState({ id: '', type: 'SAIDA', qty: 1, name: '', badge: '' });
 
-            useEffect(() => {
-                return db.collection('inventory').onSnapshot(s => setProducts(s.docs.map(d => ({ id: d.id, ...d.data() }))));
-            }, []);
+            useEffect(() => db.collection('inventory').onSnapshot(s => setProds(s.docs.map(d => ({id: d.id, ...d.data()})))), []);
 
-            const handleMove = async (e) => {
+            const submit = async (e) => {
                 e.preventDefault();
-                const p = products.find(x => x.id === move.prodId);
-                if (!p) return;
-                const newQty = move.type === 'ENTRADA' ? p.quantity + Number(move.qty) : p.quantity - Number(move.qty);
-                if (newQty < 0) return alert("Estoque insuficiente");
+                const p = prods.find(x => x.id === form.id);
+                const newQty = form.type === 'ENTRADA' ? p.quantity + Number(form.qty) : p.quantity - Number(form.qty);
+                if (newQty < 0) return alert("Sem saldo!");
 
                 await db.collection('inventory').doc(p.id).update({ quantity: newQty });
-                if (move.type === 'SAIDA') {
-                    const sub = `[ESTOQUE] Saída: ${p.name}`;
-                    const body = `SAÍDA DE MATERIAL\nItem: ${p.name}\nQtd: ${move.qty}\nRetirado por: ${move.targetUser}\nCrachá: ${move.badge}\nTécnico: ${user.name}`;
-                    window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+                if (form.type === 'SAIDA') {
+                    const body = `SAÍDA: ${p.name}\nQTD: ${form.qty}\nPARA: ${form.name}\nCRACHÁ: ${form.badge}\nTÉCNICO: ${user}`;
+                    window.location.href = `mailto:${EMAIL_DESTINO}?subject=SAIDA_ESTOQUE_${p.name}&body=${encodeURIComponent(body)}`;
                 }
-                setMove({ prodId: '', type: 'SAIDA', qty: 1, targetUser: '', badge: '' });
+                alert("OK!");
             };
 
             return (
-                <div className="p-6 space-y-6 fade-in">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">{Icons.Box} Estoque</h2>
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <Card>
-                            <h3 className="font-bold mb-4">Saldos</h3>
-                            <div className="space-y-2 max-h-96 overflow-auto">
-                                {products.map(p => (
-                                    <div key={p.id} className="flex justify-between p-3 border rounded-lg mb-2">
-                                        <span className="font-medium">{p.name}</span>
-                                        <span className={`font-bold ${p.quantity < 3 ? 'text-red-500' : 'text-emerald-500'}`}>{p.quantity}</span>
-                                    </div>
-                                ))}
+                <div className="grid md:grid-cols-2 gap-6 fade-in">
+                    <Card title="Saldo">
+                        {prods.map(p => (
+                            <div key={p.id} className="flex justify-between py-2 border-b dark:border-slate-800">
+                                <span>{p.name}</span><span className="font-bold">{p.quantity}</span>
                             </div>
-                            <Button className="w-full mt-4" onClick={() => {
-                                const n = prompt("Nome do item:");
-                                if(n) db.collection('inventory').add({ name: n, quantity: 0 });
-                            }}>+ Novo Produto</Button>
-                        </Card>
-                        <Card>
-                            <h3 className="font-bold mb-4 uppercase text-xs text-slate-400">Movimentação</h3>
-                            <form onSubmit={handleMove} className="space-y-4">
-                                <select className="w-full h-10 border rounded-lg bg-white dark:bg-slate-950 px-2" value={move.prodId} onChange={e => setMove({...move, prodId: e.target.value})} required>
-                                    <option value="">Selecione o Item...</option>
-                                    {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        ))}
+                        <button className="text-brand-500 text-xs mt-4" onClick={() => {const n=prompt("Item:"); n && db.collection('inventory').add({name:n, quantity:0})}}>+ Adicionar Item</button>
+                    </Card>
+                    <Card title="Movimentação">
+                        <form onSubmit={submit} className="space-y-3">
+                            <select className="w-full p-2 rounded border dark:bg-slate-950" onChange={e=>setForm({...form, id: e.target.value})} required>
+                                <option value="">Item...</option>
+                                {prods.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+                            </select>
+                            <div className="flex gap-2">
+                                <select className="flex-1 p-2 rounded border dark:bg-slate-950" onChange={e=>setForm({...form, type: e.target.value})}>
+                                    <option value="SAIDA">Saída</option><option value="ENTRADA">Entrada</option>
                                 </select>
-                                <div className="flex gap-2">
-                                    <select className="flex-1 h-10 border rounded-lg bg-white dark:bg-slate-950" value={move.type} onChange={e => setMove({...move, type: e.target.value})}>
-                                        <option value="SAIDA">Saída</option><option value="ENTRADA">Entrada</option>
-                                    </select>
-                                    <Input type="number" className="w-24" value={move.qty} onChange={e => setMove({...move, qty: e.target.value})} />
+                                <input type="number" className="w-20 p-2 rounded border dark:bg-slate-950" value={form.qty} onChange={e=>setForm({...form, qty: e.target.value})} />
+                            </div>
+                            {form.type === 'SAIDA' && (
+                                <div className="space-y-2">
+                                    <input placeholder="Usuário" className="w-full p-2 rounded border dark:bg-slate-950" onChange={e=>setForm({...form, name: e.target.value})} required />
+                                    <input placeholder="Crachá" className="w-full p-2 rounded border dark:bg-slate-950" onChange={e=>setForm({...form, badge: e.target.value})} required />
                                 </div>
-                                {move.type === 'SAIDA' && (
-                                    <>
-                                        <Input placeholder="Quem retirou?" value={move.targetUser} onChange={e => setMove({...move, targetUser: e.target.value})} required />
-                                        <Input placeholder="Crachá" value={move.badge} onChange={e => setMove({...move, badge: e.target.value})} required />
-                                    </>
-                                )}
-                                <Button type="submit" className="w-full">Registrar e Notificar</Button>
-                            </form>
-                        </Card>
-                    </div>
+                            )}
+                            <button className="w-full bg-brand-600 text-white p-2 rounded font-bold">Registrar</button>
+                        </form>
+                    </Card>
                 </div>
             );
         };
 
-        // --- APP PRINCIPAL ---
+        // --- VIEW: DASHBOARD ---
+        const Dashboard = ({ tickets, onSelect, onNew }) => (
+            <div className="space-y-6 fade-in">
+                <div className="grid grid-cols-2 gap-4">
+                    <button onClick={()=>onNew('formatacao')} className="bg-brand-600 text-white p-6 rounded-2xl font-bold shadow-lg shadow-brand-500/20">Nova Formatação</button>
+                    <button onClick={()=>onNew('zebra')} className="bg-white dark:bg-slate-900 border p-6 rounded-2xl font-bold">Manutenção Zebra</button>
+                </div>
+                <div className="grid md:grid-cols-3 gap-4">
+                    {tickets.map(t => (
+                        <div key={t.id} onClick={()=>onSelect(t.id)} className="bg-white dark:bg-slate-900 p-4 rounded-xl border hover:border-brand-500 cursor-pointer transition-all">
+                            <div className="text-[10px] font-bold text-brand-500 uppercase">{t.type}</div>
+                            <div className="font-bold text-lg">#{t.visualId}</div>
+                            <div className="text-xs text-slate-500">{t.meta.maquina || 'Sem ID'}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        // --- APP ENGINE ---
         const App = () => {
             const [view, setView] = useState('login');
-            const [user, setUser] = useState(null);
+            const [user, setUser] = useState('');
             const [tickets, setTickets] = useState([]);
-            const [activeId, setActiveId] = useState(null);
+            const [activeTid, setActiveTid] = useState(null);
 
             useEffect(() => {
-                return db.collection('tickets').onSnapshot(s => setTickets(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+                const unsub = db.collection('tickets').onSnapshot(s => setTickets(s.docs.map(d => ({id: d.id, ...d.data()}))));
+                return unsub;
             }, []);
 
+            const handleNew = async (type) => {
+                const data = createTicket(type, user);
+                const ref = await db.collection('tickets').add(data);
+                setActiveTid(ref.id); setView('checklist');
+            };
+
+            const updateMeta = (key, val) => {
+                const t = tickets.find(x => x.id === activeTid);
+                t.meta[key] = val;
+                db.collection('tickets').doc(activeTid).update({ meta: t.meta });
+            };
+
             if (view === 'login') return (
-                <div className="h-screen flex items-center justify-center">
-                    <Card className="w-full max-w-sm">
-                        <h2 className="text-xl font-bold mb-6 text-center">INFRA CHECK & STOCK</h2>
-                        <form onSubmit={(e) => {
-                            e.preventDefault();
-                            const tech = e.target.tech.value;
-                            if(tech) { setUser({name: tech}); setView('dash'); }
-                        }} className="space-y-4">
-                            <Input name="tech" placeholder="Nome do Técnico" required />
-                            <Button type="submit" className="w-full">Acessar</Button>
-                        </form>
-                    </Card>
+                <div className="h-screen flex items-center justify-center p-4">
+                    <div className="w-full max-w-xs space-y-4">
+                        <h1 className="text-2xl font-bold text-center">INFRA SYS</h1>
+                        <input className="w-full p-3 rounded-lg border dark:bg-slate-900" placeholder="Matrícula" onChange={e=>setUser(e.target.value)} />
+                        <button className="w-full bg-brand-600 text-white p-3 rounded-lg font-bold" onClick={()=>user && setView('dash')}>Entrar</button>
+                    </div>
                 </div>
             );
 
             return (
                 <div className="flex h-screen overflow-hidden">
-                    <aside className="w-64 bg-slate-900 flex flex-col border-r border-slate-800 no-print">
-                        <div className="p-6 text-white font-bold border-b border-slate-800 tracking-tighter text-xl">INFRA SYS</div>
-                        <nav className="flex-1 p-4 space-y-2">
-                            <button onClick={() => setView('dash')} className={`w-full flex p-3 rounded-lg ${view === 'dash' ? 'bg-brand-600 text-white' : 'text-slate-400'}`}>{Icons.Checklist} Dashboard</button>
-                            <button onClick={() => setView('stock')} className={`w-full flex p-3 rounded-lg ${view === 'stock' ? 'bg-brand-600 text-white' : 'text-slate-400'}`}>{Icons.Box} Estoque</button>
+                    <aside className="w-16 md:w-64 bg-slate-900 text-slate-400 flex flex-col border-r border-slate-800">
+                        <div className="p-4 text-white font-bold text-center border-b border-slate-800 hidden md:block">INFRA SYSTEM</div>
+                        <nav className="flex-1 p-2 space-y-2">
+                            <button onClick={()=>setView('dash')} className={`w-full flex items-center gap-3 p-3 rounded-lg ${view === 'dash' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Home} <span className="hidden md:block">Início</span></button>
+                            <button onClick={()=>setView('stock')} className={`w-full flex items-center gap-3 p-3 rounded-lg ${view === 'stock' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Box} <span className="hidden md:block">Estoque</span></button>
                         </nav>
-                        <button onClick={() => setView('login')} className="p-6 text-red-400 flex gap-2 border-t border-slate-800">{Icons.Logout} Sair</button>
+                        <button onClick={()=>setView('login')} className="p-4 border-t border-slate-800 text-xs text-center">Sair</button>
                     </aside>
 
-                    <main className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-950">
-                        {view === 'dash' && (
-                            <div className="p-8 space-y-8 fade-in">
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <button onClick={() => { setActiveId(null); setView('new_checklist'); }} className="p-8 bg-brand-600 text-white rounded-2xl text-left shadow-lg">Nova Atividade</button>
-                                    <Card className="flex items-center justify-center text-slate-400 border-dashed border-2">Histórico (Em Breve)</Card>
+                    <main className="flex-1 overflow-auto p-4 md:p-8">
+                        {view === 'dash' && <Dashboard tickets={tickets} onSelect={(id)=>{setActiveTid(id); setView('checklist')}} onNew={handleNew} />}
+                        {view === 'stock' && <Inventory user={user} />}
+                        {view === 'checklist' && activeTid && (
+                            <div className="max-w-4xl mx-auto space-y-6 fade-in">
+                                <div className="flex justify-between items-center">
+                                    <button className="text-sm font-bold" onClick={()=>setView('dash')}>← Voltar</button>
+                                    <button className="bg-emerald-600 text-white px-4 py-2 rounded font-bold" onClick={()=>{
+                                        const t = tickets.find(x => x.id === activeTid);
+                                        window.location.href = `mailto:${EMAIL_DESTINO}?subject=Checklist_${t.visualId}_${t.meta.maquina}&body=Finalizado`;
+                                    }}>Enviar Relatório</button>
                                 </div>
-                                <div className="grid md:grid-cols-3 gap-4">
-                                    {tickets.map(t => (
-                                        <Card key={t.id} onClick={() => { setActiveId(t.id); setView('checklist'); }} className="cursor-pointer hover:border-brand-500 relative group">
-                                            <div className="flex justify-between font-bold text-xs text-brand-500 uppercase">
-                                                <span>{t.type}</span>
-                                                <button onClick={(e) => { e.stopPropagation(); db.collection('tickets').doc(t.id).delete(); }} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
-                                            </div>
-                                            <h4 className="font-bold text-lg">#{t.visualId} - {t.data.meta.maquina || 'TI'}</h4>
-                                        </Card>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {view === 'new_checklist' && (
-                            <div className="p-10 flex gap-4 fade-in">
-                                <Button className="h-32 flex-1" onClick={() => {
-                                    const t = getChecklistTemplate('formatacao', user.name);
-                                    db.collection('tickets').add({ type: 'formatacao', visualId: Math.floor(1000+Math.random()*9000), data: t }).then(ref => { setActiveId(ref.id); setView('checklist'); });
-                                }}>Nova Formatação</Button>
-                                <Button className="h-32 flex-1" variant="secondary" onClick={() => {
-                                    const t = getChecklistTemplate('zebra', user.name);
-                                    db.collection('tickets').add({ type: 'zebra', visualId: Math.floor(1000+Math.random()*9000), data: t }).then(ref => { setActiveId(ref.id); setView('checklist'); });
-                                }}>Manutenção Zebra</Button>
-                            </div>
-                        )}
-
-                        {view === 'stock' && <InventoryView user={user} />}
-
-                        {view === 'checklist' && activeId && (
-                            <div className="p-6 space-y-6 fade-in">
-                                <div className="flex justify-between"><Button onClick={() => setView('dash')}>Voltar</Button><Button onClick={() => {
-                                    const t = tickets.find(x => x.id === activeId);
-                                    const sub = `Finalizado: #${t.visualId} - ${t.data.meta.maquina}`;
-                                    window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(sub)}&body=Checklist Finalizado.`;
-                                }}>Enviar Relatório</Button></div>
-                                <Card className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {Object.keys(tickets.find(x => x.id === activeId).data.meta).map(m => (
-                                        <div key={m}><label className="text-[10px] uppercase font-bold text-slate-400">{m}</label>
-                                        <Input value={tickets.find(x => x.id === activeId).data.meta[m]} onChange={e => {
-                                            const newData = {...tickets.find(x => x.id === activeId).data};
-                                            newData.meta[m] = e.target.value;
-                                            db.collection('tickets').doc(activeId).update({ data: newData });
-                                        }} /></div>
-                                    ))}
+                                <Card title="Dados">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input className="p-2 border rounded dark:bg-slate-800" placeholder="Máquina" value={tickets.find(x=>x.id===activeTid).meta.maquina} onChange={e=>updateMeta('maquina', e.target.value)} />
+                                        <input className="p-2 border rounded dark:bg-slate-800" placeholder="Ativo" value={tickets.find(x=>x.id===activeTid).meta.ativo} onChange={e=>updateMeta('ativo', e.target.value)} />
+                                    </div>
                                 </Card>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    {Object.entries(tickets.find(x => x.id === activeId).data.items).map(([k, g]) => (
-                                        <Card key={k} className="p-0 overflow-hidden">
-                                            <div className="bg-slate-100 dark:bg-slate-800 p-2 text-xs font-bold uppercase">{g.title}</div>
-                                            {g.tasks.map(t => (
-                                                <label key={t.id} className="flex p-3 gap-3 border-b dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
-                                                    <input type="checkbox" checked={t.checked} onChange={() => {
-                                                        const newData = {...tickets.find(x => x.id === activeId).data};
-                                                        newData.items[k].tasks = g.tasks.map(task => task.id === t.id ? {...task, checked: !task.checked} : task);
-                                                        db.collection('tickets').doc(activeId).update({ data: newData });
-                                                    }} className="w-5 h-5" />
-                                                    <span className={t.checked ? 'line-through text-slate-400' : ''}>{t.label}</span>
-                                                </label>
-                                            ))}
+                                <div className="grid md:grid-cols-2 gap-4 pb-10">
+                                    {Object.entries(tickets.find(x=>x.id===activeTid).items).map(([cat, tasks]) => (
+                                        <Card key={cat} title={cat}>
+                                            <div className="space-y-2">
+                                                {tasks.map((t, i) => (
+                                                    <label key={i} className="flex items-center gap-3 text-sm cursor-pointer">
+                                                        <input type="checkbox" className="w-4 h-4" /> {t}
+                                                    </label>
+                                                ))}
+                                            </div>
                                         </Card>
                                     ))}
                                 </div>
@@ -282,8 +229,7 @@
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
