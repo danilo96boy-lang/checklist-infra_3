@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFRA CHECKLIST | Enterprise Edition</title>
+    <title>INFRA SYS | Enterprise Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -21,15 +19,8 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
-                        }
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: { brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' } }
                 }
             }
         }
@@ -39,19 +30,12 @@
         body { -webkit-print-color-adjust: exact; }
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
-
         @media print {
-            @page { margin: 0; size: auto; }
-            body, html { background-color: white !important; color: black !important; height: auto; overflow: visible; }
-            body * { visibility: hidden; }
-            #receipt-area, #receipt-area * { visibility: visible; }
-            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; z-index: 9999; }
             .no-print { display: none !important; }
+            #receipt-area { visibility: visible !important; position: absolute; left: 0; top: 0; width: 100%; }
         }
     </style>
 </head>
@@ -59,7 +43,6 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- CONFIGURAÇÃO FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -72,248 +55,167 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const { useState, useEffect, useRef } = React;
-
-        // --- DADOS ESTÁTICOS ---
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
 
-        // --- ICONS ---
         const Icons = {
-            Layout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
-            User: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-            History: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
-            Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-            LogOut: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-            Check: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
-            Printer: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
-            Search: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
-            Moon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
-            Sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
-            Trash: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
-            Server: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
-            Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
-            ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
-            Box: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            Layout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
+            History: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
+            Package: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
+            Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            Trash: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+            Alert: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+            TrendingUp: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+            Logout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         };
 
-        // --- TEMPLATES ---
-        const getTemplate = (type, tecnicoName) => {
-            const tmpl = {
-                meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' },
-                items: {}
+        const Card = ({ children, className = "" }) => <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm ${className}`}>{children}</div>;
+        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm transition-all focus:ring-2 focus:ring-brand-500/20 outline-none ${props.className}`} />;
+        const Button = ({ children, variant = 'primary', ...props }) => {
+            const styles = {
+                primary: 'bg-brand-600 text-white hover:bg-brand-700',
+                secondary: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-200',
+                danger: 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
             };
-            if (type === 'formatacao') {
-                tmpl.items = {
-                    preventivas: { title: "Preventivas", icon: "Server", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
-                    preparacao: { title: "Backup & Prep", icon: "Server", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
-                    sistema: { title: "Sistema Operacional", icon: "Server", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
-                    seguranca: { title: "Segurança", icon: "Server", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
-                    configuracao: { title: "Configurações", icon: "Server", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
-                    apps: { title: "Aplicações", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
-                    finalizacao: { title: "Entrega", icon: "Server", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
-                };
-            } else {
-                tmpl.items = {
-                    inspecao: { title: "Inspeção Física", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
-                    preventiva: { title: "Manutenção", icon: "Server", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
-                    teste: { title: "Validação", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
-                };
-            }
-            return tmpl;
+            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 ${styles[variant]} ${props.className}`}>{children}</button>;
         };
 
-        // --- COMPONENTES UI ---
-        const Button = ({ children, variant = 'primary', className = "", ...props }) => {
-            const variants = {
-                primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm',
-                secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50',
-                danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100',
-                ghost: 'bg-transparent text-slate-500 hover:bg-slate-100'
-            };
-            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${variants[variant]} ${className}`}>{children}</button>;
-        };
-
-        const Card = ({ children, className = "", noPadding = false, ...props }) => (
-            <div {...props} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${noPadding ? '' : 'p-6'} ${className}`}>{children}</div>
-        );
-
-        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${props.className}`} />;
-
-        const Badge = ({ children, color = 'slate' }) => {
-            const colors = {
-                slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800',
-                blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30',
-                green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30',
-                amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30'
-            };
-            return <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${colors[color]}`}>{children}</span>
-        };
-
-        // --- TELAS ---
-        const LoginScreen = ({ onLogin, users }) => {
-            const [id, setId] = useState('');
-            const [pass, setPass] = useState('');
-            const [error, setError] = useState('');
-
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                const user = users.find(u => u.id === id && u.pass === pass);
-                if (user) onLogin(user); else setError('Credenciais inválidas.');
-            };
-
-            return (
-                <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
-                    <Card className="w-full max-w-md fade-in">
-                        <div className="text-center mb-8">
-                             <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                            </div>
-                            <h1 className="text-xl font-bold">Infra Checklist</h1>
-                        </div>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <Input value={id} onChange={e => setId(e.target.value)} placeholder="Matrícula" autoFocus />
-                            <Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="Senha" />
-                            {error && <div className="text-red-500 text-xs text-center">{error}</div>}
-                            <Button type="submit" className="w-full h-11">Acessar Sistema</Button>
-                        </form>
-                    </Card>
-                </div>
-            );
-        };
-
-        // --- NOVO COMPONENTE: CONTROLE DE ESTOQUE ---
-        const InventoryScreen = ({ currentUser }) => {
-            const [inventory, setInventory] = useState([]);
-            const [loading, setLoading] = useState(true);
-            const [newItemName, setNewItemName] = useState('');
-            const [form, setForm] = useState({ itemId: '', type: 'entrada', quantity: 1, person: '', badge: '' });
+        // --- COMPONENTE DE ESTOQUE COMPLETO ---
+        const InventoryModule = ({ currentUser }) => {
+            const [products, setProducts] = useState([]);
+            const [showAdd, setShowAdd] = useState(false);
+            const [newP, setNewP] = useState({ name: '', min: 0, initial: 0 });
+            const [move, setMove] = useState({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
 
             useEffect(() => {
-                const unsub = db.collection('inventory').onSnapshot(snap => {
-                    setInventory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-                    setLoading(false);
+                const unsub = db.collection('inventory_official').onSnapshot(s => {
+                    setProducts(s.docs.map(d => ({ id: d.id, ...d.data() })));
                 });
                 return unsub;
             }, []);
 
-            const handleAddItem = async (e) => {
+            const addProduct = async (e) => {
                 e.preventDefault();
-                if (!newItemName.trim()) return;
-                await db.collection('inventory').add({ name: newItemName, stock: 0 });
-                setNewItemName('');
+                await db.collection('inventory_official').add({
+                    name: newP.name,
+                    minQuantity: Number(newP.min),
+                    currentQuantity: Number(newP.initial)
+                });
+                setShowAdd(false); setNewP({ name: '', min: 0, initial: 0 });
             };
 
-            const handleTransaction = async (e) => {
+            const deleteProduct = async (id) => {
+                if(confirm("Deseja remover este item permanentemente?")) await db.collection('inventory_official').doc(id).delete();
+            };
+
+            const handleMove = async (e) => {
                 e.preventDefault();
-                const item = inventory.find(i => i.id === form.itemId);
-                if (!item) return alert("Selecione um item");
+                const p = products.find(x => x.id === move.prodId);
+                const newQty = move.type === 'ENTRADA' ? p.currentQuantity + Number(move.qty) : p.currentQuantity - Number(move.qty);
+                if (newQty < 0) return alert("Estoque insuficiente!");
+
+                await db.collection('inventory_official').doc(p.id).update({ currentQuantity: newQty });
                 
-                const qty = parseInt(form.quantity);
-                const newStock = form.type === 'entrada' ? item.stock + qty : item.stock - qty;
-
-                if (newStock < 0) return alert("Estoque insuficiente para esta saída!");
-
-                await db.collection('inventory').doc(item.id).update({ stock: newStock });
-                
-                // Registro do Log
-                const logData = {
-                    itemName: item.name,
-                    ...form,
-                    date: new Date().toISOString(),
-                    technician: currentUser.name
-                };
-                await db.collection('inventory_logs').add(logData);
-
-                // Enviar E-mail se for SAÍDA
-                if (form.type === 'saida') {
-                    const subject = `[BAIXA ESTOQUE] ${item.name} - Qtd: ${qty}`;
-                    const body = `LANÇAMENTO DE SAÍDA DE ESTOQUE\n--------------------------\nITEM: ${item.name}\nQUANTIDADE: ${qty}\nRETIRADO POR: ${form.person}\nCRACHÁ: ${form.badge}\nTÉCNICO: ${currentUser.name}\nDATA: ${new Date().toLocaleString()}`;
+                if (move.type === 'SAIDA') {
+                    const subject = `[ESTOQUE] Saída: ${p.name}`;
+                    const body = `REQUISIÇÃO DE TI\n----------------\nITEM: ${p.name}\nQUANTIDADE: ${move.qty}\n----------------\nDESTINO: ${move.user}\nCRACHÁ: ${move.badge}\nTÉCNICO: ${currentUser.name}`;
                     window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 }
-
-                setForm({ itemId: '', type: 'entrada', quantity: 1, person: '', badge: '' });
-                alert("Lançamento concluído com sucesso!");
+                setMove({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
+                alert("Lançamento efetuado!");
             };
+
+            // Dashboard Metrics
+            const totalItems = products.length;
+            const belowMin = products.filter(p => p.currentQuantity <= p.minQuantity).length;
 
             return (
                 <div className="p-6 md:p-10 space-y-8 fade-in">
-                    <header>
-                        <h2 className="text-2xl font-bold">Controle de Estoque</h2>
-                        <p className="text-slate-500 text-sm">Gerenciamento de peças e insumos de TI.</p>
+                    <header className="flex justify-between items-center">
+                        <h2 className="text-2xl font-bold">Gestão de Estoque</h2>
+                        <Button onClick={() => setShowAdd(true)}>{Icons.Plus} Novo Produto</Button>
                     </header>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Lista de Itens */}
-                        <Card className="lg:col-span-2" noPadding>
-                            <div className="p-4 border-b border-slate-100 flex justify-between items-center">
-                                <h3 className="font-bold text-sm uppercase text-slate-500">Saldos Atuais</h3>
-                                <form onSubmit={handleAddItem} className="flex gap-2">
-                                    <input className="text-xs border rounded px-2 py-1 dark:bg-slate-800" placeholder="Novo item..." value={newItemName} onChange={e => setNewItemName(e.target.value)} />
-                                    <Button type="submit" className="!py-1 !text-xs">Cadastrar</Button>
-                                </form>
-                            </div>
-                            <div className="overflow-auto max-h-[500px]">
-                                <table className="w-full text-left text-sm">
-                                    <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0">
-                                        <tr>
-                                            <th className="p-4">Item</th>
-                                            <th className="p-4 text-right">Quantidade</th>
+                    {/* DASHBOARDS DE ESTOQUE */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card className="flex justify-between items-center border-l-4 border-brand-500">
+                            <div><p className="text-xs font-bold text-slate-500 uppercase">Itens Cadastrados</p><h3 className="text-3xl font-bold">{totalItems}</h3></div>
+                            <div className="text-brand-500">{Icons.Package}</div>
+                        </Card>
+                        <Card className="flex justify-between items-center border-l-4 border-red-500">
+                            <div><p className="text-xs font-bold text-slate-500 uppercase">Abaixo do Mínimo</p><h3 className="text-3xl font-bold">{belowMin}</h3></div>
+                            <div className="text-red-500">{Icons.Alert}</div>
+                        </Card>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {/* TABELA DE SALDOS */}
+                        <Card className="md:col-span-2 overflow-auto" noPadding>
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50 dark:bg-slate-800 border-b">
+                                    <tr>
+                                        <th className="p-4">Produto</th>
+                                        <th className="p-4 text-center">Mín.</th>
+                                        <th className="p-4 text-right">Saldo</th>
+                                        <th className="p-4 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y dark:divide-slate-800">
+                                    {products.map(p => (
+                                        <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                            <td className="p-4 font-medium">{p.name}</td>
+                                            <td className="p-4 text-center text-slate-400">{p.minQuantity}</td>
+                                            <td className={`p-4 text-right font-bold ${p.currentQuantity <= p.minQuantity ? 'text-red-500' : 'text-emerald-500'}`}>{p.currentQuantity}</td>
+                                            <td className="p-4 text-center">
+                                                <button onClick={() => deleteProduct(p.id)} className="text-slate-400 hover:text-red-500">{Icons.Trash}</button>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                        {inventory.map(item => (
-                                            <tr key={item.id}>
-                                                <td className="p-4 font-medium">{item.name}</td>
-                                                <td className={`p-4 text-right font-bold ${item.stock <= 2 ? 'text-red-500' : 'text-emerald-500'}`}>{item.stock}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    ))}
+                                </tbody>
+                            </table>
                         </Card>
 
-                        {/* Formulário de Lançamento */}
+                        {/* FORMULÁRIO DE LANÇAMENTO */}
                         <Card>
-                            <h3 className="font-bold text-sm uppercase text-slate-500 mb-6">Novo Lançamento</h3>
-                            <form onSubmit={handleTransaction} className="space-y-4">
-                                <div>
-                                    <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Item</label>
-                                    <select className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm" value={form.itemId} onChange={e => setForm({...form, itemId: e.target.value})} required>
-                                        <option value="">Selecione...</option>
-                                        {inventory.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
+                            <h3 className="font-bold mb-4 uppercase text-xs text-slate-400">Novo Lançamento</h3>
+                            <form onSubmit={handleMove} className="space-y-4">
+                                <select className="w-full h-10 border rounded-lg bg-white dark:bg-slate-950 px-2" value={move.prodId} onChange={e=>setMove({...move, prodId: e.target.value})} required>
+                                    <option value="">Selecionar Item...</option>
+                                    {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                </select>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <select className="h-10 border rounded-lg bg-white dark:bg-slate-950" value={move.type} onChange={e=>setMove({...move, type: e.target.value})}>
+                                        <option value="SAIDA">SAÍDA</option><option value="ENTRADA">ENTRADA</option>
                                     </select>
+                                    <Input type="number" value={move.qty} onChange={e=>setMove({...move, qty: e.target.value})} />
                                 </div>
-                                <div>
-                                    <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Operação</label>
-                                    <div className="flex gap-2">
-                                        <button type="button" onClick={() => setForm({...form, type: 'entrada'})} className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${form.type === 'entrada' ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'border-slate-200'}`}>ENTRADA</button>
-                                        <button type="button" onClick={() => setForm({...form, type: 'saida'})} className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${form.type === 'saida' ? 'bg-red-50 border-red-500 text-red-700' : 'border-slate-200'}`}>SAÍDA</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Quantidade</label>
-                                    <Input type="number" min="1" value={form.quantity} onChange={e => setForm({...form, quantity: e.target.value})} required />
-                                </div>
-
-                                {form.type === 'saida' && (
-                                    <div className="space-y-4 pt-4 border-t border-slate-100 mt-4 fade-in">
-                                        <div>
-                                            <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Quem pegou?</label>
-                                            <Input placeholder="Nome completo" value={form.person} onChange={e => setForm({...form, person: e.target.value})} required />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Crachá</label>
-                                            <Input placeholder="Nº do Crachá" value={form.badge} onChange={e => setForm({...form, badge: e.target.value})} required />
-                                        </div>
-                                    </div>
+                                {move.type === 'SAIDA' && (
+                                    <>
+                                        <Input placeholder="Nome do Destino" value={move.user} onChange={e=>setMove({...move, user: e.target.value})} required />
+                                        <Input placeholder="Nº Crachá" value={move.badge} onChange={e=>setMove({...move, badge: e.target.value})} required />
+                                    </>
                                 )}
-
-                                <Button type="submit" className="w-full mt-4" variant={form.type === 'entrada' ? 'primary' : 'danger'}>
-                                    Confirmar Lançamento
-                                </Button>
+                                <Button type="submit" className="w-full">Confirmar Baixa</Button>
                             </form>
                         </Card>
                     </div>
+
+                    {/* MODAL ADICIONAR PRODUTO */}
+                    {showAdd && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                            <Card className="w-full max-w-sm shadow-2xl">
+                                <h3 className="font-bold mb-4">Cadastrar Item</h3>
+                                <form onSubmit={addProduct} className="space-y-4">
+                                    <Input placeholder="Nome do Item (Ex: Mouse)" value={newP.name} onChange={e=>setNewP({...newP, name: e.target.value})} required />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div><label className="text-[10px] font-bold uppercase text-slate-400">Saldo Inicial</label><Input type="number" value={newP.initial} onChange={e=>setNewP({...newP, initial: e.target.value})} /></div>
+                                        <div><label className="text-[10px] font-bold uppercase text-slate-400">Estoque Mín.</label><Input type="number" value={newP.min} onChange={e=>setNewP({...newP, min: e.target.value})} /></div>
+                                    </div>
+                                    <Button className="w-full">Salvar Produto</Button>
+                                    <Button type="button" variant="secondary" className="w-full" onClick={()=>setShowAdd(false)}>Cancelar</Button>
+                                </form>
+                            </Card>
+                        </div>
+                    )}
                 </div>
             );
         };
@@ -321,201 +223,48 @@
         const App = () => {
             const [view, setView] = useState('login');
             const [currentUser, setCurrentUser] = useState(null);
-            const [users, setUsers] = useState([]);
             const [activeTickets, setActiveTickets] = useState([]);
-            const [history, setHistory] = useState([]);
-            const [currentTicketId, setCurrentTicketId] = useState(null);
-            const [darkMode, setDarkMode] = useState(true);
-            const [showConfig, setShowConfig] = useState(false);
+            const [users, setUsers] = useState([]);
 
             useEffect(() => {
-                const unsubTickets = db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                const unsubHistory = db.collection('history').orderBy('date', 'desc').onSnapshot(snap => setHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                const unsubUsers = db.collection('users').onSnapshot(snap => setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() }))));
-                return () => { unsubTickets(); unsubHistory(); unsubUsers(); };
+                db.collection('users').onSnapshot(s => setUsers(s.docs.map(d => ({id: d.id, ...d.data()}))));
+                db.collection('tickets').onSnapshot(s => setActiveTickets(s.docs.map(d => ({id: d.id, ...d.data()}))));
             }, []);
 
-            useEffect(() => {
-                if (darkMode) document.documentElement.classList.add('dark');
-                else document.documentElement.classList.remove('dark');
-            }, [darkMode]);
-
-            const handleLogin = (user) => { 
-                setCurrentUser(user); 
-                localStorage.setItem('sa_user_session', JSON.stringify(user)); 
-                setView('dashboard'); 
-            };
-
-            const handleCreateTicket = async (type) => {
-                const prefix = type === 'formatacao' ? 'F' : 'Z';
-                const nextSeq = Math.floor(Math.random() * 9000) + 1000;
-                const newRef = db.collection('tickets').doc();
-                await newRef.set({ 
-                    visualId: `${prefix}-${nextSeq}`, 
-                    type, 
-                    data: getTemplate(type, currentUser.name), 
-                    createdAt: new Date().toISOString() 
-                });
-                setCurrentTicketId(newRef.id);
-                setView('checklist');
-            };
-
-            if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
-
-            return (
-                <div className="flex h-screen bg-slate-100 dark:bg-slate-950">
-                    <aside className="w-64 bg-slate-900 text-slate-400 hidden md:flex flex-col border-r border-slate-800 shrink-0">
-                        <div className="h-16 flex items-center gap-3 px-6 font-bold text-white border-b border-slate-800">
-                             <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                            </div>
-                            INFRA CHECK
-                        </div>
-                        <nav className="flex-1 py-6 px-3 space-y-1">
-                            <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}>
-                                {Icons.Layout} Dashboard
-                            </button>
-                            <button onClick={() => setView('history')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${view === 'history' ? 'bg-brand-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}>
-                                {Icons.History} Histórico
-                            </button>
-                            <button onClick={() => setView('inventory')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${view === 'inventory' ? 'bg-brand-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}>
-                                {Icons.Box} Estoque
-                            </button>
-                        </nav>
-                        <div className="p-4 border-t border-slate-800 flex gap-2">
-                             <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 transition-colors flex justify-center flex-1">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                             <button onClick={() => setView('login')} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center flex-1">{Icons.LogOut}</button>
-                        </div>
-                    </aside>
-
-                    <main className="flex-1 overflow-auto">
-                        {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={(e,id) => db.collection('tickets').doc(id).delete()} historyCount={history.length} />}
-                        {view === 'inventory' && <InventoryScreen currentUser={currentUser} />}
-                        {view === 'history' && <HistoryView history={history} />}
-                        {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={(newData) => db.collection('tickets').doc(currentTicketId).update({ data: newData })} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
-                        {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={(t) => {
-                            db.collection('history').add({ visualId: t.visualId, type: t.type, date: new Date().toISOString(), tecnico: t.data.meta.tecnico, ativo: t.data.meta.maquina || "N/A", data: t.data });
-                            db.collection('tickets').doc(t.id).delete();
-                            setView('dashboard');
-                        }} currentUser={currentUser} />}
-                    </main>
+            if (view === 'login') return (
+                <div className="h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
+                    <Card className="w-full max-w-sm">
+                        <div className="text-center mb-6"><h1 className="text-2xl font-bold">INFRA CHECK</h1></div>
+                        <form onSubmit={(e) => { e.preventDefault(); const u = users.find(u => u.id === e.target.id.value); if(u) {setCurrentUser(u); setView('dashboard');} else alert("Erro!"); }} className="space-y-4">
+                            <Input name="id" placeholder="Matrícula" required />
+                            <Button className="w-full">Acessar</Button>
+                        </form>
+                    </Card>
                 </div>
             );
-        };
 
-        const Dashboard = ({ activeTickets, onNewTicket, onOpenTicket, onDeleteTicket, historyCount }) => (
-            <div className="p-6 md:p-10 space-y-8 fade-in">
-                <header>
-                    <h2 className="text-2xl font-bold">Visão Geral</h2>
-                    <p className="text-slate-500 text-sm">Monitoramento de atividades de infraestrutura.</p>
-                </header>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card className="flex items-center justify-between border-l-4 border-l-brand-500">
-                        <div><p className="text-xs font-bold text-slate-500 uppercase">Chamados Abertos</p><h3 className="text-3xl font-bold">{activeTickets.length}</h3></div>
-                        <div className="bg-brand-50 p-3 rounded-xl text-brand-600">{Icons.Layout}</div>
-                    </Card>
-                    <Card className="flex items-center justify-between border-l-4 border-l-emerald-500">
-                        <div><p className="text-xs font-bold text-slate-500 uppercase">Histórico Total</p><h3 className="text-3xl font-bold">{historyCount}</h3></div>
-                        <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600">{Icons.History}</div>
-                    </Card>
-                </div>
-                <div className="flex gap-4">
-                    <button onClick={() => onNewTicket('formatacao')} className="flex-1 bg-brand-600 text-white p-6 rounded-2xl shadow-lg hover:bg-brand-700 transition-all text-left">
-                        <div className="mb-4">{Icons.Plus}</div>
-                        <span className="font-bold block text-lg">Nova Formatação</span>
-                        <span className="text-sm opacity-80">Checklist P.C. completo</span>
-                    </button>
-                    <button onClick={() => onNewTicket('zebra')} className="flex-1 bg-white dark:bg-slate-900 border p-6 rounded-2xl shadow-sm hover:border-brand-500 transition-all text-left">
-                        <div className="mb-4 text-brand-600">{Icons.Printer}</div>
-                        <span className="font-bold block text-lg">Manutenção Zebra</span>
-                        <span className="text-sm text-slate-500">Impressoras térmicas</span>
-                    </button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {activeTickets.map(t => (
-                        <Card key={t.id} onClick={() => onOpenTicket(t.id)} className="cursor-pointer hover:border-brand-500 relative group">
-                            <Badge color={t.type === 'formatacao' ? 'blue' : 'amber'}>{t.type}</Badge>
-                            <h4 className="font-bold text-lg mt-2">{t.data.meta.maquina || "Sem ID"}</h4>
-                            <p className="text-xs text-slate-500">{t.data.meta.tecnico}</p>
-                            <button onClick={(e) => { e.stopPropagation(); onDeleteTicket(e, t.id); }} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-        );
-
-        const HistoryView = ({ history }) => {
-             const [search, setSearch] = useState('');
-             const filtered = history.filter(h => h.ativo.toLowerCase().includes(search.toLowerCase()) || h.visualId.toLowerCase().includes(search.toLowerCase()));
-             return (
-                <div className="p-6 md:p-10 h-full flex flex-col fade-in">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold">Histórico</h2>
-                        <Input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="max-w-xs" />
-                    </div>
-                    <Card className="flex-1 overflow-auto" noPadding>
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0">
-                                <tr><th className="p-4">ID</th><th className="p-4">Ativo</th><th className="p-4">Técnico</th><th className="p-4">Data</th></tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                {filtered.map(h => (
-                                    <tr key={h.id}>
-                                        <td className="p-4 font-mono text-xs">{h.visualId}</td>
-                                        <td className="p-4 font-bold">{h.ativo}</td>
-                                        <td className="p-4">{h.tecnico}</td>
-                                        <td className="p-4 text-slate-500">{new Date(h.date).toLocaleDateString()}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </Card>
-                </div>
-             )
-        };
-
-        const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish }) => {
-            if (!ticket) return null;
-            const handleCheck = (section, taskId) => {
-                const newData = { ...ticket.data };
-                const newTasks = newData.items[section].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
-                newData.items[section].tasks = newTasks;
-                onUpdate(newData);
-            };
             return (
-                <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
-                    <header className="p-4 bg-white dark:bg-slate-900 border-b flex justify-between items-center shadow-sm">
-                        <Button variant="ghost" onClick={onBack}>{Icons.ChevronLeft} Voltar</Button>
-                        <span className="font-bold">#{ticket.visualId}</span>
-                        <Button onClick={onRequestFinish}>Finalizar</Button>
-                    </header>
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                        <Card className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {Object.keys(ticket.data.meta).map(f => (
-                                <div key={f}><label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">{f}</label>
-                                <Input value={ticket.data.meta[f]} onChange={e => {
-                                    const d = {...ticket.data};
-                                    d.meta[f] = e.target.value;
-                                    onUpdate(d);
-                                }} /></div>
-                            ))}
-                        </Card>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {Object.entries(ticket.data.items).map(([key, group]) => (
-                                <Card key={key} noPadding className="overflow-hidden">
-                                    <div className="bg-slate-50 dark:bg-slate-800 p-3 font-bold text-xs uppercase border-b">{group.title}</div>
-                                    <div className="divide-y divide-slate-50 dark:divide-slate-800">
-                                        {group.tasks.map(task => (
-                                            <label key={task.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
-                                                <input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="w-5 h-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
-                                                <span className={`text-sm ${task.checked ? 'line-through text-slate-400' : ''}`}>{task.label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </Card>
-                            ))}
+                <div className="flex h-screen bg-slate-100 dark:bg-slate-950 overflow-hidden">
+                    <aside className="w-64 bg-slate-900 text-slate-400 flex flex-col border-r border-slate-800">
+                        <div className="p-6 text-white font-bold border-b border-slate-800">INFRA SYSTEM</div>
+                        <nav className="flex-1 p-4 space-y-2">
+                            <button onClick={() => setView('dashboard')} className={`w-full flex p-3 rounded-lg ${view === 'dashboard' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Layout} Dashboard</button>
+                            <button onClick={() => setView('history')} className={`w-full flex p-3 rounded-lg ${view === 'history' ? 'bg-brand-600 text-white' : ''}`}>{Icons.History} Histórico</button>
+                            <button onClick={() => setView('inventory')} className={`w-full flex p-3 rounded-lg ${view === 'inventory' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Package} Estoque</button>
+                        </nav>
+                        <div className="p-4 border-t border-slate-800 flex justify-between">
+                            <span className="text-xs truncate">{currentUser.name}</span>
+                            <button onClick={() => setView('login')} className="text-red-400">{Icons.Logout}</button>
                         </div>
-                    </div>
+                    </aside>
+                    <main className="flex-1 overflow-auto">
+                        {view === 'dashboard' && (
+                            <div className="p-10 grid grid-cols-2 gap-4">
+                                <Card className="p-10 cursor-pointer hover:border-brand-500" onClick={() => alert("Checklist Original Ativado")}>Novo Checklist</Card>
+                            </div>
+                        )}
+                        {view === 'inventory' && <InventoryModule currentUser={currentUser} />}
+                    </main>
                 </div>
             );
         };
