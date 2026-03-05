@@ -12,37 +12,32 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-                    colors: { brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' } }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb' } }
                 }
             }
         }
     </script>
 
     <style>
-        body { -webkit-print-color-adjust: exact; }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        @media print {
-            .no-print { display: none !important; }
-            #receipt-area { visibility: visible !important; position: absolute; left: 0; top: 0; width: 100%; }
-        }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased transition-colors duration-300">
     <div id="root"></div>
 
     <script type="text/babel">
+        // --- CONFIGURAÇÃO FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -54,223 +49,173 @@
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
 
+        // --- ICONS ---
         const Icons = {
-            Layout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
-            History: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
-            Package: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
-            Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-            Trash: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
-            Alert: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
-            TrendingUp: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
-            Logout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Box: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
+            Plus: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>,
+            ArrowUp: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m5 12 7-7 7 7M12 19V5"/></svg>,
+            ArrowDown: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m19 12-7 7-7-7M12 5v14"/></svg>,
+            Trash: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         };
 
-        const Card = ({ children, className = "" }) => <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm ${className}`}>{children}</div>;
-        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm transition-all focus:ring-2 focus:ring-brand-500/20 outline-none ${props.className}`} />;
-        const Button = ({ children, variant = 'primary', ...props }) => {
-            const styles = {
-                primary: 'bg-brand-600 text-white hover:bg-brand-700',
-                secondary: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-200',
-                danger: 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
-            };
-            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 ${styles[variant]} ${props.className}`}>{children}</button>;
-        };
+        // --- COMPONENTES UI ---
+        const Card = ({ children, className = "" }) => <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${className}`}>{children}</div>;
+        const Input = (props) => <input {...props} className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 outline-none" />;
 
-        // --- COMPONENTE DE ESTOQUE COMPLETO ---
-        const InventoryModule = ({ currentUser }) => {
+        // --- COMPONENTE ESTOQUE ESTILO APPSHEET ---
+        const InventoryModule = ({ user }) => {
+            const [activeTab, setActiveTab] = useState('saldos'); // saldos, entradas, saidas
             const [products, setProducts] = useState([]);
-            const [showAdd, setShowAdd] = useState(false);
-            const [newP, setNewP] = useState({ name: '', min: 0, initial: 0 });
-            const [move, setMove] = useState({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
+            const [move, setMove] = useState({ prodId: '', qty: 1, person: '', badge: '' });
 
             useEffect(() => {
-                const unsub = db.collection('inventory_official').onSnapshot(s => {
-                    setProducts(s.docs.map(d => ({ id: d.id, ...d.data() })));
-                });
-                return unsub;
+                return db.collection('inventory_official').onSnapshot(s => setProducts(s.docs.map(d => ({id: d.id, ...d.data()}))));
             }, []);
 
-            const addProduct = async (e) => {
-                e.preventDefault();
-                await db.collection('inventory_official').add({
-                    name: newP.name,
-                    minQuantity: Number(newP.min),
-                    currentQuantity: Number(newP.initial)
-                });
-                setShowAdd(false); setNewP({ name: '', min: 0, initial: 0 });
-            };
-
-            const deleteProduct = async (id) => {
-                if(confirm("Deseja remover este item permanentemente?")) await db.collection('inventory_official').doc(id).delete();
-            };
-
-            const handleMove = async (e) => {
-                e.preventDefault();
+            const handleMovement = async (type) => {
                 const p = products.find(x => x.id === move.prodId);
-                const newQty = move.type === 'ENTRADA' ? p.currentQuantity + Number(move.qty) : p.currentQuantity - Number(move.qty);
+                if (!p) return alert("Selecione o produto");
+
+                const newQty = type === 'ENTRADA' ? (p.currentQuantity || 0) + Number(move.qty) : (p.currentQuantity || 0) - Number(move.qty);
                 if (newQty < 0) return alert("Estoque insuficiente!");
 
                 await db.collection('inventory_official').doc(p.id).update({ currentQuantity: newQty });
                 
-                if (move.type === 'SAIDA') {
-                    const subject = `[ESTOQUE] Saída: ${p.name}`;
-                    const body = `REQUISIÇÃO DE TI\n----------------\nITEM: ${p.name}\nQUANTIDADE: ${move.qty}\n----------------\nDESTINO: ${move.user}\nCRACHÁ: ${move.badge}\nTÉCNICO: ${currentUser.name}`;
-                    window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                if (type === 'SAIDA') {
+                    const sub = `[SAÍDA ESTOQUE] ${p.name}`;
+                    const body = `BAIXA DE MATERIAL\nItem: ${p.name}\nQtd: ${move.qty}\nRetirado por: ${move.person}\nCrachá: ${move.badge}\nResponsável: ${user.name}`;
+                    window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
                 }
-                setMove({ prodId: '', type: 'SAIDA', qty: 1, user: '', badge: '' });
-                alert("Lançamento efetuado!");
+                setMove({ prodId: '', qty: 1, person: '', badge: '' });
+                alert("Registrado com sucesso!");
             };
 
-            // Dashboard Metrics
-            const totalItems = products.length;
-            const belowMin = products.filter(p => p.currentQuantity <= p.minQuantity).length;
-
             return (
-                <div className="p-6 md:p-10 space-y-8 fade-in">
-                    <header className="flex justify-between items-center">
-                        <h2 className="text-2xl font-bold">Gestão de Estoque</h2>
-                        <Button onClick={() => setShowAdd(true)}>{Icons.Plus} Novo Produto</Button>
-                    </header>
-
-                    {/* DASHBOARDS DE ESTOQUE */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Card className="flex justify-between items-center border-l-4 border-brand-500">
-                            <div><p className="text-xs font-bold text-slate-500 uppercase">Itens Cadastrados</p><h3 className="text-3xl font-bold">{totalItems}</h3></div>
-                            <div className="text-brand-500">{Icons.Package}</div>
+                <div className="p-4 md:p-8 space-y-6 fade-in max-w-6xl mx-auto">
+                    {/* Dashboards Rápidos */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <Card className="p-4 border-l-4 border-brand-500">
+                            <div className="text-[10px] font-bold text-slate-500 uppercase">Total Itens</div>
+                            <div className="text-2xl font-bold">{products.length}</div>
                         </Card>
-                        <Card className="flex justify-between items-center border-l-4 border-red-500">
-                            <div><p className="text-xs font-bold text-slate-500 uppercase">Abaixo do Mínimo</p><h3 className="text-3xl font-bold">{belowMin}</h3></div>
-                            <div className="text-red-500">{Icons.Alert}</div>
+                        <Card className="p-4 border-l-4 border-red-500">
+                            <div className="text-[10px] font-bold text-slate-500 uppercase">Estoque Crítico</div>
+                            <div className="text-2xl font-bold text-red-500">{products.filter(x => x.currentQuantity <= x.minQuantity).length}</div>
                         </Card>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {/* TABELA DE SALDOS */}
-                        <Card className="md:col-span-2 overflow-auto" noPadding>
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-50 dark:bg-slate-800 border-b">
-                                    <tr>
-                                        <th className="p-4">Produto</th>
-                                        <th className="p-4 text-center">Mín.</th>
-                                        <th className="p-4 text-right">Saldo</th>
-                                        <th className="p-4 text-center">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y dark:divide-slate-800">
-                                    {products.map(p => (
-                                        <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                            <td className="p-4 font-medium">{p.name}</td>
-                                            <td className="p-4 text-center text-slate-400">{p.minQuantity}</td>
-                                            <td className={`p-4 text-right font-bold ${p.currentQuantity <= p.minQuantity ? 'text-red-500' : 'text-emerald-500'}`}>{p.currentQuantity}</td>
-                                            <td className="p-4 text-center">
-                                                <button onClick={() => deleteProduct(p.id)} className="text-slate-400 hover:text-red-500">{Icons.Trash}</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </Card>
+                    {/* Navegação por Abas Estilo AppSheet */}
+                    <div className="flex border-b dark:border-slate-800">
+                        <button onClick={() => setActiveTab('saldos')} className={`px-6 py-3 text-sm font-bold transition-all ${activeTab === 'saldos' ? 'text-brand-500 border-b-2 border-brand-500' : 'text-slate-400'}`}>SALDOS</button>
+                        <button onClick={() => setActiveTab('entradas')} className={`px-6 py-3 text-sm font-bold transition-all ${activeTab === 'entradas' ? 'text-brand-500 border-b-2 border-brand-500' : 'text-slate-400'}`}>ENTRADAS</button>
+                        <button onClick={() => setActiveTab('saidas')} className={`px-6 py-3 text-sm font-bold transition-all ${activeTab === 'saidas' ? 'text-brand-500 border-b-2 border-brand-500' : 'text-slate-400'}`}>SAÍDAS</button>
+                    </div>
 
-                        {/* FORMULÁRIO DE LANÇAMENTO */}
-                        <Card>
-                            <h3 className="font-bold mb-4 uppercase text-xs text-slate-400">Novo Lançamento</h3>
-                            <form onSubmit={handleMove} className="space-y-4">
-                                <select className="w-full h-10 border rounded-lg bg-white dark:bg-slate-950 px-2" value={move.prodId} onChange={e=>setMove({...move, prodId: e.target.value})} required>
+                    {/* Conteúdo das Abas */}
+                    <Card className="p-0 overflow-hidden">
+                        {activeTab === 'saldos' && (
+                            <div className="overflow-auto">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-slate-50 dark:bg-slate-800 border-b dark:border-slate-700">
+                                        <tr>
+                                            <th className="p-4 uppercase text-[10px] text-slate-500">Produto</th>
+                                            <th className="p-4 uppercase text-[10px] text-slate-500 text-center">Mínimo</th>
+                                            <th className="p-4 uppercase text-[10px] text-slate-500 text-right">Saldo</th>
+                                            <th className="p-4 w-10"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y dark:divide-slate-800">
+                                        {products.map(p => (
+                                            <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                                <td className="p-4 font-semibold">{p.name}</td>
+                                                <td className="p-4 text-center text-slate-400">{p.minQuantity || 0}</td>
+                                                <td className={`p-4 text-right font-bold ${p.currentQuantity <= p.minQuantity ? 'text-red-500' : 'text-emerald-500'}`}>{p.currentQuantity || 0}</td>
+                                                <td className="p-4 text-right">
+                                                    <button onClick={() => db.collection('inventory_official').doc(p.id).delete()} className="text-slate-300 hover:text-red-500">{Icons.Trash}</button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t dark:border-slate-800">
+                                    <button onClick={() => {
+                                        const n = prompt("Nome do produto:");
+                                        const m = prompt("Estoque mínimo:");
+                                        if(n) db.collection('inventory_official').add({name: n, minQuantity: Number(m), currentQuantity: 0});
+                                    }} className="text-brand-500 text-xs font-bold flex items-center gap-2"> {Icons.Plus} CADASTRAR NOVO ITEM NOVO</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'entradas' && (
+                            <div className="p-6 max-w-md mx-auto space-y-4">
+                                <h3 className="font-bold flex items-center gap-2">{Icons.ArrowUp} Registrar Entrada</h3>
+                                <select className="w-full h-10 border rounded-lg dark:bg-slate-950 px-2" value={move.prodId} onChange={e => setMove({...move, prodId: e.target.value})}>
                                     <option value="">Selecionar Item...</option>
                                     {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                                 </select>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <select className="h-10 border rounded-lg bg-white dark:bg-slate-950" value={move.type} onChange={e=>setMove({...move, type: e.target.value})}>
-                                        <option value="SAIDA">SAÍDA</option><option value="ENTRADA">ENTRADA</option>
-                                    </select>
-                                    <Input type="number" value={move.qty} onChange={e=>setMove({...move, qty: e.target.value})} />
-                                </div>
-                                {move.type === 'SAIDA' && (
-                                    <>
-                                        <Input placeholder="Nome do Destino" value={move.user} onChange={e=>setMove({...move, user: e.target.value})} required />
-                                        <Input placeholder="Nº Crachá" value={move.badge} onChange={e=>setMove({...move, badge: e.target.value})} required />
-                                    </>
-                                )}
-                                <Button type="submit" className="w-full">Confirmar Baixa</Button>
-                            </form>
-                        </Card>
-                    </div>
+                                <Input type="number" placeholder="Quantidade" value={move.qty} onChange={e => setMove({...move, qty: e.target.value})} />
+                                <button onClick={() => handleMovement('ENTRADA')} className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold">CONFIRMAR ENTRADA</button>
+                            </div>
+                        )}
 
-                    {/* MODAL ADICIONAR PRODUTO */}
-                    {showAdd && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                            <Card className="w-full max-w-sm shadow-2xl">
-                                <h3 className="font-bold mb-4">Cadastrar Item</h3>
-                                <form onSubmit={addProduct} className="space-y-4">
-                                    <Input placeholder="Nome do Item (Ex: Mouse)" value={newP.name} onChange={e=>setNewP({...newP, name: e.target.value})} required />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div><label className="text-[10px] font-bold uppercase text-slate-400">Saldo Inicial</label><Input type="number" value={newP.initial} onChange={e=>setNewP({...newP, initial: e.target.value})} /></div>
-                                        <div><label className="text-[10px] font-bold uppercase text-slate-400">Estoque Mín.</label><Input type="number" value={newP.min} onChange={e=>setNewP({...newP, min: e.target.value})} /></div>
-                                    </div>
-                                    <Button className="w-full">Salvar Produto</Button>
-                                    <Button type="button" variant="secondary" className="w-full" onClick={()=>setShowAdd(false)}>Cancelar</Button>
-                                </form>
-                            </Card>
-                        </div>
-                    )}
+                        {activeTab === 'saidas' && (
+                            <div className="p-6 max-w-md mx-auto space-y-4">
+                                <h3 className="font-bold flex items-center gap-2 text-red-500">{Icons.ArrowDown} Registrar Saída (Baixa)</h3>
+                                <select className="w-full h-10 border rounded-lg dark:bg-slate-950 px-2" value={move.prodId} onChange={e => setMove({...move, prodId: e.target.value})}>
+                                    <option value="">Selecionar Item...</option>
+                                    {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                </select>
+                                <Input type="number" placeholder="Quantidade" value={move.qty} onChange={e => setMove({...move, qty: e.target.value})} />
+                                <Input placeholder="Nome de quem pegou" value={move.person} onChange={e => setMove({...move, person: e.target.value})} />
+                                <Input placeholder="Número do Crachá" value={move.badge} onChange={e => setMove({...move, badge: e.target.value})} />
+                                <button onClick={() => handleMovement('SAIDA')} className="w-full py-3 bg-red-600 text-white rounded-lg font-bold">CONFIRMAR SAÍDA & EMAIL</button>
+                            </div>
+                        )}
+                    </Card>
                 </div>
             );
         };
 
-        const App = () => {
+        // --- APP PRINCIPAL ---
+        const MainApp = () => {
             const [view, setView] = useState('login');
-            const [currentUser, setCurrentUser] = useState(null);
-            const [activeTickets, setActiveTickets] = useState([]);
-            const [users, setUsers] = useState([]);
-
-            useEffect(() => {
-                db.collection('users').onSnapshot(s => setUsers(s.docs.map(d => ({id: d.id, ...d.data()}))));
-                db.collection('tickets').onSnapshot(s => setActiveTickets(s.docs.map(d => ({id: d.id, ...d.data()}))));
-            }, []);
+            const [user, setUser] = useState(null);
 
             if (view === 'login') return (
-                <div className="h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
-                    <Card className="w-full max-w-sm">
-                        <div className="text-center mb-6"><h1 className="text-2xl font-bold">INFRA CHECK</h1></div>
-                        <form onSubmit={(e) => { e.preventDefault(); const u = users.find(u => u.id === e.target.id.value); if(u) {setCurrentUser(u); setView('dashboard');} else alert("Erro!"); }} className="space-y-4">
-                            <Input name="id" placeholder="Matrícula" required />
-                            <Button className="w-full">Acessar</Button>
+                <div className="h-screen flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-950">
+                    <Card className="w-full max-w-sm p-8 text-center space-y-6">
+                        <h1 className="text-2xl font-bold tracking-tighter">INFRA SYS</h1>
+                        <form onSubmit={(e) => { e.preventDefault(); setUser({name: e.target.id.value}); setView('inventory'); }} className="space-y-4">
+                            <Input name="id" placeholder="Sua Matrícula" required />
+                            <button className="w-full py-3 bg-brand-600 text-white rounded-lg font-bold">ENTRAR NO SISTEMA</button>
                         </form>
                     </Card>
                 </div>
             );
 
             return (
-                <div className="flex h-screen bg-slate-100 dark:bg-slate-950 overflow-hidden">
-                    <aside className="w-64 bg-slate-900 text-slate-400 flex flex-col border-r border-slate-800">
+                <div className="flex h-screen overflow-hidden">
+                    <aside className="w-64 bg-slate-900 text-slate-400 hidden md:flex flex-col border-r border-slate-800">
                         <div className="p-6 text-white font-bold border-b border-slate-800">INFRA SYSTEM</div>
                         <nav className="flex-1 p-4 space-y-2">
-                            <button onClick={() => setView('dashboard')} className={`w-full flex p-3 rounded-lg ${view === 'dashboard' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Layout} Dashboard</button>
-                            <button onClick={() => setView('history')} className={`w-full flex p-3 rounded-lg ${view === 'history' ? 'bg-brand-600 text-white' : ''}`}>{Icons.History} Histórico</button>
-                            <button onClick={() => setView('inventory')} className={`w-full flex p-3 rounded-lg ${view === 'inventory' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Package} Estoque</button>
+                            <button onClick={() => setView('dashboard_checklist')} className={`w-full flex p-3 rounded-lg ${view === 'dashboard_checklist' ? 'bg-brand-600 text-white' : ''}`}>Checklists</button>
+                            <button onClick={() => setView('inventory')} className={`w-full flex p-3 rounded-lg ${view === 'inventory' ? 'bg-brand-600 text-white' : ''}`}>Estoque</button>
                         </nav>
-                        <div className="p-4 border-t border-slate-800 flex justify-between">
-                            <span className="text-xs truncate">{currentUser.name}</span>
-                            <button onClick={() => setView('login')} className="text-red-400">{Icons.Logout}</button>
-                        </div>
+                        <div className="p-4 text-xs border-t border-slate-800">{user.name} | <button onClick={() => setView('login')} className="text-red-400">Sair</button></div>
                     </aside>
-                    <main className="flex-1 overflow-auto">
-                        {view === 'dashboard' && (
-                            <div className="p-10 grid grid-cols-2 gap-4">
-                                <Card className="p-10 cursor-pointer hover:border-brand-500" onClick={() => alert("Checklist Original Ativado")}>Novo Checklist</Card>
-                            </div>
-                        )}
-                        {view === 'inventory' && <InventoryModule currentUser={currentUser} />}
+                    <main className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-950">
+                        {view === 'inventory' && <InventoryModule user={user} />}
+                        {view === 'dashboard_checklist' && <div className="p-20 text-center text-slate-400">Módulo de Checklist Integrado.</div>}
                     </main>
                 </div>
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        ReactDOM.createRoot(document.getElementById('root')).render(<MainApp />);
     </script>
 </body>
 </html>
