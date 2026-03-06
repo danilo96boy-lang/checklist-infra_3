@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFRA CENTRAL | Full Stack Edition</title>
+    <title>INFRA CHECKLIST | Enterprise Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -21,8 +21,15 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-                    colors: { brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' } }
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
+                        }
+                    }
                 }
             }
         }
@@ -30,23 +37,30 @@
 
     <style>
         body { -webkit-print-color-adjust: exact; }
-        .fade-in { animation: fadeIn 0.4s ease-out; }
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 6px; }
+        
+        /* Custom Scrollbar for cleaner look */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        input, select, textarea { 
-            background-color: transparent;
-            outline: none;
+
+        @media print {
+            @page { margin: 0; size: auto; }
+            body, html { background-color: white !important; color: black !important; height: auto; overflow: visible; }
+            body * { visibility: hidden; }
+            #receipt-area, #receipt-area * { visibility: visible; }
+            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; z-index: 9999; }
+            .no-print { display: none !important; }
         }
-        @media print { .no-print { display: none !important; } }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased transition-colors duration-300">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300">
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- CONFIGURAÇÃO FIREBASE ---
+        // --- CONFIGURAÇÃO FIREBASE (MANTIDA) ---
         const firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -60,240 +74,610 @@
         const db = firebase.firestore();
         const { useState, useEffect, useRef } = React;
 
-        const Icons = {
-            Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>,
-            Stock: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
-            Check: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
-            Cart: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>,
-            Trash: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
-            History: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>,
-            Edit: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        };
-
-        const CATEGORIAS = [
-            "Teclado/Mouse", "Monitor / Suporte", "Memória / Processador / Placa Mãe",
-            "SSD / HD", "Fontes", "Impressora / Zebra", "Nobreaks / Baterias",
-            "Redes / Switches", "Cabos / Adaptadores", "Outros"
+        // --- DADOS ESTÁTICOS ---
+        const EMAIL_DESTINO = "infra@cobrecom.com.br";
+        const DEFAULT_TEAM = [
+            { id: '01001071', name: 'Inacio', pass: '1234' },
+            { id: '01001440', name: 'Kauan', pass: '1234' },
+            { id: '01001691', name: 'Lui', pass: '1234' }
         ];
 
-        const Card = ({ children, className = "", noPadding = false }) => <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${noPadding ? '' : 'p-6'} ${className}`}>{children}</div>;
+        // --- ICONS (Lucide Style) ---
+        const Icons = {
+            Layout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
+            User: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            History: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
+            Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            LogOut: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Check: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
+            Printer: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
+            Search: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
+            Moon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
+            Sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
+            Trash: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+            Server: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
+            Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        };
+
+        // --- TEMPLATES ---
+        const getTemplate = (type, tecnicoName) => {
+            const tmpl = {
+                meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' },
+                items: {}
+            };
+            if (type === 'formatacao') {
+                tmpl.items = {
+                    preventivas: { title: "Preventivas", icon: "Server", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
+                    preparacao: { title: "Backup & Prep", icon: "Server", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
+                    sistema: { title: "Sistema Operacional", icon: "Server", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
+                    seguranca: { title: "Segurança", icon: "Server", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
+                    configuracao: { title: "Configurações", icon: "Server", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
+                    apps: { title: "Aplicações", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
+                    finalizacao: { title: "Entrega", icon: "Server", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
+                };
+            } else {
+                tmpl.items = {
+                    inspecao: { title: "Inspeção Física", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
+                    preventiva: { title: "Manutenção", icon: "Server", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
+                    teste: { title: "Validação", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
+                };
+            }
+            return tmpl;
+        };
+
+        // --- COMPONENTES UI (DESIGN SYSTEM) ---
+        const Button = ({ children, variant = 'primary', className = "", ...props }) => {
+            const variants = {
+                primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
+                secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700',
+                danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/40 dark:text-red-400',
+                ghost: 'bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+            };
+            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
+        };
+
+        const Card = ({ children, className = "", noPadding = false, ...props }) => (
+            <div {...props} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${noPadding ? '' : 'p-6'} ${className}`}>{children}</div>
+        );
+
+        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all ${props.className}`} />;
+
+        const Badge = ({ children, color = 'slate' }) => {
+            const colors = {
+                slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+                blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+                green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+                amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+            };
+            return <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${colors[color]}`}>{children}</span>
+        };
+
+        // --- TELAS ---
+
+        const LoginScreen = ({ onLogin, users }) => {
+            const [id, setId] = useState('');
+            const [pass, setPass] = useState('');
+            const [error, setError] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const user = users.find(u => u.id === id && u.pass === pass);
+                if (user) onLogin(user); else setError('Credenciais inválidas.');
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
+                    <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden fade-in">
+                        <div className="p-8 pb-6 text-center border-b border-slate-100 dark:border-slate-800">
+                            <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-brand-500/30">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                            </div>
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
+                            <p className="text-sm text-slate-500 mt-1">Acesso Administrativo</p>
+                        </div>
+                        <form onSubmit={handleSubmit} className="p-8 space-y-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">ID Usuário</label>
+                                <Input value={id} onChange={e => setId(e.target.value)} placeholder="000000" autoFocus />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha</label>
+                                <Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••" />
+                            </div>
+                            {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</div>}
+                            <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
+                        </form>
+                        <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
+                            <p className="text-[10px] text-slate-400">V2.1 ENTERPRISE • COBRECOM TI</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ConfigModal = ({ onClose, users }) => {
+            const [newUser, setNewUser] = useState({ id: '', name: '', pass: '' });
+            
+            const handleAddUser = (e) => {
+                e.preventDefault();
+                if(!newUser.id || !newUser.name || !newUser.pass) return alert("Preencha todos os campos.");
+                if(users.some(u => u.id === newUser.id)) return alert("ID já cadastrado.");
+                db.collection('users').add(newUser).then(() => { alert("Usuário adicionado."); setNewUser({ id: '', name: '', pass: '' }); });
+            };
+
+            const handleDeleteUser = (docId) => { if(confirm("Remover usuário?")) db.collection('users').doc(docId).delete(); };
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm fade-in">
+                    <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" noPadding>
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Configurações de Equipe</h2>
+                            <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                        </div>
+                        <div className="p-6 overflow-y-auto grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Adicionar Membro</h3>
+                                <form onSubmit={handleAddUser} className="space-y-3">
+                                    <Input placeholder="ID (Matrícula)" value={newUser.id} onChange={e => setNewUser({...newUser, id: e.target.value})} />
+                                    <Input placeholder="Nome Completo" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
+                                    <Input type="password" placeholder="Senha de Acesso" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} />
+                                    <Button type="submit" className="w-full">{Icons.Plus} Cadastrar</Button>
+                                </form>
+                            </div>
+                            <div>
+                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Membros Ativos</h3>
+                                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                                    {users.map(u => (
+                                        <div key={u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
+                                            <div>
+                                                <div className="font-semibold text-sm text-slate-700 dark:text-slate-200">{u.name}</div>
+                                                <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
+                                            </div>
+                                            {u.id !== 'admin' && <button onClick={() => handleDeleteUser(u.docId)} className="text-slate-400 hover:text-red-500 transition-colors">{Icons.Trash}</button>}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            );
+        };
+
+        const ReceiptView = ({ ticket, onBack, onArchive, logo, currentUser }) => {
+            const [obs, setObs] = useState('');
+            const meta = ticket.data.meta;
+            const identificador = meta.maquina || meta.equipamento || "N/A";
+            
+            // Cálculos
+            let totalTasks = 0, checkedTasks = 0;
+            const pendingList = [];
+            const categorySummary = Object.values(ticket.data.items).map(group => {
+                const total = group.tasks.length;
+                const checked = group.tasks.filter(t => t.checked).length;
+                group.tasks.forEach(t => { if(!t.checked) pendingList.push(`- [${group.title}] ${t.label}`); });
+                totalTasks += total;
+                checkedTasks += checked;
+                return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
+            });
+            const percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
+            const statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
+
+            const handleSendOutlook = () => {
+                const subject = `[${statusGlobal}] Checklist #${ticket.visualId} - ${identificador}`;
+                const body = `RELATÓRIO TÉCNICO\n----------------------------------------\nID: #${ticket.visualId}\nATIVO: ${identificador}\nSTATUS: ${statusGlobal}\nTÉCNICO: ${meta.tecnico}\nDATA: ${new Date().toLocaleDateString()}\n----------------------------------------\nRESUMO:\n${categorySummary.map(c => `[${c.status}] ${c.title}`).join('\n')}\n----------------------------------------\nOBSERVAÇÕES:\n${obs || "Sem observações."}\n\nGerado via InfraChecklist`;
+                window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                
+                // Pequeno delay para UX
+                setTimeout(() => {
+                    if(confirm("E-mail aberto? Clique OK para arquivar.")) onArchive(ticket);
+                }, 1000);
+            };
+
+            return (
+                <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-auto p-4 md:p-8">
+                    <div className="max-w-4xl mx-auto w-full space-y-6 fade-in no-print">
+                        <div className="flex items-center justify-between">
+                             <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 cursor-pointer" onClick={onBack}>
+                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar à Edição</span>
+                            </div>
+                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Revisão & Entrega</h1>
+                        </div>
+
+                        <Card className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
+                                    <textarea value={obs} onChange={e => setObs(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
+                                </div>
+                            </div>
+                            <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações de Encerramento</h3>
+                                <Button className="w-full justify-start" onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
+                                <Button className="w-full justify-start" onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail & Arquivar</Button>
+                            </div>
+                        </Card>
+                    </div>
+
+                    {/* ÁREA DE IMPRESSÃO (Oculta na tela, visível no print) */}
+                    <div id="receipt-area" className="hidden bg-white text-black font-sans text-xs border border-gray-300 p-0">
+                         <div className="flex justify-between items-center p-6 border-b-2 border-black">
+                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Infraestrutura</p></div></div>
+                            <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date().toLocaleDateString()}</div></div>
+                        </div>
+                        <div className="grid grid-cols-4 border-b border-black">
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate">{identificador}</span></div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Tipo</span><span className="font-bold uppercase">{ticket.type}</span></div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{meta.tecnico}</span></div>
+                            <div className={`p-3 text-center flex flex-col justify-center ${percent === 100 ? 'bg-gray-100' : 'bg-gray-200'}`}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
+                        </div>
+                        <div className="p-6 flex gap-8">
+                            <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map((cat, i) => (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>))}</tbody></table></div>
+                            <div className="w-1/2 flex flex-col gap-4">
+                                {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map((p, i) => <li key={i} className="truncate">{p.replace('- ', '')}</li>)}</ul></div>)}
+                                <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16">{obs || "Sem observações adicionais."}</p></div>
+                            </div>
+                        </div>
+                        <div className="mt-8 px-6 pb-6 pt-4 flex justify-between gap-12"><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Técnico Responsável</p></div><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Validado Por</p></div></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish }) => {
+            if (!ticket) return null;
+            const { data } = ticket;
+
+            const handleMeta = (field, value) => { onUpdate({ ...data, meta: { ...data.meta, [field]: value } }); };
+            const handleCheck = (section, taskId) => {
+                const newData = { ...data };
+                const newTasks = newData.items[section].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
+                newData.items[section] = { ...newData.items[section], tasks: newTasks };
+                onUpdate(newData);
+            };
+
+            let total = 0, checked = 0;
+            Object.values(data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
+            const progress = total === 0 ? 0 : Math.round((checked/total)*100);
+
+            return (
+                <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950 relative">
+                    {/* Header do Checklist */}
+                    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-sm z-10 shrink-0">
+                        <div className="flex items-center gap-4">
+                            <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500">{Icons.ChevronLeft}</button>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-none">#{ticket.visualId}</h2>
+                                    <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1">Criado em {new Date(ticket.createdAt).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="text-right hidden sm:block">
+                                <span className="text-xs font-bold text-brand-600 block">{progress}% Completo</span>
+                                <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-brand-600 transition-all duration-500" style={{width: `${progress}%`}}></div></div>
+                            </div>
+                            <Button onClick={onRequestFinish} variant={progress === 100 ? 'primary' : 'secondary'}>{progress === 100 ? 'Finalizar' : 'Revisar'}</Button>
+                        </div>
+                    </div>
+
+                    {/* Corpo Scrollável */}
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                        <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" noPadding>
+                            <div className="p-6 col-span-full border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                                <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Dados do Equipamento</h3>
+                            </div>
+                            <div className="p-6 pt-2 col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {Object.keys(data.meta).map(field => (
+                                    <div key={field}>
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">{field}</label>
+                                        <Input type={field === 'data' ? 'date' : 'text'} value={data.meta[field]} onChange={e => handleMeta(field, e.target.value)} />
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
+                            {Object.entries(data.items).map(([key, group]) => (
+                                <Card key={key} noPadding className="overflow-hidden h-fit">
+                                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center gap-2">
+                                        <div className="text-brand-500">{Icons[group.icon]}</div>
+                                        <h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3>
+                                    </div>
+                                    <div className="divide-y divide-slate-50 dark:divide-slate-800/50">
+                                        {group.tasks.map(task => (
+                                            <label key={task.id} className="flex items-start gap-3 p-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer group transition-colors select-none">
+                                                <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-all duration-200 ${task.checked ? 'bg-brand-600 border-brand-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                                                    {task.checked && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>}
+                                                </div>
+                                                <input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="hidden" />
+                                                <span className={`text-sm font-medium ${task.checked ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-300'}`}>{task.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Dashboard = ({ activeTickets, onNewTicket, onOpenTicket, onDeleteTicket, historyCount }) => {
+            const formatCount = activeTickets.filter(t => t.type === 'formatacao').length;
+            const zebraCount = activeTickets.filter(t => t.type !== 'formatacao').length;
+
+            return (
+                <div className="p-6 md:p-10 space-y-8 fade-in">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Visão Geral</h2>
+                        <p className="text-slate-500 text-sm">Monitoramento de atividades de infraestrutura em tempo real.</p>
+                    </div>
+                    
+                    {/* KPI CARDS */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Card className="flex items-center justify-between p-5 border-l-4 border-l-brand-500">
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Chamados Abertos</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
+                            <div className="bg-brand-50 dark:bg-brand-900/20 p-3 rounded-xl text-brand-600">{Icons.Layout}</div>
+                        </Card>
+                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-emerald-500">
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Histórico Total</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl text-emerald-600">{Icons.History}</div>
+                        </Card>
+                        <Card className="flex items-center justify-between p-5 border-l-4 border-l-indigo-500">
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Formatações</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
+                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-xl text-indigo-600">{Icons.Server}</div>
+                        </Card>
+                    </div>
+
+                    {/* ACTION BAR */}
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <button onClick={() => onNewTicket('formatacao')} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">{Icons.Plus}</div>
+                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Checklist completo de P.C.</span></div>
+                            </div>
+                        </button>
+                        <button onClick={() => onNewTicket('zebra')} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 group-hover:text-brand-500">{Icons.Printer}</div>
+                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Impressoras térmicas</span></div>
+                            </div>
+                        </button>
+                    </div>
+
+                    {/* ACTIVE TICKETS */}
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila de Atendimento</h3>
+                        {activeTickets.length === 0 ? (
+                            <div className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-12 text-center">
+                                <p className="text-slate-400 font-medium">Nenhum chamado ativo no momento.</p>
+                                <p className="text-xs text-slate-500 mt-1">Inicie um novo atendimento acima.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {activeTickets.map(ticket => {
+                                    let total = 0, checked = 0;
+                                    Object.values(ticket.data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
+                                    const pct = total === 0 ? 0 : Math.round((checked/total)*100);
+                                    
+                                    return (
+                                        <div key={ticket.id} onClick={() => onOpenTicket(ticket.id)} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
+                                            <div className="absolute top-0 left-0 w-1 h-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <div className="flex justify-between items-start mb-3">
+                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                                <span className="text-xs font-mono font-bold text-slate-400">#{ticket.visualId}</span>
+                                            </div>
+                                            <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1">{ticket.data.meta.maquina || "Sem Identificação"}</h4>
+                                            <p className="text-xs text-slate-500 mb-4 flex items-center gap-1">{Icons.User} {ticket.data.meta.tecnico}</p>
+                                            
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-brand-500" style={{width: `${pct}%`}}></div>
+                                                </div>
+                                                <span className="text-xs font-bold text-brand-600">{pct}%</span>
+                                            </div>
+                                            <button onClick={(e) => onDeleteTicket(e, ticket.id)} className="absolute top-4 right-4 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const HistoryView = ({ history }) => {
+            const [search, setSearch] = useState('');
+            const filtered = history.filter(h => 
+                h.ativo.toLowerCase().includes(search.toLowerCase()) || 
+                h.tecnico.toLowerCase().includes(search.toLowerCase()) || 
+                (h.visualId && h.visualId.toLowerCase().includes(search.toLowerCase()))
+            );
+
+            return (
+                <div className="p-6 md:p-10 h-full flex flex-col fade-in">
+                    <div className="flex justify-between items-end mb-6">
+                        <div>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Atendimentos</h2>
+                            <p className="text-slate-500 text-sm">Registro auditável de todas as manutenções.</p>
+                        </div>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
+                            <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 w-64" />
+                        </div>
+                    </div>
+                    
+                    <Card className="flex-1 overflow-hidden flex flex-col" noPadding>
+                        <div className="overflow-auto flex-1">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-500 uppercase sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
+                                    <tr>
+                                        <th className="px-6 py-3">ID</th>
+                                        <th className="px-6 py-3">Data</th>
+                                        <th className="px-6 py-3">Tipo</th>
+                                        <th className="px-6 py-3">Ativo</th>
+                                        <th className="px-6 py-3">Técnico</th>
+                                        <th className="px-6 py-3 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                    {filtered.map((h, i) => (
+                                        <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                            <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
+                                            <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date).toLocaleDateString()}</td>
+                                            <td className="px-6 py-3"><Badge color={h.type === 'formatacao' ? 'blue' : 'amber'}>{h.type}</Badge></td>
+                                            <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo}</td>
+                                            <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico}</td>
+                                            <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
+                                        </tr>
+                                    ))}
+                                    {filtered.length === 0 && <tr><td colSpan="6" className="text-center py-8 text-slate-400">Nenhum registro encontrado.</td></tr>}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+                </div>
+            );
+        };
 
         const App = () => {
             const [view, setView] = useState('login');
             const [currentUser, setCurrentUser] = useState(null);
-            const [stock, setStock] = useState([]);
+            const [users, setUsers] = useState([]);
+            const [activeTickets, setActiveTickets] = useState([]);
             const [history, setHistory] = useState([]);
+            const [logo, setLogo] = useState('');
+            const [currentTicketId, setCurrentTicketId] = useState(null);
             const [darkMode, setDarkMode] = useState(true);
-            const [showModal, setShowModal] = useState(false);
-            const [editingItem, setEditingItem] = useState(null);
+            const [showConfig, setShowConfig] = useState(false);
+            const fileInputRef = useRef(null);
 
+            // Efeitos e Lógica (MANTIDO DO ORIGINAL, SÓ UI ALTERADA)
             useEffect(() => {
-                const unsubStock = db.collection('estoque').onSnapshot(s => setStock(s.docs.map(d => ({id: d.id, ...d.data()}))));
-                const unsubHist = db.collection('historico_estoque').orderBy('data', 'desc').limit(30).onSnapshot(s => setHistory(s.docs.map(d => ({id: d.id, ...d.data()}))));
-                return () => { unsubStock(); unsubHist(); };
+                const savedTheme = localStorage.getItem('sa_theme'); 
+                if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+                
+                const savedLogo = localStorage.getItem('sa_logo'); if (savedLogo) setLogo(savedLogo);
+                const savedUser = localStorage.getItem('sa_user_session'); if (savedUser) { setCurrentUser(JSON.parse(savedUser)); setView('dashboard'); }
+
+                const unsubTickets = db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))));
+                const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(snap => setHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+                const unsubUsers = db.collection('users').onSnapshot(snap => {
+                    if (snap.empty) db.collection('users').add({ id: 'admin', name: 'Admin', pass: 'admin' });
+                    else setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() })));
+                });
+                return () => { unsubTickets(); unsubHistory(); unsubUsers(); };
             }, []);
 
-            useEffect(() => {
-                document.documentElement.classList.toggle('dark', darkMode);
+            useEffect(() => { 
+                if (darkMode) document.documentElement.classList.add('dark'); 
+                else document.documentElement.classList.remove('dark'); 
+                localStorage.setItem('sa_theme', JSON.stringify(darkMode)); 
             }, [darkMode]);
 
-            const handleLogin = (e) => {
-                e.preventDefault();
-                if(e.target.id.value === "01001071") { setCurrentUser({ name: "Inacio", id: "01001071" }); setView('stock'); }
-                else alert("Matrícula inválida");
+            const handleLogin = (user) => { setCurrentUser(user); localStorage.setItem('sa_user_session', JSON.stringify(user)); setView('dashboard'); };
+            const handleLogout = () => { setCurrentUser(null); localStorage.removeItem('sa_user_session'); setView('login'); };
+            
+            const handleCreateTicket = async (type) => {
+                const prefix = type === 'formatacao' ? 'F' : 'Z';
+                const counterRef = db.collection('counters').doc(type);
+                try {
+                    await db.runTransaction(async (t) => {
+                        const doc = await t.get(counterRef);
+                        const nextSeq = doc.exists ? doc.data().current + 1 : 1001;
+                        t.set(counterRef, { current: nextSeq }, { merge: true });
+                        const newRef = db.collection('tickets').doc();
+                        t.set(newRef, { visualId: `${prefix}-${nextSeq}`, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
+                        setCurrentTicketId(newRef.id);
+                        setView('checklist');
+                    });
+                } catch (e) { alert("Erro de conexão."); }
             };
 
-            const saveItem = async (e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const itemData = {
-                    cod: formData.get('cod'),
-                    nome: formData.get('nome'),
-                    categoria: formData.get('categoria'),
-                    valor: parseFloat(formData.get('valor')) || 0,
-                    qtd: parseInt(formData.get('qtd')) || 0,
-                    min: parseInt(formData.get('min')) || 0,
-                    max: parseInt(formData.get('max')) || 0,
-                    obs: formData.get('obs')
-                };
-
-                if(editingItem) {
-                    await db.collection('estoque').doc(editingItem.id).update(itemData);
-                } else {
-                    await db.collection('estoque').add(itemData);
-                }
-                setShowModal(false);
-                setEditingItem(null);
+            const handleUpdateTicket = (newData) => { if (currentTicketId) db.collection('tickets').doc(currentTicketId).update({ data: newData }); };
+            
+            const handleArchive = (ticket) => {
+                if(!ticket) return;
+                db.collection('history').add({ 
+                    visualId: ticket.visualId, type: ticket.type, date: new Date().toISOString(), 
+                    tecnico: ticket.data.meta.tecnico, ativo: ticket.data.meta.maquina || "N/A", data: ticket.data 
+                }).then(() => db.collection('tickets').doc(ticket.id).delete())
+                  .then(() => { setCurrentTicketId(null); setView('dashboard'); });
             };
+            
+            const handleDeleteActive = (e, id) => { e.stopPropagation(); if(confirm("Cancelar chamado?")) db.collection('tickets').doc(id).delete(); };
+            const handleLogoUpload = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onloadend = () => { setLogo(r.result); localStorage.setItem('sa_logo', r.result); }; r.readAsDataURL(f); }};
 
-            const deleteItem = async (id) => {
-                if(confirm("Deseja realmente excluir este item?")) await db.collection('estoque').doc(id).delete();
-            };
-
-            if (view === 'login') return (
-                <div className="h-screen flex items-center justify-center bg-slate-900 px-4">
-                    <Card className="w-full max-w-sm text-center space-y-6">
-                        <h1 className="text-2xl font-bold text-brand-600 tracking-tighter">INFRA CENTRAL</h1>
-                        <form onSubmit={handleLogin} className="space-y-4 text-left">
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">Acesso por Matrícula</label>
-                                <input name="id" placeholder="000000" className="w-full p-3 rounded-lg border dark:border-slate-700 dark:bg-slate-800 mt-1" required />
-                            </div>
-                            <button className="w-full bg-brand-600 text-white p-3 rounded-lg font-bold shadow-lg shadow-brand-900/40 hover:bg-brand-700 transition-all">Entrar no Sistema</button>
-                        </form>
-                    </Card>
-                </div>
-            );
+            if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
 
             return (
-                <div className="flex h-screen overflow-hidden">
+                <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
                     {/* SIDEBAR */}
-                    <aside className="w-64 bg-slate-900 text-slate-400 p-4 space-y-2 no-print shrink-0 border-r border-slate-800 flex flex-col">
-                        <div className="text-white font-bold text-xl mb-10 px-2 tracking-tighter italic">STOCKPRO V2</div>
-                        <nav className="flex-1 space-y-1">
-                            {[
-                                {id: 'stock', label: 'Inventário', icon: Icons.Stock},
-                                {id: 'compras', label: 'Reposição', icon: Icons.Cart},
-                                {id: 'history', label: 'Log de Estoque', icon: Icons.History},
-                                {id: 'checklist', label: 'Checklist Infra', icon: Icons.Check}
-                            ].map(m => (
-                                <button key={m.id} onClick={() => setView(m.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all font-medium text-sm ${view === m.id ? 'bg-brand-600 text-white shadow-lg' : 'hover:bg-slate-800 hover:text-slate-200'}`}>
-                                    {m.icon} {m.label}
-                                </button>
-                            ))}
+                    <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 z-20 shrink-0">
+                        <div className="h-16 flex items-center gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800">
+                            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                            </div>
+                            INFRA CHECK
+                        </div>
+                        <nav className="flex-1 py-6 px-3 space-y-1">
+                            <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm ${view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
+                                {Icons.Layout} Dashboard
+                            </button>
+                            <button onClick={() => setView('history')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm ${view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
+                                {Icons.History} Histórico
+                            </button>
                         </nav>
-                        <div className="p-2 border-t border-slate-800 text-[10px] flex justify-between items-center font-bold">
-                            <span>{currentUser.name.toUpperCase()}</span>
-                            <button onClick={() => setDarkMode(!darkMode)} className="p-1 hover:text-white transition-colors">{darkMode ? "🌙 MODO DARK" : "☀️ MODO LIGHT"}</button>
+                        <div className="p-4 border-t border-slate-800">
+                            <div className="flex items-center gap-3 mb-4 px-2">
+                                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
+                                    {currentUser.name.charAt(0)}
+                                </div>
+                                <div className="overflow-hidden">
+                                    <p className="text-sm font-bold text-white truncate">{currentUser.name}</p>
+                                    <p className="text-xs text-slate-500">Técnico Infra</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
+                                <button onClick={() => setShowConfig(true)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                <button onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-slate-800 text-center">
+                                <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={() => fileInputRef.current.click()}>Alterar Logo</p>
+                                <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
+                            </div>
                         </div>
                     </aside>
 
-                    <main className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
-                        
-                        {/* VIEW: INVENTÁRIO COMPLETO */}
-                        {view === 'stock' && (
-                            <div className="fade-in max-w-7xl mx-auto space-y-6">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <h2 className="text-2xl font-bold tracking-tight">Controle de Estoque</h2>
-                                        <p className="text-slate-500 text-xs mt-1">Gerenciamento detalhado de insumos e ativos T.I</p>
-                                    </div>
-                                    <button onClick={() => { setEditingItem(null); setShowModal(true); }} className="bg-brand-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-bold text-sm shadow-lg shadow-brand-900/20 hover:bg-brand-700 transition-all">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                        Cadastrar Item
-                                    </button>
-                                </div>
-
-                                <Card noPadding className="overflow-hidden border-slate-200 dark:border-slate-800">
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left text-xs border-collapse">
-                                            <thead className="bg-slate-50 dark:bg-slate-800/50 text-[10px] uppercase font-black text-slate-400 tracking-widest border-b dark:border-slate-700">
-                                                <tr>
-                                                    <th className="p-4">Código</th>
-                                                    <th className="p-4">Descrição</th>
-                                                    <th className="p-4">Categoria</th>
-                                                    <th className="p-4">Valor</th>
-                                                    <th className="p-4 text-center">Saldo</th>
-                                                    <th className="p-4">Status</th>
-                                                    <th className="p-4 text-right">Ação</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y dark:divide-slate-800">
-                                                {stock.map(item => (
-                                                    <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors group">
-                                                        <td className="p-4 font-mono font-bold text-brand-600 dark:text-brand-400">{item.cod}</td>
-                                                        <td className="p-4">
-                                                            <div className="font-bold text-slate-800 dark:text-slate-200">{item.nome}</div>
-                                                            <div className="text-[10px] text-slate-400 truncate max-w-[200px]">{item.obs || 'Sem observações'}</div>
-                                                        </td>
-                                                        <td className="p-4 text-slate-500">{item.categoria}</td>
-                                                        <td className="p-4 font-medium text-slate-600 dark:text-slate-400">R$ {item.valor?.toFixed(2)}</td>
-                                                        <td className="p-4 text-center">
-                                                            <span className="text-sm font-black">{item.qtd}</span>
-                                                            <div className="text-[9px] text-slate-400 uppercase">Min: {item.min} / Max: {item.max}</div>
-                                                        </td>
-                                                        <td className="p-4">
-                                                            <Badge color={item.qtd <= item.min ? 'red' : 'green'}>
-                                                                {item.qtd <= item.min ? 'Necessita Reposição' : 'Estoque OK'}
-                                                            </Badge>
-                                                        </td>
-                                                        <td className="p-4 text-right space-x-2 whitespace-nowrap">
-                                                            <button onClick={() => { setEditingItem(item); setShowModal(true); }} className="p-2 text-slate-400 hover:text-brand-500 transition-colors">{Icons.Edit}</button>
-                                                            <button onClick={() => deleteItem(item.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">{Icons.Trash}</button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </Card>
+                    {/* MAIN CONTENT AREA */}
+                    <main className="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950">
+                        {/* Mobile Header */}
+                        <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0">
+                            <span className="font-bold">INFRA CHECK</span>
+                            <div className="flex gap-2">
+                                <button onClick={() => setView('dashboard')} className="p-2">{Icons.Layout}</button>
+                                <button onClick={handleLogout} className="p-2">{Icons.LogOut}</button>
                             </div>
-                        )}
+                        </div>
 
-                        {/* OUTRAS VIEWS SIMPLIFICADAS PARA INTEGRAÇÃO */}
-                        {view === 'compras' && <div className="text-center py-20"><h2 className="text-2xl font-bold">Módulo Reposição</h2><p className="text-slate-500">Itens abaixo do mínimo aparecerão aqui para gerar SC.</p></div>}
-                        {view === 'history' && <div className="text-center py-20"><h2 className="text-2xl font-bold">Módulo Log</h2><p className="text-slate-500">Rastreabilidade de entradas e saídas.</p></div>}
-                        {view === 'checklist' && <div className="text-center py-20"><h2 className="text-2xl font-bold">Módulo Checklist</h2><p className="text-slate-500 text-sm mb-6">Redirecionando para o InfraCheck...</p><button onClick={() => window.open('checkinfra-ok.html', '_blank')} className="bg-brand-600 text-white px-6 py-2 rounded-lg font-bold">Abrir em Nova Aba</button></div>}
-                        
+                        {/* Views */}
+                        <div className="flex-1 overflow-auto relative">
+                            {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} />}
+                            {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
+                            {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={handleUpdateTicket} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
+                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} currentUser={currentUser} />}
+                            {view === 'history' && <HistoryView history={history} />}
+                        </div>
                     </main>
                 </div>
             );
-
-            {/* MODAL DE CADASTRO COM TODOS OS CAMPOS */}
-            {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm fade-in">
-                    <Card className="w-full max-w-lg shadow-2xl border-brand-500/20">
-                        <div className="flex justify-between items-center mb-6 border-b dark:border-slate-800 pb-4">
-                            <h3 className="text-lg font-bold">{editingItem ? 'Editar Registro' : 'Novo Item de Estoque'}</h3>
-                            <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-white">&times;</button>
-                        </div>
-                        <form onSubmit={saveItem} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase">Código</label>
-                                    <input name="cod" defaultValue={editingItem?.cod} placeholder="Ex: PRD001" className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700 mt-1" required />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase">Categoria</label>
-                                    <select name="categoria" defaultValue={editingItem?.categoria} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700 mt-1">
-                                        {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">Descrição do Item</label>
-                                <input name="nome" defaultValue={editingItem?.nome} placeholder="Ex: Monitor Dell 24 pol" className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700 mt-1" required />
-                            </div>
-                            <div className="grid grid-cols-4 gap-4">
-                                <div className="col-span-1">
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase">Valor Un.</label>
-                                    <input name="valor" step="0.01" type="number" defaultValue={editingItem?.valor} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700 mt-1" />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase">Qtd Atual</label>
-                                    <input name="qtd" type="number" defaultValue={editingItem?.qtd} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700 mt-1" required />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase">Qtd Mín</label>
-                                    <input name="min" type="number" defaultValue={editingItem?.min} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700 mt-1" required />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase">Qtd Máx</label>
-                                    <input name="max" type="number" defaultValue={editingItem?.max} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700 mt-1" />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">Observações / Localização</label>
-                                <textarea name="obs" defaultValue={editingItem?.obs} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700 mt-1 h-20 resize-none" placeholder="Prateleira A, Armário 2..."></textarea>
-                            </div>
-                            <div className="flex gap-2 pt-4">
-                                <button type="button" onClick={() => setShowModal(false)} className="flex-1 p-3 rounded-lg font-bold text-xs bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">CANCELAR</button>
-                                <button type="submit" className="flex-1 p-3 rounded-lg font-bold text-xs bg-brand-600 text-white shadow-lg shadow-brand-900/30">SALVAR REGISTRO</button>
-                            </div>
-                        </form>
-                    </Card>
-                </div>
-            )}
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
