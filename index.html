@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFRA CHECKLIST | Enterprise Edition</title>
+    <title>STOCKPRO & INFRA CHECKLIST | Enterprise</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -21,15 +21,8 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
-                        }
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: { brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' } }
                 }
             }
         }
@@ -37,25 +30,18 @@
 
     <style>
         body { -webkit-print-color-adjust: exact; }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
-
         @media print {
-            @page { margin: 0; size: auto; }
-            body, html { background-color: white !important; color: black !important; height: auto; overflow: visible; }
-            body * { visibility: hidden; }
-            #receipt-area, #receipt-area * { visibility: visible; }
-            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; z-index: 9999; }
             .no-print { display: none !important; }
+            #receipt-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased transition-colors duration-300">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -73,427 +59,207 @@
         const db = firebase.firestore();
         const { useState, useEffect, useRef } = React;
 
-        // --- CONSTANTES ---
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
 
         // --- ICONS ---
         const Icons = {
-            Layout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
-            User: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-            History: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
-            Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-            LogOut: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-            Check: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
-            Printer: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
-            Search: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
-            Moon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
-            Sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
-            Trash: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
-            Server: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
-            Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
-            ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
+            Stock: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
+            Check: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
+            Cart: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>,
+            Trash: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         };
 
         // --- TEMPLATES ---
-        const getTemplate = (type, tecnicoName) => {
-            const tmpl = {
-                meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' },
-                items: {}
-            };
-            if (type === 'formatacao') {
-                tmpl.items = {
-                    preventivas: { title: "Preventivas", icon: "Server", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
-                    preparacao: { title: "Backup & Prep", icon: "Server", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
-                    sistema: { title: "Sistema Operacional", icon: "Server", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
-                    seguranca: { title: "Segurança", icon: "Server", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
-                    configuracao: { title: "Configurações", icon: "Server", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
-                    apps: { title: "Aplicações", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
-                    finalizacao: { title: "Entrega", icon: "Server", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
-                };
-            } else {
-                tmpl.items = {
-                    inspecao: { title: "Inspeção Física", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
-                    preventiva: { title: "Manutenção", icon: "Server", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
-                    teste: { title: "Validação", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
-                };
+        const getChecklistTemplate = (type, user) => ({
+            meta: { tecnico: user, data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' },
+            items: type === 'formatacao' ? {
+                prev: { title: "Preventivas", icon: "Stock", tasks: [{id: 'f1', label: 'Limpeza Interna', checked: false}, {id: 'f2', label: 'Pasta Térmica', checked: false}] },
+                sis: { title: "Sistema", icon: "Stock", tasks: [{id: 'f3', label: 'Drivers', checked: false}, {id: 'f4', label: 'Domínio', checked: false}] }
+            } : {
+                insp: { title: "Inspeção", icon: "Check", tasks: [{id: 'z1', label: 'Cabeça Impressão', checked: false}, {id: 'z2', label: 'Rolete', checked: false}] }
             }
-            return tmpl;
+        });
+
+        // --- COMPONENTES ---
+        const Card = ({ children, className = "" }) => <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm ${className}`}>{children}</div>;
+        const Button = ({ children, onClick, variant = "primary", disabled }) => {
+            const styles = variant === "primary" ? "bg-brand-600 text-white hover:bg-brand-700" : "bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200";
+            return <button onClick={onClick} disabled={disabled} className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 disabled:opacity-50 ${styles}`}>{children}</button>;
         };
 
-        // --- COMPONENTES UI ---
-        const Button = ({ children, variant = 'primary', className = "", ...props }) => {
-            const variants = {
-                primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
-                secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700',
-                danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/40 dark:text-red-400',
-                ghost: 'bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-            };
-            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
-        };
+        // --- APP PRINCIPAL ---
+        const App = () => {
+            const [view, setView] = useState('login'); // login, stock, checklist, compras, dashboard
+            const [currentUser, setCurrentUser] = useState(null);
+            const [activeTickets, setActiveTickets] = useState([]);
+            const [estoque, setEstoque] = useState([]);
+            const [currentTicket, setCurrentTicket] = useState(null);
 
-        const Card = ({ children, className = "", noPadding = false, ...props }) => (
-            <div {...props} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${noPadding ? '' : 'p-6'} ${className}`}>{children}</div>
-        );
+            useEffect(() => {
+                const unsub = db.collection('tickets').onSnapshot(s => setActiveTickets(s.docs.map(d => ({id: d.id, ...d.data()}))));
+                const unsubStock = db.collection('estoque').onSnapshot(s => setEstoque(s.docs.map(d => ({id: d.id, ...d.data()}))));
+                return () => { unsub(); unsubStock(); };
+            }, []);
 
-        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all ${props.className}`} />;
-
-        const Badge = ({ children, color = 'slate' }) => {
-            const colors = {
-                slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
-                blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-                green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-                amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-            };
-            return <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${colors[color]}`}>{children}</span>
-        };
-
-        // --- TELAS ---
-
-        const LoginScreen = ({ onLogin, users }) => {
-            const [id, setId] = useState('');
-            const [pass, setPass] = useState('');
-            const [error, setError] = useState('');
-
-            const handleSubmit = (e) => {
+            const handleLogin = (e) => {
                 e.preventDefault();
-                const user = users.find(u => u.id === id && u.pass === pass);
-                if (user) onLogin(user); else setError('Credenciais inválidas.');
+                const id = e.target.id.value;
+                if(id === "01001071") { setCurrentUser("Inacio"); setView('dashboard'); }
+                else alert("ID inválido");
             };
 
-            return (
-                <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
-                    <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden fade-in">
-                        <div className="p-8 pb-6 text-center border-b border-slate-100 dark:border-slate-800">
-                            <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-brand-500/30">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                            </div>
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
-                            <p className="text-sm text-slate-500 mt-1">Acesso Administrativo</p>
-                        </div>
-                        <form onSubmit={handleSubmit} className="p-8 space-y-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">ID Usuário</label>
-                                <Input value={id} onChange={e => setId(e.target.value)} placeholder="000000" autoFocus />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha</label>
-                                <Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••" />
-                            </div>
-                            {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</div>}
-                            <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
+            const createTicket = async (type) => {
+                const doc = await db.collection('tickets').add({
+                    visualId: `${type === 'formatacao' ? 'F' : 'Z'}-${Math.floor(1000 + Math.random() * 9000)}`,
+                    type,
+                    data: getChecklistTemplate(type, currentUser),
+                    createdAt: new Date().toISOString()
+                });
+                setCurrentTicket({id: doc.id, type, data: getChecklistTemplate(type, currentUser)});
+                setView('active-check');
+            };
+
+            const toggleTask = (section, taskId) => {
+                const newData = {...currentTicket.data};
+                newData.items[section].tasks = newData.items[section].tasks.map(t => t.id === taskId ? {...t, checked: !t.checked} : t);
+                setCurrentTicket({...currentTicket, data: newData});
+                db.collection('tickets').doc(currentTicket.id).update({ data: newData });
+            };
+
+            if (view === 'login') return (
+                <div className="h-screen flex items-center justify-center bg-slate-900">
+                    <Card className="w-80 text-center">
+                        <h1 className="text-xl font-bold mb-6">STOCKPRO LOGIN</h1>
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <input name="id" placeholder="ID Matrícula" className="w-full p-2 border rounded dark:bg-slate-800" required />
+                            <Button className="w-full">Entrar</Button>
                         </form>
-                    </div>
+                    </Card>
                 </div>
             );
-        };
-
-        const ConfigModal = ({ onClose, users }) => {
-            const [newUser, setNewUser] = useState({ id: '', name: '', pass: '' });
-            const handleAddUser = (e) => {
-                e.preventDefault();
-                if(!newUser.id || !newUser.name || !newUser.pass) return alert("Preencha todos os campos.");
-                if(users.some(u => u.id === newUser.id)) return alert("ID já cadastrado.");
-                db.collection('users').add(newUser).then(() => { alert("Usuário adicionado."); setNewUser({ id: '', name: '', pass: '' }); });
-            };
-            const handleDeleteUser = (docId) => { if(confirm("Remover usuário?")) db.collection('users').doc(docId).delete(); };
 
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm fade-in">
-                    <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" noPadding>
-                        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Configurações</h2>
-                            <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-600">&times;</button>
-                        </div>
-                        <div className="p-6 overflow-y-auto grid md:grid-cols-2 gap-8">
-                            <form onSubmit={handleAddUser} className="space-y-3">
-                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4">Adicionar Membro</h3>
-                                <Input placeholder="ID" value={newUser.id} onChange={e => setNewUser({...newUser, id: e.target.value})} />
-                                <Input placeholder="Nome" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
-                                <Input type="password" placeholder="Senha" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} />
-                                <Button type="submit" className="w-full">{Icons.Plus} Cadastrar</Button>
-                            </form>
-                            <div>
-                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4">Equipe</h3>
-                                <div className="space-y-2 max-h-[250px] overflow-y-auto pr-2">
-                                    {users.map(u => (
-                                        <div key={u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
-                                            <div className="text-sm font-medium">{u.name}</div>
-                                            {u.id !== 'admin' && <button onClick={() => handleDeleteUser(u.docId)} className="text-slate-400 hover:text-red-500">{Icons.Trash}</button>}
-                                        </div>
+                <div className="flex h-screen overflow-hidden">
+                    {/* SIDEBAR */}
+                    <aside className="w-64 bg-slate-900 text-slate-400 p-4 space-y-2 no-print">
+                        <div className="text-white font-bold text-xl mb-8 px-2">STOCKPRO</div>
+                        {[
+                            {id: 'dashboard', label: 'Dashboard', icon: Icons.Layout},
+                            {id: 'stock', label: 'Estoque', icon: Icons.Stock},
+                            {id: 'checklist', label: 'Checklist', icon: Icons.Check},
+                            {id: 'compras', label: 'Compras', icon: Icons.Cart}
+                        ].map(item => (
+                            <button key={item.id} onClick={() => setView(item.id)} className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${view === item.id ? 'bg-brand-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}>
+                                {item.icon} {item.label}
+                            </button>
+                        ))}
+                    </aside>
+
+                    {/* CONTEÚDO */}
+                    <main className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-950 p-8">
+                        
+                        {/* VIEW: ESTOQUE (Como na imagem) */}
+                        {view === 'stock' && (
+                            <div className="fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-2xl font-bold">Inventário</h2>
+                                    <Button onClick={() => alert('Abrir modal cadastro')}>+ Novo Item</Button>
+                                </div>
+                                <Card noPadding>
+                                    <table className="w-full text-left">
+                                        <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] uppercase font-bold text-slate-500">
+                                            <tr>
+                                                <th className="p-4">Código</th>
+                                                <th className="p-4">Item</th>
+                                                <th className="p-4">Qtd</th>
+                                                <th className="p-4">Status</th>
+                                                <th className="p-4">Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y dark:divide-slate-800">
+                                            {estoque.map(i => (
+                                                <tr key={i.id}>
+                                                    <td className="p-4 font-mono text-sm">{i.cod}</td>
+                                                    <td className="p-4 font-medium">{i.nome}</td>
+                                                    <td className="p-4">{i.qtd}</td>
+                                                    <td className="p-4"><span className={`px-2 py-1 rounded text-xs ${i.qtd < 5 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                                        {i.qtd < 5 ? 'Crítico' : 'OK'}
+                                                    </span></td>
+                                                    <td className="p-4"><button className="text-slate-400 hover:text-red-500">{Icons.Trash}</button></td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </Card>
+                            </div>
+                        )}
+
+                        {/* VIEW: CHECKLIST (Interface de Tickets) */}
+                        {view === 'checklist' && (
+                            <div className="fade-in space-y-6">
+                                <div className="flex gap-4">
+                                    <button onClick={() => createTicket('formatacao')} className="flex-1 p-6 bg-brand-600 text-white rounded-xl shadow-lg hover:scale-[1.02] transition-all text-left">
+                                        <div className="mb-4">{Icons.Stock}</div>
+                                        <h3 className="font-bold">Nova Formatação</h3>
+                                        <p className="text-xs opacity-80">Checklist completo para PCs/Notebooks</p>
+                                    </button>
+                                    <button onClick={() => createTicket('zebra')} className="flex-1 p-6 bg-white dark:bg-slate-900 border rounded-xl shadow-sm hover:scale-[1.02] transition-all text-left">
+                                        <div className="mb-4 text-brand-600">{Icons.Check}</div>
+                                        <h3 className="font-bold">Manutenção Zebra</h3>
+                                        <p className="text-xs text-slate-500">Limpeza e calibração de impressoras</p>
+                                    </button>
+                                </div>
+                                
+                                <h3 className="font-bold text-lg mt-8">Chamados em Aberto</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {activeTickets.map(t => (
+                                        <Card key={t.id} className="relative group cursor-pointer hover:border-brand-500" onClick={() => {setCurrentTicket(t); setView('active-check');}}>
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="text-xs font-bold text-brand-600">#{t.visualId}</span>
+                                                <button onClick={(e) => {e.stopPropagation(); db.collection('tickets').doc(t.id).delete();}} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500">{Icons.Trash}</button>
+                                            </div>
+                                            <h4 className="font-bold truncate">{t.data.meta.maquina || "Ativo Pendente"}</h4>
+                                            <p className="text-xs text-slate-500 mt-1">{new Date(t.createdAt).toLocaleDateString()}</p>
+                                        </Card>
                                     ))}
                                 </div>
                             </div>
-                        </div>
-                    </Card>
-                </div>
-            );
-        };
+                        )}
 
-        const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish }) => {
-            if (!ticket) return null;
-            const { data } = ticket;
+                        {/* VIEW: ACTIVE CHECKLIST (Executando o checklist) */}
+                        {view === 'active-check' && currentTicket && (
+                            <div className="fade-in max-w-4xl mx-auto space-y-6 pb-20">
+                                <Button variant="secondary" onClick={() => setView('checklist')}>← Voltar</Button>
+                                <Card>
+                                    <h2 className="text-xl font-bold mb-4">Executando Checklist {currentTicket.visualId}</h2>
+                                    <div className="grid grid-cols-2 gap-4 mb-6">
+                                        <input placeholder="Nome da Máquina" value={currentTicket.data.meta.maquina} onChange={(e) => {
+                                            const d = {...currentTicket.data}; d.meta.maquina = e.target.value;
+                                            setCurrentTicket({...currentTicket, data: d});
+                                            db.collection('tickets').doc(currentTicket.id).update({data: d});
+                                        }} className="p-2 border rounded dark:bg-slate-800" />
+                                        <input placeholder="Patrimônio/Ativo" className="p-2 border rounded dark:bg-slate-800" />
+                                    </div>
 
-            const handleMeta = (field, value) => { onUpdate({ ...data, meta: { ...data.meta, [field]: value } }); };
-            
-            const handleCheck = (section, taskId) => {
-                const newData = { ...data };
-                const newTasks = newData.items[section].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
-                newData.items[section] = { ...newData.items[section], tasks: newTasks };
-                onUpdate(newData);
-            };
-
-            const handleToggleSection = (sectionKey) => {
-                const newData = { ...data };
-                const section = newData.items[sectionKey];
-                const allChecked = section.tasks.every(t => t.checked);
-                const newTasks = section.tasks.map(t => ({ ...t, checked: !allChecked }));
-                newData.items[sectionKey] = { ...section, tasks: newTasks };
-                onUpdate(newData);
-            };
-
-            let total = 0, checked = 0;
-            Object.values(data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
-            const progress = total === 0 ? 0 : Math.round((checked/total)*100);
-
-            return (
-                <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950 relative">
-                    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-sm z-10 shrink-0">
-                        <div className="flex items-center gap-4">
-                            <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500">{Icons.ChevronLeft}</button>
-                            <div>
-                                <h2 className="text-lg font-bold">#{ticket.visualId} <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge></h2>
-                                <p className="text-xs text-slate-500">Iniciado em {new Date(ticket.createdAt).toLocaleDateString()}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <div className="text-right hidden sm:block">
-                                <span className="text-xs font-bold text-brand-600 block">{progress}%</span>
-                                <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-brand-600 transition-all duration-500" style={{width: `${progress}%`}}></div></div>
-                            </div>
-                            <Button onClick={onRequestFinish} variant={progress === 100 ? 'primary' : 'secondary'}>Finalizar</Button>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-                        <Card className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            {Object.keys(data.meta).map(field => (
-                                <div key={field}>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">{field}</label>
-                                    <Input type={field === 'data' ? 'date' : 'text'} value={data.meta[field]} onChange={e => handleMeta(field, e.target.value)} />
-                                </div>
-                            ))}
-                        </Card>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
-                            {Object.entries(data.items).map(([key, group]) => {
-                                const isAllChecked = group.tasks.every(t => t.checked);
-                                return (
-                                    <Card key={key} noPadding className="overflow-hidden">
-                                        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
-                                            <div className="flex items-center gap-2">
-                                                <div className="text-brand-500">{Icons[group.icon]}</div>
-                                                <h3 className="font-bold text-xs uppercase tracking-wider">{group.title}</h3>
+                                    {Object.entries(currentTicket.data.items).map(([key, section]) => (
+                                        <div key={key} className="mb-6">
+                                            <h4 className="text-xs font-bold uppercase text-slate-500 mb-2">{section.title}</h4>
+                                            <div className="space-y-2">
+                                                {section.tasks.map(task => (
+                                                    <label key={task.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                                                        <input type="checkbox" checked={task.checked} onChange={() => toggleTask(key, task.id)} className="w-5 h-5 rounded text-brand-600" />
+                                                        <span className={task.checked ? 'line-through text-slate-400' : ''}>{task.label}</span>
+                                                    </label>
+                                                ))}
                                             </div>
-                                            <button onClick={() => handleToggleSection(key)} className={`text-[10px] font-bold px-2 py-1 rounded ${isAllChecked ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
-                                                {isAllChecked ? 'LIMPAR' : 'MARCAR TODOS'}
-                                            </button>
                                         </div>
-                                        <div className="divide-y dark:divide-slate-800">
-                                            {group.tasks.map(task => (
-                                                <label key={task.id} className="flex items-start gap-3 p-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer select-none">
-                                                    <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center ${task.checked ? 'bg-brand-600 border-brand-600' : 'border-slate-300 bg-white dark:bg-slate-800'}`}>
-                                                        {task.checked && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>}
-                                                    </div>
-                                                    <input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="hidden" />
-                                                    <span className={`text-sm ${task.checked ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-300'}`}>{task.label}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </Card>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const ReceiptView = ({ ticket, onBack, onArchive, logo }) => {
-            const [obs, setObs] = useState('');
-            const meta = ticket.data.meta;
-            const ident = meta.maquina || meta.equipamento || "N/A";
-            
-            let total = 0, checked = 0;
-            const summary = Object.values(ticket.data.items).map(g => {
-                const tCount = g.tasks.length;
-                const cCount = g.tasks.filter(t => t.checked).length;
-                total += tCount; checked += cCount;
-                return { title: g.title, status: tCount === cCount ? "OK" : "PENDENTE" };
-            });
-
-            const handleFinish = () => {
-                const subject = `[RELATÓRIO] #${ticket.visualId} - ${ident}`;
-                const body = `ATIVO: ${ident}\nTÉCNICO: ${meta.tecnico}\nSTATUS: ${total === checked ? 'CONCLUÍDO' : 'PARCIAL'}\n\nOBS: ${obs}`;
-                window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                setTimeout(() => { if(confirm("Arquivar checklist?")) onArchive(ticket); }, 1000);
-            };
-
-            return (
-                <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-950 p-4 md:p-8 overflow-auto">
-                    <div className="max-w-3xl mx-auto w-full space-y-6 fade-in no-print">
-                        <button onClick={onBack} className="text-sm font-bold text-slate-500 flex items-center gap-2">{Icons.ChevronLeft} EDITAR</button>
-                        <Card className="grid md:grid-cols-2 gap-8">
-                            <textarea value={obs} onChange={e => setObs(e.target.value)} className="w-full p-4 bg-slate-50 dark:bg-slate-800 rounded-lg text-sm h-40 resize-none outline-none" placeholder="Observações finais..."></textarea>
-                            <div className="flex flex-col gap-3">
-                                <Button className="w-full" onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir PDF</Button>
-                                <Button className="w-full" onClick={handleFinish}>{Icons.Mail} Finalizar e Enviar</Button>
+                                    ))}
+                                    <Button className="w-full mt-8" onClick={() => window.print()}>Gerar Relatório / Imprimir</Button>
+                                </Card>
                             </div>
-                        </Card>
-                    </div>
-
-                    <div id="receipt-area" className="hidden bg-white text-black p-8 border border-gray-400">
-                        <div className="flex justify-between border-b-2 border-black pb-4 mb-4">
-                            <div><h1 className="text-xl font-bold uppercase">Relatório de Infraestrutura</h1><p className="text-xs">ID: #{ticket.visualId}</p></div>
-                            <div className="text-right font-bold">{ident}<br/>{new Date().toLocaleDateString()}</div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-8">
-                            <div><h3 className="font-bold border-b mb-2">Checklist</h3>{summary.map((s,i) => <div key={i} className="flex justify-between text-xs py-1 border-b border-dotted"><span>{s.title}</span><b>{s.status}</b></div>)}</div>
-                            <div><h3 className="font-bold border-b mb-2">Observações</h3><p className="text-xs italic">{obs || "Sem observações."}</p></div>
-                        </div>
-                        <div className="mt-20 flex justify-between px-10 text-[10px] uppercase font-bold">
-                            <div className="border-t border-black w-40 text-center pt-1">Assinatura Técnico</div>
-                            <div className="border-t border-black w-40 text-center pt-1">Validação Usuário</div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const Dashboard = ({ activeTickets, onNewTicket, onOpenTicket, onDeleteTicket, historyCount }) => (
-            <div className="p-6 md:p-10 space-y-8 fade-in">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="flex items-center justify-between border-l-4 border-brand-500">
-                        <div><p className="text-xs font-bold text-slate-500 uppercase">Abertos</p><h3 className="text-3xl font-bold">{activeTickets.length}</h3></div>
-                        <div className="text-brand-500">{Icons.Layout}</div>
-                    </Card>
-                    <Card className="flex items-center justify-between border-l-4 border-emerald-500">
-                        <div><p className="text-xs font-bold text-slate-500 uppercase">Histórico</p><h3 className="text-3xl font-bold">{historyCount}</h3></div>
-                        <div className="text-emerald-500">{Icons.History}</div>
-                    </Card>
-                </div>
-                <div className="flex gap-4">
-                    <Button onClick={() => onNewTicket('formatacao')} className="flex-1 h-16">{Icons.Server} Nova Formatação</Button>
-                    <Button onClick={() => onNewTicket('zebra')} variant="secondary" className="flex-1 h-16">{Icons.Printer} Manutenção Zebra</Button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {activeTickets.map(t => (
-                        <Card key={t.id} onClick={() => onOpenTicket(t.id)} className="cursor-pointer hover:border-brand-500 transition-all relative group">
-                            <div className="flex justify-between mb-4"><Badge color={t.type === 'formatacao' ? 'blue' : 'amber'}>{t.type}</Badge><span className="text-[10px] font-bold">#{t.visualId}</span></div>
-                            <h4 className="font-bold text-lg mb-4">{t.data.meta.maquina || "Ativo Pendente"}</h4>
-                            <button onClick={(e) => onDeleteTicket(e, t.id)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-        );
-
-        const HistoryView = ({ history }) => (
-            <div className="p-6 md:p-10 fade-in h-full flex flex-col">
-                <h2 className="text-2xl font-bold mb-6">Histórico Total</h2>
-                <Card className="flex-1 overflow-auto" noPadding>
-                    <table className="w-full text-sm">
-                        <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0">
-                            <tr className="text-left text-xs uppercase font-bold text-slate-500">
-                                <th className="p-4">ID</th><th className="p-4">Data</th><th className="p-4">Ativo</th><th className="p-4">Técnico</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y dark:divide-slate-800">
-                            {history.map((h, i) => (
-                                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                                    <td className="p-4 font-mono text-xs">#{h.visualId}</td>
-                                    <td className="p-4 text-xs">{new Date(h.date).toLocaleDateString()}</td>
-                                    <td className="p-4 font-bold">{h.ativo}</td>
-                                    <td className="p-4 text-slate-500 uppercase text-[10px]">{h.tecnico}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </Card>
-            </div>
-        );
-
-        // --- MAIN APP ---
-        const App = () => {
-            const [view, setView] = useState('login');
-            const [currentUser, setCurrentUser] = useState(null);
-            const [users, setUsers] = useState([]);
-            const [activeTickets, setActiveTickets] = useState([]);
-            const [history, setHistory] = useState([]);
-            const [currentTicketId, setCurrentTicketId] = useState(null);
-            const [darkMode, setDarkMode] = useState(true);
-            const [showConfig, setShowConfig] = useState(false);
-
-            useEffect(() => {
-                const savedUser = localStorage.getItem('sa_user');
-                if (savedUser) { setCurrentUser(JSON.parse(savedUser)); setView('dashboard'); }
-                db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                db.collection('history').orderBy('date', 'desc').onSnapshot(snap => setHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                db.collection('users').onSnapshot(snap => setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() }))));
-            }, []);
-
-            useEffect(() => {
-                if (darkMode) document.documentElement.classList.add('dark');
-                else document.documentElement.classList.remove('dark');
-            }, [darkMode]);
-
-            const handleLogin = (user) => { setCurrentUser(user); localStorage.setItem('sa_user', JSON.stringify(user)); setView('dashboard'); };
-            const handleLogout = () => { setCurrentUser(null); localStorage.removeItem('sa_user'); setView('login'); };
-
-            const handleCreateTicket = async (type) => {
-                const prefix = type === 'formatacao' ? 'F' : 'Z';
-                const counterRef = db.collection('counters').doc(type);
-                await db.runTransaction(async (t) => {
-                    const doc = await t.get(counterRef);
-                    const nextSeq = doc.exists ? doc.data().current + 1 : 1001;
-                    t.set(counterRef, { current: nextSeq }, { merge: true });
-                    const newRef = db.collection('tickets').doc();
-                    t.set(newRef, { visualId: `${prefix}-${nextSeq}`, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
-                    setCurrentTicketId(newRef.id); setView('checklist');
-                });
-            };
-
-            const handleArchive = (ticket) => {
-                db.collection('history').add({ visualId: ticket.visualId, date: new Date().toISOString(), tecnico: ticket.data.meta.tecnico, ativo: ticket.data.meta.maquina || "N/A" })
-                .then(() => db.collection('tickets').doc(ticket.id).delete())
-                .then(() => { setView('dashboard'); setCurrentTicketId(null); });
-            };
-
-            if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
-
-            return (
-                <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950">
-                    <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800">
-                        <div className="h-16 flex items-center gap-3 px-6 font-bold text-white border-b border-slate-800">INFRA CHECK</div>
-                        <nav className="flex-1 p-4 space-y-2">
-                            <button onClick={() => setView('dashboard')} className={`w-full flex p-2 rounded-lg ${view === 'dashboard' ? 'bg-brand-600 text-white' : ''}`}>{Icons.Layout} Dashboard</button>
-                            <button onClick={() => setView('history')} className={`w-full flex p-2 rounded-lg ${view === 'history' ? 'bg-brand-600 text-white' : ''}`}>{Icons.History} Histórico</button>
-                        </nav>
-                        <div className="p-4 border-t border-slate-800 space-y-4">
-                            <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-xs font-bold text-white">{currentUser.name[0]}</div><span className="text-sm font-bold">{currentUser.name}</span></div>
-                            <div className="flex justify-between">
-                                <button onClick={() => setDarkMode(!darkMode)} className="p-2">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                                <button onClick={() => setShowConfig(true)} className="p-2">{Icons.Settings}</button>
-                                <button onClick={handleLogout} className="p-2 text-red-400">{Icons.LogOut}</button>
-                            </div>
-                        </div>
-                    </aside>
-                    <main className="flex-1 overflow-auto relative">
-                        {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} />}
-                        {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={(e,id) => {e.stopPropagation(); db.collection('tickets').doc(id).delete();}} historyCount={history.length} />}
-                        {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={(d) => db.collection('tickets').doc(currentTicketId).update({data: d})} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
-                        {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} />}
-                        {view === 'history' && <HistoryView history={history} />}
+                        )}
+                        
                     </main>
                 </div>
             );
