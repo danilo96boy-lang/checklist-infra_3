@@ -86,7 +86,7 @@
             History: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
             Plus: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
             LogOut: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
             Check: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
             Printer: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
             Search: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
@@ -100,7 +100,7 @@
             Copy: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
         };
 
-        // --- MODELO COM APENAS OS ITENS DO MANUAL PREENCHIDOS ---
+        // --- FLUXO DE TRABALHO CRONOLÓGICO DA BANCADA ---
         var getTemplate = function(type, tecnicoName) {
             var tmpl = {
                 meta: { 
@@ -114,181 +114,198 @@
 
             if (type === 'formatacao') {
                 tmpl.items = {
-                    entrega: {
-                        title: "ENTREGA",
+                    // ETAPA 1: MANUTENÇÃO FÍSICA (Antes de qualquer intervenção de software)
+                    preventivas: {
+                        title: "1. PREVENTIVAS & FÍSICA",
                         icon: "Server",
                         tasks: [
-                            { id: 'f_fin_1', label: 'Restore Navegador', checked: false },
-                            { id: 'f_fin_2', label: 'Restore Email', checked: false },
-                            { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false },
-                            { 
-                                id: 'f_fin_4', 
-                                label: 'Desempenho', 
-                                checked: false, 
-                                manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar\nNome de usuário: (Variável) | Domínio: cobrecom\n\n16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela[cite: 1, 2].',
-                                copyText: 'control userpasswords2'
-                            }
+                            { id: 'f_prev_1', label: 'Limpeza interna', checked: false, manual: 'Remover acúmulo de poeira e sujidades no gabinete, ventoinhas e cooler do processador com pincel/ar comprimido.' },
+                            { id: 'f_prev_2', label: 'Pasta térmica', checked: false, manual: 'Remover a pasta ressecada do processador com álcool isopropílico e reaplicar camada uniforme de pasta térmica nova.' },
+                            { id: 'f_prev_3', label: 'Limpeza memórias', checked: false, manual: 'Limpar os contatos dourados dos módulos de memória RAM com borracha de vinil ou produto apropriado.' },
+                            { id: 'f_prev_4', label: 'Limpa contato', checked: false, manual: 'Aplicar spray limpa contato nos slots de memória, slots PCIe e conexões elétricas da placa-mãe. Aguardar secar.' }
                         ]
                     },
-                    seguranca: {
-                        title: "SEGURANÇA",
+                    // ETAPA 2: BACKUP (Com o sistema antigo ainda em operação)
+                    preparacao: {
+                        title: "2. BACKUP & PREPARAÇÃO",
                         icon: "Server",
                         tasks: [
-                            { id: 'f_sec_1', label: 'Wazuh', checked: false },
-                            { 
-                                id: 'f_sec_2', 
-                                label: 'ESET', 
-                                checked: false, 
-                                manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows"[cite: 1, 2].\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto[cite: 1, 2].',
-                                copyText: 'svchost.exe'
-                            },
-                            { 
-                                id: 'f_sec_3', 
-                                label: 'VNC + Firewall', 
-                                checked: false, 
-                                manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)[cite: 1, 2]\n- Properties: MAX CPU: 90[cite: 1, 2]\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)[cite: 1, 2]'
-                            },
-                            { 
-                                id: 'f_sec_4', 
-                                label: 'GPEDIT/Permissões', 
-                                checked: false, 
-                                manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar)[cite: 1, 2].\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3)[cite: 1, 2].',
-                                copyText: 'gpedit.msc'
-                            }
+                            { id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false, manual: 'Verificar tamanho do disco, partições existentes e padrão do nome da máquina[cite: 3].' },
+                            { id: 'f_prep_2', label: 'Backup Arquivos', checked: false, manual: 'Fazer cópia completa de segurança dos documentos locais do usuário (Desktop, Documentos, Downloads, etc.).' },
+                            { id: 'f_prep_3', label: 'Chave Office', checked: false, manual: 'Identificar e registrar a conta ou chave de licença do Microsoft Office vinculada ao usuário.' },
+                            { id: 'f_prep_4', label: 'Backup Navegador', checked: false, manual: 'Exportar os favoritos, histórico e senhas salvas do navegador Google Chrome.' },
+                            { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false, manual: 'Exportar arquivo de dados PST do Outlook e fazer backup da pasta de histórico de mensagens do Spark.' }
                         ]
                     },
+                    // ETAPA 3: INSTALAÇÃO LIMPA DO SISTEMA OPERACIONAL
                     sistema: {
-                        title: "SISTEMA OPERACIONAL",
+                        title: "3. SISTEMA OPERACIONAL",
                         icon: "Server",
                         tasks: [
                             { 
                                 id: 'f_sis_1', 
                                 label: 'Formatação', 
                                 checked: false, 
-                                manual: '1. Reiniciar o PC e fazer a formatação pela BIOS[cite: 1, 2].\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3[cite: 1, 2].',
+                                manual: '1. Reiniciar o PC e fazer a formatação pela BIOS[cite: 3].\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3[cite: 3].',
                                 copyText: 'root'
-                            },
-                            { 
-                                id: 'f_sis_2', 
-                                label: 'Domínio', 
-                                checked: false, 
-                                manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root)[cite: 1, 2].',
-                                copyText: 'cobrecom'
                             },
                             { 
                                 id: 'f_sis_3', 
                                 label: 'Proxy/DNS', 
                                 checked: false, 
-                                manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy\nENDEREÇO: 192.168.1.1 | PORTA: 3128[cite: 1, 2]',
+                                manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy[cite: 3]\nENDEREÇO: 192.168.1.1 | PORTA: 3128[cite: 3]',
                                 copyText: '192.168.1.1'
                             },
-                            { id: 'f_sis_4', label: 'WINS/Hosts', checked: false },
-                            { id: 'f_sis_5', label: 'Drivers', checked: false }
+                            { id: 'f_sis_4', label: 'WINS/Hosts', checked: false, manual: 'Configurar WINS e apontamentos locais no arquivo hosts se aplicável ao departamento.' },
+                            { id: 'f_sis_5', label: 'Drivers', checked: false, manual: 'Instalar e atualizar todos os drivers de chipset, vídeo, rede e áudio oficiais.' }
                         ]
                     },
-                    preventivas: {
-                        title: "PREVENTIVAS",
-                        icon: "Server",
-                        tasks: [
-                            { id: 'f_prev_1', label: 'Limpeza interna', checked: false },
-                            { id: 'f_prev_2', label: 'Pasta térmica', checked: false },
-                            { id: 'f_prev_3', label: 'Limpeza memórias', checked: false },
-                            { id: 'f_prev_4', label: 'Limpa contato', checked: false }
-                        ]
-                    },
+                    // ETAPA 4: POLÍTICAS DE GRUPO & AJUSTES LOCAIS DO WINDOWS
                     configuracao: {
-                        title: "CONFIGURAÇÕES",
+                        title: "4. CONFIGURAÇÕES & POLÍTICAS",
                         icon: "Server",
                         tasks: [
-                            { id: 'f_conf_1', label: 'Ativar Win/Office', checked: false },
                             { 
                                 id: 'f_conf_2', 
-                                label: 'Energia', 
+                                label: 'Energia & Updates', 
                                 checked: false, 
-                                manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações[cite: 1, 2].\n\n4. Energia e Suspensão:\n(Nunca em Tudo)[cite: 1, 2].'
+                                manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações[cite: 3].\n\n4. Energia e Suspensão:\n(Nunca em Tudo)[cite: 3].'
                             },
-                            { id: 'f_conf_3', label: 'Config. Email', checked: false },
-                            { id: 'f_conf_4', label: 'Config. Spark', checked: false },
-                            { id: 'f_conf_5', label: 'Impressoras', checked: false },
+                            { 
+                                id: 'f_sec_4', 
+                                label: 'GPEDIT/Permissões', 
+                                checked: false, 
+                                manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar)[cite: 3].\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3)[cite: 3].',
+                                copyText: 'gpedit.msc'
+                            },
                             { 
                                 id: 'f_conf_6', 
-                                label: 'Map. Rede', 
+                                label: 'Map. Rede & SMB', 
                                 checked: false, 
-                                manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS[cite: 1, 2].',
+                                manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS[cite: 3].',
                                 copyText: 'optionalfeatures'
                             },
-                            { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false }
-                        ]
-                    },
-                    preparacao: {
-                        title: "BACKUP & PREP",
-                        icon: "Server",
-                        tasks: [
                             { 
-                                id: 'f_prep_1', 
-                                label: 'Verif. Nome/Partições', 
+                                id: 'f_prep_opt', 
+                                label: 'Melhorar Processamento', 
                                 checked: false, 
-                                manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo[cite: 1, 2].\nDesativar aplicativos de inicialização (que não são importantes)[cite: 1, 2].\n\n10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar[cite: 1, 2].',
+                                manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo[cite: 3].\nDesativar aplicativos de inicialização desnecessários[cite: 3].',
                                 copyText: 'msconfig'
                             },
                             { 
-                                id: 'f_prep_2', 
-                                label: 'Backup Arquivos', 
+                                id: 'f_prep_name', 
+                                label: 'Nome da Máquina', 
                                 checked: false, 
-                                manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)[cite: 1, 2]\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar[cite: 1, 2].',
-                                copyText: '\\\\pdc-cobrecom\\manutencao'
+                                manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar[cite: 3].'
                             },
-                            { id: 'f_prep_3', label: 'Chave Office', checked: false },
-                            { id: 'f_prep_4', label: 'Backup Navegador', checked: false },
-                            { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }
+                            { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false, manual: 'Definir reserva de IP fixo no DHCP via endereço físico MAC caso necessário.' }
                         ]
                     },
+                    // ETAPA 5: APLICAÇÕES & SOFTWARES
                     apps: {
-                        title: "APLICAÇÕES",
+                        title: "5. APLICAÇÕES & PACOTE COBRECOM",
                         icon: "Server",
                         tasks: [
                             { 
-                                id: 'f_app_1', 
-                                label: 'TOTVS', 
+                                id: 'f_app_pack', 
+                                label: 'Pacote Formatação W10', 
                                 checked: false, 
-                                manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora[cite: 1, 2].'
+                                manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)[cite: 3]\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar[cite: 3].',
+                                copyText: '\\\\pdc-cobrecom\\manutencao'
                             },
                             { 
-                                id: 'f_app_2', 
-                                label: 'TOTVS-MES', 
+                                id: 'f_app_apps', 
+                                label: 'Instalar Aplicativos Base', 
                                 checked: false, 
-                                manual: 'Instalar TOTVS-MES caso o equipamento pertença a apontamento de fábrica/produção.'
+                                manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora[cite: 3].'
+                            },
+                            { id: 'f_app_1', label: 'TOTVS', checked: false, manual: 'Instalar e configurar atalho de produção do SmartClient TOTVS Protheus[cite: 3].' },
+                            { id: 'f_app_2', label: 'TOTVS-MES', checked: false, manual: 'Instalar TOTVS-MES caso a estação seja destinada a apontamento fabril.' },
+                            { id: 'f_conf_1', label: 'Ativar Win/Office', checked: false, manual: 'Validar ativação permanente do Windows e do Microsoft Office.' },
+                            { id: 'f_conf_5', label: 'Impressoras', checked: false, manual: 'Instalar drivers e mapear impressoras locais ou térmicas do departamento[cite: 3].' }
+                        ]
+                    },
+                    // ETAPA 6: SEGURANÇA & ACESSO REMOTO
+                    seguranca: {
+                        title: "6. SEGURANÇA & ACESSO REMOTO",
+                        icon: "Server",
+                        tasks: [
+                            { id: 'f_sec_1', label: 'Wazuh', checked: false, manual: 'Instalar e validar o serviço ativo do agente de monitoramento Wazuh.' },
+                            { 
+                                id: 'f_sec_2', 
+                                label: 'ESET Firewall', 
+                                checked: false, 
+                                manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows"[cite: 3].\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto[cite: 3].',
+                                copyText: 'svchost.exe'
+                            },
+                            { 
+                                id: 'f_sec_3', 
+                                label: 'WinVNC', 
+                                checked: false, 
+                                manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)[cite: 3]\n- Properties: MAX CPU: 90[cite: 3]\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)[cite: 3]'
                             }
+                        ]
+                    },
+                    // ETAPA 7: DOMÍNIO, USUÁRIO & ENTREGA
+                    entrega: {
+                        title: "7. DOMÍNIO & LIBERAÇÃO",
+                        icon: "Server",
+                        tasks: [
+                            { 
+                                id: 'f_sis_2', 
+                                label: 'Domínio Cobrecom', 
+                                checked: false, 
+                                manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root)[cite: 3].',
+                                copyText: 'cobrecom'
+                            },
+                            { 
+                                id: 'f_fin_4', 
+                                label: 'Adicionar Usuário', 
+                                checked: false, 
+                                manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar[cite: 3]\nNome de usuário: (Variável) | Domínio: cobrecom[cite: 3]',
+                                copyText: 'control userpasswords2'
+                            },
+                            { 
+                                id: 'f_fin_cfg', 
+                                label: 'Configurar Usuário & Telas', 
+                                checked: false, 
+                                manual: '16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela[cite: 3].'
+                            },
+                            { id: 'f_conf_3', label: 'Config. Email', checked: false, manual: 'Configurar a conta corporativa de e-mail no Microsoft Outlook.' },
+                            { id: 'f_conf_4', label: 'Config. Spark', checked: false, manual: 'Configurar login e autenticação no mensageiro interno Spark[cite: 3].' },
+                            { id: 'f_fin_1', label: 'Restore Navegador', checked: false, manual: 'Importar favoritos e histórico do Google Chrome do usuário.' },
+                            { id: 'f_fin_2', label: 'Restore Email', checked: false, manual: 'Importar histórico de mensagens PST e catálogo de endereços do usuário.' },
+                            { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false, manual: 'Fixar e conferir a etiqueta de patrimônio/ativo físico colada no gabinete da máquina.' }
                         ]
                     }
                 };
             } else {
                 tmpl.items = {
                     inspecao: {
-                        title: "INSPEÇÃO FÍSICA",
+                        title: "1. INSPEÇÃO FÍSICA",
                         icon: "Check",
                         tasks: [
-                            { id: 'z_1', label: 'Rolete', checked: false },
-                            { id: 'z_2', label: 'Cabeça Impressão', checked: false },
-                            { id: 'z_3', label: 'Suporte Etiqueta', checked: false },
-                            { id: 'z_4', label: 'Qualidade Inicial', checked: false }
+                            { id: 'z_1', label: 'Rolete', checked: false, manual: 'Verificar alinhamento e desgastes mecânicos no rolete de borracha.' },
+                            { id: 'z_2', label: 'Cabeça Impressão', checked: false, manual: 'Inspecionar riscos ou pontos danificados na cabeça térmica.' },
+                            { id: 'z_3', label: 'Suporte Etiqueta', checked: false, manual: 'Verificar travamento do suporte do rolo de etiqueta e ribbon.' },
+                            { id: 'z_4', label: 'Qualidade Inicial', checked: false, manual: 'Imprimir página inicial de diagnóstico antes da limpeza.' }
                         ]
                     },
                     manutencao: {
-                        title: "MANUTENÇÃO",
+                        title: "2. MANUTENÇÃO",
                         icon: "Server",
                         tasks: [
-                            { id: 'z_5', label: 'Limpeza Rolete', checked: false },
-                            { id: 'z_6', label: 'Limpeza Cabeça', checked: false },
-                            { id: 'z_7', label: 'Limpeza Suporte', checked: false },
-                            { id: 'z_8', label: 'Limpeza Geral', checked: false }
+                            { id: 'z_5', label: 'Limpeza Rolete', checked: false, manual: 'Descontaminar rolete com álcool isopropílico para retirar cola.' },
+                            { id: 'z_6', label: 'Limpeza Cabeça', checked: false, manual: 'Limpar cabeça de impressão utilizando caneta térmica apropriada.' },
+                            { id: 'z_7', label: 'Limpeza Suporte', checked: false, manual: 'Desobstruir eixos e remover acúmulo de poeira do compartimento.' },
+                            { id: 'z_8', label: 'Limpeza Geral', checked: false, manual: 'Higienização geral da carcaça e limpeza do sensor de mídia/GAP.' }
                         ]
                     },
                     teste: {
-                        title: "VALIDAÇÃO",
+                        title: "3. VALIDAÇÃO",
                         icon: "Printer",
                         tasks: [
-                            { id: 'z_9', label: 'Teste Final', checked: false }
+                            { id: 'z_9', label: 'Teste Final', checked: false, manual: 'Efetuar calibração de GAP e imprimir etiquetas para leitura com scanner laser.' }
                         ]
                     }
                 };
@@ -479,7 +496,6 @@
             );
         };
 
-        // --- COMPONENTE DO ITEM DO CHECKLIST COM O MANUAL EMBUTIDO ---
         var TaskItem = function(props) {
             var task = props.task;
             var onToggle = props.onToggle;
@@ -587,8 +603,9 @@
 
             var progress = calcProgress(items);
 
-            var leftKeys = ['entrega', 'seguranca', 'sistema', 'preventivas'];
-            var rightKeys = ['configuracao', 'preparacao', 'apps'];
+            // Sequência cronológica das categorias na tela
+            var leftKeys = ['preventivas', 'preparacao', 'sistema'];
+            var rightKeys = ['configuracao', 'apps', 'seguranca', 'entrega'];
 
             var renderCategoryCard = function(key) {
                 var group = items[key];
@@ -661,7 +678,7 @@
                             </div>
                         </Card>
 
-                        {/* DISTRIBUIÇÃO EM 2 COLUNAS IDÊNTICA À FOTO */}
+                        {/* DISPOSIÇÃO EM 2 COLUNAS NA ORDEM LÓGICA DE EXECUÇÃO */}
                         {ticket.type === 'formatacao' ? (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
                                 <div className="space-y-6">
@@ -799,7 +816,7 @@
                         <button onClick={function() { onNewTicket('formatacao'); }} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">{Icons.Plus}</div>
-                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Checklist com manual interativo integrado</span></div>
+                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Fluxo cronológico com manual integrado</span></div>
                             </div>
                         </button>
                         <button onClick={function() { onNewTicket('zebra'); }} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
