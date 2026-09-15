@@ -86,7 +86,7 @@
             History: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
             Plus: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
             LogOut: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
             Check: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
             Printer: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
             Search: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
@@ -100,7 +100,7 @@
             Copy: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
         };
 
-        // --- FLUXO DE TRABALHO CRONOLÓGICO DA BANCADA ---
+        // --- FLUXO DE TRABALHO CRONOLÓGICO COM ORIENTAÇÃO DE APPDATA/OCULTOS ---
         var getTemplate = function(type, tecnicoName) {
             var tmpl = {
                 meta: { 
@@ -114,7 +114,7 @@
 
             if (type === 'formatacao') {
                 tmpl.items = {
-                    // ETAPA 1: MANUTENÇÃO FÍSICA (Antes de qualquer intervenção de software)
+                    // ETAPA 1: MANUTENÇÃO FÍSICA
                     preventivas: {
                         title: "1. PREVENTIVAS & FÍSICA",
                         icon: "Server",
@@ -125,16 +125,28 @@
                             { id: 'f_prev_4', label: 'Limpa contato', checked: false, manual: 'Aplicar spray limpa contato nos slots de memória, slots PCIe e conexões elétricas da placa-mãe. Aguardar secar.' }
                         ]
                     },
-                    // ETAPA 2: BACKUP (Com o sistema antigo ainda em operação)
+                    // ETAPA 2: BACKUP COM APPDATA E ITENS OCULTOS
                     preparacao: {
                         title: "2. BACKUP & PREPARAÇÃO",
                         icon: "Server",
                         tasks: [
                             { id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false, manual: 'Verificar tamanho do disco, partições existentes e padrão do nome da máquina[cite: 3].' },
-                            { id: 'f_prep_2', label: 'Backup Arquivos', checked: false, manual: 'Fazer cópia completa de segurança dos documentos locais do usuário (Desktop, Documentos, Downloads, etc.).' },
+                            { 
+                                id: 'f_prep_2', 
+                                label: 'Backup Arquivos', 
+                                checked: false, 
+                                manual: 'ORIENTAÇÃO DE PASTAS OCULTAS & APPDATA:\n1. No Explorador de Arquivos: clique na aba "Exibir" no menu superior e marque a caixa "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e pressione Enter para acessar C:\\Users\\<usuario>\\AppData\\Roaming.\n3. Copie a pasta AppData inteira (contém dados de navegadores, Spark, assinaturas e certificados).\n4. Salve também a pasta do usuário: Desktop, Documentos, Downloads e Imagens.',
+                                copyText: '%appdata%'
+                            },
                             { id: 'f_prep_3', label: 'Chave Office', checked: false, manual: 'Identificar e registrar a conta ou chave de licença do Microsoft Office vinculada ao usuário.' },
                             { id: 'f_prep_4', label: 'Backup Navegador', checked: false, manual: 'Exportar os favoritos, histórico e senhas salvas do navegador Google Chrome.' },
-                            { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false, manual: 'Exportar arquivo de dados PST do Outlook e fazer backup da pasta de histórico de mensagens do Spark.' }
+                            { 
+                                id: 'f_prep_5', 
+                                label: 'Backup Outlook/Spark', 
+                                checked: false, 
+                                manual: '1. Outlook: Exportar arquivo de dados .PST ou copiar de C:\\Users\\<usuario>\\AppData\\Local\\Microsoft\\Outlook.\n2. Spark: Fazer backup da pasta C:\\Users\\<usuario>\\AppData\\Roaming\\Spark (históricos de mensagens e conversas).',
+                                copyText: '%localappdata%\\Microsoft\\Outlook'
+                            }
                         ]
                     },
                     // ETAPA 3: INSTALAÇÃO LIMPA DO SISTEMA OPERACIONAL
