@@ -80,6 +80,8 @@
             { id: 'admin', name: 'Admin', pass: 'admin' }
         ];
 
+        var GPEDIT_IMAGE_URL = "gpedit.msc.jpg";
+
         var Icons = {
             Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
             User: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
@@ -97,10 +99,10 @@
             Mail: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
             ChevronLeft: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
             BookOpen: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-            Copy: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            Copy: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>,
+            Maximize: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
         };
 
-        // --- MODELO COM O MANUAL ORIGINAL INTEGRADO E GUIAS DE REFERÊNCIA EXPANDIDOS ---
         var getTemplate = function(type, tecnicoName) {
             var tmpl = {
                 meta: { 
@@ -114,283 +116,94 @@
 
             if (type === 'formatacao') {
                 tmpl.items = {
-                    // 1. PREVENTIVAS (MANUTENÇÃO FÍSICA INICIAL)
                     preventivas: {
                         title: "1. PREVENTIVAS & FÍSICA",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_prev_1', 
-                                label: 'Limpeza interna', 
-                                checked: false, 
-                                manual: 'Abrir o gabinete, travar as ventoinhas do cooler com o dedo/pincel para evitar que girem em falso e remover todo o pó com ar comprimido/pincel antiestático.' 
-                            },
-                            { 
-                                id: 'f_prev_2', 
-                                label: 'Pasta térmica', 
-                                checked: false, 
-                                manual: 'Remover o dissipador de calor, limpar a pasta ressecada antiga do processador com álcool isopropílico e aplicar uma gota/camada fina uniforme no centro do IHS.' 
-                            },
-                            { 
-                                id: 'f_prev_3', 
-                                label: 'Limpeza memórias', 
-                                checked: false, 
-                                manual: 'Remover os pentes de memória RAM e passar borracha plástica branca sobre os contatos dourados para desoxidar. Tirar os resíduos com pincel seco.' 
-                            },
-                            { 
-                                id: 'f_prev_4', 
-                                label: 'Limpa contato', 
-                                checked: false, 
-                                manual: 'Aplicar spray limpa contato diretamente nos slots DIMM e conectores da placa-mãe. Aguardar cerca de 2 minutos para secagem total antes de reinstalar as peças.' 
-                            }
+                            { id: 'f_prev_1', label: 'Limpeza interna', checked: false, manual: 'Remover poeira e sujidades no gabinete, ventoinhas e cooler do processador com pincel/ar comprimido.' },
+                            { id: 'f_prev_2', label: 'Pasta térmica', checked: false, manual: 'Remover a pasta ressecada do processador com álcool isopropílico e reaplicar camada uniforme de pasta térmica nova.' },
+                            { id: 'f_prev_3', label: 'Limpeza memórias', checked: false, manual: 'Limpar contatos dourados dos módulos de memória RAM com borracha de vinil branca para retirar oxidação.' },
+                            { id: 'f_prev_4', label: 'Limpa contato', checked: false, manual: 'Aplicar spray limpa contato nos slots de memória, slots PCIe e conexões elétricas da placa-mãe.' }
                         ]
                     },
-                    // 2. BACKUP & PREP (ANTES DE FORMATAR)
                     preparacao: {
                         title: "2. BACKUP & PREP",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_prep_1', 
-                                label: 'Verif. Nome/Partições', 
-                                checked: false, 
-                                manual: 'Conferir partições existentes e anotar o nome antigo do computador[cite: 1, 2, 3].\nPara verificar discos e volumes: pressione Win+R e digite diskmgmt.msc.', 
-                                copyText: 'diskmgmt.msc' 
-                            },
+                            { id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false, manual: 'Verificar partições do disco via diskmgmt.msc e confirmar padrão de nome da máquina.', copyText: 'diskmgmt.msc' },
                             { 
                                 id: 'f_prep_2', 
                                 label: 'Backup Arquivos', 
                                 checked: false, 
-                                manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. No Explorador de Arquivos: clique na aba superior "Exibir" e marque a caixa "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e copie a pasta AppData inteira do usuário (contém configurações, Spark e dados de navegadores).\n3. Salvar as pastas Documentos, Desktop, Downloads e Imagens.\n4. Para ferramentas de setup: Win+R > \\\\pdc-cobrecom\\manutencao (Login: admin) > pasta "m.kauan" > copiar "Formatação w10"[cite: 1, 2, 3].', 
+                                manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. No Explorador de Arquivos: aba "Exibir" > marcar "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e copie a pasta AppData inteira do usuário.\n3. Salvar as pastas Documentos, Desktop, Downloads e Imagens.\n4. Pegar instaladores na rede: Win+R > \\\\pdc-cobrecom\\manutencao (Login: admin) > pasta "m.kauan" > copiar "Formatação w10"[cite: 3].', 
                                 copyText: '%appdata%' 
                             },
-                            { 
-                                id: 'f_prep_3', 
-                                label: 'Chave Office', 
-                                checked: false, 
-                                manual: 'Identificar se o pacote Office utiliza licença vinculada à conta Microsoft do usuário ou chave física OEM. Anotar ou certificar a conta vinculada.', 
-                                copyText: null 
-                            },
-                            { 
-                                id: 'f_prep_4', 
-                                label: 'Backup Navegador', 
-                                checked: false, 
-                                manual: 'No Chrome: Configurações > Favoritos > Gerenciador de favoritos > Exportar favoritos para arquivo HTML, ou copiar o diretório: %localappdata%\\Google\\Chrome\\User Data.', 
-                                copyText: '%localappdata%\\Google\\Chrome\\User Data' 
-                            },
-                            { 
-                                id: 'f_prep_5', 
-                                label: 'Backup Outlook/Spark', 
-                                checked: false, 
-                                manual: '1. Outlook: Exportar arquivo de dados .PST ou copiar de %localappdata%\\Microsoft\\Outlook.\n2. Spark: Fazer backup da pasta de histórico de conversas em %appdata%\\Spark.', 
-                                copyText: '%appdata%\\Spark' 
-                            }
+                            { id: 'f_prep_3', label: 'Chave Office', checked: false, manual: 'Identificar se o Office é vinculado à conta Microsoft do usuário ou chave física OEM.' },
+                            { id: 'f_prep_4', label: 'Backup Navegador', checked: false, manual: 'Exportar favoritos para arquivo HTML ou copiar o diretório: %localappdata%\\Google\\Chrome\\User Data.', copyText: '%localappdata%\\Google\\Chrome\\User Data' },
+                            { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false, manual: '1. Outlook: Exportar .PST de %localappdata%\\Microsoft\\Outlook.\n2. Spark: Fazer backup da pasta de histórico em %appdata%\\Spark.', copyText: '%appdata%\\Spark' }
                         ]
                     },
-                    // 3. SISTEMA OPERACIONAL
                     sistema: {
                         title: "3. SISTEMA OPERACIONAL",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_sis_1', 
-                                label: 'Formatação', 
-                                checked: false, 
-                                manual: '1. Reiniciar o PC e fazer a formatação pela BIOS[cite: 1, 2, 3].\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3[cite: 1, 2, 3].', 
-                                copyText: 'root' 
-                            },
-                            { 
-                                id: 'f_sis_3', 
-                                label: 'Proxy/DNS', 
-                                checked: false, 
-                                manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy[cite: 1, 2, 3]\nENDEREÇO: 192.168.1.1 | PORTA: 3128[cite: 1, 2, 3]', 
-                                copyText: '192.168.1.1' 
-                            },
-                            { 
-                                id: 'f_sis_4', 
-                                label: 'WINS/Hosts', 
-                                checked: false, 
-                                manual: 'Configurar WINS na placa de rede caso o departamento utilize resolução legada de NetBIOS ou editar o arquivo de hosts do Windows em: C:\\Windows\\System32\\drivers\\etc\\hosts.', 
-                                copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' 
-                            },
-                            { 
-                                id: 'f_sis_5', 
-                                label: 'Drivers', 
-                                checked: false, 
-                                manual: 'Abrir o Gerenciador de Dispositivos (devmgmt.msc) e garantir a instalação de todos os drivers de Chipset, Áudio, Rede Gigabit e Placa Gráfica oficial.', 
-                                copyText: 'devmgmt.msc' 
-                            }
+                            { id: 'f_sis_1', label: 'Formatação', checked: false, manual: '1. Reiniciar o PC e fazer a formatação pela BIOS[cite: 3].\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3[cite: 3].', copyText: 'root' },
+                            { id: 'f_sis_3', label: 'Proxy/DNS', checked: false, manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy[cite: 3]\nENDEREÇO: 192.168.1.1 | PORTA: 3128[cite: 3]', copyText: '192.168.1.1' },
+                            { id: 'f_sis_4', label: 'WINS/Hosts', checked: false, manual: 'Configurar WINS na placa de rede e arquivo hosts do Windows: C:\\Windows\\System32\\drivers\\etc\\hosts.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
+                            { id: 'f_sis_5', label: 'Drivers', checked: false, manual: 'Abrir Gerenciador de Dispositivos (devmgmt.msc) e garantir instalação completa de todos os drivers de Chipset, Vídeo, Som e Rede.', copyText: 'devmgmt.msc' }
                         ]
                     },
-                    // 4. CONFIGURAÇÕES & POLÍTICAS
                     configuracao: {
                         title: "4. CONFIGURAÇÕES & POLÍTICAS",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_conf_2', 
-                                label: 'Energia', 
-                                checked: false, 
-                                manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações[cite: 1, 2, 3].\n\n4. Energia e Suspensão:\n(Nunca em Tudo)[cite: 1, 2, 3].' 
-                            },
+                            { id: 'f_conf_2', label: 'Energia', checked: false, manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações[cite: 3].\n\n4. Energia e Suspensão:\n(Nunca em Tudo)[cite: 3].' },
                             { 
                                 id: 'f_sec_4', 
                                 label: 'GPEDIT/Permissões', 
                                 checked: false, 
-                                manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar)[cite: 1, 2, 3].\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3)[cite: 1, 2, 3].', 
-                                copyText: 'gpedit.msc' 
+                                manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar)[cite: 3].\n\n6. Componentes do Windows > Windows update:\nDesativar as 3 opções destacadas na imagem:\n- Configurar Atualizações Automáticas (Desativado)[cite: 3]\n- Permitir instalação imediata de Atualizações Automáticas (Desativado)[cite: 3]\n- Ativar atualizações recomendadas via Atualizações Automáticas (Desativado)[cite: 3].', 
+                                copyText: 'gpedit.msc',
+                                hasGpeditImage: true
                             },
-                            { 
-                                id: 'f_conf_6', 
-                                label: 'Map. Rede', 
-                                checked: false, 
-                                manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS[cite: 1, 2, 3].', 
-                                copyText: 'optionalfeatures' 
-                            },
-                            { 
-                                id: 'f_prep_opt', 
-                                label: 'Melhorar Processamento', 
-                                checked: false, 
-                                manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo[cite: 1, 2, 3].\nDesativar aplicativos de inicialização (que não são importantes)[cite: 1, 2, 3].', 
-                                copyText: 'msconfig' 
-                            },
-                            { 
-                                id: 'f_prep_name', 
-                                label: 'Nome da Máquina', 
-                                checked: false, 
-                                manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar[cite: 1, 2, 3].' 
-                            },
-                            { 
-                                id: 'f_conf_7', 
-                                label: 'IP Fixo (MAC)', 
-                                checked: false, 
-                                manual: 'Verificar o endereço MAC da placa de rede executando "getmac" no prompt de comando e realizar a reserva de endereço no servidor DHCP caso o setor exija IP fixo.', 
-                                copyText: 'getmac' 
-                            }
+                            { id: 'f_conf_6', label: 'Map. Rede', checked: false, manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS[cite: 3].', copyText: 'optionalfeatures' },
+                            { id: 'f_prep_opt', label: 'Melhorar Processamento', checked: false, manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo[cite: 3].\nDesativar aplicativos de inicialização desnecessários[cite: 3].', copyText: 'msconfig' },
+                            { id: 'f_prep_name', label: 'Nome da Máquina', checked: false, manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar[cite: 3].' },
+                            { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false, manual: 'Descobrir o endereço MAC da placa com "getmac" e efetuar reserva no DHCP se exigido pelo setor.', copyText: 'getmac' }
                         ]
                     },
-                    // 5. APLICAÇÕES & SOFTWARES
                     apps: {
                         title: "5. APLICAÇÕES & PACOTE COBRECOM",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_app_pack', 
-                                label: 'Pegar Arquivos da Rede', 
-                                checked: false, 
-                                manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)[cite: 1, 2, 3]\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar[cite: 1, 2, 3].', 
-                                copyText: '\\\\pdc-cobrecom\\manutencao' 
-                            },
-                            { 
-                                id: 'f_app_apps', 
-                                label: 'Instalar Aplicativos Base', 
-                                checked: false, 
-                                manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora[cite: 1, 2, 3].' 
-                            },
-                            { 
-                                id: 'f_app_1', 
-                                label: 'TOTVS', 
-                                checked: false, 
-                                manual: 'Instalar o client TOTVS Protheus / SmartClient, apontar para o servidor de produção e fixar o atalho no menu iniciar/área de trabalho[cite: 1, 2, 3].' 
-                            },
-                            { 
-                                id: 'f_app_2', 
-                                label: 'TOTVS-MES', 
-                                checked: false, 
-                                manual: 'Instalar a aplicação de chão de fábrica TOTVS-MES caso a estação seja destinada a apontamentos de produção na indústria.' 
-                            },
-                            { 
-                                id: 'f_conf_1', 
-                                label: 'Ativar Win/Office', 
-                                checked: false, 
-                                manual: 'Conferir o status de ativação do Windows em Configurações > Ativação e abrir o Word/Excel para autenticar e licenciar o Office.' 
-                            },
-                            { 
-                                id: 'f_conf_5', 
-                                label: 'Impressoras', 
-                                checked: false, 
-                                manual: 'Instalar drivers das impressoras departamentais (ou térmicas Zebra) e imprimir uma página de teste de impressão do Windows.', 
-                                copyText: 'control printers' 
-                            }
+                            { id: 'f_app_pack', label: 'Pegar Arquivos da Rede', checked: false, manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)[cite: 3]\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar[cite: 3].', copyText: '\\\\pdc-cobrecom\\manutencao' },
+                            { id: 'f_app_apps', label: 'Instalar Aplicativos Base', checked: false, manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora[cite: 3].' },
+                            { id: 'f_app_1', label: 'TOTVS', checked: false, manual: 'Instalar o client TOTVS Protheus / SmartClient e atalhos de produção[cite: 3].' },
+                            { id: 'f_app_2', label: 'TOTVS-MES', checked: false, manual: 'Instalar TOTVS-MES caso a estação pertença ao apontamento de fábrica.' },
+                            { id: 'f_conf_1', label: 'Ativar Win/Office', checked: false, manual: 'Conferir status em Configurações > Ativação e licenciar pacote Office.' },
+                            { id: 'f_conf_5', label: 'Impressoras', checked: false, manual: 'Instalar drivers e mapear impressoras do departamento ou térmicas.', copyText: 'control printers' }
                         ]
                     },
-                    // 6. SEGURANÇA & ACESSO REMOTO
                     seguranca: {
                         title: "6. SEGURANÇA & ACESSO REMOTO",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_sec_1', 
-                                label: 'Wazuh', 
-                                checked: false, 
-                                manual: 'Instalar o agente Wazuh, configurar o IP/hostname do servidor SIEM no arquivo ossec.conf e iniciar o serviço (services.msc > Wazuh).', 
-                                copyText: 'services.msc' 
-                            },
-                            { 
-                                id: 'f_sec_2', 
-                                label: 'ESET', 
-                                checked: false, 
-                                manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows"[cite: 1, 2, 3].\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto[cite: 1, 2, 3].', 
-                                copyText: 'svchost.exe' 
-                            },
-                            { 
-                                id: 'f_sec_3', 
-                                label: 'VNC + Firewall', 
-                                checked: false, 
-                                manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)[cite: 1, 2, 3]\n- Properties: MAX CPU: 90[cite: 1, 2, 3]\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)[cite: 1, 2, 3]' 
-                            }
+                            { id: 'f_sec_1', label: 'Wazuh', checked: false, manual: 'Instalar o agente Wazuh e validar o serviço ativo (services.msc > Wazuh).', copyText: 'services.msc' },
+                            { id: 'f_sec_2', label: 'ESET', checked: false, manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows"[cite: 3].\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto[cite: 3].', copyText: 'svchost.exe' },
+                            { id: 'f_sec_3', label: 'VNC + Firewall', checked: false, manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)[cite: 3]\n- Properties: MAX CPU: 90[cite: 3]\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)[cite: 3]' }
                         ]
                     },
-                    // 7. DOMÍNIO & LIBERAÇÃO DO USUÁRIO
                     entrega: {
                         title: "7. DOMÍNIO & LIBERAÇÃO",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_sis_2', 
-                                label: 'Domínio', 
-                                checked: false, 
-                                manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root)[cite: 1, 2, 3].', 
-                                copyText: 'cobrecom' 
-                            },
-                            { 
-                                id: 'f_fin_4', 
-                                label: 'Desempenho (Adicionar Usuário)', 
-                                checked: false, 
-                                manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar[cite: 1, 2, 3]\nNome de usuário: (Variável) | Domínio: cobrecom[cite: 1, 2, 3]\n\n16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela[cite: 1, 2, 3].', 
-                                copyText: 'control userpasswords2' 
-                            },
-                            { 
-                                id: 'f_conf_3', 
-                                label: 'Config. Email', 
-                                checked: false, 
-                                manual: 'Abrir o Microsoft Outlook, adicionar a conta de e-mail corporativa do usuário, configurar o protocolo exchange/IMAP e importar o backup PST.' 
-                            },
-                            { 
-                                id: 'f_conf_4', 
-                                label: 'Config. Spark', 
-                                checked: false, 
-                                manual: 'Abrir o Spark, autenticar com o usuário do domínio, marcar "Salvar senha" e "Conectar automaticamente" e colar a pasta de histórico salva.', 
-                                copyText: null 
-                            },
-                            { 
-                                id: 'f_fin_1', 
-                                label: 'Restore Navegador', 
-                                checked: false, 
-                                manual: 'Importar arquivo de favoritos HTML salvo no Google Chrome e restaurar as extensões do usuário.' 
-                            },
-                            { 
-                                id: 'f_fin_2', 
-                                label: 'Restore Email', 
-                                checked: false, 
-                                manual: 'Validar o recebimento e envio de e-mails pelo Outlook e checar se as assinaturas de e-mail foram restabelecidas.' 
-                            },
-                            { 
-                                id: 'f_fin_3', 
-                                label: 'Etiqueta Ativo', 
-                                checked: false, 
-                                manual: 'Fixar e conferir se a etiqueta patrimonial física está colada no gabinete e com código de barras 100% legível.' 
-                            }
+                            { id: 'f_sis_2', label: 'Domínio', checked: false, manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root)[cite: 3].', copyText: 'cobrecom' },
+                            { id: 'f_fin_4', label: 'Desempenho (Adicionar Usuário)', checked: false, manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar[cite: 3]\nNome de usuário: (Variável) | Domínio: cobrecom[cite: 3]\n\n16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela[cite: 3].', copyText: 'control userpasswords2' },
+                            { id: 'f_conf_3', label: 'Config. Email', checked: false, manual: 'Configurar a conta corporativa de e-mail no Microsoft Outlook e importar arquivo PST.' },
+                            { id: 'f_conf_4', label: 'Config. Spark', checked: false, manual: 'Autenticar o Spark no domínio cobrecom e colar o histórico salvo.', copyText: null },
+                            { id: 'f_fin_1', label: 'Restore Navegador', checked: false, manual: 'Importar arquivo de favoritos HTML salvo no Google Chrome.' },
+                            { id: 'f_fin_2', label: 'Restore Email', checked: false, manual: 'Conferir envio e recebimento de mensagens e assinaturas do Outlook.' },
+                            { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false, manual: 'Fixar e conferir etiqueta de patrimônio/ativo físico no gabinete do computador.' }
                         ]
                     }
                 };
@@ -618,6 +431,8 @@
             var isOpen = openState[0], setIsOpen = openState[1];
             var copiedState = useState(false);
             var copied = copiedState[0], setCopied = copiedState[1];
+            var modalState = useState(false);
+            var isModalOpen = modalState[0], setIsModalOpen = modalState[1];
 
             var copyToClipboard = function(e, text) {
                 e.stopPropagation();
@@ -662,8 +477,30 @@
                                 <div className="mt-2.5 p-3 rounded-lg bg-blue-50/70 dark:bg-slate-950/70 border border-blue-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 fade-in">
                                     <div className="flex items-start gap-2">
                                         <div className="text-brand-500 shrink-0 mt-0.5 font-bold">ℹ</div>
-                                        <div className="space-y-2 flex-1">
+                                        <div className="space-y-3 flex-1">
                                             <p className="leading-relaxed whitespace-pre-line font-sans">{task.manual}</p>
+
+                                            {/* Foto anexada do GPEDIT */}
+                                            {task.hasGpeditImage && (
+                                                <div className="mt-2 border border-slate-200 dark:border-slate-800 rounded-lg p-2 bg-white dark:bg-slate-900">
+                                                    <div className="flex justify-between items-center mb-1.5">
+                                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Referência Visual (3 Políticas Desativadas):</span>
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={function() { setIsModalOpen(true); }}
+                                                            className="text-brand-600 hover:text-brand-700 text-[11px] flex items-center gap-1 font-semibold"
+                                                        >
+                                                            {Icons.Maximize} Expandir Imagem
+                                                        </button>
+                                                    </div>
+                                                    <img 
+                                                        src={GPEDIT_IMAGE_URL} 
+                                                        alt="GPEDIT Windows Update" 
+                                                        onClick={function() { setIsModalOpen(true); }}
+                                                        className="w-full max-h-56 object-contain rounded border border-slate-200 dark:border-slate-800 cursor-pointer hover:opacity-95 transition-opacity" 
+                                                    />
+                                                </div>
+                                            )}
                                             
                                             {task.copyText && (
                                                 <div className="pt-1 flex items-center gap-2">
@@ -685,6 +522,22 @@
                             )}
                         </div>
                     </div>
+
+                    {/* Modal Zoom da Imagem */}
+                    {isModalOpen && (
+                        <div 
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm fade-in"
+                            onClick={function() { setIsModalOpen(false); }}
+                        >
+                            <div className="relative max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 p-3 rounded-xl shadow-2xl border border-slate-700" onClick={function(e) { e.stopPropagation(); }}>
+                                <div className="flex justify-between items-center pb-2 mb-2 border-b border-slate-200 dark:border-slate-800">
+                                    <h4 className="font-bold text-sm text-slate-800 dark:text-white">GPEDIT - Políticas do Windows Update</h4>
+                                    <button onClick={function() { setIsModalOpen(false); }} className="text-xl font-bold px-2 text-slate-400 hover:text-white">&times;</button>
+                                </div>
+                                <img src={GPEDIT_IMAGE_URL} alt="GPEDIT Ampliado" className="max-h-[75vh] w-auto mx-auto object-contain rounded" />
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
@@ -774,7 +627,7 @@
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-                        {/* CABEÇALHO: DATA | ATIVO | MAQUINA */}
+                        {/* CABEÇALHO IDÊNTICO À IMAGEM: DATA | ATIVO | MAQUINA */}
                         <Card className="grid grid-cols-1 md:grid-cols-3 gap-6" noPadding>
                             <div className="p-6 col-span-full grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
