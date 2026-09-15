@@ -7,11 +7,11 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React 18 e ReactDOM via CDN estável -->
+    <!-- React 18 e ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel 7 Moderno -->
+    <!-- Babel Standalone 7 -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Firebase 9 Compat -->
@@ -20,7 +20,6 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Captura qualquer erro de script e mostra na tela -->
     <script>
         window.onerror = function(msg, url, line) {
             var root = document.getElementById('root');
@@ -81,7 +80,6 @@
     </div>
 
     <script type="text/babel">
-        // --- CONFIGURAÇÃO FIREBASE ---
         var firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -105,7 +103,6 @@
             { id: 'admin', name: 'Admin', pass: 'admin' }
         ];
 
-        // --- ICONS ---
         var Icons = {
             Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
             User: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
@@ -124,26 +121,83 @@
             ChevronLeft: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         };
 
+        // --- TEMPLATE UNIFICADO COM O MANUAL DE FORMATAÇÃO (COBRECOM) ---
         var getTemplate = function(type, tecnicoName) {
             var tmpl = {
-                meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' },
+                meta: { 
+                    tecnico: tecnicoName || '', 
+                    data: new Date().toISOString().split('T')[0], 
+                    maquina: '', 
+                    ativo: '',
+                    usuario_final: ''
+                },
                 items: {}
             };
             if (type === 'formatacao') {
                 tmpl.items = {
-                    preventivas: { title: "Preventivas", icon: "Server", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
-                    preparacao: { title: "Backup & Prep", icon: "Server", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
-                    sistema: { title: "Sistema Operacional", icon: "Server", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
-                    seguranca: { title: "Segurança", icon: "Server", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
-                    configuracao: { title: "Configurações", icon: "Server", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
-                    apps: { title: "Aplicações", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
-                    finalizacao: { title: "Entrega", icon: "Server", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
+                    etapa1_so: { 
+                        title: "1. Formatação & Conta Local", 
+                        icon: "Server", 
+                        tasks: [
+                            { id: 'f_so_1', label: 'Formatação limpa pela BIOS', checked: false, desc: 'Reiniciar o PC e executar a instalação pela BIOS' },
+                            { id: 'f_so_2', label: 'Criar usuário root (padrão Cobrecom)', checked: false, desc: 'Usuário: root | Dica: Perguntas de recuperação "cobre"' },
+                            { id: 'f_so_3', label: 'Pausar atualizações do Windows Update', checked: false, desc: 'Acessar Windows Update e pausar atualizações' },
+                            { id: 'f_so_4', label: 'Energia e Suspensão: Nunca em tudo', checked: false, desc: 'Definir desligar tela e suspender para "Nunca"' }
+                        ] 
+                    },
+                    etapa2_gpedit: { 
+                        title: "2. Políticas de Grupo (GPEDIT) & Rede", 
+                        icon: "Server", 
+                        tasks: [
+                            { id: 'f_gp_1', label: 'GPEDIT: Só permitir perfis de usuários', checked: false, desc: 'Modelos Adm > Sistema > Perfis de Usuários (Habilitar)' },
+                            { id: 'f_gp_2', label: 'GPEDIT: Desativar Windows Update (3 opções)', checked: false, desc: 'Componentes do Windows > Windows Update > Desativar config auto, permitir instalação e ativar atualizações' },
+                            { id: 'f_gp_3', label: 'Recursos do Windows: Ativar SMB 1.0/CIFS', checked: false, desc: 'Painel de Controle > Programas > Ativar SMB 1.0/CIFS' },
+                            { id: 'f_gp_4', label: 'Configurar Proxy (192.168.1.1:3128)', checked: false, desc: 'Desativar automático > Usar Proxy: 192.168.1.1 Porta: 3128' }
+                        ] 
+                    },
+                    etapa3_otim: { 
+                        title: "3. Otimização & Nome da Máquina", 
+                        icon: "Server", 
+                        tasks: [
+                            { id: 'f_ot_1', label: 'MSCONFIG: Ativar núcleos máximos do CPU', checked: false, desc: 'Win+R > msconfig > Inicialização > Opções Avançadas > Núcleos no Máximo' },
+                            { id: 'f_ot_2', label: 'MSCONFIG: Desativar inicialização desnecessária', checked: false, desc: 'Gerenciador de Tarefas > Inicializar > Desabilitar itens' },
+                            { id: 'f_ot_3', label: 'Alterar nome da máquina e reiniciar', checked: false, desc: 'Sobre > Configurações Avançadas > Nome do Computador > Reiniciar' }
+                        ] 
+                    },
+                    etapa4_pacote: { 
+                        title: "4. Instalação do Pacote Cobrecom", 
+                        icon: "Server", 
+                        tasks: [
+                            { id: 'f_pc_1', label: 'Acessar \\pdc-cobrecom\\manutencao', checked: false, desc: 'Win+R > \\pdc-cobrecom\\manutencao (Login: admin)' },
+                            { id: 'f_pc_2', label: 'Executar pacote "Formatação w10"', checked: false, desc: 'Pasta m.kauan > Copiar pacote para a Área de Trabalho e executar' },
+                            { id: 'f_pc_3', label: 'Instalar Aplicativos Base', checked: false, desc: 'ESET, WinRAR, UltraVNC, SambaWindows10, Spark, TOTVS, Chrome, Office, Scan e Impressora' }
+                        ] 
+                    },
+                    etapa5_sec: { 
+                        title: "5. Configuração de Segurança (ESET & WinVNC)", 
+                        icon: "Server", 
+                        tasks: [
+                            { id: 'f_sc_1', label: 'ESET: Ativar regras do Windows no Firewall', checked: false, desc: 'Configurações Avançadas > Proteção de Rede > Firewall > Habilitar regras do Windows' },
+                            { id: 'f_sc_2', label: 'ESET: Liberar regra Acesso Remoto (svchost)', checked: false, desc: 'Regras > Adicionar "Acesso remoto" > Permitir svchost.exe (Área de Trabalho Remota)' },
+                            { id: 'f_sc_3', label: 'WinVNC: Instalar e setar MAX CPU: 90', checked: false, desc: 'Properties > Configurar MAX CPU: 90 (Sem ser por acesso remoto)' },
+                            { id: 'f_sc_4', label: 'WinVNC: Desabilitar Wallpaper e Monitor Blank', checked: false, desc: 'Admin Properties > Desmarcar "Remove Wallpaper" e "Enable Blank Monitor"' }
+                        ] 
+                    },
+                    etapa6_dom: { 
+                        title: "6. Domínio & Perfil do Usuário", 
+                        icon: "Server", 
+                        tasks: [
+                            { id: 'f_dm_1', label: 'Ingressar a máquina no domínio "cobrecom"', checked: false, desc: 'Nome do Computador > Alterar > Domínio: cobrecom (Autenticar com conta root)' },
+                            { id: 'f_dm_2', label: 'Adicionar usuário nas Contas do Windows', checked: false, desc: 'Painel de Controle > Contas de Usuário > Adicionar usuário do domínio cobrecom' },
+                            { id: 'f_dm_3', label: 'Logar no usuário e organizar atalhos', checked: false, desc: 'Trocar de usuário, concluir inicialização e fixar programas na tela' }
+                        ] 
+                    }
                 };
             } else {
                 tmpl.items = {
-                    inspecao: { title: "Inspeção Física", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
-                    preventiva: { title: "Manutenção", icon: "Server", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
-                    teste: { title: "Validação", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
+                    inspecao: { title: "1. Inspeção Física", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Inspeção de rolete e suporte', checked: false, desc: 'Avaliar desgastes mecânicos' }, { id: 'z_insp_2', label: 'Cabeça de Impressão', checked: false, desc: 'Verificar riscos na cabeça' }, { id: 'z_insp_3', label: 'Qualidade Inicial de Impressão', checked: false, desc: 'Imprimir página padrão' }] },
+                    preventiva: { title: "2. Higienização & Calibração", icon: "Server", tasks: [{ id: 'z_prev_1', label: 'Limpeza de Rolete com Álcool Isopropílico', checked: false, desc: 'Remover resíduos de cola' }, { id: 'z_prev_2', label: 'Limpeza térmica da cabeça', checked: false, desc: 'Utilizar caneta/swab térmico' }, { id: 'z_prev_3', label: 'Calibração dos Sensores de Mídia', checked: false, desc: 'Ajuste de GAP e Ribbon' }] },
+                    teste: { title: "3. Validação Final", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste de Código de Barras e Legibilidade', checked: false, desc: 'Conferência com leitor' }] }
                 };
             }
             return tmpl;
@@ -225,7 +279,7 @@
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
-                            <p className="text-sm text-slate-500 mt-1">Acesso Administrativo</p>
+                            <p className="text-sm text-slate-500 mt-1">Manual Operacional Integrado • Cobrecom</p>
                         </div>
                         <form onSubmit={handleSubmit} className="p-8 space-y-4">
                             <div>
@@ -240,7 +294,7 @@
                             <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
                         </form>
                         <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] text-slate-400 font-mono">V2.6 ESTÁVEL • COBRECOM TI</p>
+                            <p className="text-[10px] text-slate-400 font-mono">POP FORMATAÇÃO W10 • TI COBRECOM</p>
                         </div>
                     </div>
                 </div>
@@ -277,7 +331,7 @@
 
             var handleDeleteUser = function(user) {
                 if (currentUser && user.id === currentUser.id) return alert("Você não pode remover seu próprio usuário conectado.");
-                if (confirm("Remover usuário " + user.name + "?")) {
+                if (confirm("Remover técnico " + user.name + "?")) {
                     db.collection('users').doc(user.docId).delete();
                 }
             };
@@ -291,14 +345,14 @@
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm fade-in">
                     <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" noPadding>
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Gerenciar Equipe</h2>
+                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Gestão da Equipe Técnica</h2>
                             <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
                         </div>
                         <div className="p-6 overflow-y-auto grid md:grid-cols-2 gap-6">
                             <div>
-                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Membro</h3>
+                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Técnico</h3>
                                 <form onSubmit={handleAddUser} className="space-y-3">
-                                    <Input placeholder="ID (Matrícula)" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
+                                    <Input placeholder="Matrícula / ID" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
                                     <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value })); }} />
                                     <Input type="password" placeholder="Senha" value={newUser.pass} onChange={function(e) { setNewUser(Object.assign({}, newUser, { pass: e.target.value })); }} />
                                     <Button type="submit" disabled={saving} className="w-full">{Icons.Plus} Cadastrar</Button>
@@ -306,7 +360,7 @@
                             </div>
                             <div>
                                 <div className="flex justify-between items-center mb-3">
-                                    <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Equipe Ativa</h3>
+                                    <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Técnicos Habilitados</h3>
                                     <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-28" />
                                 </div>
                                 <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
@@ -369,34 +423,48 @@
                             <div>
                                 <div className="flex items-center gap-2">
                                     <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-none">#{ticket.visualId}</h2>
-                                    <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                    <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>
+                                        {ticket.type === 'formatacao' ? 'Formatação PC' : 'Zebra Térmica'}
+                                    </Badge>
                                 </div>
-                                <p className="text-xs text-slate-500 mt-1">Criado em {new Date(ticket.createdAt || Date.now()).toLocaleDateString()}</p>
+                                <p className="text-xs text-slate-500 mt-1">Iniciado em {new Date(ticket.createdAt || Date.now()).toLocaleDateString()}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="text-right hidden sm:block">
                                 <span className="text-xs font-bold text-brand-600 block">{progress}% Completo</span>
-                                <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-brand-600 transition-all duration-500" style={{width: progress + '%'}}></div></div>
+                                <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden">
+                                    <div className={"h-full transition-all duration-500 " + (progress === 100 ? "bg-emerald-500" : "bg-brand-600")} style={{width: progress + '%'}}></div>
+                                </div>
                             </div>
-                            <Button onClick={onRequestFinish} variant={progress === 100 ? 'primary' : 'secondary'}>{progress === 100 ? 'Finalizar' : 'Revisar'}</Button>
+                            <Button onClick={onRequestFinish} variant={progress === 100 ? 'primary' : 'secondary'}>
+                                {progress === 100 ? 'Finalizar & Liberar' : 'Revisar'}
+                            </Button>
                         </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-                        <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" noPadding>
+                        <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" noPadding>
                             <div className="p-6 col-span-full border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                                <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Dados do Equipamento</h3>
+                                <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Identificação do Ativo na Bancada</h3>
                             </div>
                             <div className="p-6 pt-2 col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {Object.keys(meta).map(function(field) {
-                                    return (
-                                        <div key={field}>
-                                            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">{field}</label>
-                                            <Input type={field === 'data' ? 'date' : 'text'} value={meta[field] || ''} onChange={function(e) { handleMeta(field, e.target.value); }} />
-                                        </div>
-                                    );
-                                })}
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Nome da Máquina (Hostname)</label>
+                                    <Input placeholder="Ex: CORP-PC-01" value={meta.maquina || ''} onChange={function(e) { handleMeta('maquina', e.target.value); }} />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Patrimônio / Etiqueta</label>
+                                    <Input placeholder="Ex: PAT-01492" value={meta.ativo || ''} onChange={function(e) { handleMeta('ativo', e.target.value); }} />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Usuário Final (Setor)</label>
+                                    <Input placeholder="Ex: Financeiro / João" value={meta.usuario_final || ''} onChange={function(e) { handleMeta('usuario_final', e.target.value); }} />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Técnico Responsável</label>
+                                    <Input value={meta.tecnico || ''} onChange={function(e) { handleMeta('tecnico', e.target.value); }} />
+                                </div>
                             </div>
                         </Card>
 
@@ -413,11 +481,20 @@
                                             {(group.tasks || []).map(function(task) {
                                                 return (
                                                     <label key={task.id} className="flex items-start gap-3 p-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer group transition-colors select-none">
-                                                        <div className={"mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-all duration-200 " + (task.checked ? 'bg-brand-600 border-brand-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800')}>
+                                                        <div className={"mt-1 w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-all duration-200 " + (task.checked ? 'bg-brand-600 border-brand-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800')}>
                                                             {task.checked && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>}
                                                         </div>
                                                         <input type="checkbox" checked={!!task.checked} onChange={function() { handleCheck(key, task.id); }} className="hidden" />
-                                                        <span className={"text-sm font-medium " + (task.checked ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-300')}>{task.label}</span>
+                                                        <div className="flex-1">
+                                                            <span className={"text-sm font-semibold " + (task.checked ? 'text-slate-400 line-through' : 'text-slate-800 dark:text-slate-200')}>
+                                                                {task.label}
+                                                            </span>
+                                                            {task.desc && (
+                                                                <p className={"text-xs mt-0.5 leading-snug " + (task.checked ? 'text-slate-400 line-through opacity-70' : 'text-slate-500 dark:text-slate-400 font-mono')}>
+                                                                    {task.desc}
+                                                                </p>
+                                                            )}
+                                                        </div>
                                                     </label>
                                                 );
                                             })}
@@ -457,11 +534,11 @@
                 return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
             });
             var percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
-            var statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
+            var statusGlobal = percent === 100 ? "LIBERADO" : "PARCIAL";
 
             var handleSendOutlook = function() {
-                var subject = "[" + statusGlobal + "] Checklist #" + ticket.visualId + " - " + identificador;
-                var body = "RELATÓRIO TÉCNICO\n----------------------------------------\nID: #" + ticket.visualId + "\nATIVO: " + identificador + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO:\n" + categorySummary.map(function(c) { return "[" + c.status + "] " + c.title; }).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações.") + "\n\nGerado via InfraChecklist";
+                var subject = "[" + statusGlobal + "] Liberação de Máquina #" + ticket.visualId + " - " + identificador;
+                var body = "RELATÓRIO DE FORMATAÇÃO E LIBERAÇÃO\n----------------------------------------\nID: #" + ticket.visualId + "\nMÁQUINA: " + identificador + "\nPATRIMÔNIO: " + (meta.ativo || 'N/A') + "\nUSUÁRIO/SETOR: " + (meta.usuario_final || 'N/A') + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO POR ETAPA:\n" + categorySummary.map(function(c) { return "[" + c.status + "] " + c.title; }).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações adicionais.") + "\n\nGerado via InfraChecklist Cobrecom";
                 window.location.href = "mailto:" + EMAIL_DESTINO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
                 setTimeout(function() {
                     if (confirm("E-mail aberto? Clique OK para arquivar.")) onArchive(ticket);
@@ -473,19 +550,19 @@
                     <div className="max-w-4xl mx-auto w-full space-y-6 fade-in no-print">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 cursor-pointer" onClick={onBack}>
-                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar à Edição</span>
+                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar ao Checklist</span>
                             </div>
-                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Revisão & Entrega</h1>
+                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Ficha de Liberação Técnica</h1>
                         </div>
 
                         <Card className="grid md:grid-cols-2 gap-6">
                             <div className="space-y-4">
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
-                                <textarea value={obs} onChange={function(e) { setObs(e.target.value); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais de Bancada</label>
+                                <textarea value={obs} onChange={function(e) { setObs(e.target.value); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-36 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Ex: Usuário adicionado com sucesso. Impressora do setor mapeada..."></textarea>
                             </div>
                             <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
-                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações de Encerramento</h3>
-                                <Button className="w-full justify-start" onClick={function() { window.print(); }} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Encerramento</h3>
+                                <Button className="w-full justify-start" onClick={function() { window.print(); }} variant="secondary">{Icons.Printer} Imprimir Ficha de Entrega</Button>
                                 <Button className="w-full justify-start" onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail & Arquivar</Button>
                             </div>
                         </Card>
@@ -493,21 +570,25 @@
 
                     <div id="receipt-area" className="hidden bg-white text-black font-sans text-xs border border-gray-300 p-0">
                         <div className="flex justify-between items-center p-6 border-b-2 border-black">
-                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Infraestrutura</p></div></div>
+                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Ficha Técnica de Liberação</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Cobrecom</p></div></div>
                             <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date().toLocaleDateString()}</div></div>
                         </div>
                         <div className="grid grid-cols-4 border-b border-black">
-                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate">{identificador}</span></div>
-                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Tipo</span><span className="font-bold uppercase">{ticket.type}</span></div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Máquina</span><span className="font-bold text-sm block truncate">{identificador}</span></div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Patrimônio</span><span className="font-bold uppercase truncate">{meta.ativo || 'N/A'}</span></div>
                             <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{meta.tecnico}</span></div>
-                            <div className={"p-3 text-center flex flex-col justify-center " + (percent === 100 ? 'bg-gray-100' : 'bg-gray-200')}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
+                            <div className={"p-3 text-center flex flex-col justify-center " + (percent === 100 ? 'bg-gray-100' : 'bg-gray-200')}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal} ({percent}%)</span></div>
                         </div>
                         <div className="p-6 flex gap-8">
-                            <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map(function(cat, i) { return (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>); })}</tbody></table></div>
+                            <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Etapas de Conformidade</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map(function(cat, i) { return (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'CONFORME' : 'PENDENTE'}</td></tr>); })}</tbody></table></div>
                             <div className="w-1/2 flex flex-col gap-4">
                                 {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map(function(p, i) { return <li key={i} className="truncate">{p.replace('- ', '')}</li>; })}</ul></div>)}
                                 <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16">{obs || "Sem observações adicionais."}</p></div>
                             </div>
+                        </div>
+                        <div className="mt-8 px-6 pb-6 pt-4 flex justify-between gap-12">
+                            <div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Técnico Responsável</p></div>
+                            <div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Recebido / Validado Por</p></div>
                         </div>
                     </div>
                 </div>
@@ -526,21 +607,21 @@
             return (
                 <div className="p-6 md:p-10 space-y-8 fade-in">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Visão Geral</h2>
-                        <p className="text-slate-500 text-sm">Monitoramento de atividades de infraestrutura em tempo real.</p>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Visão Geral da Bancada</h2>
+                        <p className="text-slate-500 text-sm">Controle de qualidade e liberação de computadores e impressoras.</p>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-brand-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Chamados Abertos</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Em Preparação</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
                             <div className="bg-brand-50 dark:bg-brand-900/20 p-3 rounded-xl text-brand-600">{Icons.Layout}</div>
                         </Card>
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-emerald-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Histórico Total</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total Liberado</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
                             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl text-emerald-600">{Icons.History}</div>
                         </Card>
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-indigo-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Formatações</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Computadores</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-xl text-indigo-600">{Icons.Server}</div>
                         </Card>
                     </div>
@@ -549,23 +630,23 @@
                         <button onClick={function() { onNewTicket('formatacao'); }} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">{Icons.Plus}</div>
-                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Checklist completo de P.C.</span></div>
+                                <div className="text-left"><span className="block font-bold">Nova Formatação de PC</span><span className="text-xs opacity-80">Manual padrão com GPEDIT, Proxy e ESET</span></div>
                             </div>
                         </button>
                         <button onClick={function() { onNewTicket('zebra'); }} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 group-hover:text-brand-500">{Icons.Printer}</div>
-                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Impressoras térmicas</span></div>
+                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Higienização e calibração térmica</span></div>
                             </div>
                         </button>
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila de Atendimento</h3>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila da Bancada</h3>
                         {activeTickets.length === 0 ? (
                             <div className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-12 text-center">
-                                <p className="text-slate-400 font-medium">Nenhum chamado ativo no momento.</p>
-                                <p className="text-xs text-slate-500 mt-1">Inicie um novo atendimento acima.</p>
+                                <p className="text-slate-400 font-medium">Nenhum equipamento na bancada no momento.</p>
+                                <p className="text-xs text-slate-500 mt-1">Clique em "Nova Formatação de PC" acima para iniciar.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -578,7 +659,7 @@
                                         <div key={ticket.id} onClick={function() { onOpenTicket(ticket.id); }} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
                                             <div className="absolute top-0 left-0 w-1 h-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                             <div className="flex justify-between items-start mb-3">
-                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type === 'formatacao' ? 'Formatação' : 'Zebra'}</Badge>
                                                 <span className="text-xs font-mono font-bold text-slate-400">#{ticket.visualId}</span>
                                             </div>
                                             <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1">{nomeAtivo}</h4>
@@ -586,7 +667,7 @@
                                             
                                             <div className="flex items-center gap-3">
                                                 <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-brand-500" style={{width: pct + '%'}}></div>
+                                                    <div className={"h-full " + (pct === 100 ? "bg-emerald-500" : "bg-brand-500")} style={{width: pct + '%'}}></div>
                                                 </div>
                                                 <span className="text-xs font-bold text-brand-600">{pct}%</span>
                                             </div>
@@ -616,12 +697,12 @@
                 <div className="p-6 md:p-10 h-full flex flex-col fade-in">
                     <div className="flex justify-between items-end mb-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Atendimentos</h2>
-                            <p className="text-slate-500 text-sm">Registro auditável de todas as manutenções.</p>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Liberações</h2>
+                            <p className="text-slate-500 text-sm">Registro de computadores e impressoras configurados.</p>
                         </div>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
-                            <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={function(e) { setSearch(e.target.value); }} className="pl-10 w-64" />
+                            <Input placeholder="Buscar por ID, Máquina..." value={search} onChange={function(e) { setSearch(e.target.value); }} className="pl-10 w-64" />
                         </div>
                     </div>
                     
@@ -633,7 +714,7 @@
                                         <th className="px-6 py-3">ID</th>
                                         <th className="px-6 py-3">Data</th>
                                         <th className="px-6 py-3">Tipo</th>
-                                        <th className="px-6 py-3">Ativo</th>
+                                        <th className="px-6 py-3">Máquina / Ativo</th>
                                         <th className="px-6 py-3">Técnico</th>
                                         <th className="px-6 py-3 text-right">Status</th>
                                     </tr>
@@ -647,7 +728,7 @@
                                                 <td className="px-6 py-3"><Badge color={h.type === 'formatacao' ? 'blue' : 'amber'}>{h.type}</Badge></td>
                                                 <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
                                                 <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico || 'N/A'}</td>
-                                                <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
+                                                <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Liberado</span></td>
                                             </tr>
                                         );
                                     })}
@@ -699,7 +780,6 @@
                     localStorage.removeItem('sa_user_session');
                 }
 
-                // Carrega tickets e FILTRA qualquer documento nulo/incompleto para evitar crash
                 var unsubTickets = db.collection('tickets').onSnapshot(function(snap) {
                     var list = snap.docs.map(function(doc) {
                         return Object.assign({ id: doc.id }, doc.data());
@@ -812,7 +892,7 @@
                         </div>
                         <nav className="flex-1 py-6 px-3 space-y-1">
                             <button onClick={function() { setView('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                {Icons.Layout} Dashboard
+                                {Icons.Layout} Bancada de Trabalho
                             </button>
                             <button onClick={function() { setView('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                 {Icons.History} Histórico
