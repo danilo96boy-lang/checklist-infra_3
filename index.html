@@ -7,10 +7,14 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <!-- React 18 e ReactDOM -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     
+    <!-- Babel Standalone 7 Moderno e Estável (Cloudflare CDNJS) -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.12/babel.min.js"></script>
+    
+    <!-- Firebase Compat 9 -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -56,7 +60,15 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300">
-    <div id="root"></div>
+    <div id="root">
+        <!-- Indicador de carregamento caso os CDNs demorem -->
+        <div id="loading-fallback" class="min-h-screen flex items-center justify-center p-4">
+            <div class="text-center">
+                <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                <p class="text-xs text-slate-500 font-medium">Carregando Checklist...</p>
+            </div>
+        </div>
+    </div>
 
     <script type="text/babel">
         // --- CONFIGURAÇÃO FIREBASE ---
@@ -71,7 +83,7 @@
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const { useState, useEffect, useRef, Component } = React;
+        const { useState, useEffect, useRef } = React;
 
         const EMAIL_DESTINO = "infra@cobrecom.com.br";
         const DEFAULT_TEAM = [
@@ -80,41 +92,6 @@
             { id: '01001691', name: 'Lui', pass: '1234' },
             { id: 'admin', name: 'Admin', pass: 'admin' }
         ];
-
-        // --- ERROR BOUNDARY ANTI-TELA BRANCA ---
-        class ErrorBoundary extends Component {
-            constructor(props) {
-                super(props);
-                this.state = { hasError: false, error: null };
-            }
-            static getDerivedStateFromError(error) {
-                return { hasError: true, error };
-            }
-            componentDidCatch(error, errorInfo) {
-                console.error("Erro capturado:", error, errorInfo);
-            }
-            handleReset = () => {
-                localStorage.clear();
-                window.location.reload();
-            };
-            render() {
-                if (this.state.hasError) {
-                    return (
-                        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100 dark:bg-slate-950 text-center">
-                            <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800">
-                                <div className="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center mx-auto mb-4 font-bold text-xl">⚠️</div>
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Erro de Inicialização</h2>
-                                <p className="text-xs text-slate-500 mb-6">Uma sessão corrompida ou dados inconsistentes impediram a inicialização.</p>
-                                <button onClick={this.handleReset} className="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-lg transition-colors">
-                                    Limpar Cache & Reiniciar
-                                </button>
-                            </div>
-                        </div>
-                    );
-                }
-                return this.props.children;
-            }
-        }
 
         // --- ICONS ---
         const Icons = {
@@ -237,7 +214,7 @@
                             <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
                         </form>
                         <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] text-slate-400 font-mono">V2.4 RESTAURADO • COBRECOM TI</p>
+                            <p className="text-[10px] text-slate-400 font-mono">V2.5 CONECTADO • COBRECOM TI</p>
                         </div>
                     </div>
                 </div>
@@ -653,7 +630,6 @@
                     localStorage.removeItem('sa_user_session');
                 }
 
-                // Listeners Firebase com proteção de erro
                 const unsubTickets = db.collection('tickets').onSnapshot(snap => {
                     const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     list.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
@@ -807,11 +783,7 @@
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(
-            <ErrorBoundary>
-                <App />
-            </ErrorBoundary>
-        );
+        root.render(<App />);
     </script>
 </body>
 </html>
