@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFRA CHECKLIST | Manual Integrado Cobrecom</title>
+    <title>INFRA CHECKLIST | Enterprise Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React 18 e ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel Standalone 7 -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Firebase 9 Compat -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -101,203 +96,127 @@
             Server: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
             Mail: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
             ChevronLeft: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
-            BookOpen: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            BookOpen: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
             Copy: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
         };
 
-        // --- MODELO COM MANUAL INTEGRADO PASSO A PASSO ---
+        // --- MODELO ORIGINAL COM TODOS OS NOMES DA SUA TELA E MANUAL ACOPLADO ---
         var getTemplate = function(type, tecnicoName) {
             var tmpl = {
                 meta: { 
                     tecnico: tecnicoName || '', 
                     data: new Date().toISOString().split('T')[0], 
-                    maquina: '', 
-                    ativo: '',
-                    usuario_final: ''
+                    ativo: '', 
+                    maquina: '' 
                 },
                 items: {}
             };
 
             if (type === 'formatacao') {
                 tmpl.items = {
-                    etapa1: {
-                        title: "1. Formatação, Usuário e Sistema",
+                    entrega: {
+                        title: "ENTREGA",
                         icon: "Server",
                         tasks: [
-                            {
-                                id: 'm_step_1',
-                                label: 'Formatação Limpa via BIOS',
-                                checked: false,
-                                instructions: 'Reiniciar o computador com o pendrive de boot e executar a formatação completa do Windows pela BIOS.',
-                                copyText: null
-                            },
-                            {
-                                id: 'm_step_2',
-                                label: 'Conta Local "root" e Perguntas de Recuperação',
-                                checked: false,
-                                instructions: 'Criar usuário com o nome "root". Para as 3 perguntas de segurança de recuperação, a resposta obrigatória é "cobre".',
-                                copyText: 'root'
-                            },
-                            {
-                                id: 'm_step_3',
-                                label: 'Pausar Atualizações do Windows Update',
-                                checked: false,
-                                instructions: 'Abrir Configurações > Windows Update e clicar na opção "Pausar Atualizações" para evitar downloads concorrentes durante a montagem.',
-                                copyText: null
-                            },
-                            {
-                                id: 'm_step_4',
-                                label: 'Configurações de Energia (Definir "Nunca")',
-                                checked: false,
-                                instructions: 'Acessar "Energia e Suspensão" e alterar tanto o desligamento de tela quanto a suspensão automática para "Nunca" em todas as opções.',
-                                copyText: null
-                            }
+                            { id: 'f_fin_1', label: 'Restore Navegador', checked: false, manual: 'Restaurar favoritos, histórico e perfis salvos do Google Chrome.' },
+                            { id: 'f_fin_2', label: 'Restore Email', checked: false, manual: 'Restaurar o arquivo PST do Outlook, catálogo de endereços e regras locais.' },
+                            { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false, manual: 'Conferir se a etiqueta patrimonial física está colada e legível no gabinete.' },
+                            { id: 'f_fin_4', label: 'Desempenho', checked: false, manual: 'Adicionar usuário: Painel de Controle > Contas de Usuário > Gerenciar contas de usuário > Adicionar (Domínio: cobrecom)[cite: 2]. Fazer logoff, logar no usuário e fixar os programas na tela[cite: 2].', copyText: 'control userpasswords2' }
                         ]
                     },
-                    etapa2: {
-                        title: "2. Políticas de Grupo (GPEDIT) e Recursos",
+                    seguranca: {
+                        title: "SEGURANÇA",
                         icon: "Server",
                         tasks: [
-                            {
-                                id: 'm_step_5',
-                                label: 'GPEDIT: Bloquear Criação Indevida de Perfis',
-                                checked: false,
-                                instructions: 'Abrir gpedit.msc > Modelos Administrativos > Sistema > Perfis de Usuários > Localizar "Só permitir perfis de usuários" e Habilitar.',
-                                copyText: 'gpedit.msc'
-                            },
-                            {
-                                id: 'm_step_6',
-                                label: 'GPEDIT: Desativar Atualizações Automáticas',
-                                checked: false,
-                                instructions: 'Modelos Administrativos > Componentes do Windows > Windows Update > Desativar as 3 políticas: "Configuração automática", "Permitir instalação" e "Ativar atualizações".',
-                                copyText: null
-                            },
-                            {
-                                id: 'm_step_7',
-                                label: 'Ativar Recurso de Rede SMB 1.0 / CIFS',
-                                checked: false,
-                                instructions: 'Painel de Controle > Programas > Ativar ou desativar recursos do Windows > Marcar a caixa "Suporte para Compartilhamento de Arquivos SMB 1.0/CIFS".',
-                                copyText: 'optionalfeatures'
-                            },
-                            {
-                                id: 'm_step_8',
-                                label: 'Configuração do Servidor Proxy Cobrecom',
-                                checked: false,
-                                instructions: 'Configurações > Pesquisar "Proxy" > Desativar detecção automática > Ativar "Usar servidor proxy" com Endereço: 192.168.1.1 e Porta: 3128.',
-                                copyText: '192.168.1.1'
-                            }
+                            { id: 'f_sec_1', label: 'Wazuh', checked: false, manual: 'Validar instalação e registro do agente Wazuh ativo apontando para o servidor corporativo.' },
+                            { id: 'f_sec_2', label: 'ESET', checked: false, manual: 'Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows"[cite: 2]. Em Regras (editar) > Adicionar regra "Acesso remoto" permitindo svchost.exe no serviço "Área de trabalho remoto"[cite: 2].', copyText: 'svchost.exe' },
+                            { id: 'f_sec_3', label: 'VNC + Firewall', checked: false, manual: 'Configurações WinVNC (Instalar/configurar localmente, sem acesso remoto)[cite: 2]:\n- Properties > MAX CPU: 90[cite: 2]\n- Admin Properties > Desmarcar "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request"[cite: 2].' },
+                            { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false, manual: 'Executar gpedit.msc[cite: 2]:\n1. Modelos administrativos > Sistemas > Perfis de usuários > "só permitir perfis de usuários" (Habilitar)[cite: 2].\n2. Componentes do Windows > Windows update > Desativar: "Configuração automática", "permitir instalação" e "ativar atualizações"[cite: 2].', copyText: 'gpedit.msc' }
                         ]
                     },
-                    etapa3: {
-                        title: "3. Otimização de CPU e Renomeação",
+                    sistema: {
+                        title: "SISTEMA OPERACIONAL",
                         icon: "Server",
                         tasks: [
-                            {
-                                id: 'm_step_9',
-                                label: 'MSCONFIG: Aumentar Núcleos do Processador',
-                                checked: false,
-                                instructions: 'Pressione Win+R > digite msconfig > Inicialização do Sistema > Opções Avançadas > Marcar "Número de processadores" e selecionar o número máximo disponível.',
-                                copyText: 'msconfig'
-                            },
-                            {
-                                id: 'm_step_9_1',
-                                label: 'Desativar Aplicativos de Inicialização',
-                                checked: false,
-                                instructions: 'No Gerenciador de Tarefas (Ctrl+Shift+Esc), ir na aba Inicializar e desabilitar softwares pesados que não são vitais para o boot.',
-                                copyText: null
-                            },
-                            {
-                                id: 'm_step_10',
-                                label: 'Alterar Nome da Máquina e Reiniciar',
-                                checked: false,
-                                instructions: 'Configurações > Sobre > Renomear este computador (ou Configurações Avançadas do Sistema > Nome do Computador) > Aplicar o padrão corporativo e reiniciar.',
-                                copyText: null
-                            }
+                            { id: 'f_sis_1', label: 'Formatação', checked: false, manual: '1. Reiniciar o PC e fazer a formatação pela BIOS[cite: 2].\n2. Usuário: root | Senha: nas 3 perguntas de recuperação, responder "cobre"[cite: 2].', copyText: 'root' },
+                            { id: 'f_sis_2', label: 'Domínio', checked: false, manual: 'Sobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root)[cite: 2].', copyText: 'cobrecom' },
+                            { id: 'f_sis_3', label: 'Proxy/DNS', checked: false, manual: 'Configurações > Pesquisar por PROXY > Desativar configuração automática > Usar servidor proxy: ENDEREÇO: 192.168.1.1 | PORTA: 3128[cite: 2].', copyText: '192.168.1.1' },
+                            { id: 'f_sis_4', label: 'WINS/Hosts', checked: false, manual: 'Ajustar configurações de WINS na placa de rede e arquivo hosts conforme o padrão da Cobrecom.' },
+                            { id: 'f_sis_5', label: 'Drivers', checked: false, manual: 'Instalar e atualizar todos os drivers oficiais de chipset, vídeo, rede e áudio.' }
                         ]
                     },
-                    etapa4: {
-                        title: "4. Instalação do Pacote Corporativo",
+                    preventivas: {
+                        title: "PREVENTIVAS",
                         icon: "Server",
                         tasks: [
-                            {
-                                id: 'm_step_11',
-                                label: 'Acessar Servidor de Manutenção da Infra',
-                                checked: false,
-                                instructions: 'Pressione Win+R > Acesse \\\\pdc-cobrecom\\manutencao com login admin. Navegue até a pasta "m.kauan" e copie a pasta "Formatação w10" para a Área de Trabalho.',
-                                copyText: '\\\\pdc-cobrecom\\manutencao'
-                            },
-                            {
-                                id: 'm_step_12',
-                                label: 'Instalar Aplicativos Base do Pacote',
-                                checked: false,
-                                instructions: 'Executar e instalar: ESET Antivírus, WinRAR-x64, UltraVNC, SambaWindows10, Spark, TOTVS Protheus, Google Chrome, Microsoft Office, utilitário Scan e impressoras.',
-                                copyText: null
-                            }
+                            { id: 'f_prev_1', label: 'Limpeza interna', checked: false, manual: 'Remover poeira interna do gabinete, cooler do processador e fontes de alimentação com ar comprimido/pincel.' },
+                            { id: 'f_prev_2', label: 'Pasta térmica', checked: false, manual: 'Remover pasta antiga ressecada com álcool isopropílico e aplicar nova camada de pasta térmica.' },
+                            { id: 'f_prev_3', label: 'Limpeza memórias', checked: false, manual: 'Limpar os contatos dourados dos módulos de memória RAM com borracha branca ou spray apropriado.' },
+                            { id: 'f_prev_4', label: 'Limpa contato', checked: false, manual: 'Aplicar spray limpa contato nos slots de memória, PCIe e conexões elétricas da placa-mãe.' }
                         ]
                     },
-                    etapa5: {
-                        title: "5. Configurações ESET & UltraVNC",
+                    configuracao: {
+                        title: "CONFIGURAÇÕES",
                         icon: "Server",
                         tasks: [
-                            {
-                                id: 'm_step_13',
-                                label: 'ESET: Firewall e Liberação de Acesso Remoto',
-                                checked: false,
-                                instructions: 'Abrir ESET > Configuração Avançada > Proteção de Acesso à Rede > Firewall: Habilitar "Avaliar também as regras do Windows". Em Regras (Editar): Adicionar regra "Acesso remoto" permitindo o aplicativo svchost.exe com o serviço "Área de trabalho remota".',
-                                copyText: 'svchost.exe'
-                            },
-                            {
-                                id: 'm_step_13_1',
-                                label: 'UltraVNC: Ajuste de Desempenho e Monitor',
-                                checked: false,
-                                instructions: 'IMPORTANTE: Configurar localmente no PC (não via acesso remoto). Em Properties: setar MAX CPU: 90. Em Admin Properties: Desmarcar "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request". Definir a senha padrão.',
-                                copyText: null
-                            }
+                            { id: 'f_conf_1', label: 'Ativar Win/Office', checked: false, manual: 'Verificar a ativação legal do Windows e pacote Microsoft Office.' },
+                            { id: 'f_conf_2', label: 'Energia', checked: false, manual: 'Energia e Suspensão: Definir tudo para "Nunca" (desligamento de tela e suspensão)[cite: 2]. Pausar atualizações no Windows Update[cite: 2].' },
+                            { id: 'f_conf_3', label: 'Config. Email', checked: false, manual: 'Configurar a conta corporativa de e-mail no Microsoft Outlook.' },
+                            { id: 'f_conf_4', label: 'Config. Spark', checked: false, manual: 'Configurar servidor e autenticação do mensageiro interno Spark.' },
+                            { id: 'f_conf_5', label: 'Impressoras', checked: false, manual: 'Instalar drivers e mapear impressoras locais e de rede do setor.' },
+                            { id: 'f_conf_6', label: 'Map. Rede', checked: false, manual: 'Mapear pastas da rede. Ativar opção SMB 1.0/CIFS no Painel de Controle > Programas > Ativar ou desativar recursos do Windows[cite: 2].', copyText: 'optionalfeatures' },
+                            { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false, manual: 'Fazer reserva de endereço IP fixo via MAC no DHCP corporativo caso necessário.' }
                         ]
                     },
-                    etapa6: {
-                        title: "6. Ingresso no Domínio e Perfil do Usuário",
+                    preparacao: {
+                        title: "BACKUP & PREP",
                         icon: "Server",
                         tasks: [
-                            {
-                                id: 'm_step_14',
-                                label: 'Ingressar Máquina no Domínio cobrecom',
-                                checked: false,
-                                instructions: 'Sobre > Configurações Avançadas > Nome do Computador > Alterar > Selecionar "Domínio", digitar "cobrecom" e autenticar com credenciais de administrador da rede (root).',
-                                copyText: 'cobrecom'
-                            },
-                            {
-                                id: 'm_step_15',
-                                label: 'Adicionar Conta do Usuário no Painel de Controle',
-                                checked: false,
-                                instructions: 'Painel de Controle > Contas de Usuário > Gerenciar contas de usuário > Adicionar > Informar o nome do usuário final com o domínio cobrecom selecionado.',
-                                copyText: 'control userpasswords2'
-                            },
-                            {
-                                id: 'm_step_16',
-                                label: 'Logar no Perfil e Fixar Programas na Área de Trabalho',
-                                checked: false,
-                                instructions: 'Fazer logoff da conta root, logar com o usuário final criado, aguardar a preparação inicial do Windows e fixar os atalhos de ERP, Office, Navegador e Spark na tela.',
-                                copyText: null
-                            }
+                            { id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false, manual: 'Conferir partições[cite: 2]. Melhorar processamento: Win+R > msconfig > Inicialização > Opções avançadas > Aumentar núcleos do processador ao máximo[cite: 2]. Desativar apps de inicialização desnecessários[cite: 2]. Renomear máquina e reiniciar[cite: 2].', copyText: 'msconfig' },
+                            { id: 'f_prep_2', label: 'Backup Arquivos', checked: false, manual: 'Win+R > \\\\pdc-cobrecom\\manutencao (Login: admin)[cite: 2]. Acessar pasta "m.kauan", copiar "Formatação w10" para a área de trabalho e executar[cite: 2].', copyText: '\\\\pdc-cobrecom\\manutencao' },
+                            { id: 'f_prep_3', label: 'Chave Office', checked: false, manual: 'Localizar e registrar chave ou conta de ativação do Microsoft Office do usuário.' },
+                            { id: 'f_prep_4', label: 'Backup Navegador', checked: false, manual: 'Exportar favoritos, senhas e certificados do navegador de internet.' },
+                            { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false, manual: 'Fazer cópia do arquivo PST/OST do Outlook e pasta de histórico do Spark.' }
+                        ]
+                    },
+                    apps: {
+                        title: "APLICAÇÕES",
+                        icon: "Server",
+                        tasks: [
+                            { id: 'f_app_1', label: 'TOTVS', checked: false, manual: 'Instalar o client TOTVS Protheus / SmartClient e atalhos operacionais[cite: 2].' },
+                            { id: 'f_app_2', label: 'TOTVS-MES', checked: false, manual: 'Instalar TOTVS-MES e softwares dedicados de fábrica/apontamento de produção[cite: 2].' }
                         ]
                     }
                 };
             } else {
                 tmpl.items = {
-                    inspecao: { title: "1. Inspeção Física", icon: "Check", tasks: [
-                        { id: 'z_1', label: 'Inspeção do Rolete de Tração', checked: false, instructions: 'Verificar se o rolete de borracha possui cortes ou deformações.' },
-                        { id: 'z_2', label: 'Inspeção da Cabeça Térmica', checked: false, instructions: 'Checar visualmente se há pontos de desgaste ou riscos na linha de queima térmica.' },
-                        { id: 'z_3', label: 'Verificação do Suporte de Mídia', checked: false, instructions: 'Conferir o travamento das guias de rolo de etiqueta e ribbon.' }
-                    ]},
-                    manutencao: { title: "2. Higienização e Calibração", icon: "Server", tasks: [
-                        { id: 'z_4', label: 'Limpeza com Álcool Isopropílico', checked: false, instructions: 'Passar álcool isopropílico 99% no rolete girando manualmente e na cabeça térmica com swab.' },
-                        { id: 'z_5', label: 'Limpeza do Sensor de Mídia / GAP', checked: false, instructions: 'Remover todo acúmulo de poeira e fiapos de etiqueta do leitor ótico de espaço/GAP.' },
-                        { id: 'z_6', label: 'Auto-Calibração de Sensores', checked: false, instructions: 'Segurar os botões Pause + Feed para calibração padrão de etiquetas na impressora.' }
-                    ]},
-                    teste: { title: "3. Teste e Liberação", icon: "Printer", tasks: [
-                        { id: 'z_7', label: 'Impressão de Teste e Validação de Código de Barras', checked: false, instructions: 'Imprimir etiqueta de configuração e verificar leitura perfeita com scanner laser.' }
-                    ]}
+                    inspecao: {
+                        title: "INSPEÇÃO FÍSICA",
+                        icon: "Check",
+                        tasks: [
+                            { id: 'z_1', label: 'Rolete', checked: false, manual: 'Verificar alinhamento e desgastes mecânicos no rolete de borracha.' },
+                            { id: 'z_2', label: 'Cabeça Impressão', checked: false, manual: 'Inspecionar riscos ou pontos danificados na cabeça térmica.' },
+                            { id: 'z_3', label: 'Suporte Etiqueta', checked: false, manual: 'Verificar travamento do suporte do rolo de etiqueta e ribbon.' },
+                            { id: 'z_4', label: 'Qualidade Inicial', checked: false, manual: 'Imprimir página inicial de diagnóstico antes da limpeza.' }
+                        ]
+                    },
+                    manutencao: {
+                        title: "MANUTENÇÃO",
+                        icon: "Server",
+                        tasks: [
+                            { id: 'z_5', label: 'Limpeza Rolete', checked: false, manual: 'Descontaminar rolete com álcool isopropílico para retirar cola.' },
+                            { id: 'z_6', label: 'Limpeza Cabeça', checked: false, manual: 'Limpar cabeça de impressão utilizando caneta térmica apropriada.' },
+                            { id: 'z_7', label: 'Limpeza Suporte', checked: false, manual: 'Desobstruir eixos e remover acúmulo de poeira do compartimento.' },
+                            { id: 'z_8', label: 'Limpeza Geral', checked: false, manual: 'Higienização geral da carcaça e limpeza do sensor de mídia/GAP.' }
+                        ]
+                    },
+                    teste: {
+                        title: "VALIDAÇÃO",
+                        icon: "Printer",
+                        tasks: [
+                            { id: 'z_9', label: 'Teste Final', checked: false, manual: 'Efetuar calibração de GAP e imprimir etiquetas para leitura com scanner laser.' }
+                        ]
+                    }
                 };
             }
             return tmpl;
@@ -379,7 +298,7 @@
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
-                            <p className="text-sm text-slate-500 mt-1">Manual Operacional de Bancada • Cobrecom</p>
+                            <p className="text-sm text-slate-500 mt-1">Manual Operacional de Formatação • Cobrecom</p>
                         </div>
                         <form onSubmit={handleSubmit} className="p-8 space-y-4">
                             <div>
@@ -394,7 +313,7 @@
                             <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Checklist</Button>
                         </form>
                         <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] text-slate-400 font-mono">POP FORMATAÇÃO W10 UNIFICADO • TI COBRECOM</p>
+                            <p className="text-[10px] text-slate-400 font-mono">POP FORMATAÇÃO W10 • TI COBRECOM</p>
                         </div>
                     </div>
                 </div>
@@ -486,7 +405,7 @@
             );
         };
 
-        // --- COMPONENTE DO ITEM COM SANFONA E INSTRUÇÕES DETALHADAS ---
+        // --- COMPONENTE DO ITEM COM SANFONA E BOTÃO COPIAR ---
         var TaskItem = function(props) {
             var task = props.task;
             var onToggle = props.onToggle;
@@ -523,28 +442,28 @@
                                     {task.label}
                                 </span>
                                 
-                                {task.instructions && (
+                                {task.manual && (
                                     <button 
                                         type="button"
                                         onClick={function() { setIsOpen(!isOpen); }} 
                                         className={"text-[11px] font-medium flex items-center gap-1 px-2 py-0.5 rounded transition-colors " + (isOpen ? "bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300" : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-brand-600")}
                                     >
-                                        {Icons.BookOpen} <span>{isOpen ? 'Ocultar' : 'Ver Manual'}</span>
+                                        {Icons.BookOpen} <span>{isOpen ? 'Fechar' : 'Manual'}</span>
                                     </button>
                                 )}
                             </div>
 
-                            {/* Detalhes do Manual Operacional */}
-                            {isOpen && task.instructions && (
+                            {/* Sanfona do Manual Técnico */}
+                            {isOpen && task.manual && (
                                 <div className="mt-2.5 p-3 rounded-lg bg-blue-50/70 dark:bg-slate-950/70 border border-blue-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 fade-in">
                                     <div className="flex items-start gap-2">
-                                        <div className="text-brand-500 shrink-0 mt-0.5">ℹ</div>
+                                        <div className="text-brand-500 shrink-0 mt-0.5 font-bold">ℹ</div>
                                         <div className="space-y-2 flex-1">
-                                            <p className="leading-relaxed whitespace-pre-line">{task.instructions}</p>
+                                            <p className="leading-relaxed whitespace-pre-line font-sans">{task.manual}</p>
                                             
                                             {task.copyText && (
                                                 <div className="pt-1 flex items-center gap-2">
-                                                    <span className="text-[10px] uppercase font-bold text-slate-400">Atalho / Parâmetro:</span>
+                                                    <span className="text-[10px] uppercase font-bold text-slate-400">Comando / Parâmetro:</span>
                                                     <button 
                                                         type="button"
                                                         onClick={function(e) { copyToClipboard(e, task.copyText); }}
@@ -595,6 +514,34 @@
 
             var progress = calcProgress(items);
 
+            // Divisão exata das colunas da sua foto
+            var leftKeys = ['entrega', 'seguranca', 'sistema', 'preventivas'];
+            var rightKeys = ['configuracao', 'preparacao', 'apps'];
+
+            var renderCategoryCard = function(key) {
+                var group = items[key];
+                if (!group) return null;
+                return (
+                    <Card key={key} noPadding className="overflow-hidden h-fit">
+                        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center gap-2">
+                            <div className="text-brand-500">{Icons[group.icon] || Icons.Server}</div>
+                            <h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3>
+                        </div>
+                        <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                            {(group.tasks || []).map(function(task) {
+                                return (
+                                    <TaskItem 
+                                        key={task.id} 
+                                        task={task} 
+                                        onToggle={function() { handleCheck(key, task.id); }} 
+                                    />
+                                );
+                            })}
+                        </div>
+                    </Card>
+                );
+            };
+
             return (
                 <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950 relative">
                     <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-sm z-10 shrink-0">
@@ -604,74 +551,62 @@
                                 <div className="flex items-center gap-2">
                                     <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-none">#{ticket.visualId}</h2>
                                     <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>
-                                        {ticket.type === 'formatacao' ? 'Formatação PC' : 'Zebra Térmica'}
+                                        {ticket.type === 'formatacao' ? 'Formatação PC' : 'Zebra'}
                                     </Badge>
                                 </div>
-                                <p className="text-xs text-slate-500 mt-1">Iniciado em {new Date(ticket.createdAt || Date.now()).toLocaleDateString()}</p>
+                                <p className="text-xs text-slate-500 mt-1">Criado em {new Date(ticket.createdAt || Date.now()).toLocaleDateString()}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="text-right hidden sm:block">
-                                <span className="text-xs font-bold text-brand-600 block">{progress}% Concluído</span>
+                                <span className="text-xs font-bold text-brand-600 block">{progress}% Completo</span>
                                 <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden">
                                     <div className={"h-full transition-all duration-500 " + (progress === 100 ? "bg-emerald-500" : "bg-brand-600")} style={{width: progress + '%'}}></div>
                                 </div>
                             </div>
                             <Button onClick={onRequestFinish} variant={progress === 100 ? 'primary' : 'secondary'}>
-                                {progress === 100 ? 'Finalizar & Liberar' : 'Revisar'}
+                                {progress === 100 ? 'Finalizar' : 'Revisar'}
                             </Button>
                         </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-                        <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" noPadding>
-                            <div className="p-6 col-span-full border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                                <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Identificação do Ativo na Bancada</h3>
-                            </div>
-                            <div className="p-6 pt-2 col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* CABEÇALHO IDÊNTICO À IMAGEM: DATA | ATIVO | MAQUINA */}
+                        <Card className="grid grid-cols-1 md:grid-cols-3 gap-6" noPadding>
+                            <div className="p-6 col-span-full grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Nome da Máquina (Hostname)</label>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">DATA</label>
+                                    <Input type="date" value={meta.data || ''} onChange={function(e) { handleMeta('data', e.target.value); }} />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">ATIVO</label>
+                                    <Input placeholder="Ex: PAT-01020" value={meta.ativo || ''} onChange={function(e) { handleMeta('ativo', e.target.value); }} />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">MAQUINA</label>
                                     <Input placeholder="Ex: CORP-PC-01" value={meta.maquina || ''} onChange={function(e) { handleMeta('maquina', e.target.value); }} />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Patrimônio / Etiqueta</label>
-                                    <Input placeholder="Ex: PAT-01492" value={meta.ativo || ''} onChange={function(e) { handleMeta('ativo', e.target.value); }} />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Usuário Final (Setor)</label>
-                                    <Input placeholder="Ex: Financeiro / João" value={meta.usuario_final || ''} onChange={function(e) { handleMeta('usuario_final', e.target.value); }} />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Técnico Responsável</label>
-                                    <Input value={meta.tecnico || ''} onChange={function(e) { handleMeta('tecnico', e.target.value); }} />
                                 </div>
                             </div>
                         </Card>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
-                            {Object.keys(items).map(function(key) {
-                                var group = items[key];
-                                return (
-                                    <Card key={key} noPadding className="overflow-hidden h-fit">
-                                        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center gap-2">
-                                            <div className="text-brand-500">{Icons[group.icon] || Icons.Server}</div>
-                                            <h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3>
-                                        </div>
-                                        <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                                            {(group.tasks || []).map(function(task) {
-                                                return (
-                                                    <TaskItem 
-                                                        key={task.id} 
-                                                        task={task} 
-                                                        onToggle={function() { handleCheck(key, task.id); }} 
-                                                    />
-                                                );
-                                            })}
-                                        </div>
-                                    </Card>
-                                );
-                            })}
-                        </div>
+                        {/* DISTRIBUIÇÃO EM 2 COLUNAS IDÊNTICA À FOTO */}
+                        {ticket.type === 'formatacao' ? (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
+                                {/* Coluna Esquerda: ENTREGA, SEGURANÇA, SISTEMA OPERACIONAL, PREVENTIVAS */}
+                                <div className="space-y-6">
+                                    {leftKeys.map(renderCategoryCard)}
+                                </div>
+
+                                {/* Coluna Direita: CONFIGURAÇÕES, BACKUP & PREP, APLICAÇÕES */}
+                                <div className="space-y-6">
+                                    {rightKeys.map(renderCategoryCard)}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
+                                {Object.keys(items).map(renderCategoryCard)}
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -703,11 +638,11 @@
                 return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
             });
             var percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
-            var statusGlobal = percent === 100 ? "LIBERADO" : "PARCIAL";
+            var statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
 
             var handleSendOutlook = function() {
-                var subject = "[" + statusGlobal + "] Liberação de Máquina #" + ticket.visualId + " - " + identificador;
-                var body = "RELATÓRIO DE FORMATAÇÃO E LIBERAÇÃO\n----------------------------------------\nID: #" + ticket.visualId + "\nMÁQUINA: " + identificador + "\nPATRIMÔNIO: " + (meta.ativo || 'N/A') + "\nUSUÁRIO/SETOR: " + (meta.usuario_final || 'N/A') + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO POR ETAPA:\n" + categorySummary.map(function(c) { return "[" + c.status + "] " + c.title; }).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações adicionais.") + "\n\nGerado via InfraChecklist Cobrecom";
+                var subject = "[" + statusGlobal + "] Checklist #" + ticket.visualId + " - " + identificador;
+                var body = "RELATÓRIO TÉCNICO\n----------------------------------------\nID: #" + ticket.visualId + "\nATIVO: " + (meta.ativo || 'N/A') + "\nMÁQUINA: " + identificador + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO:\n" + categorySummary.map(function(c) { return "[" + c.status + "] " + c.title; }).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações.") + "\n\nGerado via InfraChecklist Cobrecom";
                 window.location.href = "mailto:" + EMAIL_DESTINO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
                 setTimeout(function() {
                     if (confirm("E-mail aberto? Clique OK para arquivar.")) onArchive(ticket);
@@ -719,19 +654,19 @@
                     <div className="max-w-4xl mx-auto w-full space-y-6 fade-in no-print">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 cursor-pointer" onClick={onBack}>
-                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar ao Checklist</span>
+                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar à Edição</span>
                             </div>
-                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Ficha de Liberação Técnica</h1>
+                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Revisão & Entrega</h1>
                         </div>
 
                         <Card className="grid md:grid-cols-2 gap-6">
                             <div className="space-y-4">
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais de Bancada</label>
-                                <textarea value={obs} onChange={function(e) { setObs(e.target.value); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-36 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Ex: Máquina configurada com sucesso. Antivírus e regras de firewall validados..."></textarea>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
+                                <textarea value={obs} onChange={function(e) { setObs(e.target.value); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
                             </div>
                             <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
-                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Encerramento</h3>
-                                <Button className="w-full justify-start" onClick={function() { window.print(); }} variant="secondary">{Icons.Printer} Imprimir Ficha de Entrega</Button>
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações de Encerramento</h3>
+                                <Button className="w-full justify-start" onClick={function() { window.print(); }} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
                                 <Button className="w-full justify-start" onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail & Arquivar</Button>
                             </div>
                         </Card>
@@ -739,25 +674,21 @@
 
                     <div id="receipt-area" className="hidden bg-white text-black font-sans text-xs border border-gray-300 p-0">
                         <div className="flex justify-between items-center p-6 border-b-2 border-black">
-                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Ficha Técnica de Liberação</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Cobrecom</p></div></div>
+                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Infraestrutura</p></div></div>
                             <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date().toLocaleDateString()}</div></div>
                         </div>
                         <div className="grid grid-cols-4 border-b border-black">
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate">{meta.ativo || 'N/A'}</span></div>
                             <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Máquina</span><span className="font-bold text-sm block truncate">{identificador}</span></div>
-                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Patrimônio</span><span className="font-bold uppercase truncate">{meta.ativo || 'N/A'}</span></div>
                             <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{meta.tecnico}</span></div>
-                            <div className={"p-3 text-center flex flex-col justify-center " + (percent === 100 ? 'bg-gray-100' : 'bg-gray-200')}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal} ({percent}%)</span></div>
+                            <div className={"p-3 text-center flex flex-col justify-center " + (percent === 100 ? 'bg-gray-100' : 'bg-gray-200')}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
                         </div>
                         <div className="p-6 flex gap-8">
-                            <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Etapas de Conformidade</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map(function(cat, i) { return (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'CONFORME' : 'PENDENTE'}</td></tr>); })}</tbody></table></div>
+                            <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map(function(cat, i) { return (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>); })}</tbody></table></div>
                             <div className="w-1/2 flex flex-col gap-4">
                                 {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map(function(p, i) { return <li key={i} className="truncate">{p.replace('- ', '')}</li>; })}</ul></div>)}
                                 <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16">{obs || "Sem observações adicionais."}</p></div>
                             </div>
-                        </div>
-                        <div className="mt-8 px-6 pb-6 pt-4 flex justify-between gap-12">
-                            <div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Técnico Responsável: {meta.tecnico}</p></div>
-                            <div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Recebido / Validado Por</p></div>
                         </div>
                     </div>
                 </div>
@@ -776,21 +707,21 @@
             return (
                 <div className="p-6 md:p-10 space-y-8 fade-in">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Visão Geral da Bancada</h2>
-                        <p className="text-slate-500 text-sm">Controle de qualidade e liberação de computadores e impressoras.</p>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Visão Geral</h2>
+                        <p className="text-slate-500 text-sm">Monitoramento de atividades de infraestrutura em tempo real.</p>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-brand-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Em Preparação</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Chamados Abertos</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
                             <div className="bg-brand-50 dark:bg-brand-900/20 p-3 rounded-xl text-brand-600">{Icons.Layout}</div>
                         </Card>
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-emerald-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total Liberado</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Histórico Total</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
                             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl text-emerald-600">{Icons.History}</div>
                         </Card>
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-indigo-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Computadores</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Formatações</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-xl text-indigo-600">{Icons.Server}</div>
                         </Card>
                     </div>
@@ -799,23 +730,23 @@
                         <button onClick={function() { onNewTicket('formatacao'); }} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">{Icons.Plus}</div>
-                                <div className="text-left"><span className="block font-bold">Nova Formatação de PC</span><span className="text-xs opacity-80">Manual padrão completo com instruções interativas</span></div>
+                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Checklist com manual interativo integrado</span></div>
                             </div>
                         </button>
                         <button onClick={function() { onNewTicket('zebra'); }} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 group-hover:text-brand-500">{Icons.Printer}</div>
-                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Higienização e calibração térmica</span></div>
+                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Impressoras térmicas</span></div>
                             </div>
                         </button>
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila da Bancada</h3>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila de Atendimento</h3>
                         {activeTickets.length === 0 ? (
                             <div className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-12 text-center">
-                                <p className="text-slate-400 font-medium">Nenhum equipamento na bancada no momento.</p>
-                                <p className="text-xs text-slate-500 mt-1">Clique em "Nova Formatação de PC" acima para iniciar.</p>
+                                <p className="text-slate-400 font-medium">Nenhum chamado ativo no momento.</p>
+                                <p className="text-xs text-slate-500 mt-1">Inicie um novo atendimento acima.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -828,7 +759,7 @@
                                         <div key={ticket.id} onClick={function() { onOpenTicket(ticket.id); }} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
                                             <div className="absolute top-0 left-0 w-1 h-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                             <div className="flex justify-between items-start mb-3">
-                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type === 'formatacao' ? 'Formatação' : 'Zebra'}</Badge>
+                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
                                                 <span className="text-xs font-mono font-bold text-slate-400">#{ticket.visualId}</span>
                                             </div>
                                             <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1">{nomeAtivo}</h4>
@@ -866,12 +797,12 @@
                 <div className="p-6 md:p-10 h-full flex flex-col fade-in">
                     <div className="flex justify-between items-end mb-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Liberações</h2>
-                            <p className="text-slate-500 text-sm">Registro de computadores e impressoras configurados.</p>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Atendimentos</h2>
+                            <p className="text-slate-500 text-sm">Registro auditável de todas as manutenções.</p>
                         </div>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
-                            <Input placeholder="Buscar por ID, Máquina..." value={search} onChange={function(e) { setSearch(e.target.value); }} className="pl-10 w-64" />
+                            <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={function(e) { setSearch(e.target.value); }} className="pl-10 w-64" />
                         </div>
                     </div>
                     
@@ -883,7 +814,7 @@
                                         <th className="px-6 py-3">ID</th>
                                         <th className="px-6 py-3">Data</th>
                                         <th className="px-6 py-3">Tipo</th>
-                                        <th className="px-6 py-3">Máquina / Ativo</th>
+                                        <th className="px-6 py-3">Ativo</th>
                                         <th className="px-6 py-3">Técnico</th>
                                         <th className="px-6 py-3 text-right">Status</th>
                                     </tr>
@@ -897,7 +828,7 @@
                                                 <td className="px-6 py-3"><Badge color={h.type === 'formatacao' ? 'blue' : 'amber'}>{h.type}</Badge></td>
                                                 <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
                                                 <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico || 'N/A'}</td>
-                                                <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Liberado</span></td>
+                                                <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
                                             </tr>
                                         );
                                     })}
@@ -1021,7 +952,7 @@
                     type: ticket.type, 
                     date: new Date().toISOString(), 
                     tecnico: meta.tecnico || 'N/A', 
-                    ativo: meta.maquina || meta.ativo || "N/A", 
+                    ativo: meta.ativo || meta.maquina || "N/A", 
                     data: ticket.data 
                 }).then(function() {
                     return db.collection('tickets').doc(ticket.id).delete();
@@ -1061,7 +992,7 @@
                         </div>
                         <nav className="flex-1 py-6 px-3 space-y-1">
                             <button onClick={function() { setView('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                {Icons.Layout} Bancada de Trabalho
+                                {Icons.Layout} Dashboard
                             </button>
                             <button onClick={function() { setView('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                 {Icons.History} Histórico
