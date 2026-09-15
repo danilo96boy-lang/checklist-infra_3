@@ -100,7 +100,7 @@
             Copy: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
         };
 
-        // --- FLUXO DE TRABALHO CRONOLÓGICO COM ORIENTAÇÃO DE APPDATA/OCULTOS ---
+        // --- MODELO COM O MANUAL ORIGINAL INTEGRADO E GUIAS DE REFERÊNCIA EXPANDIDOS ---
         var getTemplate = function(type, tecnicoName) {
             var tmpl = {
                 meta: { 
@@ -114,42 +114,80 @@
 
             if (type === 'formatacao') {
                 tmpl.items = {
-                    // ETAPA 1: MANUTENÇÃO FÍSICA
+                    // 1. PREVENTIVAS (MANUTENÇÃO FÍSICA INICIAL)
                     preventivas: {
                         title: "1. PREVENTIVAS & FÍSICA",
                         icon: "Server",
                         tasks: [
-                            { id: 'f_prev_1', label: 'Limpeza interna', checked: false, manual: 'Remover acúmulo de poeira e sujidades no gabinete, ventoinhas e cooler do processador com pincel/ar comprimido.' },
-                            { id: 'f_prev_2', label: 'Pasta térmica', checked: false, manual: 'Remover a pasta ressecada do processador com álcool isopropílico e reaplicar camada uniforme de pasta térmica nova.' },
-                            { id: 'f_prev_3', label: 'Limpeza memórias', checked: false, manual: 'Limpar os contatos dourados dos módulos de memória RAM com borracha de vinil ou produto apropriado.' },
-                            { id: 'f_prev_4', label: 'Limpa contato', checked: false, manual: 'Aplicar spray limpa contato nos slots de memória, slots PCIe e conexões elétricas da placa-mãe. Aguardar secar.' }
+                            { 
+                                id: 'f_prev_1', 
+                                label: 'Limpeza interna', 
+                                checked: false, 
+                                manual: 'Abrir o gabinete, travar as ventoinhas do cooler com o dedo/pincel para evitar que girem em falso e remover todo o pó com ar comprimido/pincel antiestático.' 
+                            },
+                            { 
+                                id: 'f_prev_2', 
+                                label: 'Pasta térmica', 
+                                checked: false, 
+                                manual: 'Remover o dissipador de calor, limpar a pasta ressecada antiga do processador com álcool isopropílico e aplicar uma gota/camada fina uniforme no centro do IHS.' 
+                            },
+                            { 
+                                id: 'f_prev_3', 
+                                label: 'Limpeza memórias', 
+                                checked: false, 
+                                manual: 'Remover os pentes de memória RAM e passar borracha plástica branca sobre os contatos dourados para desoxidar. Tirar os resíduos com pincel seco.' 
+                            },
+                            { 
+                                id: 'f_prev_4', 
+                                label: 'Limpa contato', 
+                                checked: false, 
+                                manual: 'Aplicar spray limpa contato diretamente nos slots DIMM e conectores da placa-mãe. Aguardar cerca de 2 minutos para secagem total antes de reinstalar as peças.' 
+                            }
                         ]
                     },
-                    // ETAPA 2: BACKUP COM APPDATA E ITENS OCULTOS
+                    // 2. BACKUP & PREP (ANTES DE FORMATAR)
                     preparacao: {
-                        title: "2. BACKUP & PREPARAÇÃO",
+                        title: "2. BACKUP & PREP",
                         icon: "Server",
                         tasks: [
-                            { id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false, manual: 'Verificar tamanho do disco, partições existentes e padrão do nome da máquina[cite: 3].' },
+                            { 
+                                id: 'f_prep_1', 
+                                label: 'Verif. Nome/Partições', 
+                                checked: false, 
+                                manual: 'Conferir partições existentes e anotar o nome antigo do computador[cite: 1, 2, 3].\nPara verificar discos e volumes: pressione Win+R e digite diskmgmt.msc.', 
+                                copyText: 'diskmgmt.msc' 
+                            },
                             { 
                                 id: 'f_prep_2', 
                                 label: 'Backup Arquivos', 
                                 checked: false, 
-                                manual: 'ORIENTAÇÃO DE PASTAS OCULTAS & APPDATA:\n1. No Explorador de Arquivos: clique na aba "Exibir" no menu superior e marque a caixa "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e pressione Enter para acessar C:\\Users\\<usuario>\\AppData\\Roaming.\n3. Copie a pasta AppData inteira (contém dados de navegadores, Spark, assinaturas e certificados).\n4. Salve também a pasta do usuário: Desktop, Documentos, Downloads e Imagens.',
-                                copyText: '%appdata%'
+                                manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. No Explorador de Arquivos: clique na aba superior "Exibir" e marque a caixa "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e copie a pasta AppData inteira do usuário (contém configurações, Spark e dados de navegadores).\n3. Salvar as pastas Documentos, Desktop, Downloads e Imagens.\n4. Para ferramentas de setup: Win+R > \\\\pdc-cobrecom\\manutencao (Login: admin) > pasta "m.kauan" > copiar "Formatação w10"[cite: 1, 2, 3].', 
+                                copyText: '%appdata%' 
                             },
-                            { id: 'f_prep_3', label: 'Chave Office', checked: false, manual: 'Identificar e registrar a conta ou chave de licença do Microsoft Office vinculada ao usuário.' },
-                            { id: 'f_prep_4', label: 'Backup Navegador', checked: false, manual: 'Exportar os favoritos, histórico e senhas salvas do navegador Google Chrome.' },
+                            { 
+                                id: 'f_prep_3', 
+                                label: 'Chave Office', 
+                                checked: false, 
+                                manual: 'Identificar se o pacote Office utiliza licença vinculada à conta Microsoft do usuário ou chave física OEM. Anotar ou certificar a conta vinculada.', 
+                                copyText: null 
+                            },
+                            { 
+                                id: 'f_prep_4', 
+                                label: 'Backup Navegador', 
+                                checked: false, 
+                                manual: 'No Chrome: Configurações > Favoritos > Gerenciador de favoritos > Exportar favoritos para arquivo HTML, ou copiar o diretório: %localappdata%\\Google\\Chrome\\User Data.', 
+                                copyText: '%localappdata%\\Google\\Chrome\\User Data' 
+                            },
                             { 
                                 id: 'f_prep_5', 
                                 label: 'Backup Outlook/Spark', 
                                 checked: false, 
-                                manual: '1. Outlook: Exportar arquivo de dados .PST ou copiar de C:\\Users\\<usuario>\\AppData\\Local\\Microsoft\\Outlook.\n2. Spark: Fazer backup da pasta C:\\Users\\<usuario>\\AppData\\Roaming\\Spark (históricos de mensagens e conversas).',
-                                copyText: '%localappdata%\\Microsoft\\Outlook'
+                                manual: '1. Outlook: Exportar arquivo de dados .PST ou copiar de %localappdata%\\Microsoft\\Outlook.\n2. Spark: Fazer backup da pasta de histórico de conversas em %appdata%\\Spark.', 
+                                copyText: '%appdata%\\Spark' 
                             }
                         ]
                     },
-                    // ETAPA 3: INSTALAÇÃO LIMPA DO SISTEMA OPERACIONAL
+                    // 3. SISTEMA OPERACIONAL
                     sistema: {
                         title: "3. SISTEMA OPERACIONAL",
                         icon: "Server",
@@ -158,136 +196,201 @@
                                 id: 'f_sis_1', 
                                 label: 'Formatação', 
                                 checked: false, 
-                                manual: '1. Reiniciar o PC e fazer a formatação pela BIOS[cite: 3].\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3[cite: 3].',
-                                copyText: 'root'
+                                manual: '1. Reiniciar o PC e fazer a formatação pela BIOS[cite: 1, 2, 3].\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3[cite: 1, 2, 3].', 
+                                copyText: 'root' 
                             },
                             { 
                                 id: 'f_sis_3', 
                                 label: 'Proxy/DNS', 
                                 checked: false, 
-                                manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy[cite: 3]\nENDEREÇO: 192.168.1.1 | PORTA: 3128[cite: 3]',
-                                copyText: '192.168.1.1'
+                                manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy[cite: 1, 2, 3]\nENDEREÇO: 192.168.1.1 | PORTA: 3128[cite: 1, 2, 3]', 
+                                copyText: '192.168.1.1' 
                             },
-                            { id: 'f_sis_4', label: 'WINS/Hosts', checked: false, manual: 'Configurar WINS e apontamentos locais no arquivo hosts se aplicável ao departamento.' },
-                            { id: 'f_sis_5', label: 'Drivers', checked: false, manual: 'Instalar e atualizar todos os drivers de chipset, vídeo, rede e áudio oficiais.' }
+                            { 
+                                id: 'f_sis_4', 
+                                label: 'WINS/Hosts', 
+                                checked: false, 
+                                manual: 'Configurar WINS na placa de rede caso o departamento utilize resolução legada de NetBIOS ou editar o arquivo de hosts do Windows em: C:\\Windows\\System32\\drivers\\etc\\hosts.', 
+                                copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' 
+                            },
+                            { 
+                                id: 'f_sis_5', 
+                                label: 'Drivers', 
+                                checked: false, 
+                                manual: 'Abrir o Gerenciador de Dispositivos (devmgmt.msc) e garantir a instalação de todos os drivers de Chipset, Áudio, Rede Gigabit e Placa Gráfica oficial.', 
+                                copyText: 'devmgmt.msc' 
+                            }
                         ]
                     },
-                    // ETAPA 4: POLÍTICAS DE GRUPO & AJUSTES LOCAIS DO WINDOWS
+                    // 4. CONFIGURAÇÕES & POLÍTICAS
                     configuracao: {
                         title: "4. CONFIGURAÇÕES & POLÍTICAS",
                         icon: "Server",
                         tasks: [
                             { 
                                 id: 'f_conf_2', 
-                                label: 'Energia & Updates', 
+                                label: 'Energia', 
                                 checked: false, 
-                                manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações[cite: 3].\n\n4. Energia e Suspensão:\n(Nunca em Tudo)[cite: 3].'
+                                manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações[cite: 1, 2, 3].\n\n4. Energia e Suspensão:\n(Nunca em Tudo)[cite: 1, 2, 3].' 
                             },
                             { 
                                 id: 'f_sec_4', 
                                 label: 'GPEDIT/Permissões', 
                                 checked: false, 
-                                manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar)[cite: 3].\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3)[cite: 3].',
-                                copyText: 'gpedit.msc'
+                                manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar)[cite: 1, 2, 3].\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3)[cite: 1, 2, 3].', 
+                                copyText: 'gpedit.msc' 
                             },
                             { 
                                 id: 'f_conf_6', 
-                                label: 'Map. Rede & SMB', 
+                                label: 'Map. Rede', 
                                 checked: false, 
-                                manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS[cite: 3].',
-                                copyText: 'optionalfeatures'
+                                manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS[cite: 1, 2, 3].', 
+                                copyText: 'optionalfeatures' 
                             },
                             { 
                                 id: 'f_prep_opt', 
                                 label: 'Melhorar Processamento', 
                                 checked: false, 
-                                manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo[cite: 3].\nDesativar aplicativos de inicialização desnecessários[cite: 3].',
-                                copyText: 'msconfig'
+                                manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo[cite: 1, 2, 3].\nDesativar aplicativos de inicialização (que não são importantes)[cite: 1, 2, 3].', 
+                                copyText: 'msconfig' 
                             },
                             { 
                                 id: 'f_prep_name', 
                                 label: 'Nome da Máquina', 
                                 checked: false, 
-                                manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar[cite: 3].'
+                                manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar[cite: 1, 2, 3].' 
                             },
-                            { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false, manual: 'Definir reserva de IP fixo no DHCP via endereço físico MAC caso necessário.' }
+                            { 
+                                id: 'f_conf_7', 
+                                label: 'IP Fixo (MAC)', 
+                                checked: false, 
+                                manual: 'Verificar o endereço MAC da placa de rede executando "getmac" no prompt de comando e realizar a reserva de endereço no servidor DHCP caso o setor exija IP fixo.', 
+                                copyText: 'getmac' 
+                            }
                         ]
                     },
-                    // ETAPA 5: APLICAÇÕES & SOFTWARES
+                    // 5. APLICAÇÕES & SOFTWARES
                     apps: {
                         title: "5. APLICAÇÕES & PACOTE COBRECOM",
                         icon: "Server",
                         tasks: [
                             { 
                                 id: 'f_app_pack', 
-                                label: 'Pacote Formatação W10', 
+                                label: 'Pegar Arquivos da Rede', 
                                 checked: false, 
-                                manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)[cite: 3]\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar[cite: 3].',
-                                copyText: '\\\\pdc-cobrecom\\manutencao'
+                                manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)[cite: 1, 2, 3]\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar[cite: 1, 2, 3].', 
+                                copyText: '\\\\pdc-cobrecom\\manutencao' 
                             },
                             { 
                                 id: 'f_app_apps', 
                                 label: 'Instalar Aplicativos Base', 
                                 checked: false, 
-                                manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora[cite: 3].'
+                                manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora[cite: 1, 2, 3].' 
                             },
-                            { id: 'f_app_1', label: 'TOTVS', checked: false, manual: 'Instalar e configurar atalho de produção do SmartClient TOTVS Protheus[cite: 3].' },
-                            { id: 'f_app_2', label: 'TOTVS-MES', checked: false, manual: 'Instalar TOTVS-MES caso a estação seja destinada a apontamento fabril.' },
-                            { id: 'f_conf_1', label: 'Ativar Win/Office', checked: false, manual: 'Validar ativação permanente do Windows e do Microsoft Office.' },
-                            { id: 'f_conf_5', label: 'Impressoras', checked: false, manual: 'Instalar drivers e mapear impressoras locais ou térmicas do departamento[cite: 3].' }
+                            { 
+                                id: 'f_app_1', 
+                                label: 'TOTVS', 
+                                checked: false, 
+                                manual: 'Instalar o client TOTVS Protheus / SmartClient, apontar para o servidor de produção e fixar o atalho no menu iniciar/área de trabalho[cite: 1, 2, 3].' 
+                            },
+                            { 
+                                id: 'f_app_2', 
+                                label: 'TOTVS-MES', 
+                                checked: false, 
+                                manual: 'Instalar a aplicação de chão de fábrica TOTVS-MES caso a estação seja destinada a apontamentos de produção na indústria.' 
+                            },
+                            { 
+                                id: 'f_conf_1', 
+                                label: 'Ativar Win/Office', 
+                                checked: false, 
+                                manual: 'Conferir o status de ativação do Windows em Configurações > Ativação e abrir o Word/Excel para autenticar e licenciar o Office.' 
+                            },
+                            { 
+                                id: 'f_conf_5', 
+                                label: 'Impressoras', 
+                                checked: false, 
+                                manual: 'Instalar drivers das impressoras departamentais (ou térmicas Zebra) e imprimir uma página de teste de impressão do Windows.', 
+                                copyText: 'control printers' 
+                            }
                         ]
                     },
-                    // ETAPA 6: SEGURANÇA & ACESSO REMOTO
+                    // 6. SEGURANÇA & ACESSO REMOTO
                     seguranca: {
                         title: "6. SEGURANÇA & ACESSO REMOTO",
                         icon: "Server",
                         tasks: [
-                            { id: 'f_sec_1', label: 'Wazuh', checked: false, manual: 'Instalar e validar o serviço ativo do agente de monitoramento Wazuh.' },
+                            { 
+                                id: 'f_sec_1', 
+                                label: 'Wazuh', 
+                                checked: false, 
+                                manual: 'Instalar o agente Wazuh, configurar o IP/hostname do servidor SIEM no arquivo ossec.conf e iniciar o serviço (services.msc > Wazuh).', 
+                                copyText: 'services.msc' 
+                            },
                             { 
                                 id: 'f_sec_2', 
-                                label: 'ESET Firewall', 
+                                label: 'ESET', 
                                 checked: false, 
-                                manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows"[cite: 3].\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto[cite: 3].',
-                                copyText: 'svchost.exe'
+                                manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows"[cite: 1, 2, 3].\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto[cite: 1, 2, 3].', 
+                                copyText: 'svchost.exe' 
                             },
                             { 
                                 id: 'f_sec_3', 
-                                label: 'WinVNC', 
+                                label: 'VNC + Firewall', 
                                 checked: false, 
-                                manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)[cite: 3]\n- Properties: MAX CPU: 90[cite: 3]\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)[cite: 3]'
+                                manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)[cite: 1, 2, 3]\n- Properties: MAX CPU: 90[cite: 1, 2, 3]\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)[cite: 1, 2, 3]' 
                             }
                         ]
                     },
-                    // ETAPA 7: DOMÍNIO, USUÁRIO & ENTREGA
+                    // 7. DOMÍNIO & LIBERAÇÃO DO USUÁRIO
                     entrega: {
                         title: "7. DOMÍNIO & LIBERAÇÃO",
                         icon: "Server",
                         tasks: [
                             { 
                                 id: 'f_sis_2', 
-                                label: 'Domínio Cobrecom', 
+                                label: 'Domínio', 
                                 checked: false, 
-                                manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root)[cite: 3].',
-                                copyText: 'cobrecom'
+                                manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root)[cite: 1, 2, 3].', 
+                                copyText: 'cobrecom' 
                             },
                             { 
                                 id: 'f_fin_4', 
-                                label: 'Adicionar Usuário', 
+                                label: 'Desempenho (Adicionar Usuário)', 
                                 checked: false, 
-                                manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar[cite: 3]\nNome de usuário: (Variável) | Domínio: cobrecom[cite: 3]',
-                                copyText: 'control userpasswords2'
+                                manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar[cite: 1, 2, 3]\nNome de usuário: (Variável) | Domínio: cobrecom[cite: 1, 2, 3]\n\n16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela[cite: 1, 2, 3].', 
+                                copyText: 'control userpasswords2' 
                             },
                             { 
-                                id: 'f_fin_cfg', 
-                                label: 'Configurar Usuário & Telas', 
+                                id: 'f_conf_3', 
+                                label: 'Config. Email', 
                                 checked: false, 
-                                manual: '16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela[cite: 3].'
+                                manual: 'Abrir o Microsoft Outlook, adicionar a conta de e-mail corporativa do usuário, configurar o protocolo exchange/IMAP e importar o backup PST.' 
                             },
-                            { id: 'f_conf_3', label: 'Config. Email', checked: false, manual: 'Configurar a conta corporativa de e-mail no Microsoft Outlook.' },
-                            { id: 'f_conf_4', label: 'Config. Spark', checked: false, manual: 'Configurar login e autenticação no mensageiro interno Spark[cite: 3].' },
-                            { id: 'f_fin_1', label: 'Restore Navegador', checked: false, manual: 'Importar favoritos e histórico do Google Chrome do usuário.' },
-                            { id: 'f_fin_2', label: 'Restore Email', checked: false, manual: 'Importar histórico de mensagens PST e catálogo de endereços do usuário.' },
-                            { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false, manual: 'Fixar e conferir a etiqueta de patrimônio/ativo físico colada no gabinete da máquina.' }
+                            { 
+                                id: 'f_conf_4', 
+                                label: 'Config. Spark', 
+                                checked: false, 
+                                manual: 'Abrir o Spark, autenticar com o usuário do domínio, marcar "Salvar senha" e "Conectar automaticamente" e colar a pasta de histórico salva.', 
+                                copyText: null 
+                            },
+                            { 
+                                id: 'f_fin_1', 
+                                label: 'Restore Navegador', 
+                                checked: false, 
+                                manual: 'Importar arquivo de favoritos HTML salvo no Google Chrome e restaurar as extensões do usuário.' 
+                            },
+                            { 
+                                id: 'f_fin_2', 
+                                label: 'Restore Email', 
+                                checked: false, 
+                                manual: 'Validar o recebimento e envio de e-mails pelo Outlook e checar se as assinaturas de e-mail foram restabelecidas.' 
+                            },
+                            { 
+                                id: 'f_fin_3', 
+                                label: 'Etiqueta Ativo', 
+                                checked: false, 
+                                manual: 'Fixar e conferir se a etiqueta patrimonial física está colada no gabinete e com código de barras 100% legível.' 
+                            }
                         ]
                     }
                 };
@@ -297,27 +400,27 @@
                         title: "1. INSPEÇÃO FÍSICA",
                         icon: "Check",
                         tasks: [
-                            { id: 'z_1', label: 'Rolete', checked: false, manual: 'Verificar alinhamento e desgastes mecânicos no rolete de borracha.' },
-                            { id: 'z_2', label: 'Cabeça Impressão', checked: false, manual: 'Inspecionar riscos ou pontos danificados na cabeça térmica.' },
-                            { id: 'z_3', label: 'Suporte Etiqueta', checked: false, manual: 'Verificar travamento do suporte do rolo de etiqueta e ribbon.' },
-                            { id: 'z_4', label: 'Qualidade Inicial', checked: false, manual: 'Imprimir página inicial de diagnóstico antes da limpeza.' }
+                            { id: 'z_1', label: 'Rolete', checked: false, manual: 'Verificar alinhamento e desgastes mecânicos no rolete de borracha de tração.' },
+                            { id: 'z_2', label: 'Cabeça Impressão', checked: false, manual: 'Inspecionar visualmente se há riscos ou pontos queimados na linha térmica.' },
+                            { id: 'z_3', label: 'Suporte Etiqueta', checked: false, manual: 'Verificar o travamento do suporte do rolo de etiqueta e tensão do ribbon.' },
+                            { id: 'z_4', label: 'Qualidade Inicial', checked: false, manual: 'Imprimir página inicial de diagnóstico para análise de falhas de queima.' }
                         ]
                     },
                     manutencao: {
                         title: "2. MANUTENÇÃO",
                         icon: "Server",
                         tasks: [
-                            { id: 'z_5', label: 'Limpeza Rolete', checked: false, manual: 'Descontaminar rolete com álcool isopropílico para retirar cola.' },
-                            { id: 'z_6', label: 'Limpeza Cabeça', checked: false, manual: 'Limpar cabeça de impressão utilizando caneta térmica apropriada.' },
-                            { id: 'z_7', label: 'Limpeza Suporte', checked: false, manual: 'Desobstruir eixos e remover acúmulo de poeira do compartimento.' },
-                            { id: 'z_8', label: 'Limpeza Geral', checked: false, manual: 'Higienização geral da carcaça e limpeza do sensor de mídia/GAP.' }
+                            { id: 'z_5', label: 'Limpeza Rolete', checked: false, manual: 'Descontaminar rolete com álcool isopropílico girando manualmente para retirar resíduos de cola.' },
+                            { id: 'z_6', label: 'Limpeza Cabeça', checked: false, manual: 'Limpar a cabeça de impressão utilizando caneta térmica apropriada ou swab com álcool.' },
+                            { id: 'z_7', label: 'Limpeza Suporte', checked: false, manual: 'Remover poeiras internas, cola residual e fiapos de papel dos eixos de sustentação.' },
+                            { id: 'z_8', label: 'Limpeza Geral', checked: false, manual: 'Higienização geral da carcaça e remoção de poeira ótica na área do sensor de mídia/GAP.' }
                         ]
                     },
                     teste: {
                         title: "3. VALIDAÇÃO",
                         icon: "Printer",
                         tasks: [
-                            { id: 'z_9', label: 'Teste Final', checked: false, manual: 'Efetuar calibração de GAP e imprimir etiquetas para leitura com scanner laser.' }
+                            { id: 'z_9', label: 'Teste Final', checked: false, manual: 'Efetuar calibração de GAP e imprimir etiquetas para conferência de código de barras com leitor laser.' }
                         ]
                     }
                 };
@@ -615,7 +718,6 @@
 
             var progress = calcProgress(items);
 
-            // Sequência cronológica das categorias na tela
             var leftKeys = ['preventivas', 'preparacao', 'sistema'];
             var rightKeys = ['configuracao', 'apps', 'seguranca', 'entrega'];
 
@@ -672,7 +774,7 @@
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-                        {/* CABEÇALHO IDÊNTICO À IMAGEM: DATA | ATIVO | MAQUINA */}
+                        {/* CABEÇALHO: DATA | ATIVO | MAQUINA */}
                         <Card className="grid grid-cols-1 md:grid-cols-3 gap-6" noPadding>
                             <div className="p-6 col-span-full grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
