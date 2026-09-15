@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFRA CHECKLIST | Enterprise Edition</title>
+    <title>INFRA CHECKLIST | Manual Integrado Cobrecom</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <!-- React 18 e ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     
+    <!-- Babel Standalone 7 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Firebase 9 Compat -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -37,10 +41,8 @@
 
     <style>
         body { -webkit-print-color-adjust: exact; }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Custom Scrollbar for cleaner look */
+        .fade-in { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -60,8 +62,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- CONFIGURAÇÃO FIREBASE (MANTIDA) ---
-        const firebaseConfig = {
+        var firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
             projectId: "checklist-infra",
@@ -71,100 +72,303 @@
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const { useState, useEffect, useRef } = React;
+        var db = firebase.firestore();
+        var useState = React.useState;
+        var useEffect = React.useEffect;
+        var useRef = React.useRef;
 
-        // --- DADOS ESTÁTICOS ---
-        const EMAIL_DESTINO = "infra@cobrecom.com.br";
-        const DEFAULT_TEAM = [
+        var EMAIL_DESTINO = "infra@cobrecom.com.br";
+        var DEFAULT_TEAM = [
             { id: '01001071', name: 'Inacio', pass: '1234' },
             { id: '01001440', name: 'Kauan', pass: '1234' },
-            { id: '01001691', name: 'Lui', pass: '1234' }
+            { id: '01001691', name: 'Lui', pass: '1234' },
+            { id: 'admin', name: 'Admin', pass: 'admin' }
         ];
 
-        // --- ICONS (Lucide Style) ---
-        const Icons = {
-            Layout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
-            User: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-            History: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
-            Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-            LogOut: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-            Check: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
-            Printer: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
-            Search: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
-            Moon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
-            Sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
-            Trash: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
-            Server: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
-            Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
-            ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        var Icons = {
+            Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
+            User: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            History: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
+            Plus: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            LogOut: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Check: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
+            Printer: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
+            Search: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
+            Moon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
+            Sun: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
+            Trash: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+            Server: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
+            Mail: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            ChevronLeft: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
+            BookOpen: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            Copy: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
         };
 
-        // --- TEMPLATES ---
-        const getTemplate = (type, tecnicoName) => {
-            const tmpl = {
-                meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' },
+        // --- MODELO COM MANUAL INTEGRADO PASSO A PASSO ---
+        var getTemplate = function(type, tecnicoName) {
+            var tmpl = {
+                meta: { 
+                    tecnico: tecnicoName || '', 
+                    data: new Date().toISOString().split('T')[0], 
+                    maquina: '', 
+                    ativo: '',
+                    usuario_final: ''
+                },
                 items: {}
             };
+
             if (type === 'formatacao') {
                 tmpl.items = {
-                    preventivas: { title: "Preventivas", icon: "Server", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
-                    preparacao: { title: "Backup & Prep", icon: "Server", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
-                    sistema: { title: "Sistema Operacional", icon: "Server", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
-                    seguranca: { title: "Segurança", icon: "Server", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
-                    configuracao: { title: "Configurações", icon: "Server", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
-                    apps: { title: "Aplicações", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
-                    finalizacao: { title: "Entrega", icon: "Server", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
+                    etapa1: {
+                        title: "1. Formatação, Usuário e Sistema",
+                        icon: "Server",
+                        tasks: [
+                            {
+                                id: 'm_step_1',
+                                label: 'Formatação Limpa via BIOS',
+                                checked: false,
+                                instructions: 'Reiniciar o computador com o pendrive de boot e executar a formatação completa do Windows pela BIOS.',
+                                copyText: null
+                            },
+                            {
+                                id: 'm_step_2',
+                                label: 'Conta Local "root" e Perguntas de Recuperação',
+                                checked: false,
+                                instructions: 'Criar usuário com o nome "root". Para as 3 perguntas de segurança de recuperação, a resposta obrigatória é "cobre".',
+                                copyText: 'root'
+                            },
+                            {
+                                id: 'm_step_3',
+                                label: 'Pausar Atualizações do Windows Update',
+                                checked: false,
+                                instructions: 'Abrir Configurações > Windows Update e clicar na opção "Pausar Atualizações" para evitar downloads concorrentes durante a montagem.',
+                                copyText: null
+                            },
+                            {
+                                id: 'm_step_4',
+                                label: 'Configurações de Energia (Definir "Nunca")',
+                                checked: false,
+                                instructions: 'Acessar "Energia e Suspensão" e alterar tanto o desligamento de tela quanto a suspensão automática para "Nunca" em todas as opções.',
+                                copyText: null
+                            }
+                        ]
+                    },
+                    etapa2: {
+                        title: "2. Políticas de Grupo (GPEDIT) e Recursos",
+                        icon: "Server",
+                        tasks: [
+                            {
+                                id: 'm_step_5',
+                                label: 'GPEDIT: Bloquear Criação Indevida de Perfis',
+                                checked: false,
+                                instructions: 'Abrir gpedit.msc > Modelos Administrativos > Sistema > Perfis de Usuários > Localizar "Só permitir perfis de usuários" e Habilitar.',
+                                copyText: 'gpedit.msc'
+                            },
+                            {
+                                id: 'm_step_6',
+                                label: 'GPEDIT: Desativar Atualizações Automáticas',
+                                checked: false,
+                                instructions: 'Modelos Administrativos > Componentes do Windows > Windows Update > Desativar as 3 políticas: "Configuração automática", "Permitir instalação" e "Ativar atualizações".',
+                                copyText: null
+                            },
+                            {
+                                id: 'm_step_7',
+                                label: 'Ativar Recurso de Rede SMB 1.0 / CIFS',
+                                checked: false,
+                                instructions: 'Painel de Controle > Programas > Ativar ou desativar recursos do Windows > Marcar a caixa "Suporte para Compartilhamento de Arquivos SMB 1.0/CIFS".',
+                                copyText: 'optionalfeatures'
+                            },
+                            {
+                                id: 'm_step_8',
+                                label: 'Configuração do Servidor Proxy Cobrecom',
+                                checked: false,
+                                instructions: 'Configurações > Pesquisar "Proxy" > Desativar detecção automática > Ativar "Usar servidor proxy" com Endereço: 192.168.1.1 e Porta: 3128.',
+                                copyText: '192.168.1.1'
+                            }
+                        ]
+                    },
+                    etapa3: {
+                        title: "3. Otimização de CPU e Renomeação",
+                        icon: "Server",
+                        tasks: [
+                            {
+                                id: 'm_step_9',
+                                label: 'MSCONFIG: Aumentar Núcleos do Processador',
+                                checked: false,
+                                instructions: 'Pressione Win+R > digite msconfig > Inicialização do Sistema > Opções Avançadas > Marcar "Número de processadores" e selecionar o número máximo disponível.',
+                                copyText: 'msconfig'
+                            },
+                            {
+                                id: 'm_step_9_1',
+                                label: 'Desativar Aplicativos de Inicialização',
+                                checked: false,
+                                instructions: 'No Gerenciador de Tarefas (Ctrl+Shift+Esc), ir na aba Inicializar e desabilitar softwares pesados que não são vitais para o boot.',
+                                copyText: null
+                            },
+                            {
+                                id: 'm_step_10',
+                                label: 'Alterar Nome da Máquina e Reiniciar',
+                                checked: false,
+                                instructions: 'Configurações > Sobre > Renomear este computador (ou Configurações Avançadas do Sistema > Nome do Computador) > Aplicar o padrão corporativo e reiniciar.',
+                                copyText: null
+                            }
+                        ]
+                    },
+                    etapa4: {
+                        title: "4. Instalação do Pacote Corporativo",
+                        icon: "Server",
+                        tasks: [
+                            {
+                                id: 'm_step_11',
+                                label: 'Acessar Servidor de Manutenção da Infra',
+                                checked: false,
+                                instructions: 'Pressione Win+R > Acesse \\\\pdc-cobrecom\\manutencao com login admin. Navegue até a pasta "m.kauan" e copie a pasta "Formatação w10" para a Área de Trabalho.',
+                                copyText: '\\\\pdc-cobrecom\\manutencao'
+                            },
+                            {
+                                id: 'm_step_12',
+                                label: 'Instalar Aplicativos Base do Pacote',
+                                checked: false,
+                                instructions: 'Executar e instalar: ESET Antivírus, WinRAR-x64, UltraVNC, SambaWindows10, Spark, TOTVS Protheus, Google Chrome, Microsoft Office, utilitário Scan e impressoras.',
+                                copyText: null
+                            }
+                        ]
+                    },
+                    etapa5: {
+                        title: "5. Configurações ESET & UltraVNC",
+                        icon: "Server",
+                        tasks: [
+                            {
+                                id: 'm_step_13',
+                                label: 'ESET: Firewall e Liberação de Acesso Remoto',
+                                checked: false,
+                                instructions: 'Abrir ESET > Configuração Avançada > Proteção de Acesso à Rede > Firewall: Habilitar "Avaliar também as regras do Windows". Em Regras (Editar): Adicionar regra "Acesso remoto" permitindo o aplicativo svchost.exe com o serviço "Área de trabalho remota".',
+                                copyText: 'svchost.exe'
+                            },
+                            {
+                                id: 'm_step_13_1',
+                                label: 'UltraVNC: Ajuste de Desempenho e Monitor',
+                                checked: false,
+                                instructions: 'IMPORTANTE: Configurar localmente no PC (não via acesso remoto). Em Properties: setar MAX CPU: 90. Em Admin Properties: Desmarcar "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request". Definir a senha padrão.',
+                                copyText: null
+                            }
+                        ]
+                    },
+                    etapa6: {
+                        title: "6. Ingresso no Domínio e Perfil do Usuário",
+                        icon: "Server",
+                        tasks: [
+                            {
+                                id: 'm_step_14',
+                                label: 'Ingressar Máquina no Domínio cobrecom',
+                                checked: false,
+                                instructions: 'Sobre > Configurações Avançadas > Nome do Computador > Alterar > Selecionar "Domínio", digitar "cobrecom" e autenticar com credenciais de administrador da rede (root).',
+                                copyText: 'cobrecom'
+                            },
+                            {
+                                id: 'm_step_15',
+                                label: 'Adicionar Conta do Usuário no Painel de Controle',
+                                checked: false,
+                                instructions: 'Painel de Controle > Contas de Usuário > Gerenciar contas de usuário > Adicionar > Informar o nome do usuário final com o domínio cobrecom selecionado.',
+                                copyText: 'control userpasswords2'
+                            },
+                            {
+                                id: 'm_step_16',
+                                label: 'Logar no Perfil e Fixar Programas na Área de Trabalho',
+                                checked: false,
+                                instructions: 'Fazer logoff da conta root, logar com o usuário final criado, aguardar a preparação inicial do Windows e fixar os atalhos de ERP, Office, Navegador e Spark na tela.',
+                                copyText: null
+                            }
+                        ]
+                    }
                 };
             } else {
                 tmpl.items = {
-                    inspecao: { title: "Inspeção Física", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
-                    preventiva: { title: "Manutenção", icon: "Server", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
-                    teste: { title: "Validação", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
+                    inspecao: { title: "1. Inspeção Física", icon: "Check", tasks: [
+                        { id: 'z_1', label: 'Inspeção do Rolete de Tração', checked: false, instructions: 'Verificar se o rolete de borracha possui cortes ou deformações.' },
+                        { id: 'z_2', label: 'Inspeção da Cabeça Térmica', checked: false, instructions: 'Checar visualmente se há pontos de desgaste ou riscos na linha de queima térmica.' },
+                        { id: 'z_3', label: 'Verificação do Suporte de Mídia', checked: false, instructions: 'Conferir o travamento das guias de rolo de etiqueta e ribbon.' }
+                    ]},
+                    manutencao: { title: "2. Higienização e Calibração", icon: "Server", tasks: [
+                        { id: 'z_4', label: 'Limpeza com Álcool Isopropílico', checked: false, instructions: 'Passar álcool isopropílico 99% no rolete girando manualmente e na cabeça térmica com swab.' },
+                        { id: 'z_5', label: 'Limpeza do Sensor de Mídia / GAP', checked: false, instructions: 'Remover todo acúmulo de poeira e fiapos de etiqueta do leitor ótico de espaço/GAP.' },
+                        { id: 'z_6', label: 'Auto-Calibração de Sensores', checked: false, instructions: 'Segurar os botões Pause + Feed para calibração padrão de etiquetas na impressora.' }
+                    ]},
+                    teste: { title: "3. Teste e Liberação", icon: "Printer", tasks: [
+                        { id: 'z_7', label: 'Impressão de Teste e Validação de Código de Barras', checked: false, instructions: 'Imprimir etiqueta de configuração e verificar leitura perfeita com scanner laser.' }
+                    ]}
                 };
             }
             return tmpl;
         };
 
-        // --- COMPONENTES UI (DESIGN SYSTEM) ---
-        const Button = ({ children, variant = 'primary', className = "", ...props }) => {
-            const variants = {
+        var Button = function(props) {
+            var variant = props.variant || 'primary';
+            var variants = {
                 primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
                 secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700',
                 danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/40 dark:text-red-400',
                 ghost: 'bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
             };
-            return <button {...props} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
+            var cls = "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 " + (variants[variant] || variants.primary) + " " + (props.className || '');
+            return <button {...props} className={cls}>{props.children}</button>;
         };
 
-        const Card = ({ children, className = "", noPadding = false, ...props }) => (
-            <div {...props} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${noPadding ? '' : 'p-6'} ${className}`}>{children}</div>
-        );
+        var Card = function(props) {
+            var pad = props.noPadding ? '' : 'p-6';
+            var cls = "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm " + pad + " " + (props.className || '');
+            return <div className={cls}>{props.children}</div>;
+        };
 
-        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all ${props.className}`} />;
+        var Input = function(props) {
+            var cls = "w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all " + (props.className || '');
+            return <input {...props} className={cls} />;
+        };
 
-        const Badge = ({ children, color = 'slate' }) => {
-            const colors = {
+        var Badge = function(props) {
+            var color = props.color || 'slate';
+            var colors = {
                 slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
                 blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
                 green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
                 amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
             };
-            return <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${colors[color]}`}>{children}</span>
+            return <span className={"px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider " + (colors[color] || colors.slate)}>{props.children}</span>;
         };
 
-        // --- TELAS ---
+        var calcProgress = function(items) {
+            if (!items || typeof items !== 'object') return 0;
+            var total = 0, done = 0;
+            Object.keys(items).forEach(function(k) {
+                var group = items[k];
+                if (group && Array.isArray(group.tasks)) {
+                    group.tasks.forEach(function(t) {
+                        total++;
+                        if (t && t.checked) done++;
+                    });
+                }
+            });
+            return total === 0 ? 0 : Math.round((done / total) * 100);
+        };
 
-        const LoginScreen = ({ onLogin, users }) => {
-            const [id, setId] = useState('');
-            const [pass, setPass] = useState('');
-            const [error, setError] = useState('');
+        var LoginScreen = function(props) {
+            var onLogin = props.onLogin;
+            var users = props.users || [];
+            var idState = useState('');
+            var id = idState[0], setId = idState[1];
+            var passState = useState('');
+            var pass = passState[0], setPass = passState[1];
+            var errState = useState('');
+            var error = errState[0], setError = errState[1];
 
-            const handleSubmit = (e) => {
+            var handleSubmit = function(e) {
                 e.preventDefault();
-                const user = users.find(u => u.id === id && u.pass === pass);
-                if (user) onLogin(user); else setError('Credenciais inválidas.');
+                var cleanId = (id || '').trim();
+                var cleanPass = (pass || '').trim();
+                var found = users.find(function(u) { return u.id === cleanId && u.pass === cleanPass; });
+                if (found) onLogin(found);
+                else setError('Credenciais inválidas. Verifique matrícula e senha.');
             };
 
             return (
@@ -175,69 +379,105 @@
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
-                            <p className="text-sm text-slate-500 mt-1">Acesso Administrativo</p>
+                            <p className="text-sm text-slate-500 mt-1">Manual Operacional de Bancada • Cobrecom</p>
                         </div>
                         <form onSubmit={handleSubmit} className="p-8 space-y-4">
                             <div>
-                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">ID Usuário</label>
-                                <Input value={id} onChange={e => setId(e.target.value)} placeholder="000000" autoFocus />
+                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Matrícula / ID</label>
+                                <Input value={id} onChange={function(e) { setId(e.target.value); }} placeholder="0100xxxx" autoFocus />
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha</label>
-                                <Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••" />
+                                <Input type="password" value={pass} onChange={function(e) { setPass(e.target.value); }} placeholder="••••" />
                             </div>
                             {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</div>}
-                            <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
+                            <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Checklist</Button>
                         </form>
                         <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] text-slate-400">V2.1 ENTERPRISE • COBRECOM TI</p>
+                            <p className="text-[10px] text-slate-400 font-mono">POP FORMATAÇÃO W10 UNIFICADO • TI COBRECOM</p>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        const ConfigModal = ({ onClose, users }) => {
-            const [newUser, setNewUser] = useState({ id: '', name: '', pass: '' });
-            
-            const handleAddUser = (e) => {
+        var ConfigModal = function(props) {
+            var onClose = props.onClose;
+            var users = props.users || [];
+            var currentUser = props.currentUser;
+            var userState = useState({ id: '', name: '', pass: '' });
+            var newUser = userState[0], setNewUser = userState[1];
+            var filterState = useState('');
+            var filter = filterState[0], setFilter = filterState[1];
+            var savingState = useState(false);
+            var saving = savingState[0], setSaving = savingState[1];
+
+            var handleAddUser = function(e) {
                 e.preventDefault();
-                if(!newUser.id || !newUser.name || !newUser.pass) return alert("Preencha todos os campos.");
-                if(users.some(u => u.id === newUser.id)) return alert("ID já cadastrado.");
-                db.collection('users').add(newUser).then(() => { alert("Usuário adicionado."); setNewUser({ id: '', name: '', pass: '' }); });
+                var cleanId = (newUser.id || '').trim();
+                var cleanName = (newUser.name || '').trim();
+                var cleanPass = (newUser.pass || '').trim();
+                if (!cleanId || !cleanName || !cleanPass) return alert("Preencha todos os campos.");
+                if (users.some(function(u) { return (u.id || '').toLowerCase() === cleanId.toLowerCase(); })) {
+                    return alert("Matrícula já cadastrada.");
+                }
+
+                setSaving(true);
+                db.collection('users').add({ id: cleanId, name: cleanName, pass: cleanPass })
+                    .then(function() { setNewUser({ id: '', name: '', pass: '' }); })
+                    .catch(function(err) { alert("Erro: " + err.message); })
+                    .finally(function() { setSaving(false); });
             };
 
-            const handleDeleteUser = (docId) => { if(confirm("Remover usuário?")) db.collection('users').doc(docId).delete(); };
+            var handleDeleteUser = function(user) {
+                if (currentUser && user.id === currentUser.id) return alert("Você não pode remover seu próprio usuário conectado.");
+                if (confirm("Remover técnico " + user.name + "?")) {
+                    db.collection('users').doc(user.docId).delete();
+                }
+            };
+
+            var list = users.filter(function(u) {
+                return (u.name || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1 ||
+                       (u.id || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+            });
 
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm fade-in">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm fade-in">
                     <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" noPadding>
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Configurações de Equipe</h2>
+                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Gestão da Equipe Técnica</h2>
                             <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
                         </div>
-                        <div className="p-6 overflow-y-auto grid md:grid-cols-2 gap-8">
+                        <div className="p-6 overflow-y-auto grid md:grid-cols-2 gap-6">
                             <div>
-                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Adicionar Membro</h3>
+                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Técnico</h3>
                                 <form onSubmit={handleAddUser} className="space-y-3">
-                                    <Input placeholder="ID (Matrícula)" value={newUser.id} onChange={e => setNewUser({...newUser, id: e.target.value})} />
-                                    <Input placeholder="Nome Completo" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
-                                    <Input type="password" placeholder="Senha de Acesso" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} />
-                                    <Button type="submit" className="w-full">{Icons.Plus} Cadastrar</Button>
+                                    <Input placeholder="Matrícula / ID" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
+                                    <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value })); }} />
+                                    <Input type="password" placeholder="Senha" value={newUser.pass} onChange={function(e) { setNewUser(Object.assign({}, newUser, { pass: e.target.value })); }} />
+                                    <Button type="submit" disabled={saving} className="w-full">{Icons.Plus} Cadastrar</Button>
                                 </form>
                             </div>
                             <div>
-                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Membros Ativos</h3>
-                                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                                    {users.map(u => (
-                                        <div key={u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
-                                            <div>
-                                                <div className="font-semibold text-sm text-slate-700 dark:text-slate-200">{u.name}</div>
-                                                <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Técnicos Habilitados</h3>
+                                    <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-28" />
+                                </div>
+                                <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
+                                    {list.map(function(u) {
+                                        var isMe = currentUser && u.id === currentUser.id;
+                                        return (
+                                            <div key={u.docId || u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
+                                                <div>
+                                                    <div className="font-semibold text-sm text-slate-700 dark:text-slate-200">{u.name}</div>
+                                                    <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
+                                                </div>
+                                                {!isMe && (
+                                                    <button onClick={function() { handleDeleteUser(u); }} className="text-slate-400 hover:text-red-500 transition-colors p-1">{Icons.Trash}</button>
+                                                )}
                                             </div>
-                                            {u.id !== 'admin' && <button onClick={() => handleDeleteUser(u.docId)} className="text-slate-400 hover:text-red-500 transition-colors">{Icons.Trash}</button>}
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -246,33 +486,231 @@
             );
         };
 
-        const ReceiptView = ({ ticket, onBack, onArchive, logo, currentUser }) => {
-            const [obs, setObs] = useState('');
-            const meta = ticket.data.meta;
-            const identificador = meta.maquina || meta.equipamento || "N/A";
+        // --- COMPONENTE DO ITEM COM SANFONA E INSTRUÇÕES DETALHADAS ---
+        var TaskItem = function(props) {
+            var task = props.task;
+            var onToggle = props.onToggle;
+            var openState = useState(false);
+            var isOpen = openState[0], setIsOpen = openState[1];
+            var copiedState = useState(false);
+            var copied = copiedState[0], setCopied = copiedState[1];
+
+            var copyToClipboard = function(e, text) {
+                e.stopPropagation();
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                    setCopied(true);
+                    setTimeout(function() { setCopied(false); }, 1500);
+                }
+            };
+
+            return (
+                <div className="p-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors select-none">
+                    <div className="flex items-start gap-3">
+                        <div 
+                            onClick={onToggle}
+                            className={"mt-0.5 w-5 h-5 rounded border flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 " + (task.checked ? 'bg-brand-600 border-brand-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800')}
+                        >
+                            {task.checked && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>}
+                        </div>
+
+                        <div className="flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                                <span 
+                                    onClick={onToggle}
+                                    className={"text-sm font-semibold cursor-pointer " + (task.checked ? 'text-slate-400 line-through' : 'text-slate-800 dark:text-slate-200')}
+                                >
+                                    {task.label}
+                                </span>
+                                
+                                {task.instructions && (
+                                    <button 
+                                        type="button"
+                                        onClick={function() { setIsOpen(!isOpen); }} 
+                                        className={"text-[11px] font-medium flex items-center gap-1 px-2 py-0.5 rounded transition-colors " + (isOpen ? "bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300" : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-brand-600")}
+                                    >
+                                        {Icons.BookOpen} <span>{isOpen ? 'Ocultar' : 'Ver Manual'}</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Detalhes do Manual Operacional */}
+                            {isOpen && task.instructions && (
+                                <div className="mt-2.5 p-3 rounded-lg bg-blue-50/70 dark:bg-slate-950/70 border border-blue-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 fade-in">
+                                    <div className="flex items-start gap-2">
+                                        <div className="text-brand-500 shrink-0 mt-0.5">ℹ</div>
+                                        <div className="space-y-2 flex-1">
+                                            <p className="leading-relaxed whitespace-pre-line">{task.instructions}</p>
+                                            
+                                            {task.copyText && (
+                                                <div className="pt-1 flex items-center gap-2">
+                                                    <span className="text-[10px] uppercase font-bold text-slate-400">Atalho / Parâmetro:</span>
+                                                    <button 
+                                                        type="button"
+                                                        onClick={function(e) { copyToClipboard(e, task.copyText); }}
+                                                        className="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-[11px] font-mono font-bold text-brand-600 dark:text-brand-400 hover:border-brand-500 flex items-center gap-1.5 transition-all shadow-sm"
+                                                    >
+                                                        {Icons.Copy}
+                                                        <span>{task.copyText}</span>
+                                                        {copied && <span className="text-[9px] text-emerald-600 font-sans">✓ Copiado!</span>}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        var ActiveChecklist = function(props) {
+            var ticket = props.ticket;
+            var onUpdate = props.onUpdate;
+            var onBack = props.onBack;
+            var onRequestFinish = props.onRequestFinish;
+
+            if (!ticket || !ticket.data) return null;
+            var data = ticket.data;
+            var meta = data.meta || {};
+            var items = data.items || {};
+
+            var handleMeta = function(field, value) {
+                var newMeta = Object.assign({}, meta);
+                newMeta[field] = value;
+                onUpdate(Object.assign({}, data, { meta: newMeta }));
+            };
+
+            var handleCheck = function(section, taskId) {
+                var newData = Object.assign({}, data);
+                var sec = newData.items && newData.items[section];
+                if (!sec || !Array.isArray(sec.tasks)) return;
+                sec.tasks = sec.tasks.map(function(t) {
+                    return t.id === taskId ? Object.assign({}, t, { checked: !t.checked }) : t;
+                });
+                onUpdate(newData);
+            };
+
+            var progress = calcProgress(items);
+
+            return (
+                <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950 relative">
+                    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-sm z-10 shrink-0">
+                        <div className="flex items-center gap-4">
+                            <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500">{Icons.ChevronLeft}</button>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-none">#{ticket.visualId}</h2>
+                                    <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>
+                                        {ticket.type === 'formatacao' ? 'Formatação PC' : 'Zebra Térmica'}
+                                    </Badge>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1">Iniciado em {new Date(ticket.createdAt || Date.now()).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="text-right hidden sm:block">
+                                <span className="text-xs font-bold text-brand-600 block">{progress}% Concluído</span>
+                                <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden">
+                                    <div className={"h-full transition-all duration-500 " + (progress === 100 ? "bg-emerald-500" : "bg-brand-600")} style={{width: progress + '%'}}></div>
+                                </div>
+                            </div>
+                            <Button onClick={onRequestFinish} variant={progress === 100 ? 'primary' : 'secondary'}>
+                                {progress === 100 ? 'Finalizar & Liberar' : 'Revisar'}
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                        <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" noPadding>
+                            <div className="p-6 col-span-full border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                                <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Identificação do Ativo na Bancada</h3>
+                            </div>
+                            <div className="p-6 pt-2 col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Nome da Máquina (Hostname)</label>
+                                    <Input placeholder="Ex: CORP-PC-01" value={meta.maquina || ''} onChange={function(e) { handleMeta('maquina', e.target.value); }} />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Patrimônio / Etiqueta</label>
+                                    <Input placeholder="Ex: PAT-01492" value={meta.ativo || ''} onChange={function(e) { handleMeta('ativo', e.target.value); }} />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Usuário Final (Setor)</label>
+                                    <Input placeholder="Ex: Financeiro / João" value={meta.usuario_final || ''} onChange={function(e) { handleMeta('usuario_final', e.target.value); }} />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Técnico Responsável</label>
+                                    <Input value={meta.tecnico || ''} onChange={function(e) { handleMeta('tecnico', e.target.value); }} />
+                                </div>
+                            </div>
+                        </Card>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
+                            {Object.keys(items).map(function(key) {
+                                var group = items[key];
+                                return (
+                                    <Card key={key} noPadding className="overflow-hidden h-fit">
+                                        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center gap-2">
+                                            <div className="text-brand-500">{Icons[group.icon] || Icons.Server}</div>
+                                            <h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3>
+                                        </div>
+                                        <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                                            {(group.tasks || []).map(function(task) {
+                                                return (
+                                                    <TaskItem 
+                                                        key={task.id} 
+                                                        task={task} 
+                                                        onToggle={function() { handleCheck(key, task.id); }} 
+                                                    />
+                                                );
+                                            })}
+                                        </div>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        var ReceiptView = function(props) {
+            var ticket = props.ticket;
+            var onBack = props.onBack;
+            var onArchive = props.onArchive;
+            var logo = props.logo;
+
+            if (!ticket || !ticket.data) return null;
+            var obsState = useState('');
+            var obs = obsState[0], setObs = obsState[1];
+            var meta = ticket.data.meta || {};
+            var items = ticket.data.items || {};
+            var identificador = meta.maquina || meta.ativo || "N/A";
             
-            // Cálculos
-            let totalTasks = 0, checkedTasks = 0;
-            const pendingList = [];
-            const categorySummary = Object.values(ticket.data.items).map(group => {
-                const total = group.tasks.length;
-                const checked = group.tasks.filter(t => t.checked).length;
-                group.tasks.forEach(t => { if(!t.checked) pendingList.push(`- [${group.title}] ${t.label}`); });
+            var totalTasks = 0, checkedTasks = 0;
+            var pendingList = [];
+            var categorySummary = Object.keys(items).map(function(k) {
+                var group = items[k];
+                var tasks = group.tasks || [];
+                var total = tasks.length;
+                var checked = tasks.filter(function(t) { return t.checked; }).length;
+                tasks.forEach(function(t) { if (!t.checked) pendingList.push("- [" + group.title + "] " + t.label); });
                 totalTasks += total;
                 checkedTasks += checked;
                 return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
             });
-            const percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
-            const statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
+            var percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
+            var statusGlobal = percent === 100 ? "LIBERADO" : "PARCIAL";
 
-            const handleSendOutlook = () => {
-                const subject = `[${statusGlobal}] Checklist #${ticket.visualId} - ${identificador}`;
-                const body = `RELATÓRIO TÉCNICO\n----------------------------------------\nID: #${ticket.visualId}\nATIVO: ${identificador}\nSTATUS: ${statusGlobal}\nTÉCNICO: ${meta.tecnico}\nDATA: ${new Date().toLocaleDateString()}\n----------------------------------------\nRESUMO:\n${categorySummary.map(c => `[${c.status}] ${c.title}`).join('\n')}\n----------------------------------------\nOBSERVAÇÕES:\n${obs || "Sem observações."}\n\nGerado via InfraChecklist`;
-                window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                
-                // Pequeno delay para UX
-                setTimeout(() => {
-                    if(confirm("E-mail aberto? Clique OK para arquivar.")) onArchive(ticket);
+            var handleSendOutlook = function() {
+                var subject = "[" + statusGlobal + "] Liberação de Máquina #" + ticket.visualId + " - " + identificador;
+                var body = "RELATÓRIO DE FORMATAÇÃO E LIBERAÇÃO\n----------------------------------------\nID: #" + ticket.visualId + "\nMÁQUINA: " + identificador + "\nPATRIMÔNIO: " + (meta.ativo || 'N/A') + "\nUSUÁRIO/SETOR: " + (meta.usuario_final || 'N/A') + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO POR ETAPA:\n" + categorySummary.map(function(c) { return "[" + c.status + "] " + c.title; }).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações adicionais.") + "\n\nGerado via InfraChecklist Cobrecom";
+                window.location.href = "mailto:" + EMAIL_DESTINO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+                setTimeout(function() {
+                    if (confirm("E-mail aberto? Clique OK para arquivar.")) onArchive(ticket);
                 }, 1000);
             };
 
@@ -280,208 +718,129 @@
                 <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-auto p-4 md:p-8">
                     <div className="max-w-4xl mx-auto w-full space-y-6 fade-in no-print">
                         <div className="flex items-center justify-between">
-                             <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 cursor-pointer" onClick={onBack}>
-                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar à Edição</span>
+                            <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 cursor-pointer" onClick={onBack}>
+                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar ao Checklist</span>
                             </div>
-                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Revisão & Entrega</h1>
+                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Ficha de Liberação Técnica</h1>
                         </div>
 
                         <Card className="grid md:grid-cols-2 gap-6">
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
-                                    <textarea value={obs} onChange={e => setObs(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
-                                </div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais de Bancada</label>
+                                <textarea value={obs} onChange={function(e) { setObs(e.target.value); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-36 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Ex: Máquina configurada com sucesso. Antivírus e regras de firewall validados..."></textarea>
                             </div>
                             <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
-                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações de Encerramento</h3>
-                                <Button className="w-full justify-start" onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Encerramento</h3>
+                                <Button className="w-full justify-start" onClick={function() { window.print(); }} variant="secondary">{Icons.Printer} Imprimir Ficha de Entrega</Button>
                                 <Button className="w-full justify-start" onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail & Arquivar</Button>
                             </div>
                         </Card>
                     </div>
 
-                    {/* ÁREA DE IMPRESSÃO (Oculta na tela, visível no print) */}
                     <div id="receipt-area" className="hidden bg-white text-black font-sans text-xs border border-gray-300 p-0">
-                         <div className="flex justify-between items-center p-6 border-b-2 border-black">
-                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Infraestrutura</p></div></div>
+                        <div className="flex justify-between items-center p-6 border-b-2 border-black">
+                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Ficha Técnica de Liberação</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Cobrecom</p></div></div>
                             <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date().toLocaleDateString()}</div></div>
                         </div>
                         <div className="grid grid-cols-4 border-b border-black">
-                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate">{identificador}</span></div>
-                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Tipo</span><span className="font-bold uppercase">{ticket.type}</span></div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Máquina</span><span className="font-bold text-sm block truncate">{identificador}</span></div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Patrimônio</span><span className="font-bold uppercase truncate">{meta.ativo || 'N/A'}</span></div>
                             <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{meta.tecnico}</span></div>
-                            <div className={`p-3 text-center flex flex-col justify-center ${percent === 100 ? 'bg-gray-100' : 'bg-gray-200'}`}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
+                            <div className={"p-3 text-center flex flex-col justify-center " + (percent === 100 ? 'bg-gray-100' : 'bg-gray-200')}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal} ({percent}%)</span></div>
                         </div>
                         <div className="p-6 flex gap-8">
-                            <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map((cat, i) => (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>))}</tbody></table></div>
+                            <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Etapas de Conformidade</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map(function(cat, i) { return (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'CONFORME' : 'PENDENTE'}</td></tr>); })}</tbody></table></div>
                             <div className="w-1/2 flex flex-col gap-4">
-                                {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map((p, i) => <li key={i} className="truncate">{p.replace('- ', '')}</li>)}</ul></div>)}
+                                {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map(function(p, i) { return <li key={i} className="truncate">{p.replace('- ', '')}</li>; })}</ul></div>)}
                                 <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16">{obs || "Sem observações adicionais."}</p></div>
                             </div>
                         </div>
-                        <div className="mt-8 px-6 pb-6 pt-4 flex justify-between gap-12"><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Técnico Responsável</p></div><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Validado Por</p></div></div>
-                    </div>
-                </div>
-            );
-        };
-
-        const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish }) => {
-            if (!ticket) return null;
-            const { data } = ticket;
-
-            const handleMeta = (field, value) => { onUpdate({ ...data, meta: { ...data.meta, [field]: value } }); };
-            const handleCheck = (section, taskId) => {
-                const newData = { ...data };
-                const newTasks = newData.items[section].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
-                newData.items[section] = { ...newData.items[section], tasks: newTasks };
-                onUpdate(newData);
-            };
-
-            let total = 0, checked = 0;
-            Object.values(data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
-            const progress = total === 0 ? 0 : Math.round((checked/total)*100);
-
-            return (
-                <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950 relative">
-                    {/* Header do Checklist */}
-                    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-sm z-10 shrink-0">
-                        <div className="flex items-center gap-4">
-                            <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500">{Icons.ChevronLeft}</button>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-none">#{ticket.visualId}</h2>
-                                    <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
-                                </div>
-                                <p className="text-xs text-slate-500 mt-1">Criado em {new Date(ticket.createdAt).toLocaleDateString()}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <div className="text-right hidden sm:block">
-                                <span className="text-xs font-bold text-brand-600 block">{progress}% Completo</span>
-                                <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-brand-600 transition-all duration-500" style={{width: `${progress}%`}}></div></div>
-                            </div>
-                            <Button onClick={onRequestFinish} variant={progress === 100 ? 'primary' : 'secondary'}>{progress === 100 ? 'Finalizar' : 'Revisar'}</Button>
-                        </div>
-                    </div>
-
-                    {/* Corpo Scrollável */}
-                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-                        <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" noPadding>
-                            <div className="p-6 col-span-full border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                                <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Dados do Equipamento</h3>
-                            </div>
-                            <div className="p-6 pt-2 col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {Object.keys(data.meta).map(field => (
-                                    <div key={field}>
-                                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">{field}</label>
-                                        <Input type={field === 'data' ? 'date' : 'text'} value={data.meta[field]} onChange={e => handleMeta(field, e.target.value)} />
-                                    </div>
-                                ))}
-                            </div>
-                        </Card>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
-                            {Object.entries(data.items).map(([key, group]) => (
-                                <Card key={key} noPadding className="overflow-hidden h-fit">
-                                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center gap-2">
-                                        <div className="text-brand-500">{Icons[group.icon]}</div>
-                                        <h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3>
-                                    </div>
-                                    <div className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                                        {group.tasks.map(task => (
-                                            <label key={task.id} className="flex items-start gap-3 p-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer group transition-colors select-none">
-                                                <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-all duration-200 ${task.checked ? 'bg-brand-600 border-brand-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
-                                                    {task.checked && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>}
-                                                </div>
-                                                <input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="hidden" />
-                                                <span className={`text-sm font-medium ${task.checked ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-300'}`}>{task.label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </Card>
-                            ))}
+                        <div className="mt-8 px-6 pb-6 pt-4 flex justify-between gap-12">
+                            <div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Técnico Responsável: {meta.tecnico}</p></div>
+                            <div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Recebido / Validado Por</p></div>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        const Dashboard = ({ activeTickets, onNewTicket, onOpenTicket, onDeleteTicket, historyCount }) => {
-            const formatCount = activeTickets.filter(t => t.type === 'formatacao').length;
-            const zebraCount = activeTickets.filter(t => t.type !== 'formatacao').length;
+        var Dashboard = function(props) {
+            var activeTickets = props.activeTickets || [];
+            var onNewTicket = props.onNewTicket;
+            var onOpenTicket = props.onOpenTicket;
+            var onDeleteTicket = props.onDeleteTicket;
+            var historyCount = props.historyCount || 0;
+
+            var formatCount = activeTickets.filter(function(t) { return t.type === 'formatacao'; }).length;
 
             return (
                 <div className="p-6 md:p-10 space-y-8 fade-in">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Visão Geral</h2>
-                        <p className="text-slate-500 text-sm">Monitoramento de atividades de infraestrutura em tempo real.</p>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Visão Geral da Bancada</h2>
+                        <p className="text-slate-500 text-sm">Controle de qualidade e liberação de computadores e impressoras.</p>
                     </div>
                     
-                    {/* KPI CARDS */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-brand-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Chamados Abertos</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Em Preparação</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
                             <div className="bg-brand-50 dark:bg-brand-900/20 p-3 rounded-xl text-brand-600">{Icons.Layout}</div>
                         </Card>
-                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-emerald-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Histórico Total</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
+                        <Card className="flex items-center justify-between p-5 border-l-4 border-l-emerald-500">
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total Liberado</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
                             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl text-emerald-600">{Icons.History}</div>
                         </Card>
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-indigo-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Formatações</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Computadores</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-xl text-indigo-600">{Icons.Server}</div>
                         </Card>
                     </div>
 
-                    {/* ACTION BAR */}
                     <div className="flex flex-col md:flex-row gap-4">
-                        <button onClick={() => onNewTicket('formatacao')} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
+                        <button onClick={function() { onNewTicket('formatacao'); }} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">{Icons.Plus}</div>
-                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Checklist completo de P.C.</span></div>
+                                <div className="text-left"><span className="block font-bold">Nova Formatação de PC</span><span className="text-xs opacity-80">Manual padrão completo com instruções interativas</span></div>
                             </div>
                         </button>
-                        <button onClick={() => onNewTicket('zebra')} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                        <button onClick={function() { onNewTicket('zebra'); }} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 group-hover:text-brand-500">{Icons.Printer}</div>
-                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Impressoras térmicas</span></div>
+                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Higienização e calibração térmica</span></div>
                             </div>
                         </button>
                     </div>
 
-                    {/* ACTIVE TICKETS */}
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila de Atendimento</h3>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila da Bancada</h3>
                         {activeTickets.length === 0 ? (
                             <div className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-12 text-center">
-                                <p className="text-slate-400 font-medium">Nenhum chamado ativo no momento.</p>
-                                <p className="text-xs text-slate-500 mt-1">Inicie um novo atendimento acima.</p>
+                                <p className="text-slate-400 font-medium">Nenhum equipamento na bancada no momento.</p>
+                                <p className="text-xs text-slate-500 mt-1">Clique em "Nova Formatação de PC" acima para iniciar.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {activeTickets.map(ticket => {
-                                    let total = 0, checked = 0;
-                                    Object.values(ticket.data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
-                                    const pct = total === 0 ? 0 : Math.round((checked/total)*100);
+                                {activeTickets.map(function(ticket) {
+                                    var meta = (ticket.data && ticket.data.meta) || {};
+                                    var pct = calcProgress(ticket.data && ticket.data.items);
+                                    var nomeAtivo = meta.maquina || meta.ativo || "Sem Identificação";
                                     
                                     return (
-                                        <div key={ticket.id} onClick={() => onOpenTicket(ticket.id)} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
+                                        <div key={ticket.id} onClick={function() { onOpenTicket(ticket.id); }} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
                                             <div className="absolute top-0 left-0 w-1 h-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                             <div className="flex justify-between items-start mb-3">
-                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type === 'formatacao' ? 'Formatação' : 'Zebra'}</Badge>
                                                 <span className="text-xs font-mono font-bold text-slate-400">#{ticket.visualId}</span>
                                             </div>
-                                            <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1">{ticket.data.meta.maquina || "Sem Identificação"}</h4>
-                                            <p className="text-xs text-slate-500 mb-4 flex items-center gap-1">{Icons.User} {ticket.data.meta.tecnico}</p>
+                                            <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1">{nomeAtivo}</h4>
+                                            <p className="text-xs text-slate-500 mb-4 flex items-center gap-1">{Icons.User} {meta.tecnico || 'Técnico'}</p>
                                             
                                             <div className="flex items-center gap-3">
                                                 <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-brand-500" style={{width: `${pct}%`}}></div>
+                                                    <div className={"h-full " + (pct === 100 ? "bg-emerald-500" : "bg-brand-500")} style={{width: pct + '%'}}></div>
                                                 </div>
                                                 <span className="text-xs font-bold text-brand-600">{pct}%</span>
                                             </div>
-                                            <button onClick={(e) => onDeleteTicket(e, ticket.id)} className="absolute top-4 right-4 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
+                                            <button onClick={function(e) { onDeleteTicket(e, ticket.id); }} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
                                         </div>
                                     );
                                 })}
@@ -492,24 +851,27 @@
             );
         };
 
-        const HistoryView = ({ history }) => {
-            const [search, setSearch] = useState('');
-            const filtered = history.filter(h => 
-                h.ativo.toLowerCase().includes(search.toLowerCase()) || 
-                h.tecnico.toLowerCase().includes(search.toLowerCase()) || 
-                (h.visualId && h.visualId.toLowerCase().includes(search.toLowerCase()))
-            );
+        var HistoryView = function(props) {
+            var history = props.history || [];
+            var searchState = useState('');
+            var search = searchState[0], setSearch = searchState[1];
+
+            var filtered = history.filter(function(h) {
+                return (h.ativo || '').toLowerCase().indexOf(search.toLowerCase()) !== -1 ||
+                       (h.tecnico || '').toLowerCase().indexOf(search.toLowerCase()) !== -1 ||
+                       (h.visualId && h.visualId.toLowerCase().indexOf(search.toLowerCase()) !== -1);
+            });
 
             return (
                 <div className="p-6 md:p-10 h-full flex flex-col fade-in">
                     <div className="flex justify-between items-end mb-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Atendimentos</h2>
-                            <p className="text-slate-500 text-sm">Registro auditável de todas as manutenções.</p>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Liberações</h2>
+                            <p className="text-slate-500 text-sm">Registro de computadores e impressoras configurados.</p>
                         </div>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
-                            <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 w-64" />
+                            <Input placeholder="Buscar por ID, Máquina..." value={search} onChange={function(e) { setSearch(e.target.value); }} className="pl-10 w-64" />
                         </div>
                     </div>
                     
@@ -521,22 +883,24 @@
                                         <th className="px-6 py-3">ID</th>
                                         <th className="px-6 py-3">Data</th>
                                         <th className="px-6 py-3">Tipo</th>
-                                        <th className="px-6 py-3">Ativo</th>
+                                        <th className="px-6 py-3">Máquina / Ativo</th>
                                         <th className="px-6 py-3">Técnico</th>
                                         <th className="px-6 py-3 text-right">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                    {filtered.map((h, i) => (
-                                        <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                            <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
-                                            <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date).toLocaleDateString()}</td>
-                                            <td className="px-6 py-3"><Badge color={h.type === 'formatacao' ? 'blue' : 'amber'}>{h.type}</Badge></td>
-                                            <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo}</td>
-                                            <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico}</td>
-                                            <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
-                                        </tr>
-                                    ))}
+                                    {filtered.map(function(h, i) {
+                                        return (
+                                            <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
+                                                <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date || Date.now()).toLocaleDateString()}</td>
+                                                <td className="px-6 py-3"><Badge color={h.type === 'formatacao' ? 'blue' : 'amber'}>{h.type}</Badge></td>
+                                                <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
+                                                <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico || 'N/A'}</td>
+                                                <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Liberado</span></td>
+                                            </tr>
+                                        );
+                                    })}
                                     {filtered.length === 0 && <tr><td colSpan="6" className="text-center py-8 text-slate-400">Nenhum registro encontrado.</td></tr>}
                                 </tbody>
                             </table>
@@ -546,79 +910,148 @@
             );
         };
 
-        const App = () => {
-            const [view, setView] = useState('login');
-            const [currentUser, setCurrentUser] = useState(null);
-            const [users, setUsers] = useState([]);
-            const [activeTickets, setActiveTickets] = useState([]);
-            const [history, setHistory] = useState([]);
-            const [logo, setLogo] = useState('');
-            const [currentTicketId, setCurrentTicketId] = useState(null);
-            const [darkMode, setDarkMode] = useState(true);
-            const [showConfig, setShowConfig] = useState(false);
-            const fileInputRef = useRef(null);
+        var App = function() {
+            var viewState = useState('login');
+            var view = viewState[0], setView = viewState[1];
+            var userState = useState(null);
+            var currentUser = userState[0], setCurrentUser = userState[1];
+            var usersState = useState(DEFAULT_TEAM);
+            var users = usersState[0], setUsers = usersState[1];
+            var ticketsState = useState([]);
+            var activeTickets = ticketsState[0], setActiveTickets = ticketsState[1];
+            var historyState = useState([]);
+            var history = historyState[0], setHistory = historyState[1];
+            var logoState = useState('');
+            var logo = logoState[0], setLogo = logoState[1];
+            var curTicketState = useState(null);
+            var currentTicketId = curTicketState[0], setCurrentTicketId = curTicketState[1];
+            var darkState = useState(true);
+            var darkMode = darkState[0], setDarkMode = darkState[1];
+            var cfgState = useState(false);
+            var showConfig = cfgState[0], setShowConfig = cfgState[1];
+            var fileInputRef = useRef(null);
 
-            // Efeitos e Lógica (MANTIDO DO ORIGINAL, SÓ UI ALTERADA)
-            useEffect(() => {
-                const savedTheme = localStorage.getItem('sa_theme'); 
-                if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
-                
-                const savedLogo = localStorage.getItem('sa_logo'); if (savedLogo) setLogo(savedLogo);
-                const savedUser = localStorage.getItem('sa_user_session'); if (savedUser) { setCurrentUser(JSON.parse(savedUser)); setView('dashboard'); }
+            useEffect(function() {
+                try {
+                    var savedTheme = localStorage.getItem('sa_theme'); 
+                    if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+                    var savedLogo = localStorage.getItem('sa_logo'); 
+                    if (savedLogo) setLogo(savedLogo);
+                    var savedUser = localStorage.getItem('sa_user_session'); 
+                    if (savedUser) { 
+                        var parsed = JSON.parse(savedUser);
+                        if (parsed && parsed.id) {
+                            setCurrentUser(parsed); 
+                            setView('dashboard'); 
+                        }
+                    }
+                } catch(e) {
+                    localStorage.removeItem('sa_user_session');
+                }
 
-                const unsubTickets = db.collection('tickets').onSnapshot(snap => setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))));
-                const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(snap => setHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-                const unsubUsers = db.collection('users').onSnapshot(snap => {
-                    if (snap.empty) db.collection('users').add({ id: 'admin', name: 'Admin', pass: 'admin' });
-                    else setUsers(snap.docs.map(doc => ({ docId: doc.id, ...doc.data() })));
+                var unsubTickets = db.collection('tickets').onSnapshot(function(snap) {
+                    var list = snap.docs.map(function(doc) {
+                        return Object.assign({ id: doc.id }, doc.data());
+                    }).filter(function(t) {
+                        return t && t.data && t.data.items;
+                    });
+                    list.sort(function(a,b) { return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); });
+                    setActiveTickets(list);
                 });
-                return () => { unsubTickets(); unsubHistory(); unsubUsers(); };
+
+                var unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(function(snap) {
+                    setHistory(snap.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); }));
+                });
+
+                var unsubUsers = db.collection('users').onSnapshot(function(snap) {
+                    if (snap.empty) {
+                        DEFAULT_TEAM.forEach(function(u) { db.collection('users').add(u); });
+                    } else {
+                        setUsers(snap.docs.map(function(doc) { return Object.assign({ docId: doc.id }, doc.data()); }));
+                    }
+                });
+
+                return function() { unsubTickets(); unsubHistory(); unsubUsers(); };
             }, []);
 
-            useEffect(() => { 
+            useEffect(function() { 
                 if (darkMode) document.documentElement.classList.add('dark'); 
                 else document.documentElement.classList.remove('dark'); 
                 localStorage.setItem('sa_theme', JSON.stringify(darkMode)); 
             }, [darkMode]);
 
-            const handleLogin = (user) => { setCurrentUser(user); localStorage.setItem('sa_user_session', JSON.stringify(user)); setView('dashboard'); };
-            const handleLogout = () => { setCurrentUser(null); localStorage.removeItem('sa_user_session'); setView('login'); };
-            
-            const handleCreateTicket = async (type) => {
-                const prefix = type === 'formatacao' ? 'F' : 'Z';
-                const counterRef = db.collection('counters').doc(type);
-                try {
-                    await db.runTransaction(async (t) => {
-                        const doc = await t.get(counterRef);
-                        const nextSeq = doc.exists ? doc.data().current + 1 : 1001;
-                        t.set(counterRef, { current: nextSeq }, { merge: true });
-                        const newRef = db.collection('tickets').doc();
-                        t.set(newRef, { visualId: `${prefix}-${nextSeq}`, type, data: getTemplate(type, currentUser.name), createdAt: new Date().toISOString() });
-                        setCurrentTicketId(newRef.id);
-                        setView('checklist');
-                    });
-                } catch (e) { alert("Erro de conexão."); }
+            var handleLogin = function(user) { 
+                setCurrentUser(user); 
+                localStorage.setItem('sa_user_session', JSON.stringify(user)); 
+                setView('dashboard'); 
             };
 
-            const handleUpdateTicket = (newData) => { if (currentTicketId) db.collection('tickets').doc(currentTicketId).update({ data: newData }); };
-            
-            const handleArchive = (ticket) => {
-                if(!ticket) return;
-                db.collection('history').add({ 
-                    visualId: ticket.visualId, type: ticket.type, date: new Date().toISOString(), 
-                    tecnico: ticket.data.meta.tecnico, ativo: ticket.data.meta.maquina || "N/A", data: ticket.data 
-                }).then(() => db.collection('tickets').doc(ticket.id).delete())
-                  .then(() => { setCurrentTicketId(null); setView('dashboard'); });
+            var handleLogout = function() { 
+                setCurrentUser(null); 
+                localStorage.removeItem('sa_user_session'); 
+                setView('login'); 
             };
             
-            const handleDeleteActive = (e, id) => { e.stopPropagation(); if(confirm("Cancelar chamado?")) db.collection('tickets').doc(id).delete(); };
-            const handleLogoUpload = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onloadend = () => { setLogo(r.result); localStorage.setItem('sa_logo', r.result); }; r.readAsDataURL(f); }};
+            var handleCreateTicket = function(type) {
+                var prefix = type === 'formatacao' ? 'F' : 'Z';
+                var seq = Math.floor(1000 + Math.random() * 9000);
+                var newTicket = {
+                    visualId: prefix + '-' + seq,
+                    type: type,
+                    data: getTemplate(type, currentUser ? currentUser.name : ''),
+                    createdAt: new Date().toISOString()
+                };
+                db.collection('tickets').add(newTicket).then(function(docRef) {
+                    setCurrentTicketId(docRef.id);
+                    setView('checklist');
+                }).catch(function(err) {
+                    alert("Erro ao abrir chamado: " + err.message);
+                });
+            };
+
+            var handleUpdateTicket = function(newData) { 
+                if (currentTicketId) db.collection('tickets').doc(currentTicketId).update({ data: newData }); 
+            };
+            
+            var handleArchive = function(ticket) {
+                if (!ticket) return;
+                var meta = (ticket.data && ticket.data.meta) || {};
+                db.collection('history').add({ 
+                    visualId: ticket.visualId, 
+                    type: ticket.type, 
+                    date: new Date().toISOString(), 
+                    tecnico: meta.tecnico || 'N/A', 
+                    ativo: meta.maquina || meta.ativo || "N/A", 
+                    data: ticket.data 
+                }).then(function() {
+                    return db.collection('tickets').doc(ticket.id).delete();
+                }).then(function() {
+                    setCurrentTicketId(null);
+                    setView('dashboard');
+                });
+            };
+            
+            var handleDeleteActive = function(e, id) { 
+                e.stopPropagation(); 
+                if (confirm("Cancelar chamado?")) db.collection('tickets').doc(id).delete(); 
+            };
+
+            var handleLogoUpload = function(e) { 
+                var f = e.target.files && e.target.files[0]; 
+                if (f) { 
+                    var r = new FileReader(); 
+                    r.onloadend = function() { 
+                        setLogo(r.result); 
+                        localStorage.setItem('sa_logo', r.result); 
+                    }; 
+                    r.readAsDataURL(f); 
+                }
+            };
 
             if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
 
             return (
                 <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
-                    {/* SIDEBAR */}
                     <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 z-20 shrink-0">
                         <div className="h-16 flex items-center gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800">
                             <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
@@ -627,52 +1060,50 @@
                             INFRA CHECK
                         </div>
                         <nav className="flex-1 py-6 px-3 space-y-1">
-                            <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm ${view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
-                                {Icons.Layout} Dashboard
+                            <button onClick={function() { setView('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                {Icons.Layout} Bancada de Trabalho
                             </button>
-                            <button onClick={() => setView('history')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm ${view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
+                            <button onClick={function() { setView('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                 {Icons.History} Histórico
                             </button>
                         </nav>
                         <div className="p-4 border-t border-slate-800">
                             <div className="flex items-center gap-3 mb-4 px-2">
                                 <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
-                                    {currentUser.name.charAt(0)}
+                                    {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                                 </div>
                                 <div className="overflow-hidden">
-                                    <p className="text-sm font-bold text-white truncate">{currentUser.name}</p>
-                                    <p className="text-xs text-slate-500">Técnico Infra</p>
+                                    <p className="text-sm font-bold text-white truncate">{currentUser ? currentUser.name : ''}</p>
+                                    <p className="text-xs text-slate-500 font-mono">ID: {currentUser ? currentUser.id : ''}</p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
-                                <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                                <button onClick={() => setShowConfig(true)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
-                                <button onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
+                                <button title="Alternar tema" onClick={function() { setDarkMode(!darkMode); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
+                                <button title="Gerenciar Equipe" onClick={function() { setShowConfig(true); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
                             </div>
                             <div className="mt-4 pt-4 border-t border-slate-800 text-center">
-                                <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={() => fileInputRef.current.click()}>Alterar Logo</p>
+                                <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={function() { if (fileInputRef.current) fileInputRef.current.click(); }}>Alterar Logo</p>
                                 <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
                             </div>
                         </div>
                     </aside>
 
-                    {/* MAIN CONTENT AREA */}
                     <main className="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950">
-                        {/* Mobile Header */}
                         <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0">
                             <span className="font-bold">INFRA CHECK</span>
                             <div className="flex gap-2">
-                                <button onClick={() => setView('dashboard')} className="p-2">{Icons.Layout}</button>
+                                <button onClick={function() { setShowConfig(true); }} className="p-2">{Icons.Settings}</button>
+                                <button onClick={function() { setView('dashboard'); }} className="p-2">{Icons.Layout}</button>
                                 <button onClick={handleLogout} className="p-2">{Icons.LogOut}</button>
                             </div>
                         </div>
 
-                        {/* Views */}
                         <div className="flex-1 overflow-auto relative">
-                            {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} />}
-                            {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
-                            {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={handleUpdateTicket} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
-                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} currentUser={currentUser} />}
+                            {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} />}
+                            {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={function(id) { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
+                            {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(function(t) { return t.id === currentTicketId; })} onUpdate={handleUpdateTicket} onBack={function() { setView('dashboard'); }} onRequestFinish={function() { setView('receipt'); }} />}
+                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(function(t) { return t.id === currentTicketId; })} onBack={function() { setView('checklist'); }} onArchive={handleArchive} logo={logo} />}
                             {view === 'history' && <HistoryView history={history} />}
                         </div>
                     </main>
@@ -680,7 +1111,7 @@
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
+        var root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
