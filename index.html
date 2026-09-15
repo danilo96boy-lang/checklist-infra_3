@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BANCADA INFRA | Controle de Qualidade Técnica</title>
+    <title>INFRA CHECKLIST | Enterprise Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -82,115 +82,50 @@
 
         // --- ICONS ---
         const Icons = {
-            Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
-            User: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-            History: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
-            Plus: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-            LogOut: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-            Check: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
-            Printer: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
-            Search: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
-            Moon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
-            Sun: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
+            Layout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
+            User: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            History: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
+            Plus: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            LogOut: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            Settings: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Check: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
+            Printer: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
+            Search: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
+            Moon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
+            Sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
             Trash: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
-            Server: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
-            Mail: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
-            ChevronLeft: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
-            Download: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-            CheckAll: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m2 12 5 5L18 6"/><path d="m7 12 5 5L22 6"/></svg>
+            Server: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>,
+            Mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            ChevronLeft: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         };
 
-        // --- TEMPLATES TÉCNICOS COM ESTADO 'PENDING' | 'DONE' | 'NA' ---
-        const createTask = (id, label) => ({ id, label, status: 'pending' });
-
+        // --- TEMPLATES ---
         const getTemplate = (type, tecnicoName) => {
-            const meta = {
-                tecnico: tecnicoName || '',
-                data: new Date().toISOString().split('T')[0],
-                hostname: '',
-                patrimonio: '',
-                specs: '',
-                rede: ''
+            const tmpl = {
+                meta: { tecnico: tecnicoName || '', data: new Date().toISOString().split('T')[0], maquina: '', ativo: '' },
+                items: {}
             };
-
-            let items = {};
-
             if (type === 'formatacao') {
-                items = {
-                    preventivas: { title: "1. Manutenção Física & Preventiva", icon: "Server", tasks: [
-                        createTask('f_prev_1', 'Limpeza interna completa (poeira/cooler)'),
-                        createTask('f_prev_2', 'Aplicação de pasta térmica nova'),
-                        createTask('f_prev_3', 'Limpeza dos contatos de memória RAM'),
-                        createTask('f_prev_4', 'Aplicação de limpa contato nos slots')
-                    ]},
-                    preparacao: { title: "2. Backup & Preparação", icon: "Server", tasks: [
-                        createTask('f_prep_1', 'Verificação de partição e volume de dados'),
-                        createTask('f_prep_2', 'Backup de arquivos locais do usuário'),
-                        createTask('f_prep_3', 'Backup de certificados e chave Office/Win'),
-                        createTask('f_prep_4', 'Exportação de favoritos do Navegador'),
-                        createTask('f_prep_5', 'Backup PST/Assinatura Outlook e Spark')
-                    ]},
-                    sistema: { title: "3. Sistema Operacional & Drivers", icon: "Server", tasks: [
-                        createTask('f_sis_1', 'Instalação limpa do Windows/SO padrão'),
-                        createTask('f_sis_2', 'Ingresso correto no Domínio corporativo'),
-                        createTask('f_sis_3', 'Configuração de Proxy / DNS corporativo'),
-                        createTask('f_sis_4', 'Ajuste de Hosts / WINS'),
-                        createTask('f_sis_5', 'Atualização completa de Drivers e BIOS')
-                    ]},
-                    seguranca: { title: "4. Segurança & Agentes", icon: "Server", tasks: [
-                        createTask('f_sec_1', 'Instalação e registro do agente Wazuh'),
-                        createTask('f_sec_2', 'Instalação e vacina ESET Antivirus'),
-                        createTask('f_sec_3', 'Instalação VNC + Regras de Firewall ativas'),
-                        createTask('f_sec_4', 'Aplicação de GPOs e restrições locais')
-                    ]},
-                    configuracao: { title: "5. Configuração do Usuário", icon: "Server", tasks: [
-                        createTask('f_conf_1', 'Ativação oficial do Windows e Office'),
-                        createTask('f_conf_2', 'Plano de energia em Alto Desempenho'),
-                        createTask('f_conf_3', 'Configuração de conta e perfil no Outlook'),
-                        createTask('f_conf_4', 'Configuração do mensageiro interno Spark'),
-                        createTask('f_conf_5', 'Instalação e teste de impressoras do setor'),
-                        createTask('f_conf_6', 'Mapeamento de unidades de rede compartilhadas'),
-                        createTask('f_conf_7', 'Reserva de IP Fixo via MAC no DHCP (se aplicável)')
-                    ]},
-                    apps: { title: "6. ERP & Softwares de Negócio", icon: "Server", tasks: [
-                        createTask('f_app_1', 'TOTVS Protheus / SmartClient instalado'),
-                        createTask('f_app_2', 'TOTVS-MES / Aplicações de Fábrica'),
-                        createTask('f_app_3', 'Softwares específicos do departamento')
-                    ]},
-                    finalizacao: { title: "7. Validação & Liberação", icon: "Server", tasks: [
-                        createTask('f_fin_1', 'Restauração de favoritos e perfil de navegador'),
-                        createTask('f_fin_2', 'Restauração de históricos de e-mail'),
-                        createTask('f_fin_3', 'Fixação/conferência da etiqueta de Patrimônio'),
-                        createTask('f_fin_4', 'Teste de estresse e validação de desempenho')
-                    ]}
+                tmpl.items = {
+                    preventivas: { title: "Preventivas", icon: "Server", tasks: [{ id: 'f_prev_1', label: 'Limpeza interna', checked: false }, { id: 'f_prev_2', label: 'Pasta térmica', checked: false }, { id: 'f_prev_3', label: 'Limpeza memórias', checked: false }, { id: 'f_prev_4', label: 'Limpa contato', checked: false }] },
+                    preparacao: { title: "Backup & Prep", icon: "Server", tasks: [{ id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false }, { id: 'f_prep_2', label: 'Backup Arquivos', checked: false }, { id: 'f_prep_3', label: 'Chave Office', checked: false }, { id: 'f_prep_4', label: 'Backup Navegador', checked: false }, { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false }] },
+                    sistema: { title: "Sistema Operacional", icon: "Server", tasks: [{ id: 'f_sis_1', label: 'Formatação', checked: false }, { id: 'f_sis_2', label: 'Domínio', checked: false }, { id: 'f_sis_3', label: 'Proxy/DNS', checked: false }, { id: 'f_sis_4', label: 'WINS/Hosts', checked: false }, { id: 'f_sis_5', label: 'Drivers', checked: false }] },
+                    seguranca: { title: "Segurança", icon: "Server", tasks: [{ id: 'f_sec_1', label: 'Wazuh', checked: false }, { id: 'f_sec_2', label: 'ESET', checked: false }, { id: 'f_sec_3', label: 'VNC + Firewall', checked: false }, { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false }] },
+                    configuracao: { title: "Configurações", icon: "Server", tasks: [{ id: 'f_conf_1', label: 'Ativar Win/Office', checked: false }, { id: 'f_conf_2', label: 'Energia', checked: false }, { id: 'f_conf_3', label: 'Config. Email', checked: false }, { id: 'f_conf_4', label: 'Config. Spark', checked: false }, { id: 'f_conf_5', label: 'Impressoras', checked: false }, { id: 'f_conf_6', label: 'Map. Rede', checked: false }, { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false } ]},
+                    apps: { title: "Aplicações", icon: "Server", tasks: [{ id: 'f_app_1', label: 'TOTVS', checked: false }, { id: 'f_app_2', label: 'TOTVS-MES', checked: false }] },
+                    finalizacao: { title: "Entrega", icon: "Server", tasks: [{ id: 'f_fin_1', label: 'Restore Navegador', checked: false }, { id: 'f_fin_2', label: 'Restore Email', checked: false }, { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false }, { id: 'f_fin_4', label: 'Desempenho', checked: false }] }
                 };
             } else {
-                items = {
-                    inspecao: { title: "1. Inspeção Física Inicial", icon: "Check", tasks: [
-                        createTask('z_insp_1', 'Inspeção visual e alinhamento do rolete'),
-                        createTask('z_insp_2', 'Estado físico da cabeça de impressão'),
-                        createTask('z_insp_3', 'Fixação do suporte de ribbon e etiqueta'),
-                        createTask('z_insp_4', 'Impressão de padrão inicial de teste')
-                    ]},
-                    preventiva: { title: "2. Higienização & Manutenção", icon: "Server", tasks: [
-                        createTask('z_prev_1', 'Descontaminação do rolete com álcool isopropílico'),
-                        createTask('z_prev_2', 'Limpeza da cabeça térmica com caneta/swab'),
-                        createTask('z_prev_3', 'Limpeza do sensor de gap/tarja preta'),
-                        createTask('z_prev_4', 'Desobstrução interna de poeira e cola de etiquetas')
-                    ]},
-                    teste: { title: "3. Calibração & Liberação", icon: "Printer", tasks: [
-                        createTask('z_test_1', 'Calibração dos sensores de mídia'),
-                        createTask('z_test_2', 'Configuração de Darkline e Velocidade'),
-                        createTask('z_test_3', 'Impressão de teste com código de barras 100% legível')
-                    ]}
+                tmpl.items = {
+                    inspecao: { title: "Inspeção Física", icon: "Check", tasks: [{ id: 'z_insp_1', label: 'Rolete', checked: false }, { id: 'z_insp_2', label: 'Cabeça Impressão', checked: false }, { id: 'z_insp_3', label: 'Suporte Etiqueta', checked: false }, { id: 'z_insp_4', label: 'Qualidade Inicial', checked: false }] },
+                    preventiva: { title: "Manutenção", icon: "Server", tasks: [{ id: 'z_prev_1', label: 'Limpeza Rolete', checked: false }, { id: 'z_prev_2', label: 'Limpeza Cabeça', checked: false }, { id: 'z_prev_3', label: 'Limpeza Suporte', checked: false }, { id: 'z_prev_4', label: 'Limpeza Geral', checked: false }] },
+                    teste: { title: "Validação", icon: "Printer", tasks: [{ id: 'z_test_1', label: 'Teste Final', checked: false }] }
                 };
             }
-
-            return { meta, items };
+            return tmpl;
         };
 
-        // --- COMPONENTES UI BÁSICOS ---
+        // --- COMPONENTES UI ---
         const Button = ({ children, variant = 'primary', className = "", ...props }) => {
             const variants = {
                 primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
@@ -205,7 +140,7 @@
             <div {...props} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${noPadding ? '' : 'p-6'} ${className}`}>{children}</div>
         );
 
-        const Input = (props) => <input {...props} className={`w-full h-9 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all ${props.className || ''}`} />;
+        const Input = (props) => <input {...props} className={`w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all ${props.className || ''}`} />;
 
         const Badge = ({ children, color = 'slate' }) => {
             const colors = {
@@ -214,36 +149,10 @@
                 green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
                 amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
             };
-            return <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${colors[color]}`}>{children}</span>;
+            return <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${colors[color]}`}>{children}</span>
         };
 
-        // --- CÁLCULO DE PROGRESSO (IGNORA N/A) ---
-        const calculateProgress = (items) => {
-            let totalApplicable = 0;
-            let completed = 0;
-            let naCount = 0;
-            let pendingCount = 0;
-
-            Object.values(items || {}).forEach(group => {
-                group.tasks.forEach(t => {
-                    const status = t.status !== undefined ? t.status : (t.checked ? 'done' : 'pending');
-                    if (status === 'na') {
-                        naCount++;
-                    } else if (status === 'done') {
-                        totalApplicable++;
-                        completed++;
-                    } else {
-                        totalApplicable++;
-                        pendingCount++;
-                    }
-                });
-            });
-
-            const percent = totalApplicable === 0 ? 100 : Math.round((completed / totalApplicable) * 100);
-            return { percent, completed, totalApplicable, naCount, pendingCount };
-        };
-
-        // --- TELAS ---
+        // --- TELAS & MODAIS ---
         const LoginScreen = ({ onLogin, users }) => {
             const [id, setId] = useState('');
             const [pass, setPass] = useState('');
@@ -260,10 +169,10 @@
                     <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden fade-in">
                         <div className="p-8 pb-6 text-center border-b border-slate-100 dark:border-slate-800">
                             <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-brand-500/30">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Bancada de TI</h1>
-                            <p className="text-xs text-slate-500 mt-1">Checklist de Liberação Técnica & Ativos</p>
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
+                            <p className="text-sm text-slate-500 mt-1">Acesso Administrativo</p>
                         </div>
                         <form onSubmit={handleSubmit} className="p-8 space-y-4">
                             <div>
@@ -271,14 +180,14 @@
                                 <Input value={id} onChange={e => setId(e.target.value)} placeholder="0100xxxx" autoFocus />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha de Bancada</label>
+                                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha</label>
                                 <Input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••" />
                             </div>
                             {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</div>}
-                            <Button type="submit" className="w-full h-11 text-base mt-2">Iniciar Sessão de Bancada</Button>
+                            <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Sistema</Button>
                         </form>
                         <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] text-slate-400 font-mono">CONTROLE TÉCNICO DE ATIVOS • COBRECOM</p>
+                            <p className="text-[10px] text-slate-400 font-mono">V2.2 ENTERPRISE • COBRECOM TI</p>
                         </div>
                     </div>
                 </div>
@@ -296,29 +205,40 @@
                 const name = newUser.name.trim();
                 const pass = newUser.pass.trim();
 
-                if (!id || !name || !pass) return alert("Preencha todos os campos do técnico.");
-                if (users.some(u => u.id.toLowerCase() === id.toLowerCase())) return alert("Essa matrícula já está cadastrada.");
+                if (!id || !name || !pass) return alert("Por favor, preencha Matrícula, Nome e Senha.");
+                if (users.some(u => u.id.toLowerCase() === id.toLowerCase())) return alert("Essa matrícula já está cadastrada no sistema.");
 
                 setSaving(true);
                 try {
                     await db.collection('users').add({ id, name, pass });
                     setNewUser({ id: '', name: '', pass: '' });
                 } catch (err) {
-                    alert("Erro ao cadastrar: " + err.message);
+                    alert("Erro ao cadastrar usuário: " + err.message);
                 } finally {
                     setSaving(false);
                 }
             };
 
             const handleDeleteUser = async (user) => {
-                if (user.id === currentUser.id) return alert("Você não pode remover a si mesmo da equipe enquanto estiver logado.");
-                if (users.length <= 1) return alert("A bancada precisa manter ao menos um técnico cadastrado.");
-                if (confirm(`Remover o técnico ${user.name} (${user.id}) da equipe de bancada?`)) {
-                    await db.collection('users').doc(user.docId).delete();
+                if (user.id === currentUser.id) {
+                    return alert("Você não pode remover seu próprio usuário enquanto estiver logado nele.");
+                }
+                if (users.length <= 1) {
+                    return alert("O sistema precisa manter ao menos um usuário cadastrado.");
+                }
+                if (confirm(`Tem certeza que deseja remover o usuário ${user.name} (${user.id})?`)) {
+                    try {
+                        await db.collection('users').doc(user.docId).delete();
+                    } catch (err) {
+                        alert("Erro ao remover usuário: " + err.message);
+                    }
                 }
             };
 
-            const filteredUsers = users.filter(u => u.name.toLowerCase().includes(filter.toLowerCase()) || u.id.toLowerCase().includes(filter.toLowerCase()));
+            const filteredUsers = users.filter(u => 
+                u.name.toLowerCase().includes(filter.toLowerCase()) || 
+                u.id.toLowerCase().includes(filter.toLowerCase())
+            );
 
             return (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm fade-in">
@@ -326,41 +246,51 @@
                         <div className="p-4 px-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
                             <div>
                                 <h2 className="font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                                    {Icons.Settings} Equipe Técnica de Bancada
+                                    {Icons.Settings} Gestão de Usuários & Equipe
                                 </h2>
-                                <p className="text-xs text-slate-500 mt-0.5">Gerenciamento de técnicos habilitados para assinar checklists.</p>
+                                <p className="text-xs text-slate-500 mt-0.5">Cadastre novos membros ou desative técnicos desligados.</p>
                             </div>
                             <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600 transition-colors">&times;</button>
                         </div>
                         
                         <div className="p-6 overflow-y-auto grid md:grid-cols-5 gap-6">
+                            {/* Formulário de Adicionar */}
                             <div className="md:col-span-2 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 md:pr-6 pb-6 md:pb-0">
                                 <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider flex items-center gap-1.5">
-                                    {Icons.Plus} Adicionar Técnico
+                                    {Icons.Plus} Adicionar Novo Membro
                                 </h3>
                                 <form onSubmit={handleAddUser} className="space-y-3">
                                     <div>
-                                        <label className="block text-[11px] font-semibold text-slate-500 mb-1">Matrícula</label>
+                                        <label className="block text-[11px] font-semibold text-slate-500 mb-1">Matrícula / ID</label>
                                         <Input placeholder="Ex: 01001999" value={newUser.id} onChange={e => setNewUser({...newUser, id: e.target.value})} />
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-semibold text-slate-500 mb-1">Nome Completo</label>
-                                        <Input placeholder="Ex: Marcelo Silva" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
+                                        <Input placeholder="Ex: Carlos Silva" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-semibold text-slate-500 mb-1">Senha de Acesso</label>
-                                        <Input type="password" placeholder="••••" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} />
+                                        <Input type="password" placeholder="Senha do técnico" value={newUser.pass} onChange={e => setNewUser({...newUser, pass: e.target.value})} />
                                     </div>
                                     <Button type="submit" disabled={saving} className="w-full mt-2">
-                                        {saving ? "Salvando..." : "Cadastrar Técnico"}
+                                        {saving ? "Salvando..." : "Cadastrar Membro"}
                                     </Button>
                                 </form>
                             </div>
 
+                            {/* Lista de Membros */}
                             <div className="md:col-span-3 flex flex-col">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Técnicos Ativos ({users.length})</h3>
-                                    <input type="text" placeholder="Filtrar..." value={filter} onChange={e => setFilter(e.target.value)} className="text-xs px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-36" />
+                                    <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">
+                                        Membros Ativos ({users.length})
+                                    </h3>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Filtrar membro..." 
+                                        value={filter} 
+                                        onChange={e => setFilter(e.target.value)} 
+                                        className="text-xs px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-36"
+                                    />
                                 </div>
                                 <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
                                     {filteredUsers.map(u => {
@@ -374,19 +304,26 @@
                                                     <div>
                                                         <div className="font-semibold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
                                                             {u.name}
-                                                            {isCurrent && <span className="text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 px-1.5 py-0.2 rounded">Você</span>}
+                                                            {isCurrent && <span className="text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 px-1.5 py-0.5 rounded">Você</span>}
                                                         </div>
                                                         <div className="text-[11px] text-slate-400 font-mono">ID: {u.id}</div>
                                                     </div>
                                                 </div>
                                                 {!isCurrent && (
-                                                    <button onClick={() => handleDeleteUser(u)} title="Remover da bancada" className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors">
+                                                    <button 
+                                                        onClick={() => handleDeleteUser(u)} 
+                                                        title="Remover da equipe"
+                                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors"
+                                                    >
                                                         {Icons.Trash}
                                                     </button>
                                                 )}
                                             </div>
                                         );
                                     })}
+                                    {filteredUsers.length === 0 && (
+                                        <div className="text-center py-8 text-xs text-slate-400">Nenhum membro encontrado.</div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -395,220 +332,31 @@
             );
         };
 
-        // --- TELA DE EXECUÇÃO DO CHECKLIST ---
-        const ActiveChecklist = ({ item, onUpdate, onBack, onRequestFinish }) => {
-            if (!item) return null;
-            const { data } = item;
-
-            const handleMeta = (field, value) => {
-                onUpdate({ ...data, meta: { ...data.meta, [field]: value } });
-            };
-
-            // Alternar Tri-State: pending -> done -> na -> pending
-            const toggleTaskStatus = (sectionKey, taskId) => {
-                const newData = { ...data };
-                const currentTasks = newData.items[sectionKey].tasks;
-                const updatedTasks = currentTasks.map(task => {
-                    if (task.id === taskId) {
-                        const curStatus = task.status !== undefined ? task.status : (task.checked ? 'done' : 'pending');
-                        let nextStatus = 'done';
-                        if (curStatus === 'pending') nextStatus = 'done';
-                        else if (curStatus === 'done') nextStatus = 'na';
-                        else nextStatus = 'pending';
-
-                        return { ...task, status: nextStatus, checked: nextStatus === 'done' };
-                    }
-                    return task;
-                });
-                newData.items[sectionKey] = { ...newData.items[sectionKey], tasks: updatedTasks };
-                onUpdate(newData);
-            };
-
-            // Marcar todas da seção como FEITO
-            const setSectionAll = (sectionKey, status) => {
-                const newData = { ...data };
-                const updatedTasks = newData.items[sectionKey].tasks.map(t => ({
-                    ...t,
-                    status,
-                    checked: status === 'done'
-                }));
-                newData.items[sectionKey] = { ...newData.items[sectionKey], tasks: updatedTasks };
-                onUpdate(newData);
-            };
-
-            const stats = calculateProgress(data.items);
-
-            return (
-                <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950 relative">
-                    {/* Barra Superior */}
-                    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-sm z-10 shrink-0">
-                        <div className="flex items-center gap-4">
-                            <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500">{Icons.ChevronLeft}</button>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-none font-mono">#{item.visualId}</h2>
-                                    <Badge color={item.type === 'formatacao' ? 'blue' : 'amber'}>
-                                        {item.type === 'formatacao' ? 'Preparação PC' : 'Zebra Térmica'}
-                                    </Badge>
-                                </div>
-                                <p className="text-xs text-slate-500 mt-1">Iniciado em {new Date(item.createdAt).toLocaleDateString()}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-5">
-                            <div className="text-right hidden sm:block">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-brand-600 block">{stats.percent}% Concluído</span>
-                                    {stats.naCount > 0 && <span className="text-[10px] text-slate-400">({stats.naCount} N/A)</span>}
-                                </div>
-                                <div className="w-36 h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden">
-                                    <div className={`h-full transition-all duration-500 ${stats.percent === 100 ? 'bg-emerald-500' : 'bg-brand-600'}`} style={{ width: `${stats.percent}%` }}></div>
-                                </div>
-                            </div>
-                            <Button onClick={onRequestFinish} variant={stats.percent === 100 ? 'primary' : 'secondary'}>
-                                {stats.percent === 100 ? 'Liberar Equipamento' : 'Revisar & Assinar'}
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* Conteúdo Scrollável */}
-                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-                        {/* Ficha de Identificação do Ativo */}
-                        <Card noPadding className="border-l-4 border-l-brand-600">
-                            <div className="p-4 px-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex justify-between items-center">
-                                <h3 className="text-xs font-bold uppercase text-slate-600 dark:text-slate-300 tracking-wider">
-                                    Identificação do Equipamento em Bancada
-                                </h3>
-                                <span className="text-[11px] font-mono text-slate-400">Preenchimento de Inventário</span>
-                            </div>
-                            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Patrimônio / Service Tag</label>
-                                    <Input placeholder="Ex: PAT-01492" value={data.meta.patrimonio || ''} onChange={e => handleMeta('patrimonio', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Hostname / Nome da Máquina</label>
-                                    <Input placeholder="Ex: TI-NOTE-04" value={data.meta.hostname || ''} onChange={e => handleMeta('hostname', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Hardware / Specs (RAM, SSD, CPU)</label>
-                                    <Input placeholder="Ex: i5 11th / 16GB / 512GB SSD" value={data.meta.specs || ''} onChange={e => handleMeta('specs', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Endereço IP / MAC</label>
-                                    <Input placeholder="Ex: 192.168.1.105" value={data.meta.rede || ''} onChange={e => handleMeta('rede', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Técnico Responsável</label>
-                                    <Input value={data.meta.tecnico || ''} onChange={e => handleMeta('tecnico', e.target.value)} />
-                                </div>
-                            </div>
-                        </Card>
-
-                        {/* Grupos do Checklist */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
-                            {Object.entries(data.items).map(([groupKey, group]) => {
-                                const groupStats = calculateProgress({ [groupKey]: group });
-                                return (
-                                    <Card key={groupKey} noPadding className="overflow-hidden h-fit">
-                                        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <div className="text-brand-500">{Icons[group.icon]}</div>
-                                                <h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <button 
-                                                    onClick={() => setSectionAll(groupKey, 'done')} 
-                                                    title="Marcar todas como concluídas" 
-                                                    className="text-[10px] font-bold uppercase px-2 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 rounded flex items-center gap-1 transition-colors"
-                                                >
-                                                    {Icons.CheckAll} Todos OK
-                                                </button>
-                                                <button 
-                                                    onClick={() => setSectionAll(groupKey, 'na')} 
-                                                    title="Marcar todas como Não se Aplica" 
-                                                    className="text-[10px] font-bold uppercase px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300 rounded transition-colors"
-                                                >
-                                                    N/A
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                                            {group.tasks.map(task => {
-                                                const taskStatus = task.status !== undefined ? task.status : (task.checked ? 'done' : 'pending');
-                                                return (
-                                                    <div 
-                                                        key={task.id} 
-                                                        onClick={() => toggleTaskStatus(groupKey, task.id)}
-                                                        className="flex items-center justify-between p-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer select-none transition-colors"
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
-                                                                taskStatus === 'done' ? 'bg-emerald-600 text-white' :
-                                                                taskStatus === 'na' ? 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300' :
-                                                                'border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'
-                                                            }`}>
-                                                                {taskStatus === 'done' && Icons.Check}
-                                                                {taskStatus === 'na' && <span className="text-[10px] font-bold">✕</span>}
-                                                            </div>
-                                                            <span className={`text-sm ${
-                                                                taskStatus === 'done' ? 'text-slate-400 dark:text-slate-500 line-through' :
-                                                                taskStatus === 'na' ? 'text-slate-400 italic' :
-                                                                'text-slate-700 dark:text-slate-200 font-medium'
-                                                            }`}>
-                                                                {task.label}
-                                                            </span>
-                                                        </div>
-                                                        <span className={`text-[10px] font-mono uppercase font-bold px-1.5 py-0.5 rounded ${
-                                                            taskStatus === 'done' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' :
-                                                                taskStatus === 'na' ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' :
-                                                                'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300'
-                                                        }`}>
-                                                            {taskStatus === 'done' ? 'FEITO' : taskStatus === 'na' ? 'N/A' : 'PENDENTE'}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </Card>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- TELA DE REVISÃO E FICHA DE LIBERAÇÃO ---
-        const ReceiptView = ({ item, onBack, onArchive, logo, currentUser }) => {
+        const ReceiptView = ({ ticket, onBack, onArchive, logo, currentUser }) => {
             const [obs, setObs] = useState('');
-            const meta = item.data.meta;
-            const identificador = meta.hostname || meta.patrimonio || "SEM IDENTIFICAÇÃO";
-            const stats = calculateProgress(item.data.items);
-            const statusGlobal = stats.percent === 100 ? "LIBERADO" : "PENDENTE";
-
+            const meta = ticket.data.meta;
+            const identificador = meta.maquina || meta.equipamento || "N/A";
+            
+            let totalTasks = 0, checkedTasks = 0;
             const pendingList = [];
-            const categorySummary = Object.values(item.data.items).map(group => {
+            const categorySummary = Object.values(ticket.data.items).map(group => {
                 const total = group.tasks.length;
-                const doneCount = group.tasks.filter(t => (t.status || (t.checked ? 'done' : 'pending')) === 'done').length;
-                const naCount = group.tasks.filter(t => t.status === 'na').length;
-                const isOk = (doneCount + naCount) === total;
-
-                group.tasks.forEach(t => {
-                    const st = t.status || (t.checked ? 'done' : 'pending');
-                    if (st === 'pending') pendingList.push(`- [${group.title}] ${t.label}`);
-                });
-
-                return { title: group.title, status: isOk ? "OK" : "PENDENTE", naCount };
+                const checked = group.tasks.filter(t => t.checked).length;
+                group.tasks.forEach(t => { if(!t.checked) pendingList.push(`- [${group.title}] ${t.label}`); });
+                totalTasks += total;
+                checkedTasks += checked;
+                return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
             });
+            const percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
+            const statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
 
-            const handleSendEmail = () => {
-                const subject = `[${statusGlobal}] Liberação de Bancada #${item.visualId} - ${identificador}`;
-                const body = `FICHA DE LIBERAÇÃO TÉCNICA - BANCADA DE TI\n----------------------------------------\nID PROCESSO: #${item.visualId}\nHOSTNAME: ${meta.hostname || 'N/A'}\nPATRIMÔNIO: ${meta.patrimonio || 'N/A'}\nHARDWARE: ${meta.specs || 'N/A'}\nIP/REDE: ${meta.rede || 'N/A'}\nTÉCNICO: ${meta.tecnico}\nDATA LIBERAÇÃO: ${new Date().toLocaleDateString()}\nCONFORMIDADE TÉCNICA: ${stats.percent}%\n----------------------------------------\nRESUMO POR ETAPA:\n${categorySummary.map(c => `[${c.status}] ${c.title} ${c.naCount > 0 ? `(${c.naCount} N/A)` : ''}`).join('\n')}\n----------------------------------------\nOBSERVAÇÕES DE BANCADA:\n${obs || "Nenhuma observação técnica registrada."}\n\nGerado via Controle de Bancada Infra`;
-                
+            const handleSendOutlook = () => {
+                const subject = `[${statusGlobal}] Checklist #${ticket.visualId} - ${identificador}`;
+                const body = `RELATÓRIO TÉCNICO\n----------------------------------------\nID: #${ticket.visualId}\nATIVO: ${identificador}\nSTATUS: ${statusGlobal}\nTÉCNICO: ${meta.tecnico}\nDATA: ${new Date().toLocaleDateString()}\n----------------------------------------\nRESUMO:\n${categorySummary.map(c => `[${c.status}] ${c.title}`).join('\n')}\n----------------------------------------\nOBSERVAÇÕES:\n${obs || "Sem observações."}\n\nGerado via InfraChecklist`;
                 window.location.href = `mailto:${EMAIL_DESTINO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 
                 setTimeout(() => {
-                    if(confirm("E-mail disparado? Clique em OK para arquivar o equipamento como concluído.")) onArchive(item);
+                    if(confirm("E-mail aberto? Clique OK para arquivar.")) onArchive(ticket);
                 }, 1000);
             };
 
@@ -616,171 +364,203 @@
                 <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-950 overflow-auto p-4 md:p-8">
                     <div className="max-w-4xl mx-auto w-full space-y-6 fade-in no-print">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer" onClick={onBack}>
-                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar ao Checklist</span>
+                             <div className="flex items-center gap-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer" onClick={onBack}>
+                                {Icons.ChevronLeft} <span className="font-bold text-sm">Voltar à Edição</span>
                             </div>
-                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Ficha de Liberação Técnica</h1>
+                            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Revisão & Entrega</h1>
                         </div>
 
                         <Card className="grid md:grid-cols-2 gap-6">
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Técnicas de Bancada</label>
-                                    <textarea value={obs} onChange={e => setObs(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-36 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Ex: Substituído pente de 8GB por 16GB. Bateria trocada. Licença OEM vinculada à conta corporativa..."></textarea>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
+                                    <textarea value={obs} onChange={e => setObs(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
                                 </div>
                             </div>
                             <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
-                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações de Finalização</h3>
-                                <Button className="w-full justify-start" onClick={() => window.print()} variant="secondary">
-                                    {Icons.Printer} Imprimir Espelho / Etiqueta de Bancada
-                                </Button>
-                                <Button className="w-full justify-start" onClick={handleSendEmail}>
-                                    {Icons.Mail} Enviar Notificação & Liberar para Estoque
-                                </Button>
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações de Encerramento</h3>
+                                <Button className="w-full justify-start" onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
+                                <Button className="w-full justify-start" onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail & Arquivar</Button>
                             </div>
                         </Card>
                     </div>
 
-                    {/* FOLHA DE IMPRESSÃO / ESPELHO DE BANCADA */}
+                    {/* ÁREA DE IMPRESSÃO */}
                     <div id="receipt-area" className="hidden bg-white text-black font-sans text-xs border border-gray-300 p-0">
-                        <div className="flex justify-between items-center p-6 border-b-2 border-black">
-                            <div className="flex items-center gap-4">
-                                {logo && <img src={logo} className="h-10 object-contain" />}
-                                <div>
-                                    <h1 className="text-xl font-bold tracking-tighter uppercase">Ficha Técnica de Liberação</h1>
-                                    <p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Bancada de Infraestrutura</p>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-2xl font-mono font-bold">#{item.visualId || 'PEND'}</div>
-                                <div className="text-[10px] font-bold">{new Date().toLocaleDateString()}</div>
-                            </div>
+                         <div className="flex justify-between items-center p-6 border-b-2 border-black">
+                            <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Infraestrutura</p></div></div>
+                            <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date().toLocaleDateString()}</div></div>
                         </div>
-
                         <div className="grid grid-cols-4 border-b border-black">
-                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Hostname</span><span className="font-bold text-sm block truncate">{meta.hostname || 'N/A'}</span></div>
-                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Patrimônio</span><span className="font-bold text-sm block truncate">{meta.patrimonio || 'N/A'}</span></div>
-                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Hardware / Specs</span><span className="text-[11px] block truncate">{meta.specs || 'N/A'}</span></div>
-                            <div className={`p-3 text-center flex flex-col justify-center ${stats.percent === 100 ? 'bg-gray-100' : 'bg-gray-200'}`}>
-                                <span className="block text-[9px] font-bold uppercase text-gray-500">Status</span>
-                                <span className="font-bold text-sm">{statusGlobal} ({stats.percent}%)</span>
-                            </div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate">{identificador}</span></div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Tipo</span><span className="font-bold uppercase">{ticket.type}</span></div>
+                            <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{meta.tecnico}</span></div>
+                            <div className={`p-3 text-center flex flex-col justify-center ${percent === 100 ? 'bg-gray-100' : 'bg-gray-200'}`}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
                         </div>
-
                         <div className="p-6 flex gap-8">
-                            <div className="w-1/2">
-                                <h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Etapas de Qualidade Técnica</h3>
-                                <table className="w-full text-left border-collapse">
-                                    <tbody>
-                                        {categorySummary.map((cat, i) => (
-                                            <tr key={i} className="border-b border-dotted border-gray-400">
-                                                <td className="py-1.5 font-medium">{cat.title}</td>
-                                                <td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'CONFORME' : 'PENDENTE'}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map((cat, i) => (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>))}</tbody></table></div>
                             <div className="w-1/2 flex flex-col gap-4">
-                                {pendingList.length > 0 && (
-                                    <div className="border border-black p-2 bg-gray-50">
-                                        <h3 className="font-bold uppercase text-[9px] mb-1">Pendências Não Realizadas</h3>
-                                        <ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map((p, i) => <li key={i} className="truncate">{p.replace('- ', '')}</li>)}</ul>
-                                    </div>
-                                )}
-                                <div>
-                                    <h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações do Técnico</h3>
-                                    <p className="text-[10px] leading-relaxed italic h-20">{obs || "Equipamento revisado e pronto para entrega ao estoque/usuário."}</p>
-                                </div>
+                                {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map((p, i) => <li key={i} className="truncate">{p.replace('- ', '')}</li>)}</ul></div>)}
+                                <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16">{obs || "Sem observações adicionais."}</p></div>
                             </div>
                         </div>
+                        <div className="mt-8 px-6 pb-6 pt-4 flex justify-between gap-12"><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Técnico Responsável</p></div><div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Validado Por</p></div></div>
+                    </div>
+                </div>
+            );
+        };
 
-                        <div className="mt-8 px-6 pb-6 pt-4 flex justify-between gap-12">
-                            <div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Técnico Responsável: {meta.tecnico}</p></div>
-                            <div className="w-1/2 text-center"><div className="border-t border-black pt-1"></div><p className="text-[9px] font-bold uppercase">Conferido e Liberado para Produção</p></div>
+        const ActiveChecklist = ({ ticket, onUpdate, onBack, onRequestFinish }) => {
+            if (!ticket) return null;
+            const { data } = ticket;
+
+            const handleMeta = (field, value) => { onUpdate({ ...data, meta: { ...data.meta, [field]: value } }); };
+            const handleCheck = (section, taskId) => {
+                const newData = { ...data };
+                const newTasks = newData.items[section].tasks.map(t => t.id === taskId ? { ...t, checked: !t.checked } : t);
+                newData.items[section] = { ...newData.items[section], tasks: newTasks };
+                onUpdate(newData);
+            };
+
+            let total = 0, checked = 0;
+            Object.values(data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
+            const progress = total === 0 ? 0 : Math.round((checked/total)*100);
+
+            return (
+                <div className="flex flex-col h-full overflow-hidden bg-slate-100 dark:bg-slate-950 relative">
+                    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 px-6 flex justify-between items-center shadow-sm z-10 shrink-0">
+                        <div className="flex items-center gap-4">
+                            <button onClick={onBack} className="p-2 -ml-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500">{Icons.ChevronLeft}</button>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-none">#{ticket.visualId}</h2>
+                                    <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1">Criado em {new Date(ticket.createdAt).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="text-right hidden sm:block">
+                                <span className="text-xs font-bold text-brand-600 block">{progress}% Completo</span>
+                                <div className="w-32 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-brand-600 transition-all duration-500" style={{width: `${progress}%`}}></div></div>
+                            </div>
+                            <Button onClick={onRequestFinish} variant={progress === 100 ? 'primary' : 'secondary'}>{progress === 100 ? 'Finalizar' : 'Revisar'}</Button>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+                        <Card className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" noPadding>
+                            <div className="p-6 col-span-full border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                                <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Dados do Equipamento</h3>
+                            </div>
+                            <div className="p-6 pt-2 col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {Object.keys(data.meta).map(field => (
+                                    <div key={field}>
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">{field}</label>
+                                        <Input type={field === 'data' ? 'date' : 'text'} value={data.meta[field]} onChange={e => handleMeta(field, e.target.value)} />
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
+                            {Object.entries(data.items).map(([key, group]) => (
+                                <Card key={key} noPadding className="overflow-hidden h-fit">
+                                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center gap-2">
+                                        <div className="text-brand-500">{Icons[group.icon]}</div>
+                                        <h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider">{group.title}</h3>
+                                    </div>
+                                    <div className="divide-y divide-slate-50 dark:divide-slate-800/50">
+                                        {group.tasks.map(task => (
+                                            <label key={task.id} className="flex items-start gap-3 p-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer group transition-colors select-none">
+                                                <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-all duration-200 ${task.checked ? 'bg-brand-600 border-brand-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                                                    {task.checked && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>}
+                                                </div>
+                                                <input type="checkbox" checked={task.checked} onChange={() => handleCheck(key, task.id)} className="hidden" />
+                                                <span className={`text-sm font-medium ${task.checked ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-300'}`}>{task.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </Card>
+                            ))}
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // --- DASHBOARD DE BANCADA ---
-        const Dashboard = ({ activeItems, onNewItem, onOpenItem, onDeleteItem, historyCount }) => {
-            const formatCount = activeItems.filter(t => t.type === 'formatacao').length;
-            const zebraCount = activeItems.filter(t => t.type !== 'formatacao').length;
+        const Dashboard = ({ activeTickets, onNewTicket, onOpenTicket, onDeleteTicket, historyCount }) => {
+            const formatCount = activeTickets.filter(t => t.type === 'formatacao').length;
+            const zebraCount = activeTickets.filter(t => t.type !== 'formatacao').length;
 
             return (
                 <div className="p-6 md:p-10 space-y-8 fade-in">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Bancada de Infraestrutura</h2>
-                        <p className="text-slate-500 text-sm">Controle operacional de equipamentos em preparação e manutenções técnicas.</p>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Visão Geral</h2>
+                        <p className="text-slate-500 text-sm">Monitoramento de atividades de infraestrutura em tempo real.</p>
                     </div>
                     
-                    {/* CARDS DE STATUS */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-brand-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Em Bancada Hoje</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeItems.length}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Chamados Abertos</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
                             <div className="bg-brand-50 dark:bg-brand-900/20 p-3 rounded-xl text-brand-600">{Icons.Layout}</div>
                         </Card>
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-emerald-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total Já Liberados</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Histórico Total</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
                             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl text-emerald-600">{Icons.History}</div>
                         </Card>
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-indigo-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Computadores / PCs</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Formatações</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-xl text-indigo-600">{Icons.Server}</div>
                         </Card>
                     </div>
 
-                    {/* BOTÕES DE NOVO PROCESSO */}
                     <div className="flex flex-col md:flex-row gap-4">
-                        <button onClick={() => onNewItem('formatacao')} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
+                        <button onClick={() => onNewTicket('formatacao')} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">{Icons.Plus}</div>
-                                <div className="text-left"><span className="block font-bold">Nova Preparação de Computador</span><span className="text-xs opacity-80">Formatação, backup, domínio e drivers</span></div>
+                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Checklist completo de P.C.</span></div>
                             </div>
                         </button>
-                        <button onClick={() => onNewItem('zebra')} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                        <button onClick={() => onNewTicket('zebra')} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 group-hover:text-brand-500">{Icons.Printer}</div>
-                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção de Zebra</span><span className="text-xs text-slate-500">Limpeza térmica e calibração de sensor</span></div>
+                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Impressoras térmicas</span></div>
                             </div>
                         </button>
                     </div>
 
-                    {/* LISTA DE EQUIPAMENTOS NA BANCADA */}
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Equipamentos em Andamento na Bancada</h3>
-                        {activeItems.length === 0 ? (
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila de Atendimento</h3>
+                        {activeTickets.length === 0 ? (
                             <div className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-12 text-center">
-                                <p className="text-slate-400 font-medium">Bancada vazia no momento.</p>
-                                <p className="text-xs text-slate-500 mt-1">Inicie um novo equipamento nos botões acima.</p>
+                                <p className="text-slate-400 font-medium">Nenhum chamado ativo no momento.</p>
+                                <p className="text-xs text-slate-500 mt-1">Inicie um novo atendimento acima.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {activeItems.map(item => {
-                                    const stats = calculateProgress(item.data.items);
-                                    const idDisplay = item.data.meta.hostname || item.data.meta.patrimonio || "Sem Identificação";
+                                {activeTickets.map(ticket => {
+                                    let total = 0, checked = 0;
+                                    Object.values(ticket.data.items).forEach(g => g.tasks.forEach(t => { total++; if(t.checked) checked++; }));
+                                    const pct = total === 0 ? 0 : Math.round((checked/total)*100);
                                     
                                     return (
-                                        <div key={item.id} onClick={() => onOpenItem(item.id)} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
+                                        <div key={ticket.id} onClick={() => onOpenTicket(ticket.id)} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
                                             <div className="absolute top-0 left-0 w-1 h-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                             <div className="flex justify-between items-start mb-3">
-                                                <Badge color={item.type === 'formatacao' ? 'blue' : 'amber'}>
-                                                    {item.type === 'formatacao' ? 'Computador' : 'Zebra'}
-                                                </Badge>
-                                                <span className="text-xs font-mono font-bold text-slate-400">#{item.visualId}</span>
+                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                                <span className="text-xs font-mono font-bold text-slate-400">#{ticket.visualId}</span>
                                             </div>
-                                            <h4 className="font-bold text-slate-800 dark:text-white text-base truncate mb-1">{idDisplay}</h4>
-                                            <p className="text-xs text-slate-500 mb-4 flex items-center gap-1">{Icons.User} {item.data.meta.tecnico || 'Técnico Não Definido'}</p>
+                                            <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1">{ticket.data.meta.maquina || "Sem Identificação"}</h4>
+                                            <p className="text-xs text-slate-500 mb-4 flex items-center gap-1">{Icons.User} {ticket.data.meta.tecnico}</p>
                                             
                                             <div className="flex items-center gap-3">
                                                 <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                    <div className={`h-full ${stats.percent === 100 ? 'bg-emerald-500' : 'bg-brand-500'}`} style={{ width: `${stats.percent}%` }}></div>
+                                                    <div className="h-full bg-brand-500" style={{width: `${pct}%`}}></div>
                                                 </div>
-                                                <span className="text-xs font-bold text-brand-600">{stats.percent}%</span>
+                                                <span className="text-xs font-bold text-brand-600">{pct}%</span>
                                             </div>
-                                            <button onClick={(e) => onDeleteItem(e, item.id)} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
+                                            <button onClick={(e) => onDeleteTicket(e, ticket.id)} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
                                         </div>
                                     );
                                 })}
@@ -791,55 +571,24 @@
             );
         };
 
-        // --- HISTÓRICO COM EXPORTAÇÃO CSV ---
         const HistoryView = ({ history }) => {
             const [search, setSearch] = useState('');
             const filtered = history.filter(h => 
-                (h.ativo || '').toLowerCase().includes(search.toLowerCase()) || 
-                (h.tecnico || '').toLowerCase().includes(search.toLowerCase()) || 
-                (h.visualId && h.visualId.toLowerCase().includes(search.toLowerCase())) ||
-                (h.patrimonio && h.patrimonio.toLowerCase().includes(search.toLowerCase()))
+                h.ativo.toLowerCase().includes(search.toLowerCase()) || 
+                h.tecnico.toLowerCase().includes(search.toLowerCase()) || 
+                (h.visualId && h.visualId.toLowerCase().includes(search.toLowerCase()))
             );
-
-            const exportCSV = () => {
-                if (filtered.length === 0) return alert("Nenhum registro para exportar.");
-                
-                const headers = ["ID", "Data", "Tipo", "Hostname/Ativo", "Patrimônio", "Técnico", "Status"];
-                const rows = filtered.map(h => [
-                    h.visualId,
-                    new Date(h.date).toLocaleDateString(),
-                    h.type === 'formatacao' ? 'Computador' : 'Zebra',
-                    `"${h.ativo || ''}"`,
-                    `"${h.patrimonio || ''}"`,
-                    `"${h.tecnico || ''}"`,
-                    "Liberado"
-                ]);
-
-                const csvContent = "data:text/csv;charset=utf-8," + [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `historico_bancada_infra_${new Date().toISOString().split('T')[0]}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
 
             return (
                 <div className="p-6 md:p-10 h-full flex flex-col fade-in">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
+                    <div className="flex justify-between items-end mb-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Registro de Equipamentos Liberados</h2>
-                            <p className="text-slate-500 text-sm">Histórico completo de equipamentos configurados e testados.</p>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Atendimentos</h2>
+                            <p className="text-slate-500 text-sm">Registro auditável de todas as manutenções.</p>
                         </div>
-                        <div className="flex items-center gap-3 w-full md:w-auto">
-                            <div className="relative flex-1 md:flex-initial">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
-                                <Input placeholder="Buscar Host, Patrimônio, ID..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 w-full md:w-64" />
-                            </div>
-                            <Button onClick={exportCSV} variant="secondary" className="whitespace-nowrap">
-                                {Icons.Download} Exportar Planilha
-                            </Button>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
+                            <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 w-64" />
                         </div>
                     </div>
                     
@@ -848,11 +597,10 @@
                             <table className="w-full text-sm text-left">
                                 <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-500 uppercase sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
                                     <tr>
-                                        <th className="px-6 py-3">ID Bancada</th>
+                                        <th className="px-6 py-3">ID</th>
                                         <th className="px-6 py-3">Data</th>
                                         <th className="px-6 py-3">Tipo</th>
-                                        <th className="px-6 py-3">Hostname / Ativo</th>
-                                        <th className="px-6 py-3">Patrimônio</th>
+                                        <th className="px-6 py-3">Ativo</th>
                                         <th className="px-6 py-3">Técnico</th>
                                         <th className="px-6 py-3 text-right">Status</th>
                                     </tr>
@@ -862,14 +610,13 @@
                                         <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                             <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
                                             <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date).toLocaleDateString()}</td>
-                                            <td className="px-6 py-3"><Badge color={h.type === 'formatacao' ? 'blue' : 'amber'}>{h.type === 'formatacao' ? 'Computador' : 'Zebra'}</Badge></td>
-                                            <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
-                                            <td className="px-6 py-3 font-mono text-xs text-slate-600 dark:text-slate-400">{h.patrimonio || 'N/A'}</td>
+                                            <td className="px-6 py-3"><Badge color={h.type === 'formatacao' ? 'blue' : 'amber'}>{h.type}</Badge></td>
+                                            <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo}</td>
                                             <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico}</td>
-                                            <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Liberado</span></td>
+                                            <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
                                         </tr>
                                     ))}
-                                    {filtered.length === 0 && <tr><td colSpan="7" className="text-center py-8 text-slate-400">Nenhum equipamento registrado.</td></tr>}
+                                    {filtered.length === 0 && <tr><td colSpan="6" className="text-center py-8 text-slate-400">Nenhum registro encontrado.</td></tr>}
                                 </tbody>
                             </table>
                         </div>
@@ -878,15 +625,14 @@
             );
         };
 
-        // --- COMPONENTE RAIZ (APP) ---
         const App = () => {
             const [view, setView] = useState('login');
             const [currentUser, setCurrentUser] = useState(null);
             const [users, setUsers] = useState([]);
-            const [activeItems, setActiveItems] = useState([]);
+            const [activeTickets, setActiveTickets] = useState([]);
             const [history, setHistory] = useState([]);
             const [logo, setLogo] = useState('');
-            const [currentItemId, setCurrentItemId] = useState(null);
+            const [currentTicketId, setCurrentTicketId] = useState(null);
             const [darkMode, setDarkMode] = useState(true);
             const [showConfig, setShowConfig] = useState(false);
             const fileInputRef = useRef(null);
@@ -903,15 +649,14 @@
                     setView('dashboard'); 
                 }
 
-                // Sincronização em tempo real de equipamentos em bancada
-                const unsubItems = db.collection('tickets').onSnapshot(snap => 
-                    setActiveItems(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)))
+                const unsubTickets = db.collection('tickets').onSnapshot(snap => 
+                    setActiveTickets(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)))
                 );
-                const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(100).onSnapshot(snap => 
+                const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(snap => 
                     setHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })))
                 );
 
-                // Carregamento de técnicos com seeding inicial
+                // Carregamento de usuários com seeding padrão
                 const unsubUsers = db.collection('users').onSnapshot(async snap => {
                     if (snap.empty) {
                         const batch = db.batch();
@@ -924,15 +669,18 @@
                         const userList = snap.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
                         setUsers(userList);
 
+                        // Se o usuário autenticado foi excluído do Firebase, efetua logout
                         if (savedUser) {
                             const sessionUser = JSON.parse(savedUser);
                             const exists = userList.some(u => u.id === sessionUser.id);
-                            if (!exists) handleLogout();
+                            if (!exists) {
+                                handleLogout();
+                            }
                         }
                     }
                 });
 
-                return () => { unsubItems(); unsubHistory(); unsubUsers(); };
+                return () => { unsubTickets(); unsubHistory(); unsubUsers(); };
             }, []);
 
             useEffect(() => { 
@@ -953,8 +701,8 @@
                 setView('login'); 
             };
             
-            const handleCreateItem = async (type) => {
-                const prefix = type === 'formatacao' ? 'PC' : 'ZB';
+            const handleCreateTicket = async (type) => {
+                const prefix = type === 'formatacao' ? 'F' : 'Z';
                 const counterRef = db.collection('counters').doc(type);
                 try {
                     await db.runTransaction(async (t) => {
@@ -963,33 +711,28 @@
                         t.set(counterRef, { current: nextSeq }, { merge: true });
                         const newRef = db.collection('tickets').doc();
                         t.set(newRef, { visualId: `${prefix}-${nextSeq}`, type, data: getTemplate(type, currentUser?.name), createdAt: new Date().toISOString() });
-                        setCurrentItemId(newRef.id);
+                        setCurrentTicketId(newRef.id);
                         setView('checklist');
                     });
-                } catch (e) { alert("Erro de comunicação com o banco."); }
+                } catch (e) { alert("Erro de conexão ao gerar chamado."); }
             };
 
-            const handleUpdateItem = (newData) => { 
-                if (currentItemId) db.collection('tickets').doc(currentItemId).update({ data: newData }); 
+            const handleUpdateTicket = (newData) => { 
+                if (currentTicketId) db.collection('tickets').doc(currentTicketId).update({ data: newData }); 
             };
             
-            const handleArchive = (item) => {
-                if(!item) return;
+            const handleArchive = (ticket) => {
+                if(!ticket) return;
                 db.collection('history').add({ 
-                    visualId: item.visualId, 
-                    type: item.type, 
-                    date: new Date().toISOString(), 
-                    tecnico: item.data.meta.tecnico, 
-                    ativo: item.data.meta.hostname || "N/A", 
-                    patrimonio: item.data.meta.patrimonio || "N/A",
-                    data: item.data 
-                }).then(() => db.collection('tickets').doc(item.id).delete())
-                  .then(() => { setCurrentItemId(null); setView('dashboard'); });
+                    visualId: ticket.visualId, type: ticket.type, date: new Date().toISOString(), 
+                    tecnico: ticket.data.meta.tecnico, ativo: ticket.data.meta.maquina || "N/A", data: ticket.data 
+                }).then(() => db.collection('tickets').doc(ticket.id).delete())
+                  .then(() => { setCurrentTicketId(null); setView('dashboard'); });
             };
             
             const handleDeleteActive = (e, id) => { 
                 e.stopPropagation(); 
-                if(confirm("Deseja cancelar o processo deste equipamento na bancada?")) db.collection('tickets').doc(id).delete(); 
+                if(confirm("Deseja realmente cancelar este chamado?")) db.collection('tickets').doc(id).delete(); 
             };
 
             const handleLogoUpload = (e) => { 
@@ -1005,49 +748,48 @@
 
             return (
                 <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
-                    {/* BARRA LATERAL (DESKTOP) */}
+                    {/* SIDEBAR */}
                     <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 z-20 shrink-0">
                         <div className="h-16 flex items-center gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800">
                             <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
-                            BANCADA INFRA
+                            INFRA CHECK
                         </div>
                         <nav className="flex-1 py-6 px-3 space-y-1">
                             <button onClick={() => setView('dashboard')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm ${view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
-                                {Icons.Layout} Bancada de Trabalho
+                                {Icons.Layout} Dashboard
                             </button>
                             <button onClick={() => setView('history')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm ${view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
-                                {Icons.History} Ativos Liberados
+                                {Icons.History} Histórico
                             </button>
                         </nav>
                         <div className="p-4 border-t border-slate-800">
                             <div className="flex items-center gap-3 mb-4 px-2">
                                 <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
-                                    {currentUser?.name?.charAt(0) || 'T'}
+                                    {currentUser?.name?.charAt(0) || 'U'}
                                 </div>
                                 <div className="overflow-hidden">
                                     <p className="text-sm font-bold text-white truncate">{currentUser?.name}</p>
-                                    <p className="text-xs text-slate-500 font-mono">Técnico de Bancada</p>
+                                    <p className="text-xs text-slate-500 font-mono">ID: {currentUser?.id}</p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 <button title="Alternar tema" onClick={() => setDarkMode(!darkMode)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
                                 <button title="Gerenciar Equipe" onClick={() => setShowConfig(true)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
-                                <button title="Encerrar Sessão" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
+                                <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
                             </div>
                             <div className="mt-4 pt-4 border-t border-slate-800 text-center">
-                                <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={() => fileInputRef.current.click()}>Alterar Logo do Relatório</p>
+                                <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={() => fileInputRef.current.click()}>Alterar Logo</p>
                                 <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
                             </div>
                         </div>
                     </aside>
 
-                    {/* ÁREA PRINCIPAL */}
+                    {/* MAIN CONTENT */}
                     <main className="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950">
-                        {/* Topbar Mobile */}
                         <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0">
-                            <span className="font-bold tracking-tight">BANCADA INFRA</span>
+                            <span className="font-bold">INFRA CHECK</span>
                             <div className="flex gap-2">
                                 <button onClick={() => setShowConfig(true)} className="p-2">{Icons.Settings}</button>
                                 <button onClick={() => setView('dashboard')} className="p-2">{Icons.Layout}</button>
@@ -1057,9 +799,9 @@
 
                         <div className="flex-1 overflow-auto relative">
                             {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} currentUser={currentUser} />}
-                            {view === 'dashboard' && <Dashboard activeItems={activeItems} onNewItem={handleCreateItem} onOpenItem={(id) => { setCurrentItemId(id); setView('checklist'); }} onDeleteItem={handleDeleteActive} historyCount={history.length} />}
-                            {view === 'checklist' && <ActiveChecklist item={activeItems.find(t => t.id === currentItemId)} onUpdate={handleUpdateItem} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
-                            {view === 'receipt' && <ReceiptView item={activeItems.find(t => t.id === currentItemId)} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} currentUser={currentUser} />}
+                            {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
+                            {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(t => t.id === currentTicketId)} onUpdate={handleUpdateTicket} onBack={() => setView('dashboard')} onRequestFinish={() => setView('receipt')} />}
+                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(t => t.id === currentTicketId)} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} currentUser={currentUser} />}
                             {view === 'history' && <HistoryView history={history} />}
                         </div>
                     </main>
