@@ -57,15 +57,6 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // ==========================================
-        // CONFIGURAÇÕES DOS NOMES DO CHECKLIST DIÁRIO
-        // Altere aqui os nomes de quem faz cada etapa
-        // ==========================================
-        var TITULO_COLUNA_1 = "1. KAUAN (FÍSICO E ACESSOS)";
-        var TITULO_COLUNA_2 = "2. LUI (DADOS E CONECTIVIDADE)";
-        var TITULO_COLUNA_3 = "3. INÁCIO (SEGURANÇA E ENDPOINTS)";
-        // ==========================================
-
         var firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -109,7 +100,8 @@
             Copy: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
         };
 
-        var getTemplate = function(type, tecnicoName) {
+        // --- MODELO COM TÍTULOS DINÂMICOS ---
+        var getTemplate = function(type, tecnicoName, customTitulos) {
             var tmpl = {
                 meta: { 
                     tecnico: tecnicoName || '', 
@@ -231,9 +223,14 @@
                     }
                 };
             } else if (type === 'diario') {
+                var t = customTitulos || {
+                    col1: "1. KAUAN (FÍSICO E ACESSOS)",
+                    col2: "2. LUI (DADOS E CONECTIVIDADE)",
+                    col3: "3. INÁCIO (SEGURANÇA E ENDPOINTS)"
+                };
                 tmpl.items = {
                     coluna1: {
-                        title: TITULO_COLUNA_1,
+                        title: t.col1,
                         icon: "Check",
                         tasks: [
                             { id: 'd_aux_1', label: 'Verificação Visual No-Breaks', checked: false, manual: 'Inspeção visual direta no display dos no-breaks do CPD para certificar ausência de falhas ativas.' },
@@ -245,7 +242,7 @@
                         ]
                     },
                     coluna2: {
-                        title: TITULO_COLUNA_2,
+                        title: t.col2,
                         icon: "Server",
                         tasks: [
                             { id: 'd_ple_1', label: 'Verificação Backups Veeam', checked: false, manual: 'Validar jobs de backup noturnos no Veeam. Garantir que não existem rotinas falhas ou pendentes.' },
@@ -257,7 +254,7 @@
                         ]
                     },
                     coluna3: {
-                        title: TITULO_COLUNA_3,
+                        title: t.col3,
                         icon: "Search",
                         tasks: [
                             { id: 'd_sen_1', label: 'Verificação Log Wazuh', checked: false, manual: 'Analisar eventos críticos (nível 12+) de correlação no dashboard SIEM. Analisar falhas de integridade em servidores.' },
@@ -373,6 +370,11 @@
             var onClose = props.onClose;
             var users = props.users || [];
             var currentUser = props.currentUser;
+            
+            var globalTitulos = props.globalTitulos || {col1: '', col2: '', col3: ''};
+            var titulosState = useState(globalTitulos);
+            var titulos = titulosState[0], setTitulos = titulosState[1];
+
             var userState = useState({ id: '', name: '', pass: '' });
             var newUser = userState[0], setNewUser = userState[1];
             var filterState = useState('');
@@ -403,6 +405,15 @@
                     db.collection('users').doc(user.docId).delete();
                 }
             };
+            
+            var handleSaveTitulos = function(e) {
+                e.preventDefault();
+                setSaving(true);
+                db.collection('settings').doc('titulos').set(titulos)
+                    .then(function() { alert("Títulos atualizados para toda a equipe!"); })
+                    .catch(function(err) { alert("Erro ao atualizar: " + err.message); })
+                    .finally(function() { setSaving(false); });
+            };
 
             var list = users.filter(function(u) {
                 return (u.name || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1 ||
@@ -413,41 +424,67 @@
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm fade-in">
                     <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" noPadding>
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Gestão da Equipe Técnica</h2>
+                            <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Configurações do Sistema</h2>
                             <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
                         </div>
-                        <div className="p-6 overflow-y-auto grid md:grid-cols-2 gap-6">
-                            <div>
-                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Técnico</h3>
-                                <form onSubmit={handleAddUser} className="space-y-3">
-                                    <Input placeholder="Matrícula / ID" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
-                                    <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value })); }} />
-                                    <Input type="password" placeholder="Senha" value={newUser.pass} onChange={function(e) { setNewUser(Object.assign({}, newUser, { pass: e.target.value })); }} />
-                                    <Button type="submit" disabled={saving} className="w-full">{Icons.Plus} Cadastrar</Button>
+                        <div className="p-6 overflow-y-auto">
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Técnico</h3>
+                                    <form onSubmit={handleAddUser} className="space-y-3">
+                                        <Input placeholder="Matrícula / ID" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
+                                        <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value })); }} />
+                                        <Input type="password" placeholder="Senha" value={newUser.pass} onChange={function(e) { setNewUser(Object.assign({}, newUser, { pass: e.target.value })); }} />
+                                        <Button type="submit" disabled={saving} className="w-full">{Icons.Plus} Cadastrar</Button>
+                                    </form>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Técnicos Habilitados</h3>
+                                        <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-28" />
+                                    </div>
+                                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                                        {list.map(function(u) {
+                                            var isMe = currentUser && u.id === currentUser.id;
+                                            return (
+                                                <div key={u.docId || u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
+                                                    <div>
+                                                        <div className="font-semibold text-sm text-slate-700 dark:text-slate-200">{u.name}</div>
+                                                        <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
+                                                    </div>
+                                                    {!isMe && (
+                                                        <button onClick={function() { handleDeleteUser(u); }} className="text-slate-400 hover:text-red-500 transition-colors p-1">{Icons.Trash}</button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="border-t border-slate-100 dark:border-slate-800 pt-6 mt-6">
+                                <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Títulos das Colunas (Check Diário)</h3>
+                                <form onSubmit={handleSaveTitulos} className="space-y-4">
+                                    <div className="grid md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 1</label>
+                                            <Input value={titulos.col1 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col1: e.target.value})); }} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 2</label>
+                                            <Input value={titulos.col2 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col2: e.target.value})); }} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 3</label>
+                                            <Input value={titulos.col3 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col3: e.target.value})); }} />
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <Button type="submit" disabled={saving}>{Icons.Check} Salvar Títulos Globais</Button>
+                                    </div>
                                 </form>
                             </div>
-                            <div>
-                                <div className="flex justify-between items-center mb-3">
-                                    <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Técnicos Habilitados</h3>
-                                    <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-28" />
-                                </div>
-                                <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
-                                    {list.map(function(u) {
-                                        var isMe = currentUser && u.id === currentUser.id;
-                                        return (
-                                            <div key={u.docId || u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
-                                                <div>
-                                                    <div className="font-semibold text-sm text-slate-700 dark:text-slate-200">{u.name}</div>
-                                                    <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
-                                                </div>
-                                                {!isMe && (
-                                                    <button onClick={function() { handleDeleteUser(u); }} className="text-slate-400 hover:text-red-500 transition-colors p-1">{Icons.Trash}</button>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                            
                         </div>
                     </Card>
                 </div>
@@ -914,6 +951,13 @@
             var showConfig = cfgState[0], setShowConfig = cfgState[1];
             var fileInputRef = useRef(null);
 
+            var titlesState = useState({
+                col1: "1. KAUAN (FÍSICO E ACESSOS)",
+                col2: "2. LUI (DADOS E CONECTIVIDADE)",
+                col3: "3. INÁCIO (SEGURANÇA E ENDPOINTS)"
+            });
+            var globalTitulos = titlesState[0], setGlobalTitulos = titlesState[1];
+
             useEffect(function() {
                 try {
                     var savedTheme = localStorage.getItem('sa_theme'); 
@@ -931,6 +975,14 @@
                 } catch(e) {
                     localStorage.removeItem('sa_user_session');
                 }
+
+                var unsubConfig = db.collection('settings').doc('titulos').onSnapshot(function(snap) {
+                    if (snap.exists) {
+                        setGlobalTitulos(snap.data());
+                    } else {
+                        db.collection('settings').doc('titulos').set(globalTitulos);
+                    }
+                });
 
                 var unsubTickets = db.collection('tickets').onSnapshot(function(snap) {
                     var list = snap.docs.map(function(doc) {
@@ -954,7 +1006,7 @@
                     }
                 });
 
-                return function() { unsubTickets(); unsubHistory(); unsubUsers(); };
+                return function() { unsubTickets(); unsubHistory(); unsubUsers(); unsubConfig(); };
             }, []);
 
             useEffect(function() { 
@@ -981,7 +1033,7 @@
                 var newTicket = {
                     visualId: prefix + '-' + seq,
                     type: type,
-                    data: getTemplate(type, currentUser ? currentUser.name : ''),
+                    data: getTemplate(type, currentUser ? currentUser.name : '', globalTitulos),
                     createdAt: new Date().toISOString()
                 };
                 db.collection('tickets').add(newTicket).then(function(docRef) {
@@ -1062,7 +1114,7 @@
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 <button title="Alternar tema" onClick={function() { setDarkMode(!darkMode); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                                <button title="Gerenciar Equipe" onClick={function() { setShowConfig(true); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                <button title="Gerenciar Equipe e Configurações" onClick={function() { setShowConfig(true); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
                                 <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
                             </div>
                             <div className="mt-4 pt-4 border-t border-slate-800 text-center">
@@ -1083,7 +1135,7 @@
                         </div>
 
                         <div className="flex-1 overflow-auto relative">
-                            {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} />}
+                            {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
                             {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={function(id) { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
                             {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(function(t) { return t.id === currentTicketId; })} onUpdate={handleUpdateTicket} onBack={function() { setView('dashboard'); }} onRequestFinish={function() { setView('receipt'); }} />}
                             {view === 'receipt' && <ReceiptView ticket={activeTickets.find(function(t) { return t.id === currentTicketId; })} onBack={function() { setView('checklist'); }} onArchive={handleArchive} logo={logo} />}
