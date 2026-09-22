@@ -329,7 +329,7 @@
                     onChange={function(e) { setVal(e.target.value); }}
                     onBlur={function() { if(val !== props.value) props.onSave(val); }}
                     className={"bg-transparent focus:outline-none w-full text-ellipsis " + (props.className || '')}
-                    title="Clique para editar este título"
+                    title="Clique para editar e atualizar este título para toda a equipe"
                 />
             );
         };
@@ -591,6 +591,7 @@
             var ticket = props.ticket;
             var onUpdate = props.onUpdate;
             var onBack = props.onBack;
+            var onForceSave = props.onForceSave;
             var onRequestFinish = props.onRequestFinish;
 
             if (!ticket || !ticket.data) return null;
@@ -632,6 +633,10 @@
                                     if(newData.items[key]) {
                                         newData.items[key].title = newVal;
                                         onUpdate(newData);
+                                        // Salva a alteração para os próximos checklists globais também
+                                        if (ticket.type === 'diario' && props.onGlobalTitleChange) {
+                                            props.onGlobalTitleChange(key, newVal);
+                                        }
                                     }
                                 }}
                                 className="font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider border-b border-transparent hover:border-slate-300 dark:hover:border-slate-600 focus:border-brand-500 transition-colors"
@@ -674,7 +679,7 @@
                                     <div className={"h-full transition-all duration-500 " + (progress === 100 ? "bg-emerald-500" : "bg-brand-600")} style={{width: progress + '%'}}></div>
                                 </div>
                             </div>
-                            <Button onClick={onBack} variant="secondary" className="text-xs sm:text-sm">
+                            <Button onClick={onForceSave} variant="secondary" className="text-xs sm:text-sm">
                                 {Icons.Check} Salvar e Voltar
                             </Button>
                             <Button onClick={onRequestFinish} variant="primary" className="text-xs sm:text-sm">
@@ -967,6 +972,10 @@
         };
 
         var App = function() {
+            var isSavingDraftRef = useRef(false);
+            var draftState = useState(null);
+            var draftTicket = draftState[0], setDraftTicket = draftState[1];
+
             var viewState = useState('login');
             var view = viewState[0], setView = viewState[1];
             var userState = useState(null);
@@ -1067,21 +1076,89 @@
                 var prefix = type === 'formatacao' ? 'F' : type === 'zebra' ? 'Z' : 'D';
                 var seq = Math.floor(1000 + Math.random() * 9000);
                 var newTicket = {
+                    id: 'draft',
                     visualId: prefix + '-' + seq,
                     type: type,
                     data: getTemplate(type, currentUser ? currentUser.name : '', globalTitulos),
                     createdAt: new Date().toISOString()
                 };
-                db.collection('tickets').add(newTicket).then(function(docRef) {
-                    setCurrentTicketId(docRef.id);
-                    setView('checklist');
-                }).catch(function(err) {
-                    alert("Erro ao criar registro: " + err.message);
-                });
+                setDraftTicket(newTicket);
+                setCurrentTicketId('draft');
+                setView('checklist');
             };
 
             var handleUpdateTicket = function(newData) { 
-                if (currentTicketId) db.collection('tickets').doc(currentTicketId).update({ data: newData }); 
+                if (currentTicketId === 'draft') {
+                    var pct = calcProgress(newData.items);
+                    var updatedDraft = Object.assign({}, draftTicket, { data: newData });
+                    
+                    if (pct >= 10 && !isSavingDraftRef.current) {
+                        isSavingDraftRef.current = true;
+                        var ticketToSave = Object.assign({}, updatedDraft);
+                        delete ticketToSave.id;
+                        db.collection('tickets').add(ticketToSave).then(function(docRef) {
+                            setCurrentTicketId(docRef.id);
+                            setDraftTicket(null);
+                            isSavingDraftRef.current = false;
+                        }).catch(function() {
+                            isSavingDraftRef.current = false;
+                        });
+                    } else {
+                        setDraftTicket(updatedDraft);
+                    }
+                } else if (currentTicketId && currentTicketId !== 'draft') {
+                    db.collection('tickets').doc(currentTicketId).update({ data: newData }); 
+                }
+            };
+            
+            var handleBackFromChecklist = function() {
+                if (currentTicketId === 'draft') {
+                    setDraftTicket(null);
+                    setCurrentTicketId(null);
+                }
+                setView('dashboard');
+            };
+
+            var handleForceSaveChecklist = function() {
+                if (currentTicketId === 'draft') {
+                    isSavingDraftRef.current = true;
+                    var ticketToSave = Object.assign({}, draftTicket);
+                    delete ticketToSave.id;
+                    db.collection('tickets').add(ticketToSave).then(function() {
+                        setCurrentTicketId(null);
+                        setDraftTicket(null);
+                        isSavingDraftRef.current = false;
+                        setView('dashboard');
+                    });
+                } else {
+                    setView('dashboard');
+                }
+            };
+
+            var handleRequestFinish = function() {
+                if (currentTicketId === 'draft') {
+                    isSavingDraftRef.current = true;
+                    var ticketToSave = Object.assign({}, draftTicket);
+                    delete ticketToSave.id;
+                    db.collection('tickets').add(ticketToSave).then(function(docRef) {
+                        setCurrentTicketId(docRef.id);
+                        setDraftTicket(null);
+                        isSavingDraftRef.current = false;
+                        setView('receipt');
+                    });
+                } else {
+                    setView('receipt');
+                }
+            };
+
+            var handleGlobalTitleChange = function(colKey, newVal) {
+                var map = { coluna1: 'col1', coluna2: 'col2', coluna3: 'col3' };
+                var gKey = map[colKey];
+                if (gKey) {
+                    var newTitulos = Object.assign({}, globalTitulos);
+                    newTitulos[gKey] = newVal;
+                    db.collection('settings').doc('titulos').set(newTitulos);
+                }
             };
             
             var handleArchive = function(ticket) {
@@ -1118,6 +1195,8 @@
                     r.readAsDataURL(f); 
                 }
             };
+
+            var currentTicketData = currentTicketId === 'draft' ? draftTicket : activeTickets.find(function(t) { return t.id === currentTicketId; });
 
             if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
 
@@ -1173,8 +1252,8 @@
                         <div className="flex-1 overflow-auto relative">
                             {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
                             {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onNewTicket={handleCreateTicket} onOpenTicket={function(id) { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
-                            {view === 'checklist' && <ActiveChecklist ticket={activeTickets.find(function(t) { return t.id === currentTicketId; })} onUpdate={handleUpdateTicket} onBack={function() { setView('dashboard'); }} onRequestFinish={function() { setView('receipt'); }} />}
-                            {view === 'receipt' && <ReceiptView ticket={activeTickets.find(function(t) { return t.id === currentTicketId; })} onBack={function() { setView('checklist'); }} onArchive={handleArchive} logo={logo} />}
+                            {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
+                            {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { setView('checklist'); }} onArchive={handleArchive} logo={logo} />}
                             {view === 'history' && <HistoryView history={history} />}
                         </div>
                     </main>
