@@ -106,8 +106,8 @@
                 meta: { 
                     tecnico: tecnicoName || '', 
                     data: new Date().toISOString().split('T')[0], 
-                    ativo: '', 
-                    maquina: '' 
+                    ativo: type === 'diario' ? 'INFRAESTRUTURA' : '', 
+                    maquina: type === 'diario' ? 'ROTINA DIÁRIA' : '' 
                 },
                 items: {}
             };
@@ -154,14 +154,14 @@
                                 id: 'f_prep_1', 
                                 label: 'Verif. Nome/Partições', 
                                 checked: false, 
-                                manual: 'Conferir partições existentes e anotar o nome antigo do computador[cite: 1, 2, 3].\nPara verificar discos e volumes: pressione Win+R e digite diskmgmt.msc.', 
+                                manual: 'Conferir partições existentes e anotar o nome antigo do computador.\nPara verificar discos e volumes: pressione Win+R e digite diskmgmt.msc.', 
                                 copyText: 'diskmgmt.msc' 
                             },
                             { 
                                 id: 'f_prep_2', 
                                 label: 'Backup Arquivos', 
                                 checked: false, 
-                                manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. No Explorador de Arquivos: clique na aba superior "Exibir" e marque a caixa "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e copie a pasta AppData inteira do usuário (contém configurações, Spark e dados de navegadores).\n3. Salvar as pastas Documentos, Desktop, Downloads e Imagens.\n4. Para ferramentas de setup: Win+R > \\\\pdc-cobrecom\\manutencao (Login: admin) > pasta "m.kauan" > copiar "Formatação w10"[cite: 1, 2, 3].', 
+                                manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. No Explorador de Arquivos: clique na aba superior "Exibir" e marque a caixa "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e copie a pasta AppData inteira do usuário (contém configurações, Spark e dados de navegadores).\n3. Salvar as pastas Documentos, Desktop, Downloads e Imagens.\n4. Para ferramentas de setup: Win+R > \\\\pdc-cobrecom\\manutencao (Login: admin) > pasta "m.kauan" > copiar "Formatação w10".', 
                                 copyText: '%appdata%' 
                             },
                             { 
@@ -196,14 +196,14 @@
                                 id: 'f_sis_1', 
                                 label: 'Formatação', 
                                 checked: false, 
-                                manual: '1. Reiniciar o PC e fazer a formatação pela BIOS[cite: 1, 2, 3].\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3[cite: 1, 2, 3].', 
+                                manual: '1. Reiniciar o PC e fazer a formatação pela BIOS.\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3.', 
                                 copyText: 'root' 
                             },
                             { 
                                 id: 'f_sis_3', 
                                 label: 'Proxy/DNS', 
                                 checked: false, 
-                                manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy[cite: 1, 2, 3]\nENDEREÇO: 192.168.1.1 | PORTA: 3128[cite: 1, 2, 3]', 
+                                manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy\nENDEREÇO: 192.168.1.1 | PORTA: 3128', 
                                 copyText: '192.168.1.1' 
                             },
                             { 
@@ -231,34 +231,34 @@
                                 id: 'f_conf_2', 
                                 label: 'Energia', 
                                 checked: false, 
-                                manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações[cite: 1, 2, 3].\n\n4. Energia e Suspensão:\n(Nunca em Tudo)[cite: 1, 2, 3].' 
+                                manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações.\n\n4. Energia e Suspensão:\n(Nunca em Tudo).' 
                             },
                             { 
                                 id: 'f_sec_4', 
                                 label: 'GPEDIT/Permissões', 
                                 checked: false, 
-                                manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar)[cite: 1, 2, 3].\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3)[cite: 1, 2, 3].', 
+                                manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar).\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3).', 
                                 copyText: 'gpedit.msc' 
                             },
                             { 
                                 id: 'f_conf_6', 
                                 label: 'Map. Rede', 
                                 checked: false, 
-                                manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS[cite: 1, 2, 3].', 
+                                manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS.', 
                                 copyText: 'optionalfeatures' 
                             },
                             { 
                                 id: 'f_prep_opt', 
                                 label: 'Melhorar Processamento', 
                                 checked: false, 
-                                manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo[cite: 1, 2, 3].\nDesativar aplicativos de inicialização (que não são importantes)[cite: 1, 2, 3].', 
+                                manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo.\nDesativar aplicativos de inicialização (que não são importantes).', 
                                 copyText: 'msconfig' 
                             },
                             { 
                                 id: 'f_prep_name', 
                                 label: 'Nome da Máquina', 
                                 checked: false, 
-                                manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar[cite: 1, 2, 3].' 
+                                manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar.' 
                             },
                             { 
                                 id: 'f_conf_7', 
@@ -278,20 +278,20 @@
                                 id: 'f_app_pack', 
                                 label: 'Pegar Arquivos da Rede', 
                                 checked: false, 
-                                manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)[cite: 1, 2, 3]\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar[cite: 1, 2, 3].', 
+                                manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar.', 
                                 copyText: '\\\\pdc-cobrecom\\manutencao' 
                             },
                             { 
                                 id: 'f_app_apps', 
                                 label: 'Instalar Aplicativos Base', 
                                 checked: false, 
-                                manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora[cite: 1, 2, 3].' 
+                                manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora.' 
                             },
                             { 
                                 id: 'f_app_1', 
                                 label: 'TOTVS', 
                                 checked: false, 
-                                manual: 'Instalar o client TOTVS Protheus / SmartClient, apontar para o servidor de produção e fixar o atalho no menu iniciar/área de trabalho[cite: 1, 2, 3].' 
+                                manual: 'Instalar o client TOTVS Protheus / SmartClient, apontar para o servidor de produção e fixar o atalho no menu iniciar/área de trabalho.' 
                             },
                             { 
                                 id: 'f_app_2', 
@@ -330,14 +330,14 @@
                                 id: 'f_sec_2', 
                                 label: 'ESET', 
                                 checked: false, 
-                                manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows"[cite: 1, 2, 3].\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto[cite: 1, 2, 3].', 
+                                manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows".\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto.', 
                                 copyText: 'svchost.exe' 
                             },
                             { 
                                 id: 'f_sec_3', 
                                 label: 'VNC + Firewall', 
                                 checked: false, 
-                                manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)[cite: 1, 2, 3]\n- Properties: MAX CPU: 90[cite: 1, 2, 3]\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)[cite: 1, 2, 3]' 
+                                manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)\n- Properties: MAX CPU: 90\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)' 
                             }
                         ]
                     },
@@ -350,14 +350,14 @@
                                 id: 'f_sis_2', 
                                 label: 'Domínio', 
                                 checked: false, 
-                                manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root)[cite: 1, 2, 3].', 
+                                manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root).', 
                                 copyText: 'cobrecom' 
                             },
                             { 
                                 id: 'f_fin_4', 
                                 label: 'Desempenho (Adicionar Usuário)', 
                                 checked: false, 
-                                manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar[cite: 1, 2, 3]\nNome de usuário: (Variável) | Domínio: cobrecom[cite: 1, 2, 3]\n\n16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela[cite: 1, 2, 3].', 
+                                manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar\nNome de usuário: (Variável) | Domínio: cobrecom\n\n16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela.', 
                                 copyText: 'control userpasswords2' 
                             },
                             { 
@@ -394,7 +394,7 @@
                         ]
                     }
                 };
-            } else {
+            } else if (type === 'zebra') {
                 tmpl.items = {
                     inspecao: {
                         title: "1. INSPEÇÃO FÍSICA",
@@ -421,6 +421,43 @@
                         icon: "Printer",
                         tasks: [
                             { id: 'z_9', label: 'Teste Final', checked: false, manual: 'Efetuar calibração de GAP e imprimir etiquetas para conferência de código de barras com leitor laser.' }
+                        ]
+                    }
+                };
+            } else if (type === 'diario') {
+                tmpl.items = {
+                    auxiliar: {
+                        title: "1. AUXILIAR DE TI (FÍSICO E ACESSOS)",
+                        icon: "Check",
+                        tasks: [
+                            { id: 'd_aux_1', label: 'Verificação Visual No-Breaks', checked: false, manual: 'Inspeção visual direta no display dos no-breaks do CPD para certificar ausência de falhas ativas.' },
+                            { id: 'd_aux_2', label: 'Verificação Log No-Breaks (Web Interface)', checked: false, manual: 'Acesso à interface web de gerência para checar alertas de bateria e rede elétrica.' },
+                            { id: 'd_aux_3', label: 'Verificação Visual MikroTiks', checked: false, manual: 'Checar conectividade física e status das luzes (LEDs) nas portas WAN/LAN ativas.' },
+                            { id: 'd_aux_4', label: 'Verificação Server Portal ( 15.3 )', checked: false, manual: 'Confirmar disponibilidade e latência do portal principal no IP local da rede.' },
+                            { id: 'd_aux_5', label: 'Verificação Status Portal Web (15.3:8200)', checked: false, manual: 'Testar acesso e login na porta 8200.' },
+                            { id: 'd_aux_6', label: 'Verificação Consumo SMTP (Skymail)', checked: false, manual: 'Acessar painel do Skymail para certificar limite e volume de disparos transacionais.' }
+                        ]
+                    },
+                    pleno: {
+                        title: "2. PLENO (DADOS E CONECTIVIDADE)",
+                        icon: "Server",
+                        tasks: [
+                            { id: 'd_ple_1', label: 'Verificação Backups Veeam', checked: false, manual: 'Validar jobs de backup noturnos no Veeam. Garantir que não existem rotinas falhas ou pendentes.' },
+                            { id: 'd_ple_2', label: 'Status Pool Storage (FreeNAS 7TB e 13TB)', checked: false, manual: 'Acessar a interface do TrueNAS/FreeNAS para checar integridade do array ZFS e limites de capacidade.' },
+                            { id: 'd_ple_3', label: 'Verificação MPLS / VPN (TL e Pouso Alegre)', checked: false, manual: 'Ping e teste de acesso direto para validar estabilidade da malha de rede com as filiais.' },
+                            { id: 'd_ple_4', label: 'Verificação Log OpenVPN', checked: false, manual: 'Revisar tentativas anormais de login ou quedas persistentes nos clientes de VPN externa.' },
+                            { id: 'd_ple_5', label: 'Verificação Unifi Server', checked: false, manual: 'Checar status de adoção dos Access Points e integridade geral do mapa do WiFi no controller.' },
+                            { id: 'd_ple_6', label: 'Verificação PABX (Itu, TL e Pouso Alegre)', checked: false, manual: 'Certificar registros SIP e disponibilidade de troncos entre as plantas.' }
+                        ]
+                    },
+                    senior: {
+                        title: "3. SÊNIOR (SEGURANÇA E ENDPOINTS)",
+                        icon: "Search",
+                        tasks: [
+                            { id: 'd_sen_1', label: 'Verificação Log Wazuh', checked: false, manual: 'Analisar eventos críticos (nível 12+) de correlação no dashboard SIEM. Analisar falhas de integridade em servidores.' },
+                            { id: 'd_sen_2', label: 'Verificação Log pfSense', checked: false, manual: 'Checar consumo excessivo de links, bloqueios massivos no Suricata/pfBlocker ou anomalias no gateway.' },
+                            { id: 'd_sen_3', label: 'Verificação ECA ESET', checked: false, manual: 'Validar máquinas desatualizadas, módulos inativos ou infecções detectadas via console de gerência ESET.' },
+                            { id: 'd_sen_4', label: 'Verificação CrowdStrike', checked: false, manual: 'Revisar painel da plataforma Falcon para identificação de ameaças ou sensores desconectados no parque ativo.' }
                         ]
                     }
                 };
@@ -504,7 +541,7 @@
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
-                            <p className="text-sm text-slate-500 mt-1">Manual Operacional de Formatação • Cobrecom</p>
+                            <p className="text-sm text-slate-500 mt-1">Manual Operacional • Cobrecom</p>
                         </div>
                         <form onSubmit={handleSubmit} className="p-8 space-y-4">
                             <div>
@@ -519,7 +556,7 @@
                             <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Checklist</Button>
                         </form>
                         <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] text-slate-400 font-mono">POP FORMATAÇÃO W10 • TI COBRECOM</p>
+                            <p className="text-[10px] text-slate-400 font-mono">TI COBRECOM</p>
                         </div>
                     </div>
                 </div>
@@ -717,7 +754,6 @@
             };
 
             var progress = calcProgress(items);
-
             var leftKeys = ['preventivas', 'preparacao', 'sistema'];
             var rightKeys = ['configuracao', 'apps', 'seguranca', 'entrega'];
 
@@ -753,8 +789,8 @@
                             <div>
                                 <div className="flex items-center gap-2">
                                     <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-none">#{ticket.visualId}</h2>
-                                    <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>
-                                        {ticket.type === 'formatacao' ? 'Formatação PC' : 'Zebra'}
+                                    <Badge color={ticket.type === 'formatacao' ? 'blue' : ticket.type === 'diario' ? 'green' : 'amber'}>
+                                        {ticket.type === 'formatacao' ? 'Formatação PC' : ticket.type === 'diario' ? 'Check Diário' : 'Zebra'}
                                     </Badge>
                                 </div>
                                 <p className="text-xs text-slate-500 mt-1">Criado em {new Date(ticket.createdAt || Date.now()).toLocaleDateString()}</p>
@@ -774,7 +810,6 @@
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-                        {/* CABEÇALHO: DATA | ATIVO | MAQUINA */}
                         <Card className="grid grid-cols-1 md:grid-cols-3 gap-6" noPadding>
                             <div className="p-6 col-span-full grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
@@ -782,25 +817,24 @@
                                     <Input type="date" value={meta.data || ''} onChange={function(e) { handleMeta('data', e.target.value); }} />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">ATIVO</label>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">ATIVO / DEPARTAMENTO</label>
                                     <Input placeholder="Ex: PAT-01020" value={meta.ativo || ''} onChange={function(e) { handleMeta('ativo', e.target.value); }} />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">MAQUINA</label>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">MÁQUINA / FINALIDADE</label>
                                     <Input placeholder="Ex: CORP-PC-01" value={meta.maquina || ''} onChange={function(e) { handleMeta('maquina', e.target.value); }} />
                                 </div>
                             </div>
                         </Card>
 
-                        {/* DISPOSIÇÃO EM 2 COLUNAS NA ORDEM LÓGICA DE EXECUÇÃO */}
                         {ticket.type === 'formatacao' ? (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
-                                <div className="space-y-6">
-                                    {leftKeys.map(renderCategoryCard)}
-                                </div>
-                                <div className="space-y-6">
-                                    {rightKeys.map(renderCategoryCard)}
-                                </div>
+                                <div className="space-y-6">{leftKeys.map(renderCategoryCard)}</div>
+                                <div className="space-y-6">{rightKeys.map(renderCategoryCard)}</div>
+                            </div>
+                        ) : ticket.type === 'diario' ? (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
+                                {['auxiliar', 'pleno', 'senior'].map(renderCategoryCard)}
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
@@ -926,17 +960,23 @@
                         </Card>
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <button onClick={function() { onNewTicket('formatacao'); }} className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onClick={function() { onNewTicket('formatacao'); }} className="bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">{Icons.Plus}</div>
-                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Fluxo cronológico com manual integrado</span></div>
+                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Fluxo cronológico </span></div>
                             </div>
                         </button>
-                        <button onClick={function() { onNewTicket('zebra'); }} className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                        <button onClick={function() { onNewTicket('zebra'); }} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-amber-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
-                                <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 group-hover:text-brand-500">{Icons.Printer}</div>
+                                <div className="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400 group-hover:text-amber-500">{Icons.Printer}</div>
                                 <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Manutenção Zebra</span><span className="text-xs text-slate-500">Impressoras térmicas</span></div>
+                            </div>
+                        </button>
+                        <button onClick={function() { onNewTicket('diario'); }} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-500">{Icons.Check}</div>
+                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Check Diário</span><span className="text-xs text-slate-500">Rotina de Infra</span></div>
                             </div>
                         </button>
                     </div>
@@ -959,7 +999,9 @@
                                         <div key={ticket.id} onClick={function() { onOpenTicket(ticket.id); }} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
                                             <div className="absolute top-0 left-0 w-1 h-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                             <div className="flex justify-between items-start mb-3">
-                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : 'amber'}>{ticket.type}</Badge>
+                                                <Badge color={ticket.type === 'formatacao' ? 'blue' : ticket.type === 'diario' ? 'green' : 'amber'}>
+                                                    {ticket.type === 'formatacao' ? 'Formatação' : ticket.type === 'diario' ? 'Diário' : 'Zebra'}
+                                                </Badge>
                                                 <span className="text-xs font-mono font-bold text-slate-400">#{ticket.visualId}</span>
                                             </div>
                                             <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1">{nomeAtivo}</h4>
@@ -1025,7 +1067,11 @@
                                             <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                                 <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
                                                 <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date || Date.now()).toLocaleDateString()}</td>
-                                                <td className="px-6 py-3"><Badge color={h.type === 'formatacao' ? 'blue' : 'amber'}>{h.type}</Badge></td>
+                                                <td className="px-6 py-3">
+                                                    <Badge color={h.type === 'formatacao' ? 'blue' : h.type === 'diario' ? 'green' : 'amber'}>
+                                                        {h.type === 'formatacao' ? 'Formatação' : h.type === 'diario' ? 'Diário' : 'Zebra'}
+                                                    </Badge>
+                                                </td>
                                                 <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
                                                 <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico || 'N/A'}</td>
                                                 <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
@@ -1124,7 +1170,7 @@
             };
             
             var handleCreateTicket = function(type) {
-                var prefix = type === 'formatacao' ? 'F' : 'Z';
+                var prefix = type === 'formatacao' ? 'F' : type === 'zebra' ? 'Z' : 'D';
                 var seq = Math.floor(1000 + Math.random() * 9000);
                 var newTicket = {
                     visualId: prefix + '-' + seq,
