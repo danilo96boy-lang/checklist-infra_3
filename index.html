@@ -845,7 +845,7 @@
                 );
             };
 
-            /* === COMPONENTE KANBAN JIRA STYLE (SEM SWIMLANES, APENAS 4 COLUNAS PADRÃO + DRAG & DROP + EDIÇÃO) === */
+            /* === COMPONENTE KANBAN JIRA STYLE === */
             var KanbanView = function(props) {
                 var tasks = props.tasks || [];
                 var users = props.users || [];
@@ -861,16 +861,12 @@
                 var formState = useState({ title: '', assignee: users[0] ? users[0].name : 'Danilo', priority: 'Média', status: 'a_fazer' });
                 var form = formState[0], setForm = formState[1];
 
-                // ESTADO DE EDICAO DO CARTAO E COMENTARIOS
+                // ESTADO DE EDICAO DO CARTAO
                 var editState = useState(null);
                 var editingTask = editState[0], setEditingTask = editState[1];
                 
                 var commentState = useState('');
                 var newComment = commentState[0], setNewComment = commentState[1];
-
-                // ESTADO DE DRAG AND DROP
-                var dragState = useState(null);
-                var draggedTask = dragState[0], setDraggedTask = dragState[1];
 
                 var handleCreate = function(e) {
                     e.preventDefault();
@@ -891,32 +887,6 @@
                     setIsModalOpen(false);
                 };
 
-                // Funções de Arrastar e Soltar
-                var handleDragStart = function(e, task) {
-                    setDraggedTask(task);
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', task.id);
-                    setTimeout(function() { if(e.target) e.target.style.opacity = '0.5'; }, 0);
-                };
-
-                var handleDragEnd = function(e) {
-                    if(e.target) e.target.style.opacity = '1';
-                    setDraggedTask(null);
-                };
-
-                var handleDragOver = function(e) {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                };
-
-                var handleDrop = function(e, newStatus) {
-                    e.preventDefault();
-                    if (draggedTask && draggedTask.status !== newStatus) {
-                        onMoveTask(draggedTask.id, newStatus);
-                    }
-                    setDraggedTask(null);
-                };
-
                 var columns = [
                     { id: 'a_fazer', title: 'A Fazer' },
                     { id: 'em_andamento', title: 'Em Andamento' },
@@ -929,30 +899,23 @@
                         <div className="flex justify-between items-end mb-6 shrink-0">
                             <div>
                                 <h2 className="text-2xl font-bold text-white">Quadro Kanban (Tarefas TI)</h2>
-                                <p className="text-jira-subtext text-sm mt-1">Gestão de demandas com Arrastar & Soltar.</p>
+                                <p className="text-jira-subtext text-sm mt-1">Gestão de demandas e chamados no estilo Jira.</p>
                             </div>
-                            <Button onClick={function() { setIsModalOpen(true); }}>{Icons.Plus} Novo Cartão</Button>
                         </div>
 
                         <div className="flex gap-4 flex-1 pb-4 min-w-[1000px]">
                             {columns.map(function(col) {
                                 var colTasks = tasks.filter(function(t) { return t.status === col.id; });
-                                var isDragActive = draggedTask && draggedTask.status !== col.id;
-
                                 return (
-                                    <div 
-                                        key={col.id} 
-                                        onDragOver={handleDragOver} 
-                                        onDrop={function(e) { handleDrop(e, col.id); }} 
-                                        className={"bg-jira-col rounded-xl p-3 flex flex-col w-[280px] min-w-[280px] h-full max-h-[calc(100vh-140px)] border transition-colors " + (isDragActive ? "border-slate-600 border-dashed" : "border-slate-800/50")}
-                                    >
+                                    <div key={col.id} className="bg-jira-col rounded-xl p-3 flex flex-col w-[280px] min-w-[280px] h-full max-h-[calc(100vh-180px)] border border-slate-800/50">
                                         <div className="flex items-center gap-3 mb-4 shrink-0 px-1 pt-1">
                                             <h3 className="text-xs font-bold uppercase tracking-wider text-jira-subtext">{col.title}</h3>
-                                            <span className="bg-[#22272B] text-[#B6C2CF] px-2 py-0.5 rounded text-[10px] font-bold">{colTasks.length}</span>
+                                            <span className="bg-jira-card text-jira-text px-2 py-0.5 rounded text-[10px] font-bold">{colTasks.length}</span>
                                         </div>
 
                                         <div className="space-y-2 overflow-y-auto flex-1 pr-1 custom-scrollbar">
                                             {colTasks.map(function(task) {
+                                                // Jira-style Avatar Logic
                                                 var initials = '';
                                                 var avatarBg = 'bg-slate-600 text-white';
                                                 
@@ -977,16 +940,9 @@
                                                 }
                                                 
                                                 var commentCount = task.comments ? task.comments.length : 0;
-
+                                                
                                                 return (
-                                                    <div 
-                                                        key={task.id} 
-                                                        draggable={true}
-                                                        onDragStart={function(e) { handleDragStart(e, task); }}
-                                                        onDragEnd={handleDragEnd}
-                                                        onClick={function() { setEditingTask(task); }}
-                                                        className="bg-jira-card hover:bg-jira-cardHover border border-transparent hover:border-slate-600 transition-colors p-3 rounded-lg shadow-sm group flex flex-col gap-3 relative cursor-pointer"
-                                                    >
+                                                    <div key={task.id} onClick={function() { setEditingTask(task); }} className="bg-jira-card hover:bg-jira-cardHover border border-transparent hover:border-slate-600 transition-colors p-3 rounded-lg shadow-sm group flex flex-col gap-3 relative cursor-pointer">
                                                         <h4 className="text-[13px] text-jira-text leading-snug">{task.title}</h4>
 
                                                         <div className="flex justify-between items-center mt-1">
@@ -1011,7 +967,6 @@
                                                             </div>
                                                         </div>
 
-                                                        {/* Ações Rápidas ocultas (Hover) */}
                                                         <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-jira-cardHover rounded shadow-sm p-1">
                                                             {col.id !== 'a_fazer' && (
                                                                 <button onClick={function(e) {
@@ -1034,7 +989,7 @@
                                             })}
                                         </div>
                                         <div className="mt-2 pt-2 shrink-0">
-                                            <button onClick={function() { setForm(Object.assign({}, form, {status: col.id})); setIsModalOpen(true); }} className="flex items-center gap-2 text-[#8C9BAB] hover:text-white hover:bg-[#282E33] w-full px-2 py-1.5 rounded transition-colors text-xs font-semibold">
+                                            <button onClick={function() { setForm(Object.assign({}, form, {status: col.id})); setIsModalOpen(true); }} className="flex items-center gap-2 text-jira-subtext hover:text-white hover:bg-jira-cardHover w-full px-2 py-1.5 rounded transition-colors text-xs font-semibold">
                                                 {Icons.Plus} <span>Criar</span>
                                             </button>
                                         </div>
@@ -1043,11 +998,11 @@
                             })}
                         </div>
 
-                        {/* MODAL DE CRIAÇÃO RÁPIDA DE TAREFA */}
+                        {/* MODAL DE CRIAÇÃO */}
                         {isModalOpen && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
                                 <Card className="w-full max-w-md bg-jira-bg border-slate-700" noPadding>
-                                    <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-[#161A1D]">
+                                    <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-jira-col">
                                         <h3 className="font-bold text-slate-200 text-sm">Criar Tarefa</h3>
                                         <button onClick={function() { setIsModalOpen(false); }} className="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
                                     </div>
@@ -1091,10 +1046,10 @@
                             </div>
                         )}
 
-                        {/* MODAL DE EDIÇÃO DE TAREFA (JIRA STYLE) */}
+                        {/* MODAL DE EDIÇÃO JIRA STYLE */}
                         {editingTask && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
-                                <Card className="w-full max-w-3xl bg-jira-bg border-slate-700 max-h-[90vh] flex flex-col shadow-2xl" noPadding>
+                                <Card className="w-full max-w-3xl bg-[#1D2125] border-slate-700 max-h-[90vh] flex flex-col shadow-2xl" noPadding>
                                     <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-[#161A1D]">
                                         <div className="flex items-center gap-3">
                                             <span className="text-[10px] font-mono font-bold bg-blue-600 px-2 py-1 rounded text-white">{editingTask.code}</span>
@@ -1107,16 +1062,16 @@
                                         <div className="space-y-4">
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Título</label>
-                                                <Input value={editingTask.title} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {title: e.target.value})); }} className="bg-jira-card border-slate-700 text-white font-semibold" />
+                                                <Input value={editingTask.title} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {title: e.target.value})); }} className="bg-[#22272B] border-slate-700 text-white font-semibold" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Descrição detalhada</label>
-                                                <textarea rows="3" value={editingTask.description || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {description: e.target.value})); }} className="w-full p-3 bg-jira-card border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500" placeholder="Adicione instruções, links ou contexto para esta tarefa..."></textarea>
+                                                <textarea rows="3" value={editingTask.description || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {description: e.target.value})); }} className="w-full p-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500" placeholder="Adicione instruções, links ou contexto para esta tarefa..."></textarea>
                                             </div>
                                             <div className="grid grid-cols-3 gap-4">
                                                 <div>
                                                     <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Status</label>
-                                                    <select value={editingTask.status} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {status: e.target.value})); }} className="w-full h-10 px-3 bg-jira-card border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none">
+                                                    <select value={editingTask.status} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {status: e.target.value})); }} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none">
                                                         <option value="a_fazer">A Fazer</option>
                                                         <option value="em_andamento">Em Andamento</option>
                                                         <option value="impedimentos">Impedimentos</option>
@@ -1125,14 +1080,14 @@
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Responsável</label>
-                                                    <select value={editingTask.assignee} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {assignee: e.target.value})); }} className="w-full h-10 px-3 bg-jira-card border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none">
+                                                    <select value={editingTask.assignee} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {assignee: e.target.value})); }} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none">
                                                         <option value="">Não Atribuído</option>
                                                         {users.map(function(u) { return <option key={u.id} value={u.name}>{u.name}</option>; })}
                                                     </select>
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Prioridade</label>
-                                                    <select value={editingTask.priority} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {priority: e.target.value})); }} className="w-full h-10 px-3 bg-jira-card border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none">
+                                                    <select value={editingTask.priority} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {priority: e.target.value})); }} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none">
                                                         <option value="Baixa">Baixa</option>
                                                         <option value="Média">Média</option>
                                                         <option value="Alta">Alta</option>
@@ -1141,7 +1096,7 @@
                                             </div>
                                         </div>
 
-                                        {/* Feed de Comentários */}
+                                        {/* Comentários Feed */}
                                         <div className="border-t border-slate-800 pt-6">
                                             <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">{Icons.BookOpen} Comentários e Atividade</h4>
                                             
@@ -1149,7 +1104,7 @@
                                                 {(editingTask.comments || []).map(function(c, i) {
                                                     var isMe = currentUser && c.author === currentUser.name;
                                                     return (
-                                                        <div key={i} className={"p-3 rounded-lg border flex flex-col gap-1 " + (isMe ? "bg-brand-900/10 border-brand-800/30 ml-4" : "bg-jira-card border-slate-800 mr-4")}>
+                                                        <div key={i} className={"p-3 rounded-lg border flex flex-col gap-1 " + (isMe ? "bg-brand-900/10 border-brand-800/30 ml-4" : "bg-[#22272B] border-slate-800 mr-4")}>
                                                             <div className="flex justify-between items-center">
                                                                 <span className={"text-xs font-bold " + (isMe ? "text-brand-400" : "text-slate-400")}>{c.author}</span>
                                                                 <span className="text-[10px] text-slate-500">{new Date(c.createdAt).toLocaleString()}</span>
@@ -1167,7 +1122,7 @@
                                                 <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-1 shadow-sm">
                                                     {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                                                 </div>
-                                                <textarea value={newComment} onChange={function(e) { setNewComment(e.target.value); }} rows="2" className="flex-1 p-2.5 bg-jira-card border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none" placeholder="Escreva um comentário..."></textarea>
+                                                <textarea value={newComment} onChange={function(e) { setNewComment(e.target.value); }} rows="2" className="flex-1 p-2.5 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none" placeholder="Escreva um comentário..."></textarea>
                                                 <Button onClick={function() {
                                                     if(!newComment.trim()) return;
                                                     var commentObj = {
@@ -1241,7 +1196,7 @@
                 };
 
                 var handleDeleteUser = function(user) {
-                    if (currentUser && user.id === currentUser.id) return alert("Você não pode remover seu próprio usuário conectado.");
+                    if (currentUser && user.id === currentUser.id) return alert("Você não pode remover seu próprio usuário.");
                     if (confirm("Remover técnico " + user.name + "?")) {
                         db.collection('users').doc(user.docId).delete();
                     }
@@ -1381,9 +1336,491 @@
                 );
             };
 
+            var App = function() {
+                var isSavingDraftRef = useRef(false);
+                var draftState = useState(null);
+                var draftTicket = draftState[0], setDraftTicket = draftState[1];
+
+                var viewState = useState('login');
+                var view = viewState[0], setView = viewState[1];
+                var userState = useState(null);
+                var currentUser = userState[0], setCurrentUser = userState[1];
+                var usersState = useState(DEFAULT_TEAM);
+                var users = usersState[0], setUsers = usersState[1];
+                var ticketsState = useState([]);
+                var activeTickets = ticketsState[0], setActiveTickets = ticketsState[1];
+                var historyState = useState([]);
+                var history = historyState[0], setHistory = historyState[1];
+                var kanbanState = useState([]);
+                var kanbanTasks = kanbanState[0], setKanbanTasks = kanbanState[1];
+                var logoState = useState('');
+                var logo = logoState[0], setLogo = logoState[1];
+                var curTicketState = useState(null);
+                var currentTicketId = curTicketState[0], setCurrentTicketId = curTicketState[1];
+                var darkState = useState(true);
+                var darkMode = darkState[0], setDarkMode = darkState[1];
+                
+                var cfgState = useState(false);
+                var showConfig = cfgState[0], setShowConfig = cfgState[1];
+                
+                var openFoldersState = useState({ checklists: false });
+                var openFolders = openFoldersState[0], setOpenFolders = openFoldersState[1];
+
+                var customFoldersState = useState([]);
+                var customFolders = customFoldersState[0], setCustomFolders = customFoldersState[1];
+                
+                var fileInputRef = useRef(null);
+
+                var titlesState = useState({
+                    col1: "1. KAUAN (FÍSICO E ACESSOS)",
+                    col2: "2. LUI (DADOS E CONECTIVIDADE)",
+                    col3: "3. INÁCIO (SEGURANÇA E ENDPOINTS)"
+                });
+                var globalTitulos = titlesState[0], setGlobalTitulos = titlesState[1];
+
+                useEffect(function() {
+                    try {
+                        var savedTheme = localStorage.getItem('sa_theme'); 
+                        if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+                        var savedLogo = localStorage.getItem('sa_logo'); 
+                        if (savedLogo) setLogo(savedLogo);
+                        var savedUser = localStorage.getItem('sa_user_session'); 
+                        if (savedUser) { 
+                            var parsed = JSON.parse(savedUser);
+                            if (parsed && parsed.id) {
+                                setCurrentUser(parsed); 
+                                setView('dashboard'); 
+                            }
+                        }
+                    } catch(e) {
+                        localStorage.removeItem('sa_user_session');
+                    }
+
+                    var unsubConfig = db.collection('settings').doc('titulos').onSnapshot(function(snap) {
+                        if (snap.exists) setGlobalTitulos(snap.data());
+                        else db.collection('settings').doc('titulos').set(globalTitulos);
+                    });
+
+                    var unsubFolders = db.collection('settings').doc('sidebar_modules').onSnapshot(function(snap) {
+                        if (snap.exists && snap.data() && Array.isArray(snap.data().folders)) {
+                            setCustomFolders(snap.data().folders);
+                        } else {
+                            db.collection('settings').doc('sidebar_modules').set({ folders: [] });
+                        }
+                    });
+
+                    // INJETANDO DEFAULT TASKS SE ESTIVER VAZIO
+                    var unsubKanban = db.collection('kanban_tasks').onSnapshot(function(snap) {
+                        if (snap.empty) {
+                            DEFAULT_KANBAN.forEach(function(k) {
+                                db.collection('kanban_tasks').add(Object.assign({}, k, { createdAt: new Date().toISOString() }));
+                            });
+                        } else {
+                            var list = snap.docs.map(function(doc) {
+                                return Object.assign({ id: doc.id }, doc.data());
+                            });
+                            list.sort(function(a, b) { 
+                                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(); 
+                            });
+                            setKanbanTasks(list);
+                        }
+                    });
+
+                    var unsubTickets = db.collection('tickets').onSnapshot(function(snap) {
+                        var list = snap.docs.map(function(doc) {
+                            return Object.assign({ id: doc.id }, doc.data());
+                        }).filter(function(t) {
+                            return t && t.data && t.data.items;
+                        });
+                        list.sort(function(a,b) { return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); });
+                        setActiveTickets(list);
+                    });
+
+                    var unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(function(snap) {
+                        setHistory(snap.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); }));
+                    });
+
+                    var unsubUsers = db.collection('users').onSnapshot(function(snap) {
+                        if (snap.empty) {
+                            DEFAULT_TEAM.forEach(function(u) { db.collection('users').add(u); });
+                        } else {
+                            setUsers(snap.docs.map(function(doc) { return Object.assign({ docId: doc.id }, doc.data()); }));
+                        }
+                    });
+
+                    return function() { unsubTickets(); unsubHistory(); unsubUsers(); unsubConfig(); unsubFolders(); unsubKanban(); };
+                }, []);
+
+                useEffect(function() { 
+                    if (darkMode) document.documentElement.classList.add('dark'); 
+                    else document.documentElement.classList.remove('dark'); 
+                    localStorage.setItem('sa_theme', JSON.stringify(darkMode)); 
+                }, [darkMode]);
+
+                var handleLogin = function(user) { 
+                    setCurrentUser(user); 
+                    localStorage.setItem('sa_user_session', JSON.stringify(user)); 
+                    setView('dashboard'); 
+                };
+
+                var handleLogout = function() { 
+                    setCurrentUser(null); 
+                    localStorage.removeItem('sa_user_session'); 
+                    setView('login'); 
+                };
+
+                var toggleFolder = function(id) {
+                    var nextState = Object.assign({}, openFolders);
+                    nextState[id] = !nextState[id];
+                    setOpenFolders(nextState);
+                };
+
+                var handleAddFolder = function() {
+                    var title = prompt("Nome da nova pasta (ex: Firewall, Roteadores):");
+                    if (!title || !title.trim()) return;
+                    var newFolder = { id: 'f_' + Date.now(), title: title.trim(), links: [] };
+                    var updated = customFolders.concat([newFolder]);
+                    db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                    
+                    var nextOpen = Object.assign({}, openFolders);
+                    nextOpen[newFolder.id] = true;
+                    setOpenFolders(nextOpen);
+                };
+
+                var handleDeleteFolder = function(e, folderId) {
+                    e.stopPropagation();
+                    if (confirm("Deseja realmente excluir esta pasta e seus links?")) {
+                        var updated = customFolders.filter(function(f) { return f.id !== folderId; });
+                        db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                    }
+                };
+
+                var handleAddLink = function(folderId) {
+                    var label = prompt("Nome do acesso (ex: pfSense Matriz):");
+                    if (!label || !label.trim()) return;
+                    var url = prompt("Endereço IP ou URL (ex: 192.168.1.1):");
+                    if (!url || !url.trim()) return;
+
+                    var updated = customFolders.map(function(f) {
+                        if (f.id === folderId) {
+                            var existing = f.links || [];
+                            var newLink = { id: 'l_' + Date.now(), label: label.trim(), url: url.trim() };
+                            return Object.assign({}, f, { links: existing.concat([newLink]) });
+                        }
+                        return f;
+                    });
+                    db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                };
+
+                var handleDeleteLink = function(e, folderId, linkId) {
+                    e.stopPropagation();
+                    if (confirm("Remover este acesso?")) {
+                        var updated = customFolders.map(function(f) {
+                            if (f.id === folderId) {
+                                var filtered = (f.links || []).filter(function(l) { return l.id !== linkId; });
+                                return Object.assign({}, f, { links: filtered });
+                            }
+                            return f;
+                        });
+                        db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                    }
+                };
+
+                var handleOpenLink = function(url) {
+                    if (!url) return;
+                    var target = url.startsWith('http://') || url.startsWith('https://') ? url : 'http://' + url;
+                    window.open(target, '_blank');
+                };
+                
+                var handleCreateTicket = function(type) {
+                    var prefix = type === 'formatacao' ? 'F' : type === 'zebra' ? 'Z' : type === 'rack' ? 'R' : 'D';
+                    var seq = Math.floor(1000 + Math.random() * 9000);
+                    var newTicket = {
+                        id: 'draft',
+                        visualId: prefix + '-' + seq,
+                        type: type,
+                        data: getTemplate(type, currentUser ? currentUser.name : '', globalTitulos),
+                        createdAt: new Date().toISOString()
+                    };
+                    setDraftTicket(newTicket);
+                    setCurrentTicketId('draft');
+                    setView('checklist');
+                };
+
+                var handleUpdateTicket = function(newData) { 
+                    if (currentTicketId === 'draft') {
+                        var pct = calcProgress(newData.items);
+                        var updatedDraft = Object.assign({}, draftTicket, { data: newData });
+                        
+                        if (pct >= 10 && !isSavingDraftRef.current) {
+                            isSavingDraftRef.current = true;
+                            var ticketToSave = Object.assign({}, updatedDraft);
+                            delete ticketToSave.id;
+                            db.collection('tickets').add(ticketToSave).then(function(docRef) {
+                                setCurrentTicketId(docRef.id);
+                                setDraftTicket(null);
+                                isSavingDraftRef.current = false;
+                            }).catch(function() { isSavingDraftRef.current = false; });
+                        } else {
+                            setDraftTicket(updatedDraft);
+                        }
+                    } else if (currentTicketId && currentTicketId !== 'draft') {
+                        db.collection('tickets').doc(currentTicketId).update({ data: newData }); 
+                    }
+                };
+                
+                var handleBackFromChecklist = function() {
+                    if (currentTicketId === 'draft') {
+                        setDraftTicket(null);
+                        setCurrentTicketId(null);
+                    }
+                    setView('dashboard');
+                };
+
+                var handleForceSaveChecklist = function() {
+                    if (currentTicketId === 'draft') {
+                        isSavingDraftRef.current = true;
+                        var ticketToSave = Object.assign({}, draftTicket);
+                        delete ticketToSave.id;
+                        db.collection('tickets').add(ticketToSave).then(function() {
+                            setCurrentTicketId(null);
+                            setDraftTicket(null);
+                            isSavingDraftRef.current = false;
+                            setView('dashboard');
+                        });
+                    } else {
+                        setView('dashboard');
+                    }
+                };
+
+                var handleRequestFinish = function() {
+                    if (currentTicketId === 'draft') {
+                        isSavingDraftRef.current = true;
+                        var ticketToSave = Object.assign({}, draftTicket);
+                        delete ticketToSave.id;
+                        db.collection('tickets').add(ticketToSave).then(function(docRef) {
+                            setCurrentTicketId(docRef.id);
+                            setDraftTicket(null);
+                            isSavingDraftRef.current = false;
+                            setView('receipt');
+                        });
+                    } else {
+                        setView('receipt');
+                    }
+                };
+
+                var handleGlobalTitleChange = function(colKey, newVal) {
+                    var map = { coluna1: 'col1', coluna2: 'col2', coluna3: 'col3' };
+                    var gKey = map[colKey];
+                    if (gKey) {
+                        var newTitulos = Object.assign({}, globalTitulos, { [gKey]: newVal });
+                        db.collection('settings').doc('titulos').set(newTitulos);
+                    }
+                };
+                
+                var handleArchive = function(ticket) {
+                    if (!ticket) return;
+                    var meta = (ticket.data && ticket.data.meta) || {};
+                    db.collection('history').add({ 
+                        visualId: ticket.visualId, 
+                        type: ticket.type, 
+                        date: new Date().toISOString(), 
+                        tecnico: meta.tecnico || 'N/A', 
+                        ativo: meta.ativo || meta.maquina || "N/A", 
+                        data: ticket.data 
+                    }).then(function() {
+                        return db.collection('tickets').doc(ticket.id).delete();
+                    }).then(function() {
+                        setCurrentTicketId(null);
+                        setView('dashboard');
+                    });
+                };
+                
+                var handleDeleteActive = function(e, id) { 
+                    e.stopPropagation(); 
+                    if (confirm("Cancelar este registro?")) db.collection('tickets').doc(id).delete(); 
+                };
+
+                var handleLogoUpload = function(e) { 
+                    var f = e.target.files && e.target.files[0]; 
+                    if (f) { 
+                        var r = new FileReader(); 
+                        r.onloadend = function() { 
+                            setLogo(r.result); 
+                            localStorage.setItem('sa_logo', r.result); 
+                        }; 
+                        r.readAsDataURL(f); 
+                    }
+                };
+
+                var handleSaveKanbanTask = function(task) {
+                    db.collection('kanban_tasks').add(task);
+                };
+
+                var handleDeleteKanbanTask = function(taskId) {
+                    if (confirm("Excluir este cartão do Kanban?")) {
+                        db.collection('kanban_tasks').doc(taskId).delete();
+                    }
+                };
+
+                var handleMoveKanbanTask = function(taskId, newStatus) {
+                    db.collection('kanban_tasks').doc(taskId).update({ status: newStatus });
+                };
+
+                var handleUpdateKanbanTask = function(taskId, updates) {
+                    db.collection('kanban_tasks').doc(taskId).update(updates);
+                };
+
+                var currentTicketData = currentTicketId === 'draft' ? draftTicket : activeTickets.find(function(t) { return t.id === currentTicketId; });
+
+                if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
+
+                return (
+                    <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
+                        <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 z-20 shrink-0">
+                            <div className="h-16 flex items-center gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800 shrink-0">
+                                <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                </div>
+                                INFRA CHECK
+                            </div>
+                            
+                            <div className="flex-1 overflow-y-auto py-6">
+                                <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Principal</div>
+                                <nav className="px-3 space-y-1 mb-8">
+                                    <button onClick={function() { setView('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.Layout} Dashboard
+                                    </button>
+                                    <button onClick={function() { setView('kanban'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.Kanban} Kanban TI
+                                    </button>
+                                    <button onClick={function() { setView('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.History} Histórico
+                                    </button>
+                                </nav>
+
+                                <div className="flex items-center justify-between px-6 mb-2">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Módulos</span>
+                                    <button onClick={handleAddFolder} className="text-slate-400 hover:text-brand-400 text-xs flex items-center gap-1 font-semibold" title="Criar nova pasta">{Icons.Plus} <span className="text-[10px]">Pasta</span></button>
+                                </div>
+
+                                <nav className="px-3 space-y-1">
+                                    <div className="space-y-1 mb-2">
+                                        <div onClick={function() { toggleFolder('checklists'); }} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer " + (openFolders.checklists ? 'bg-slate-800/60 text-white' : '')}>
+                                            <div className="flex items-center gap-2.5 truncate">
+                                                <span className={openFolders.checklists ? "text-brand-400" : "text-slate-500"}>{Icons.Folder}</span> 
+                                                <span className="truncate font-semibold">Checklists de TI</span>
+                                            </div>
+                                            <div className={"transition-transform duration-200 text-slate-500 " + (openFolders.checklists ? 'rotate-180' : '')}>
+                                                {Icons.ChevronDown}
+                                            </div>
+                                        </div>
+                                        
+                                        {openFolders.checklists && (
+                                            <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
+                                                <button onClick={function() { handleCreateTicket('diario'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-emerald-500/50 group-hover:text-emerald-400">{Icons.Check}</span> Check Diário
+                                                </button>
+                                                <button onClick={function() { handleCreateTicket('rack'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-indigo-500/50 group-hover:text-indigo-400">{Icons.Server}</span> Rack Fábrica
+                                                </button>
+                                                <button onClick={function() { handleCreateTicket('formatacao'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-brand-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-brand-500/50 group-hover:text-brand-400">{Icons.Copy}</span> Formatação PC
+                                                </button>
+                                                <button onClick={function() { handleCreateTicket('zebra'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-amber-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-amber-500/50 group-hover:text-amber-400">{Icons.Printer}</span> Manutenção Zebra
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {customFolders.map(function(f) {
+                                        var isOpen = !!openFolders[f.id];
+                                        return (
+                                            <div key={f.id} className="space-y-1 mb-1">
+                                                <div onClick={function() { toggleFolder(f.id); }} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer group " + (isOpen ? 'bg-slate-800/60 text-white' : '')}>
+                                                    <div className="flex items-center gap-2.5 truncate">
+                                                        <span className={isOpen ? "text-amber-400" : "text-slate-500"}>{Icons.Folder}</span> 
+                                                        <span className="truncate font-semibold">{f.title}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                        <button onClick={function(e){ handleDeleteFolder(e, f.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Pasta">{Icons.Trash}</button>
+                                                        <div className={"transition-transform duration-200 text-slate-500 " + (isOpen ? 'rotate-180' : '')}>{Icons.ChevronDown}</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {isOpen && (
+                                                    <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
+                                                        {(f.links || []).map(function(l) {
+                                                            return (
+                                                                <div key={l.id} className="flex items-center justify-between group px-2 py-1 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800/50">
+                                                                    <div onClick={function() { handleOpenLink(l.url); }} className="flex items-center gap-2 truncate cursor-pointer flex-1" title={l.url}>
+                                                                        <span className="text-slate-500 group-hover:text-brand-400">{Icons.ExternalLink}</span>
+                                                                        <span className="truncate">{l.label}</span>
+                                                                    </div>
+                                                                    <button onClick={function(e) { handleDeleteLink(e, f.id, l.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 shrink-0" title="Remover link">{Icons.Trash}</button>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        <button onClick={function() { handleAddLink(f.id); }} className="w-full text-left flex items-center gap-1.5 px-2 py-1 text-[10px] text-slate-500 hover:text-brand-400 font-semibold">
+                                                            {Icons.Plus} <span>Adicionar Link</span>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </nav>
+                            </div>
+
+                            <div className="p-4 border-t border-slate-800 shrink-0">
+                                <div className="flex items-center gap-3 mb-4 px-2">
+                                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                                        {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <p className="text-sm font-bold text-white truncate">{currentUser ? currentUser.name : ''}</p>
+                                        <p className="text-xs text-slate-500 font-mono">ID: {currentUser ? currentUser.id : ''}</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button title="Alternar tema" onClick={function() { setDarkMode(!darkMode); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
+                                    <button title="Configurações" onClick={function() { setShowConfig(true); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                    <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-slate-800 text-center">
+                                    <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={function() { if (fileInputRef.current) fileInputRef.current.click(); }}>Alterar Logo</p>
+                                    <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
+                                </div>
+                            </div>
+                        </aside>
+
+                        <main className="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950 relative">
+                            <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0 border-b border-slate-800">
+                                <span className="font-bold">INFRA CHECK</span>
+                                <div className="flex gap-2">
+                                    <button onClick={function() { setShowConfig(true); }} className="p-2">{Icons.Settings}</button>
+                                    <button onClick={function() { setView('dashboard'); }} className="p-2">{Icons.Layout}</button>
+                                    <button onClick={handleLogout} className="p-2">{Icons.LogOut}</button>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-auto relative">
+                                {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
+                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
+                                {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} currentUser={currentUser} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} onUpdateTask={handleUpdateKanbanTask} />}
+                                {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
+                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { setView('checklist'); }} onArchive={handleArchive} logo={logo} />}
+                                {view === 'history' && <HistoryView history={history} />}
+                            </div>
+                        </main>
+                    </div>
+                );
+            };
+
             var root = ReactDOM.createRoot(document.getElementById('root'));
             root.render(<App />);
-
+            
         } catch (err) {
             document.getElementById('root').innerHTML = '<div style="padding:40px;color:#ef4444;font-family:sans-serif;"><h3>Falha Fatal de Inicialização</h3><pre>' + err.message + '</pre></div>';
         }
