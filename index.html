@@ -1507,15 +1507,7 @@
                     });
 
                     var unsubHistory = db.collection('history').orderBy('date', 'desc').onSnapshot(function(snap) {
-                        var docs = snap.docs;
-                        if (docs.length > 1) {
-                            var batch = db.batch();
-                            for (var i = 1; i < docs.length; i++) {
-                                batch.delete(docs[i].ref);
-                            }
-                            batch.commit();
-                        }
-                        setHistory(docs.length > 0 ? [Object.assign({ id: docs[0].id }, docs[0].data())] : []);
+                        setHistory(snap.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); }));
                     });
 
                     var unsubUsers = db.collection('users').onSnapshot(function(snap) {
