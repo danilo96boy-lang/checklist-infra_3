@@ -53,11 +53,28 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 
         @media print {
-            @page { margin: 0; size: auto; }
-            body, html { background-color: white !important; color: black !important; height: auto; overflow: visible; }
+            @page { margin: 0.5cm; size: auto; }
+            body, html, #root { 
+                background-color: white !important; 
+                color: black !important; 
+                height: auto !important; 
+                overflow: visible !important; 
+            }
             body * { visibility: hidden; }
-            #receipt-area, #receipt-area * { visibility: visible; }
-            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; z-index: 9999; }
+            /* Forçar todos os containers pais a não cortarem o conteúdo */
+            div { overflow: visible !important; }
+            
+            #receipt-area, #receipt-area * { visibility: visible !important; }
+            #receipt-area { 
+                position: absolute !important; 
+                left: 0 !important; 
+                top: 0 !important; 
+                width: 100% !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                z-index: 9999 !important;
+                display: block !important; 
+            }
             .no-print { display: none !important; }
         }
     </style>
@@ -659,7 +676,7 @@
                             </Card>
                         </div>
 
-                        <div id="receipt-area" className="hidden bg-white text-black font-sans text-xs border border-gray-300 p-0">
+                        <div id="receipt-area" className="hidden print:block bg-white text-black font-sans text-xs border border-gray-300 p-0">
                             <div className="flex justify-between items-center p-6 border-b-2 border-black">
                                 <div className="flex items-center gap-4">{logo && <img src={logo} className="h-10 object-contain" />}<div><h1 className="text-xl font-bold tracking-tighter uppercase">Relatório Técnico</h1><p className="text-[10px] uppercase tracking-widest text-gray-500">Departamento de TI • Infraestrutura</p></div></div>
                                 <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date(ticket.createdAt || ticket.date || Date.now()).toLocaleDateString()}</div></div>
