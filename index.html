@@ -854,6 +854,7 @@
                 var onDeleteTask = props.onDeleteTask;
                 var onMoveTask = props.onMoveTask;
                 var onUpdateTask = props.onUpdateTask;
+                var onReorderTask = props.onReorderTask;
 
                 var modalState = useState(false);
                 var isModalOpen = modalState[0], setIsModalOpen = modalState[1];
@@ -861,31 +862,19 @@
                 var formState = useState({ title: '', assignee: users[0] ? users[0].name : 'Danilo', priority: 'Média', status: 'a_fazer' });
                 var form = formState[0], setForm = formState[1];
 
-                // ESTADO DE EDICAO DO CARTAO
                 var editState = useState(null);
                 var editingTask = editState[0], setEditingTask = editState[1];
                 
                 var commentState = useState('');
                 var newComment = commentState[0], setNewComment = commentState[1];
 
-                // === FUNÇÕES DE DRAG AND DROP ===
-                var handleDragStart = function(e, taskId) {
-                    e.dataTransfer.setData('taskId', taskId);
-                };
-
-                var handleDrop = function(e, colId) {
+                // === FUNÇÕES DE DRAG AND DROP COM ORDENAÇÃO ===
+                var handleDropOnCol = function(e, colId) {
                     e.preventDefault();
-                    var taskId = e.dataTransfer.getData('taskId');
-                    if (taskId) {
-                        var task = tasks.find(function(t) { return t.id === taskId; });
-                        if (task && task.status !== colId) {
-                            onMoveTask(taskId, colId);
-                        }
+                    var draggedId = e.dataTransfer.getData('taskId');
+                    if (draggedId) {
+                        onReorderTask(draggedId, null, colId);
                     }
-                };
-
-                var handleDragOver = function(e) {
-                    e.preventDefault(); // Necessário para permitir o drop
                 };
 
                 var handleCreate = function(e) {
@@ -928,8 +917,8 @@
                                 var colTasks = tasks.filter(function(t) { return t.status === col.id; });
                                 return (
                                     <div key={col.id} 
-                                         onDragOver={handleDragOver}
-                                         onDrop={function(e) { handleDrop(e, col.id); }}
+                                         onDragOver={function(e) { e.preventDefault(); }}
+                                         onDrop={function(e) { handleDropOnCol(e, col.id); }}
                                          className="bg-jira-col rounded-xl p-3 flex flex-col w-[280px] min-w-[280px] h-full max-h-[calc(100vh-180px)] border border-slate-800/50">
                                         <div className="flex items-center gap-3 mb-4 shrink-0 px-1 pt-1">
                                             <h3 className="text-xs font-bold uppercase tracking-wider text-jira-subtext">{col.title}</h3>
@@ -938,7 +927,6 @@
 
                                         <div className="space-y-2 overflow-y-auto flex-1 pr-1 custom-scrollbar">
                                             {colTasks.map(function(task) {
-                                                // Jira-style Avatar Logic
                                                 var initials = '';
                                                 var avatarBg = 'bg-slate-600 text-white';
                                                 
@@ -967,9 +955,29 @@
                                                 return (
                                                     <div key={task.id} 
                                                          draggable={true}
-                                                         onDragStart={function(e) { handleDragStart(e, task.id); }}
+                                                         onDragStart={function(e) { 
+                                                             e.dataTransfer.setData('taskId', task.id); 
+                                                             e.stopPropagation(); 
+                                                         }}
+                                                         onDragOver={function(e) { 
+                                                             e.preventDefault(); 
+                                                             e.stopPropagation(); 
+                                                             e.currentTarget.style.borderTop = '2px solid #3b82f6';
+                                                         }}
+                                                         onDragLeave={function(e) { 
+                                                             e.currentTarget.style.borderTop = '';
+                                                         }}
+                                                         onDrop={function(e) {
+                                                             e.preventDefault();
+                                                             e.stopPropagation();
+                                                             e.currentTarget.style.borderTop = '';
+                                                             var draggedId = e.dataTransfer.getData('taskId');
+                                                             if (draggedId && draggedId !== task.id) {
+                                                                 onReorderTask(draggedId, task.id, col.id);
+                                                             }
+                                                         }}
                                                          onClick={function() { setEditingTask(task); }} 
-                                                         className="bg-jira-card hover:bg-jira-cardHover border border-transparent hover:border-slate-600 transition-colors p-3 rounded-lg shadow-sm group flex flex-col gap-3 relative cursor-grab active:cursor-grabbing">
+                                                         className="bg-jira-card hover:bg-jira-cardHover transition-colors p-3 rounded-lg shadow-sm group flex flex-col gap-3 relative cursor-grab active:cursor-grabbing border border-transparent">
                                                         <h4 className="text-[13px] text-jira-text leading-snug">{task.title}</h4>
 
                                                         <div className="flex justify-between items-center mt-1">
@@ -1025,7 +1033,6 @@
                             })}
                         </div>
 
-                        {/* MODAL DE CRIAÇÃO */}
                         {isModalOpen && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
                                 <Card className="w-full max-w-md bg-jira-bg border-slate-700" noPadding>
@@ -1073,7 +1080,6 @@
                             </div>
                         )}
 
-                        {/* MODAL DE EDIÇÃO JIRA STYLE */}
                         {editingTask && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
                                 <Card className="w-full max-w-3xl bg-[#1D2125] border-slate-700 max-h-[90vh] flex flex-col shadow-2xl" noPadding>
@@ -1123,7 +1129,6 @@
                                             </div>
                                         </div>
 
-                                        {/* Comentários Feed */}
                                         <div className="border-t border-slate-800 pt-6">
                                             <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">{Icons.BookOpen} Comentários e Atividade</h4>
                                             
@@ -1439,15 +1444,18 @@
                     // INJETANDO DEFAULT TASKS SE ESTIVER VAZIO
                     var unsubKanban = db.collection('kanban_tasks').onSnapshot(function(snap) {
                         if (snap.empty) {
-                            DEFAULT_KANBAN.forEach(function(k) {
-                                db.collection('kanban_tasks').add(Object.assign({}, k, { createdAt: new Date().toISOString() }));
+                            DEFAULT_KANBAN.forEach(function(k, index) {
+                                db.collection('kanban_tasks').add(Object.assign({}, k, { createdAt: new Date().toISOString(), order: index }));
                             });
                         } else {
                             var list = snap.docs.map(function(doc) {
                                 return Object.assign({ id: doc.id }, doc.data());
                             });
+                            // Ordenando localmente pelo index "order" ou pelo Timestamp de criação se nao tiver order.
                             list.sort(function(a, b) { 
-                                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(); 
+                                var valA = a.order !== undefined ? a.order : new Date(a.createdAt).getTime();
+                                var valB = b.order !== undefined ? b.order : new Date(b.createdAt).getTime();
+                                return valA - valB; 
                             });
                             setKanbanTasks(list);
                         }
@@ -1680,8 +1688,11 @@
                     }
                 };
 
+                // ==== FUNÇÕES DO KANBAN ====
                 var handleSaveKanbanTask = function(task) {
-                    db.collection('kanban_tasks').add(task);
+                    // Inicializa a task na ultima ordem (999) para ir pro final da fila
+                    var maxOrder = kanbanTasks.length;
+                    db.collection('kanban_tasks').add(Object.assign({}, task, { order: maxOrder }));
                 };
 
                 var handleDeleteKanbanTask = function(taskId) {
@@ -1696,6 +1707,35 @@
 
                 var handleUpdateKanbanTask = function(taskId, updates) {
                     db.collection('kanban_tasks').doc(taskId).update(updates);
+                };
+
+                // Nova função que reordena todas as tasks de uma mesma coluna em lote
+                var handleReorderKanbanTask = function(draggedId, targetId, newStatus) {
+                    var draggedTask = kanbanTasks.find(function(t) { return t.id === draggedId; });
+                    if (!draggedTask) return;
+
+                    var colTasks = kanbanTasks.filter(function(t) { return t.status === newStatus && t.id !== draggedId; });
+                    
+                    if (targetId) {
+                        var targetIndex = colTasks.findIndex(function(t) { return t.id === targetId; });
+                        if (targetIndex !== -1) {
+                            // Insere antes do target
+                            colTasks.splice(targetIndex, 0, draggedTask);
+                        } else {
+                            colTasks.push(draggedTask);
+                        }
+                    } else {
+                        // Soltou direto na coluna vazia ou no fim dela
+                        colTasks.push(draggedTask);
+                    }
+
+                    // Faz o update em lote para gravar a nova ordem indexada
+                    var batch = db.batch();
+                    colTasks.forEach(function(t, i) {
+                        var ref = db.collection('kanban_tasks').doc(t.id);
+                        batch.update(ref, { status: newStatus, order: i });
+                    });
+                    batch.commit();
                 };
 
                 var currentTicketData = currentTicketId === 'draft' ? draftTicket : activeTickets.find(function(t) { return t.id === currentTicketId; });
@@ -1835,7 +1875,7 @@
                             <div className="flex-1 overflow-auto relative">
                                 {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
                                 {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
-                                {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} currentUser={currentUser} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} onUpdateTask={handleUpdateKanbanTask} />}
+                                {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} currentUser={currentUser} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} onReorderTask={handleReorderKanbanTask} onUpdateTask={handleUpdateKanbanTask} />}
                                 {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
                                 {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { setView('checklist'); }} onArchive={handleArchive} logo={logo} />}
                                 {view === 'history' && <HistoryView history={history} />}
