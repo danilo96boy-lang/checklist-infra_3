@@ -234,7 +234,7 @@
                         }
                     };
                 } else if (type === 'diario') {
-                    let t = customTitulos || {
+                    var t = customTitulos || {
                         col1: "1. KAUAN (FÍSICO E ACESSOS)",
                         col2: "2. LUI (DADOS E CONECTIVIDADE)",
                         col3: "3. INÁCIO (SEGURANÇA E ENDPOINTS)"
@@ -310,7 +310,7 @@
                 return tmpl;
             };
 
-            var Button = (props) => {
+            var Button = function(props) {
                 var variant = props.variant || 'primary';
                 var variants = {
                     primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
@@ -322,18 +322,18 @@
                 return <button {...props} className={cls}>{props.children}</button>;
             };
 
-            var Card = (props) => {
+            var Card = function(props) {
                 var pad = props.noPadding ? '' : 'p-6';
                 var cls = "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm " + pad + " " + (props.className || '');
                 return <div className={cls}>{props.children}</div>;
             };
 
-            var Input = (props) => {
+            var Input = function(props) {
                 var cls = "w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all " + (props.className || '');
                 return <input {...props} className={cls} />;
             };
 
-            var Badge = (props) => {
+            var Badge = function(props) {
                 var color = props.color || 'slate';
                 var colors = {
                     slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
@@ -345,13 +345,13 @@
                 return <span className={"px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider " + (colors[color] || colors.slate)}>{props.children}</span>;
             };
 
-            var calcProgress = (items) => {
+            var calcProgress = function(items) {
                 if (!items || typeof items !== 'object') return 0;
-                let total = 0, done = 0;
-                Object.keys(items).forEach((k) => {
-                    let group = items[k];
+                var total = 0, done = 0;
+                Object.keys(items).forEach(function(k) {
+                    var group = items[k];
                     if (group && Array.isArray(group.tasks)) {
-                        group.tasks.forEach((t) => {
+                        group.tasks.forEach(function(t) {
                             total++;
                             if (t && t.checked) done++;
                         });
@@ -360,32 +360,36 @@
                 return total === 0 ? 0 : Math.round((done / total) * 100);
             };
             
-            var InlineEdit = (props) => {
-                var [val, setVal] = useState(props.value || '');
-                useEffect(() => { setVal(props.value || ''); }, [props.value]);
+            var InlineEdit = function(props) {
+                var valState = useState(props.value || '');
+                var val = valState[0], setVal = valState[1];
+                useEffect(function() { setVal(props.value || ''); }, [props.value]);
 
                 return (
                     <input 
                         value={val}
-                        onChange={(e) => setVal(e.target.value)}
-                        onBlur={() => { if(val !== props.value) props.onSave(val); }}
+                        onChange={function(e) { setVal(e.target.value); }}
+                        onBlur={function() { if(val !== props.value) props.onSave(val); }}
                         className={"bg-transparent focus:outline-none w-full text-ellipsis " + (props.className || '')}
                         title="Clique para editar este título"
                     />
                 );
             };
 
-            var TaskItem = (props) => {
-                var { task, onToggle } = props;
-                var [isOpen, setIsOpen] = useState(false);
-                var [copied, setCopied] = useState(false);
+            var TaskItem = function(props) {
+                var task = props.task;
+                var onToggle = props.onToggle;
+                var openState = useState(false);
+                var isOpen = openState[0], setIsOpen = openState[1];
+                var copiedState = useState(false);
+                var copied = copiedState[0], setCopied = copiedState[1];
 
-                var copyToClipboard = (e, text) => {
+                var copyToClipboard = function(e, text) {
                     e.stopPropagation();
                     if (navigator.clipboard) {
                         navigator.clipboard.writeText(text);
                         setCopied(true);
-                        setTimeout(() => setCopied(false), 1500);
+                        setTimeout(function() { setCopied(false); }, 1500);
                     }
                 };
 
@@ -411,7 +415,7 @@
                                     {task.manual && (
                                         <button 
                                             type="button"
-                                            onClick={() => setIsOpen(!isOpen)} 
+                                            onClick={function() { setIsOpen(!isOpen); }} 
                                             className={"text-[11px] font-medium flex items-center gap-1 px-2 py-0.5 rounded transition-colors " + (isOpen ? "bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300" : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-brand-600")}
                                         >
                                             {Icons.BookOpen} <span>{isOpen ? 'Fechar' : 'Manual'}</span>
@@ -431,7 +435,7 @@
                                                         <span className="text-[10px] uppercase font-bold text-slate-400">Comando / Parâmetro:</span>
                                                         <button 
                                                             type="button"
-                                                            onClick={(e) => copyToClipboard(e, task.copyText)}
+                                                            onClick={function(e) { copyToClipboard(e, task.copyText); }}
                                                             className="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-[11px] font-mono font-bold text-brand-600 dark:text-brand-400 hover:border-brand-500 flex items-center gap-1.5 transition-all shadow-sm"
                                                         >
                                                             {Icons.Copy}
@@ -450,24 +454,28 @@
                 );
             };
 
-            var ActiveChecklist = (props) => {
-                var { ticket, onUpdate, onBack, onForceSave, onRequestFinish } = props;
+            var ActiveChecklist = function(props) {
+                var ticket = props.ticket;
+                var onUpdate = props.onUpdate;
+                var onBack = props.onBack;
+                var onForceSave = props.onForceSave;
+                var onRequestFinish = props.onRequestFinish;
 
                 if (!ticket || !ticket.data) return null;
                 var data = ticket.data;
                 var meta = data.meta || {};
                 var items = data.items || {};
 
-                var handleMeta = (field, value) => {
+                var handleMeta = function(field, value) {
                     var newMeta = Object.assign({}, meta, { [field]: value });
                     onUpdate(Object.assign({}, data, { meta: newMeta }));
                 };
 
-                var handleCheck = (section, taskId) => {
+                var handleCheck = function(section, taskId) {
                     var newData = Object.assign({}, data);
                     var sec = newData.items && newData.items[section];
                     if (!sec || !Array.isArray(sec.tasks)) return;
-                    sec.tasks = sec.tasks.map((t) => {
+                    sec.tasks = sec.tasks.map(function(t) {
                         return t.id === taskId ? Object.assign({}, t, { checked: !t.checked }) : t;
                     });
                     onUpdate(newData);
@@ -477,7 +485,7 @@
                 var leftKeys = ['preventivas', 'preparacao', 'sistema'];
                 var rightKeys = ['configuracao', 'apps', 'seguranca', 'entrega'];
 
-                var renderCategoryCard = (key) => {
+                var renderCategoryCard = function(key) {
                     var group = items[key];
                     if (!group) return null;
                     return (
@@ -486,7 +494,7 @@
                                 <div className="text-brand-500">{Icons[group.icon] || Icons.Server}</div>
                                 <InlineEdit 
                                     value={group.title}
-                                    onSave={(newVal) => {
+                                    onSave={function(newVal) {
                                         var newData = Object.assign({}, data);
                                         if(newData.items[key]) {
                                             newData.items[key].title = newVal;
@@ -500,13 +508,15 @@
                                 />
                             </div>
                             <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                                {(group.tasks || []).map((task) => (
-                                    <TaskItem 
-                                        key={task.id} 
-                                        task={task} 
-                                        onToggle={() => handleCheck(key, task.id)} 
-                                    />
-                                ))}
+                                {(group.tasks || []).map(function(task) {
+                                    return (
+                                        <TaskItem 
+                                            key={task.id} 
+                                            task={task} 
+                                            onToggle={function() { handleCheck(key, task.id); }} 
+                                        />
+                                    );
+                                })}
                             </div>
                         </Card>
                     );
@@ -548,15 +558,15 @@
                                 <div className="p-6 col-span-full grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">DATA</label>
-                                        <Input type="date" value={meta.data || ''} onChange={(e) => handleMeta('data', e.target.value)} />
+                                        <Input type="date" value={meta.data || ''} onChange={function(e) { handleMeta('data', e.target.value); }} />
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">ATIVO / DEPARTAMENTO</label>
-                                        <Input placeholder="Ex: PAT-01020" value={meta.ativo || ''} onChange={(e) => handleMeta('ativo', e.target.value)} />
+                                        <Input placeholder="Ex: PAT-01020" value={meta.ativo || ''} onChange={function(e) { handleMeta('ativo', e.target.value); }} />
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">MÁQUINA / FINALIDADE</label>
-                                        <Input placeholder="Ex: CORP-PC-01" value={meta.maquina || ''} onChange={(e) => handleMeta('maquina', e.target.value)} />
+                                        <Input placeholder="Ex: CORP-PC-01" value={meta.maquina || ''} onChange={function(e) { handleMeta('maquina', e.target.value); }} />
                                     </div>
                                 </div>
                             </Card>
@@ -576,9 +586,13 @@
                 );
             };
 
-            var ReceiptView = (props) => {
-                var { ticket, onBack, onArchive, logo } = props;
-                var [obs, setObs] = useState('');
+            var ReceiptView = function(props) {
+                var ticket = props.ticket;
+                var onBack = props.onBack;
+                var onArchive = props.onArchive;
+                var logo = props.logo;
+                var obsState = useState('');
+                var obs = obsState[0], setObs = obsState[1];
 
                 if (!ticket || !ticket.data) return null;
                 var meta = ticket.data.meta || {};
@@ -587,12 +601,12 @@
                 
                 var totalTasks = 0, checkedTasks = 0;
                 var pendingList = [];
-                var categorySummary = Object.keys(items).map((k) => {
+                var categorySummary = Object.keys(items).map(function(k) {
                     var group = items[k];
                     var tasks = group.tasks || [];
                     var total = tasks.length;
-                    var checked = tasks.filter((t) => t.checked).length;
-                    tasks.forEach((t) => { if (!t.checked) pendingList.push("- [" + group.title + "] " + t.label); });
+                    var checked = tasks.filter(function(t) { return t.checked; }).length;
+                    tasks.forEach(function(t) { if (!t.checked) pendingList.push("- [" + group.title + "] " + t.label); });
                     totalTasks += total;
                     checkedTasks += checked;
                     return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
@@ -600,11 +614,11 @@
                 var percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
                 var statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
 
-                var handleSendOutlook = () => {
+                var handleSendOutlook = function() {
                     var subject = "[" + statusGlobal + "] Registo #" + ticket.visualId + " - " + identificador;
-                    var body = "RELATÓRIO TÉCNICO\n----------------------------------------\nID: #" + ticket.visualId + "\nATIVO: " + (meta.ativo || 'N/A') + "\nMÁQUINA: " + identificador + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO:\n" + categorySummary.map((c) => "[" + c.status + "] " + c.title).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações.") + "\n\nGerado via InfraChecklist Cobrecom";
+                    var body = "RELATÓRIO TÉCNICO\n----------------------------------------\nID: #" + ticket.visualId + "\nATIVO: " + (meta.ativo || 'N/A') + "\nMÁQUINA: " + identificador + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO:\n" + categorySummary.map(function(c) { return "[" + c.status + "] " + c.title; }).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações.") + "\n\nGerado via InfraChecklist Cobrecom";
                     window.location.href = "mailto:" + EMAIL_DESTINO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-                    setTimeout(() => {
+                    setTimeout(function() {
                         if (confirm("E-mail aberto? Clique OK para arquivar.")) onArchive(ticket);
                     }, 1000);
                 };
@@ -622,11 +636,11 @@
                             <Card className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
-                                    <textarea value={obs} onChange={(e) => setObs(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
+                                    <textarea value={obs} onChange={function(e) { setObs(e.target.value); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
                                 </div>
                                 <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
                                     <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações de Encerramento</h3>
-                                    <Button className="w-full justify-start" onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
+                                    <Button className="w-full justify-start" onClick={function() { window.print(); }} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
                                     <Button className="w-full justify-start" onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail & Arquivar</Button>
                                 </div>
                             </Card>
@@ -644,9 +658,9 @@
                                 <div className={"p-3 text-center flex flex-col justify-center " + (percent === 100 ? 'bg-gray-100' : 'bg-gray-200')}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
                             </div>
                             <div className="p-6 flex gap-8">
-                                <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map((cat, i) => (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>))}</tbody></table></div>
+                                <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map(function(cat, i) { return (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>); })}</tbody></table></div>
                                 <div className="w-1/2 flex flex-col gap-4">
-                                    {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map((p, i) => <li key={i} className="truncate">{p.replace('- ', '')}</li>)}</ul></div>)}
+                                    {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map(function(p, i) { return <li key={i} className="truncate">{p.replace('- ', '')}</li>; })}</ul></div>)}
                                     <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16">{obs || "Sem observações adicionais."}</p></div>
                                 </div>
                             </div>
@@ -655,9 +669,12 @@
                 );
             };
 
-            var Dashboard = (props) => {
-                var { activeTickets, onOpenTicket, onDeleteTicket, historyCount } = props;
-                var formatCount = activeTickets.filter((t) => t.type === 'formatacao').length;
+            var Dashboard = function(props) {
+                var activeTickets = props.activeTickets || [];
+                var onOpenTicket = props.onOpenTicket;
+                var onDeleteTicket = props.onDeleteTicket;
+                var historyCount = props.historyCount || 0;
+                var formatCount = activeTickets.filter(function(t) { return t.type === 'formatacao'; }).length;
 
                 return (
                     <div className="p-6 md:p-10 space-y-8 fade-in">
@@ -690,13 +707,13 @@
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {activeTickets.map((ticket) => {
+                                    {activeTickets.map(function(ticket) {
                                         var meta = (ticket.data && ticket.data.meta) || {};
                                         var pct = calcProgress(ticket.data && ticket.data.items);
                                         var nomeAtivo = meta.maquina || meta.ativo || "Sem Identificação";
                                         
                                         return (
-                                            <div key={ticket.id} onClick={() => onOpenTicket(ticket.id)} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
+                                            <div key={ticket.id} onClick={function() { onOpenTicket(ticket.id); }} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
                                                 <div className="absolute top-0 left-0 w-1 h-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div className="flex items-center gap-2">
@@ -718,7 +735,7 @@
                                                     </div>
                                                     <span className="text-xs font-bold text-brand-600">{pct}%</span>
                                                 </div>
-                                                <button onClick={(e) => onDeleteTicket(e, ticket.id)} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100" title="Excluir registo">{Icons.Trash}</button>
+                                                <button onClick={function(e) { onDeleteTicket(e, ticket.id); }} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100" title="Excluir registo">{Icons.Trash}</button>
                                             </div>
                                         );
                                     })}
@@ -729,11 +746,12 @@
                 );
             };
 
-            var HistoryView = (props) => {
-                var { history } = props;
-                var [search, setSearch] = useState('');
+            var HistoryView = function(props) {
+                var history = props.history || [];
+                var searchState = useState('');
+                var search = searchState[0], setSearch = searchState[1];
 
-                var filtered = history.filter((h) => {
+                var filtered = history.filter(function(h) {
                     var s = search.toLowerCase();
                     var at = (h.ativo || '').toLowerCase();
                     var tc = (h.tecnico || '').toLowerCase();
@@ -750,7 +768,7 @@
                             </div>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
-                                <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 w-64" />
+                                <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={function(e) { setSearch(e.target.value); }} className="pl-10 w-64" />
                             </div>
                         </div>
                         
@@ -768,20 +786,22 @@
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                        {filtered.map((h, i) => (
-                                            <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                                <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
-                                                <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date || Date.now()).toLocaleDateString()}</td>
-                                                <td className="px-6 py-3">
-                                                    <Badge color={h.type === 'formatacao' ? 'blue' : h.type === 'diario' ? 'green' : h.type === 'rack' ? 'indigo' : 'amber'}>
-                                                        {h.type === 'formatacao' ? 'Formatação' : h.type === 'diario' ? 'Diário' : h.type === 'rack' ? 'Rack/Switch' : 'Zebra'}
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
-                                                <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico || 'N/A'}</td>
-                                                <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
-                                            </tr>
-                                        ))}
+                                        {filtered.map(function(h, i) {
+                                            return (
+                                                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                    <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
+                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date || Date.now()).toLocaleDateString()}</td>
+                                                    <td className="px-6 py-3">
+                                                        <Badge color={h.type === 'formatacao' ? 'blue' : h.type === 'diario' ? 'green' : h.type === 'rack' ? 'indigo' : 'amber'}>
+                                                            {h.type === 'formatacao' ? 'Formatação' : h.type === 'diario' ? 'Diário' : h.type === 'rack' ? 'Rack/Switch' : 'Zebra'}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
+                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico || 'N/A'}</td>
+                                                    <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
+                                                </tr>
+                                            );
+                                        })}
                                         {filtered.length === 0 && <tr><td colSpan="6" className="text-center py-8 text-slate-400">Nenhum registro encontrado.</td></tr>}
                                     </tbody>
                                 </table>
@@ -791,12 +811,20 @@
                 );
             };
 
-            var KanbanView = (props) => {
-                var { tasks, users, onSaveTask, onDeleteTask, onMoveTask } = props;
-                var [isModalOpen, setIsModalOpen] = useState(false);
-                var [form, setForm] = useState({ title: '', assignee: users[0] ? users[0].name : 'Inacio', priority: 'Média', status: 'a_fazer' });
+            var KanbanView = function(props) {
+                var tasks = props.tasks || [];
+                var users = props.users || [];
+                var onSaveTask = props.onSaveTask;
+                var onDeleteTask = props.onDeleteTask;
+                var onMoveTask = props.onMoveTask;
 
-                var handleCreate = (e) => {
+                var modalState = useState(false);
+                var isModalOpen = modalState[0], setIsModalOpen = modalState[1];
+                
+                var formState = useState({ title: '', assignee: users[0] ? users[0].name : 'Inacio', priority: 'Média', status: 'a_fazer' });
+                var form = formState[0], setForm = formState[1];
+
+                var handleCreate = function(e) {
                     e.preventDefault();
                     if (!form.title.trim()) return;
                     var seq = Math.floor(100 + Math.random() * 900);
@@ -825,14 +853,14 @@
                         <div className="flex justify-between items-end mb-6 shrink-0">
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Quadro Kanban (Tarefas TI)</h2>
-                                <p className="text-slate-500 text-sm">Gestão de demandas e chamados internos da equipe[cite: 15, 16].</p>
+                                <p className="text-slate-500 text-sm">Gestão de demandas e chamados internos da equipe.</p>
                             </div>
-                            <Button onClick={() => setIsModalOpen(true)}>{Icons.Plus} Novo Cartão</Button>
+                            <Button onClick={function() { setIsModalOpen(true); }}>{Icons.Plus} Novo Cartão</Button>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1 pb-4 min-w-[900px]">
-                            {columns.map((col) => {
-                                var colTasks = tasks.filter((t) => t.status === col.id);
+                            {columns.map(function(col) {
+                                var colTasks = tasks.filter(function(t) { return t.status === col.id; });
                                 return (
                                     <div key={col.id} className="bg-slate-200/60 dark:bg-slate-900/60 rounded-xl p-4 flex flex-col border border-slate-200 dark:border-slate-800 h-full max-h-[calc(100vh-200px)]">
                                         <div className="flex justify-between items-center mb-3 shrink-0">
@@ -841,7 +869,7 @@
                                         </div>
 
                                         <div className="space-y-3 overflow-y-auto flex-1 pr-1">
-                                            {colTasks.map((task) => {
+                                            {colTasks.map(function(task) {
                                                 var initials = (task.assignee || 'TI').substring(0, 2).toUpperCase();
                                                 var priorityColor = task.priority === 'Alta' ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400' : task.priority === 'Média' ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400' : 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400';
                                                 
@@ -851,7 +879,7 @@
                                                             <span className="text-[10px] font-mono font-bold text-slate-400">{task.code}</span>
                                                             <div className="flex items-center gap-1">
                                                                 <span className={"text-[9px] font-bold px-1.5 py-0.5 rounded " + priorityColor}>{task.priority}</span>
-                                                                <button onClick={() => onDeleteTask(task.id)} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir">{Icons.Trash}</button>
+                                                                <button onClick={function() { onDeleteTask(task.id); }} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir">{Icons.Trash}</button>
                                                             </div>
                                                         </div>
 
@@ -865,13 +893,13 @@
 
                                                             <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
                                                                 {col.id !== 'a_fazer' && (
-                                                                    <button onClick={() => {
+                                                                    <button onClick={function() {
                                                                         var prev = col.id === 'em_andamento' ? 'a_fazer' : col.id === 'impedimentos' ? 'em_andamento' : 'impedimentos';
                                                                         onMoveTask(task.id, prev);
                                                                     }} className="p-1 rounded bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-300" title="Mover para trás">{Icons.ArrowLeft}</button>
                                                                 )}
                                                                 {col.id !== 'concluido' && (
-                                                                    <button onClick={() => {
+                                                                    <button onClick={function() {
                                                                         var next = col.id === 'a_fazer' ? 'em_andamento' : col.id === 'em_andamento' ? 'impedimentos' : 'concluido';
                                                                         onMoveTask(task.id, next);
                                                                     }} className="p-1 rounded bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-300" title="Avançar">{Icons.ArrowRight}</button>
@@ -893,23 +921,23 @@
                                 <Card className="w-full max-w-md" noPadding>
                                     <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
                                         <h3 className="font-bold text-slate-700 dark:text-slate-200 text-sm">Criar Novo Cartão (Kanban)</h3>
-                                        <button onClick={() => setIsModalOpen(false)} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                                        <button onClick={function() { setIsModalOpen(false); }} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
                                     </div>
                                     <form onSubmit={handleCreate} className="p-6 space-y-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">Título da Tarefa</label>
-                                            <Input value={form.title} onChange={(e) => setForm(Object.assign({}, form, { title: e.target.value }))} placeholder="Ex: Substituir switch rack 02" autoFocus />
+                                            <Input value={form.title} onChange={function(e) { setForm(Object.assign({}, form, { title: e.target.value })); }} placeholder="Ex: Substituir switch rack 02" autoFocus />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">Responsável</label>
-                                                <select value={form.assignee} onChange={(e) => setForm(Object.assign({}, form, { assignee: e.target.value }))} className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none">
-                                                    {users.map((u) => <option key={u.id} value={u.name}>{u.name}</option>)}
+                                                <select value={form.assignee} onChange={function(e) { setForm(Object.assign({}, form, { assignee: e.target.value })); }} className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none">
+                                                    {users.map(function(u) { return <option key={u.id} value={u.name}>{u.name}</option>; })}
                                                 </select>
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">Prioridade</label>
-                                                <select value={form.priority} onChange={(e) => setForm(Object.assign({}, form, { priority: e.target.value }))} className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none">
+                                                <select value={form.priority} onChange={function(e) { setForm(Object.assign({}, form, { priority: e.target.value })); }} className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none">
                                                     <option value="Baixa">Baixa</option>
                                                     <option value="Média">Média</option>
                                                     <option value="Alta">Alta</option>
@@ -918,14 +946,14 @@
                                         </div>
                                         <div>
                                             <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5">Coluna Inicial</label>
-                                            <select value={form.status} onChange={(e) => setForm(Object.assign({}, form, { status: e.target.value }))} className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none">
+                                            <select value={form.status} onChange={function(e) { setForm(Object.assign({}, form, { status: e.target.value })); }} className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 focus:outline-none">
                                                 <option value="a_fazer">A Fazer</option>
                                                 <option value="em_andamento">Em Andamento</option>
                                                 <option value="impedimentos">Impedimentos</option>
                                             </select>
                                         </div>
                                         <div className="pt-2 flex justify-end gap-2">
-                                            <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+                                            <Button type="button" variant="secondary" onClick={function() { setIsModalOpen(false); }}>Cancelar</Button>
                                             <Button type="submit">Adicionar Cartão</Button>
                                         </div>
                                     </form>
@@ -936,33 +964,49 @@
                 );
             };
 
-            var App = () => {
+            var App = function() {
                 var isSavingDraftRef = useRef(false);
-                var [draftTicket, setDraftTicket] = useState(null);
+                var draftState = useState(null);
+                var draftTicket = draftState[0], setDraftTicket = draftState[1];
 
-                var [view, setView] = useState('login');
-                var [currentUser, setCurrentUser] = useState(null);
-                var [users, setUsers] = useState(DEFAULT_TEAM);
-                var [activeTickets, setActiveTickets] = useState([]);
-                var [history, setHistory] = useState([]);
-                var [kanbanTasks, setKanbanTasks] = useState([]);
-                var [logo, setLogo] = useState('');
-                var [currentTicketId, setCurrentTicketId] = useState(null);
-                var [darkMode, setDarkMode] = useState(true);
+                var viewState = useState('login');
+                var view = viewState[0], setView = viewState[1];
+                var userState = useState(null);
+                var currentUser = userState[0], setCurrentUser = userState[1];
+                var usersState = useState(DEFAULT_TEAM);
+                var users = usersState[0], setUsers = usersState[1];
+                var ticketsState = useState([]);
+                var activeTickets = ticketsState[0], setActiveTickets = ticketsState[1];
+                var historyState = useState([]);
+                var history = historyState[0], setHistory = historyState[1];
+                var kanbanState = useState([]);
+                var kanbanTasks = kanbanState[0], setKanbanTasks = kanbanState[1];
+                var logoState = useState('');
+                var logo = logoState[0], setLogo = logoState[1];
+                var curTicketState = useState(null);
+                var currentTicketId = curTicketState[0], setCurrentTicketId = curTicketState[1];
+                var darkState = useState(true);
+                var darkMode = darkState[0], setDarkMode = darkState[1];
                 
-                var [showConfig, setShowConfig] = useState(false);
-                var [openFolders, setOpenFolders] = useState({ checklists: false });
-                var [customFolders, setCustomFolders] = useState([]);
+                var cfgState = useState(false);
+                var showConfig = cfgState[0], setShowConfig = cfgState[1];
+                
+                var openFoldersState = useState({ checklists: false });
+                var openFolders = openFoldersState[0], setOpenFolders = openFoldersState[1];
+
+                var customFoldersState = useState([]);
+                var customFolders = customFoldersState[0], setCustomFolders = customFoldersState[1];
                 
                 var fileInputRef = useRef(null);
 
-                var [globalTitulos, setGlobalTitulos] = useState({
+                var titlesState = useState({
                     col1: "1. KAUAN (FÍSICO E ACESSOS)",
                     col2: "2. LUI (DADOS E CONECTIVIDADE)",
                     col3: "3. INÁCIO (SEGURANÇA E ENDPOINTS)"
                 });
+                var globalTitulos = titlesState[0], setGlobalTitulos = titlesState[1];
 
-                useEffect(() => {
+                useEffect(function() {
                     try {
                         var savedTheme = localStorage.getItem('sa_theme'); 
                         if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
@@ -980,12 +1024,12 @@
                         localStorage.removeItem('sa_user_session');
                     }
 
-                    var unsubConfig = db.collection('settings').doc('titulos').onSnapshot((snap) => {
+                    var unsubConfig = db.collection('settings').doc('titulos').onSnapshot(function(snap) {
                         if (snap.exists) setGlobalTitulos(snap.data());
                         else db.collection('settings').doc('titulos').set(globalTitulos);
                     });
 
-                    var unsubFolders = db.collection('settings').doc('sidebar_modules').onSnapshot((snap) => {
+                    var unsubFolders = db.collection('settings').doc('sidebar_modules').onSnapshot(function(snap) {
                         if (snap.exists && snap.data() && Array.isArray(snap.data().folders)) {
                             setCustomFolders(snap.data().folders);
                         } else {
@@ -993,79 +1037,87 @@
                         }
                     });
 
-                    var unsubKanban = db.collection('kanban_tasks').onSnapshot((snap) => {
-                        var list = snap.docs.map((doc) => Object.assign({ id: doc.id }, doc.data()));
+                    var unsubKanban = db.collection('kanban_tasks').onSnapshot(function(snap) {
+                        var list = snap.docs.map(function(doc) {
+                            return Object.assign({ id: doc.id }, doc.data());
+                        });
                         setKanbanTasks(list);
                     });
 
-                    var unsubTickets = db.collection('tickets').onSnapshot((snap) => {
-                        var list = snap.docs.map((doc) => Object.assign({ id: doc.id }, doc.data())).filter((t) => t && t.data && t.data.items);
-                        list.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                    var unsubTickets = db.collection('tickets').onSnapshot(function(snap) {
+                        var list = snap.docs.map(function(doc) {
+                            return Object.assign({ id: doc.id }, doc.data());
+                        }).filter(function(t) {
+                            return t && t.data && t.data.items;
+                        });
+                        list.sort(function(a,b) { return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); });
                         setActiveTickets(list);
                     });
 
-                    var unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot((snap) => {
-                        setHistory(snap.docs.map((doc) => Object.assign({ id: doc.id }, doc.data())));
+                    var unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot(function(snap) {
+                        setHistory(snap.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); }));
                     });
 
-                    var unsubUsers = db.collection('users').onSnapshot((snap) => {
+                    var unsubUsers = db.collection('users').onSnapshot(function(snap) {
                         if (snap.empty) {
-                            DEFAULT_TEAM.forEach((u) => db.collection('users').add(u));
+                            DEFAULT_TEAM.forEach(function(u) { db.collection('users').add(u); });
                         } else {
-                            setUsers(snap.docs.map((doc) => Object.assign({ docId: doc.id }, doc.data())));
+                            setUsers(snap.docs.map(function(doc) { return Object.assign({ docId: doc.id }, doc.data()); }));
                         }
                     });
 
-                    return () => { unsubTickets(); unsubHistory(); unsubUsers(); unsubConfig(); unsubFolders(); unsubKanban(); };
+                    return function() { unsubTickets(); unsubHistory(); unsubUsers(); unsubConfig(); unsubFolders(); unsubKanban(); };
                 }, []);
 
-                useEffect(() => { 
+                useEffect(function() { 
                     if (darkMode) document.documentElement.classList.add('dark'); 
                     else document.documentElement.classList.remove('dark'); 
                     localStorage.setItem('sa_theme', JSON.stringify(darkMode)); 
                 }, [darkMode]);
 
-                var handleLogin = (user) => { 
+                var handleLogin = function(user) { 
                     setCurrentUser(user); 
                     localStorage.setItem('sa_user_session', JSON.stringify(user)); 
                     setView('dashboard'); 
                 };
 
-                var handleLogout = () => { 
+                var handleLogout = function() { 
                     setCurrentUser(null); 
                     localStorage.removeItem('sa_user_session'); 
                     setView('login'); 
                 };
 
-                var toggleFolder = (id) => {
+                var toggleFolder = function(id) {
                     var nextState = Object.assign({}, openFolders, { [id]: !openFolders[id] });
                     setOpenFolders(nextState);
                 };
 
-                var handleAddFolder = () => {
+                var handleAddFolder = function() {
                     var title = prompt("Nome da nova pasta (ex: Firewall, Roteadores):");
                     if (!title || !title.trim()) return;
                     var newFolder = { id: 'f_' + Date.now(), title: title.trim(), links: [] };
                     var updated = customFolders.concat([newFolder]);
                     db.collection('settings').doc('sidebar_modules').set({ folders: updated });
-                    setOpenFolders(Object.assign({}, openFolders, { [newFolder.id]: true }));
+                    
+                    var nextOpen = Object.assign({}, openFolders, { [newFolder.id]: true });
+                    setOpenFolders(nextOpen);
                 };
 
-                var handleDeleteFolder = (e, folderId) => {
+                var handleDeleteFolder = function(e, folderId) {
                     e.stopPropagation();
-                    if (confirm("Excluir esta pasta e seus links?")) {
-                        var updated = customFolders.filter((f) => f.id !== folderId);
+                    if (confirm("Deseja realmente excluir esta pasta e seus links?")) {
+                        var updated = customFolders.filter(function(f) { return f.id !== folderId; });
                         db.collection('settings').doc('sidebar_modules').set({ folders: updated });
                     }
                 };
 
-                var handleAddLink = (folderId) => {
+                var handleAddLink = function(folderId) {
                     var label = prompt("Nome do acesso (ex: pfSense Matriz):");
                     if (!label || !label.trim()) return;
                     var url = prompt("Endereço IP ou URL (ex: 192.168.1.1):");
                     if (!url || !url.trim()) return;
 
-                    var updated = customFolders.map((f) => {
+                    var updated = customFolders.map(function(f) {
                         if (f.id === folderId) {
                             var existing = f.links || [];
                             var newLink = { id: 'l_' + Date.now(), label: label.trim(), url: url.trim() };
@@ -1076,12 +1128,12 @@
                     db.collection('settings').doc('sidebar_modules').set({ folders: updated });
                 };
 
-                var handleDeleteLink = (e, folderId, linkId) => {
+                var handleDeleteLink = function(e, folderId, linkId) {
                     e.stopPropagation();
                     if (confirm("Remover este acesso?")) {
-                        var updated = customFolders.map((f) => {
+                        var updated = customFolders.map(function(f) {
                             if (f.id === folderId) {
-                                var filtered = (f.links || []).filter((l) => l.id !== linkId);
+                                var filtered = (f.links || []).filter(function(l) { return l.id !== linkId; });
                                 return Object.assign({}, f, { links: filtered });
                             }
                             return f;
@@ -1090,13 +1142,13 @@
                     }
                 };
 
-                var handleOpenLink = (url) => {
+                var handleOpenLink = function(url) {
                     if (!url) return;
                     var target = url.startsWith('http://') || url.startsWith('https://') ? url : 'http://' + url;
                     window.open(target, '_blank');
                 };
                 
-                var handleCreateTicket = (type) => {
+                var handleCreateTicket = function(type) {
                     var prefix = type === 'formatacao' ? 'F' : type === 'zebra' ? 'Z' : type === 'rack' ? 'R' : 'D';
                     var seq = Math.floor(1000 + Math.random() * 9000);
                     var newTicket = {
@@ -1111,7 +1163,7 @@
                     setView('checklist');
                 };
 
-                var handleUpdateTicket = (newData) => { 
+                var handleUpdateTicket = function(newData) { 
                     if (currentTicketId === 'draft') {
                         var pct = calcProgress(newData.items);
                         var updatedDraft = Object.assign({}, draftTicket, { data: newData });
@@ -1120,11 +1172,11 @@
                             isSavingDraftRef.current = true;
                             var ticketToSave = Object.assign({}, updatedDraft);
                             delete ticketToSave.id;
-                            db.collection('tickets').add(ticketToSave).then((docRef) => {
+                            db.collection('tickets').add(ticketToSave).then(function(docRef) {
                                 setCurrentTicketId(docRef.id);
                                 setDraftTicket(null);
                                 isSavingDraftRef.current = false;
-                            }).catch(() => { isSavingDraftRef.current = false; });
+                            }).catch(function() { isSavingDraftRef.current = false; });
                         } else {
                             setDraftTicket(updatedDraft);
                         }
@@ -1133,7 +1185,7 @@
                     }
                 };
                 
-                var handleBackFromChecklist = () => {
+                var handleBackFromChecklist = function() {
                     if (currentTicketId === 'draft') {
                         setDraftTicket(null);
                         setCurrentTicketId(null);
@@ -1141,12 +1193,12 @@
                     setView('dashboard');
                 };
 
-                var handleForceSaveChecklist = () => {
+                var handleForceSaveChecklist = function() {
                     if (currentTicketId === 'draft') {
                         isSavingDraftRef.current = true;
                         var ticketToSave = Object.assign({}, draftTicket);
                         delete ticketToSave.id;
-                        db.collection('tickets').add(ticketToSave).then(() => {
+                        db.collection('tickets').add(ticketToSave).then(function() {
                             setCurrentTicketId(null);
                             setDraftTicket(null);
                             isSavingDraftRef.current = false;
@@ -1157,12 +1209,12 @@
                     }
                 };
 
-                var handleRequestFinish = () => {
+                var handleRequestFinish = function() {
                     if (currentTicketId === 'draft') {
                         isSavingDraftRef.current = true;
                         var ticketToSave = Object.assign({}, draftTicket);
                         delete ticketToSave.id;
-                        db.collection('tickets').add(ticketToSave).then((docRef) => {
+                        db.collection('tickets').add(ticketToSave).then(function(docRef) {
                             setCurrentTicketId(docRef.id);
                             setDraftTicket(null);
                             isSavingDraftRef.current = false;
@@ -1173,7 +1225,7 @@
                     }
                 };
 
-                var handleGlobalTitleChange = (colKey, newVal) => {
+                var handleGlobalTitleChange = function(colKey, newVal) {
                     var map = { coluna1: 'col1', coluna2: 'col2', coluna3: 'col3' };
                     var gKey = map[colKey];
                     if (gKey) {
@@ -1182,7 +1234,7 @@
                     }
                 };
                 
-                var handleArchive = (ticket) => {
+                var handleArchive = function(ticket) {
                     if (!ticket) return;
                     var meta = (ticket.data && ticket.data.meta) || {};
                     db.collection('history').add({ 
@@ -1192,24 +1244,24 @@
                         tecnico: meta.tecnico || 'N/A', 
                         ativo: meta.ativo || meta.maquina || "N/A", 
                         data: ticket.data 
-                    }).then(() => {
+                    }).then(function() {
                         return db.collection('tickets').doc(ticket.id).delete();
-                    }).then(() => {
+                    }).then(function() {
                         setCurrentTicketId(null);
                         setView('dashboard');
                     });
                 };
                 
-                var handleDeleteActive = (e, id) => { 
+                var handleDeleteActive = function(e, id) { 
                     e.stopPropagation(); 
                     if (confirm("Cancelar este registro?")) db.collection('tickets').doc(id).delete(); 
                 };
 
-                var handleLogoUpload = (e) => { 
+                var handleLogoUpload = function(e) { 
                     var f = e.target.files && e.target.files[0]; 
                     if (f) { 
                         var r = new FileReader(); 
-                        r.onloadend = () => { 
+                        r.onloadend = function() { 
                             setLogo(r.result); 
                             localStorage.setItem('sa_logo', r.result); 
                         }; 
@@ -1217,21 +1269,21 @@
                     }
                 };
 
-                var handleSaveKanbanTask = (task) => {
+                var handleSaveKanbanTask = function(task) {
                     db.collection('kanban_tasks').add(task);
                 };
 
-                var handleDeleteKanbanTask = (taskId) => {
+                var handleDeleteKanbanTask = function(taskId) {
                     if (confirm("Excluir este cartão do Kanban?")) {
                         db.collection('kanban_tasks').doc(taskId).delete();
                     }
                 };
 
-                var handleMoveKanbanTask = (taskId, newStatus) => {
+                var handleMoveKanbanTask = function(taskId, newStatus) {
                     db.collection('kanban_tasks').doc(taskId).update({ status: newStatus });
                 };
 
-                var currentTicketData = currentTicketId === 'draft' ? draftTicket : activeTickets.find((t) => t.id === currentTicketId);
+                var currentTicketData = currentTicketId === 'draft' ? draftTicket : activeTickets.find(function(t) { return t.id === currentTicketId; });
 
                 if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
 
@@ -1248,13 +1300,13 @@
                             <div className="flex-1 overflow-y-auto py-6">
                                 <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Principal</div>
                                 <nav className="px-3 space-y-1 mb-8">
-                                    <button onClick={() => setView('dashboard')} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                    <button onClick={function() { setView('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.Layout} Dashboard
                                     </button>
-                                    <button onClick={() => setView('kanban')} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                    <button onClick={function() { setView('kanban'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.Kanban} Kanban TI
                                     </button>
-                                    <button onClick={() => setView('history')} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                    <button onClick={function() { setView('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.History} Histórico
                                     </button>
                                 </nav>
@@ -1266,7 +1318,7 @@
 
                                 <nav className="px-3 space-y-1">
                                     <div className="space-y-1 mb-2">
-                                        <div onClick={() => toggleFolder('checklists')} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer " + (openFolders.checklists ? 'bg-slate-800/60 text-white' : '')}>
+                                        <div onClick={function() { toggleFolder('checklists'); }} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer " + (openFolders.checklists ? 'bg-slate-800/60 text-white' : '')}>
                                             <div className="flex items-center gap-2.5 truncate">
                                                 <span className={openFolders.checklists ? "text-brand-400" : "text-slate-500"}>{Icons.Folder}</span> 
                                                 <span className="truncate font-semibold">Checklists de TI</span>
@@ -1278,49 +1330,51 @@
                                         
                                         {openFolders.checklists && (
                                             <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
-                                                <button onClick={() => handleCreateTicket('diario')} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 group truncate">
+                                                <button onClick={function() { handleCreateTicket('diario'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 group truncate">
                                                     <span className="text-emerald-500/50 group-hover:text-emerald-400">{Icons.Check}</span> Check Diário
                                                 </button>
-                                                <button onClick={() => handleCreateTicket('rack')} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-400 hover:bg-slate-800/50 group truncate">
+                                                <button onClick={function() { handleCreateTicket('rack'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-400 hover:bg-slate-800/50 group truncate">
                                                     <span className="text-indigo-500/50 group-hover:text-indigo-400">{Icons.Server}</span> Rack Fábrica
                                                 </button>
-                                                <button onClick={() => handleCreateTicket('formatacao')} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-brand-400 hover:bg-slate-800/50 group truncate">
+                                                <button onClick={function() { handleCreateTicket('formatacao'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-brand-400 hover:bg-slate-800/50 group truncate">
                                                     <span className="text-brand-500/50 group-hover:text-brand-400">{Icons.Copy}</span> Formatação PC
                                                 </button>
-                                                <button onClick={() => handleCreateTicket('zebra')} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-amber-400 hover:bg-slate-800/50 group truncate">
+                                                <button onClick={function() { handleCreateTicket('zebra'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-amber-400 hover:bg-slate-800/50 group truncate">
                                                     <span className="text-amber-500/50 group-hover:text-amber-400">{Icons.Printer}</span> Manutenção Zebra
                                                 </button>
                                             </div>
                                         )}
                                     </div>
 
-                                    {customFolders.map((f) => {
+                                    {customFolders.map(function(f) {
                                         var isOpen = !!openFolders[f.id];
                                         return (
                                             <div key={f.id} className="space-y-1 mb-1">
-                                                <div onClick={() => toggleFolder(f.id)} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer group " + (isOpen ? 'bg-slate-800/60 text-white' : '')}>
+                                                <div onClick={function() { toggleFolder(f.id); }} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer group " + (isOpen ? 'bg-slate-800/60 text-white' : '')}>
                                                     <div className="flex items-center gap-2.5 truncate">
                                                         <span className={isOpen ? "text-amber-400" : "text-slate-500"}>{Icons.Folder}</span> 
                                                         <span className="truncate font-semibold">{f.title}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1.5 shrink-0">
-                                                        <button onClick={(e) => handleDeleteFolder(e, f.id)} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Pasta">{Icons.Trash}</button>
+                                                        <button onClick={function(e){ handleDeleteFolder(e, f.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Pasta">{Icons.Trash}</button>
                                                         <div className={"transition-transform duration-200 text-slate-500 " + (isOpen ? 'rotate-180' : '')}>{Icons.ChevronDown}</div>
                                                     </div>
                                                 </div>
                                                 
                                                 {isOpen && (
                                                     <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
-                                                        {(f.links || []).map((l) => (
-                                                            <div key={l.id} className="flex items-center justify-between group px-2 py-1 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800/50">
-                                                                <div onClick={() => handleOpenLink(l.url)} className="flex items-center gap-2 truncate cursor-pointer flex-1" title={l.url}>
-                                                                    <span className="text-slate-500 group-hover:text-brand-400">{Icons.ExternalLink}</span>
-                                                                    <span className="truncate">{l.label}</span>
+                                                        {(f.links || []).map(function(l) {
+                                                            return (
+                                                                <div key={l.id} className="flex items-center justify-between group px-2 py-1 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800/50">
+                                                                    <div onClick={function() { handleOpenLink(l.url); }} className="flex items-center gap-2 truncate cursor-pointer flex-1" title={l.url}>
+                                                                        <span className="text-slate-500 group-hover:text-brand-400">{Icons.ExternalLink}</span>
+                                                                        <span className="truncate">{l.label}</span>
+                                                                    </div>
+                                                                    <button onClick={function(e) { handleDeleteLink(e, f.id, l.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 shrink-0" title="Remover link">{Icons.Trash}</button>
                                                                 </div>
-                                                                <button onClick={(e) => handleDeleteLink(e, f.id, l.id)} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 shrink-0" title="Remover link">{Icons.Trash}</button>
-                                                            </div>
-                                                        ))}
-                                                        <button onClick={() => handleAddLink(f.id)} className="w-full text-left flex items-center gap-1.5 px-2 py-1 text-[10px] text-slate-500 hover:text-brand-400 font-semibold">
+                                                            );
+                                                        })}
+                                                        <button onClick={function() { handleAddLink(f.id); }} className="w-full text-left flex items-center gap-1.5 px-2 py-1 text-[10px] text-slate-500 hover:text-brand-400 font-semibold">
                                                             {Icons.Plus} <span>Adicionar Link</span>
                                                         </button>
                                                     </div>
@@ -1342,8 +1396,8 @@
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-3 gap-2">
-                                    <button title="Alternar tema" onClick={() => setDarkMode(!darkMode)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                                    <button title="Configurações" onClick={() => setShowConfig(true)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                    <button title="Alternar tema" onClick={function() { setDarkMode(!darkMode); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
+                                    <button title="Configurações" onClick={function() { setShowConfig(true); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
                                     <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
                                 </div>
                             </div>
@@ -1353,18 +1407,18 @@
                             <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0">
                                 <span className="font-bold">INFRA CHECK</span>
                                 <div className="flex gap-2">
-                                    <button onClick={() => setShowConfig(true)} className="p-2">{Icons.Settings}</button>
-                                    <button onClick={() => setView('dashboard')} className="p-2">{Icons.Layout}</button>
+                                    <button onClick={function() { setShowConfig(true); }} className="p-2">{Icons.Settings}</button>
+                                    <button onClick={function() { setView('dashboard'); }} className="p-2">{Icons.Layout}</button>
                                     <button onClick={handleLogout} className="p-2">{Icons.LogOut}</button>
                                 </div>
                             </div>
 
                             <div className="flex-1 overflow-auto relative">
-                                {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
-                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
+                                {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
+                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
                                 {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} />}
                                 {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
-                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} />}
+                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { setView('checklist'); }} onArchive={handleArchive} logo={logo} />}
                                 {view === 'history' && <HistoryView history={history} />}
                             </div>
                         </main>
