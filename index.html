@@ -50,6 +50,7 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 
         @media print {
             @page { margin: 0; size: auto; }
@@ -63,14 +64,16 @@
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300">
     <div id="root">
-        <div style="display:flex;height:100vh;align-items:center;justify-content:center;color:#94a3b8;font-family:monospace;">
-            Iniciando Infra Checklist Cobrecom...
+        <div style="display:flex;height:100vh;align-items:center;justify-content:center;color:#94a3b8;font-family:monospace;flex-direction:column;gap:10px;">
+            <div style="width: 40px; height: 40px; border: 4px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <span>Iniciando Infra Checklist Cobrecom...</span>
+            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
         </div>
     </div>
 
-    <script type="text/babel">
+    <script type="text/babel" data-type="module">
         try {
-            var firebaseConfig = {
+            const firebaseConfig = {
                 apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
                 authDomain: "checklist-infra.firebaseapp.com",
                 projectId: "checklist-infra",
@@ -80,13 +83,11 @@
             };
 
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-            var db = firebase.firestore();
-            var useState = React.useState;
-            var useEffect = React.useEffect;
-            var useRef = React.useRef;
+            const db = firebase.firestore();
+            const { useState, useEffect, useRef } = React;
 
-            var EMAIL_DESTINO = "infra@cobrecom.com.br";
-            var DEFAULT_TEAM = [
+            const EMAIL_DESTINO = "infra@cobrecom.com.br";
+            const DEFAULT_TEAM = [
                 { id: '01001071', name: 'Danilo', pass: '1234' },
                 { id: '01001440', name: 'Kauan', pass: '1234' },
                 { id: '01001691', name: 'Lui', pass: '1234' },
@@ -94,7 +95,7 @@
                 { id: 'admin', name: 'Admin', pass: 'admin' }
             ];
 
-            var DEFAULT_KANBAN = [
+            const DEFAULT_KANBAN = [
                 { code: 'SCRUM-17', title: 'ROTA VPN JOY ITU > TL -', assignee: '', priority: 'Média', status: 'a_fazer' },
                 { code: 'SCRUM-171', title: 'ATUALIZAR MAPAS DE REDE', assignee: '', priority: 'Baixa', status: 'a_fazer' },
                 { code: 'SCRUM-175', title: 'ANTENA ADMINISTRATIVO', assignee: '', priority: 'Média', status: 'a_fazer' },
@@ -116,13 +117,13 @@
                 { code: 'SCRUM-169', title: 'WORKSPACE', assignee: 'Danilo', priority: 'Alta', status: 'impedimentos' }
             ];
 
-            var Icons = {
+            const Icons = {
                 Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
                 User: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
                 History: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
                 Plus: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
                 LogOut: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-                Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+                Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
                 Check: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>,
                 Printer: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
                 Search: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
@@ -143,32 +144,8 @@
                 ArrowLeft: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
             };
 
-            class ErrorBoundary extends React.Component {
-                constructor(props) {
-                    super(props);
-                    this.state = { hasError: false, errorInfo: null, error: null };
-                }
-                static getDerivedStateFromError(error) { return { hasError: true, error: error }; }
-                componentDidCatch(error, errorInfo) { this.setState({ errorInfo: errorInfo }); }
-                render() {
-                    if (this.state.hasError) {
-                        return (
-                            <div style={{ padding: '30px', background: '#020617', color: '#f8fafc', height: '100vh', width: '100vw', fontFamily: 'monospace' }}>
-                                <h1 style={{ color: '#ef4444', fontSize: '24px', marginBottom: '10px' }}>⚠️ Erro Interno (React Crash)</h1>
-                                <p style={{ marginBottom: '20px' }}>O sistema encontrou uma inconsistência e foi interrompido.</p>
-                                <div style={{ background: '#1e293b', padding: '15px', borderRadius: '8px', overflowX: 'auto', marginBottom: '20px' }}>
-                                    <strong style={{color: '#f87171'}}>{this.state.error && this.state.error.toString()}</strong><br/>
-                                </div>
-                                <button onClick={function(){ window.location.reload(); }} style={{ padding: '10px 20px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Recarregar</button>
-                            </div>
-                        );
-                    }
-                    return this.props.children;
-                }
-            }
-
-            var getTemplate = function(type, tecnicoName, customTitulos) {
-                var tmpl = {
+            const getTemplate = (type, tecnicoName, customTitulos) => {
+                let tmpl = {
                     meta: { 
                         tecnico: tecnicoName || '', 
                         data: new Date().toISOString().split('T')[0], 
@@ -289,7 +266,7 @@
                         }
                     };
                 } else if (type === 'diario') {
-                    var t = customTitulos || {
+                    let t = customTitulos || {
                         col1: "1. KAUAN (FÍSICO E ACESSOS)",
                         col2: "2. LUI (DADOS E CONECTIVIDADE)",
                         col3: "3. INÁCIO (SEGURANÇA E ENDPOINTS)"
@@ -365,32 +342,32 @@
                 return tmpl;
             };
 
-            var Button = function(props) {
-                var variant = props.variant || 'primary';
-                var variants = {
+            const Button = (props) => {
+                let variant = props.variant || 'primary';
+                let variants = {
                     primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
                     secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700',
                     danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/40 dark:text-red-400',
                     ghost: 'bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                 };
-                var cls = "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 " + (variants[variant] || variants.primary) + " " + (props.className || '');
+                let cls = "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 " + (variants[variant] || variants.primary) + " " + (props.className || '');
                 return <button {...props} className={cls}>{props.children}</button>;
             };
 
-            var Card = function(props) {
-                var pad = props.noPadding ? '' : 'p-6';
-                var cls = "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm " + pad + " " + (props.className || '');
+            const Card = (props) => {
+                let pad = props.noPadding ? '' : 'p-6';
+                let cls = "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm " + pad + " " + (props.className || '');
                 return <div className={cls}>{props.children}</div>;
             };
 
-            var Input = function(props) {
-                var cls = "w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all " + (props.className || '');
+            const Input = (props) => {
+                let cls = "w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all " + (props.className || '');
                 return <input {...props} className={cls} />;
             };
 
-            var Badge = function(props) {
-                var color = props.color || 'slate';
-                var colors = {
+            const Badge = (props) => {
+                let color = props.color || 'slate';
+                let colors = {
                     slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
                     blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
                     green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
@@ -400,13 +377,13 @@
                 return <span className={"px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider " + (colors[color] || colors.slate)}>{props.children}</span>;
             };
 
-            var calcProgress = function(items) {
+            const calcProgress = (items) => {
                 if (!items || typeof items !== 'object') return 0;
-                var total = 0, done = 0;
-                Object.keys(items).forEach(function(k) {
-                    var group = items[k];
+                let total = 0, done = 0;
+                Object.keys(items).forEach((k) => {
+                    let group = items[k];
                     if (group && Array.isArray(group.tasks)) {
-                        group.tasks.forEach(function(t) {
+                        group.tasks.forEach((t) => {
                             total++;
                             if (t && t.checked) done++;
                         });
@@ -415,36 +392,32 @@
                 return total === 0 ? 0 : Math.round((done / total) * 100);
             };
             
-            var InlineEdit = function(props) {
-                var valState = useState(props.value || '');
-                var val = valState[0], setVal = valState[1];
-                useEffect(function() { setVal(props.value || ''); }, [props.value]);
+            const InlineEdit = (props) => {
+                const [val, setVal] = useState(props.value || '');
+                useEffect(() => { setVal(props.value || ''); }, [props.value]);
 
                 return (
                     <input 
                         value={val}
-                        onChange={function(e) { setVal(e.target.value); }}
-                        onBlur={function() { if(val !== props.value) props.onSave(val); }}
+                        onChange={(e) => setVal(e.target.value)}
+                        onBlur={() => { if(val !== props.value) props.onSave(val); }}
                         className={"bg-transparent focus:outline-none w-full text-ellipsis " + (props.className || '')}
                         title="Clique para editar este título"
                     />
                 );
             };
 
-            var TaskItem = function(props) {
-                var task = props.task;
-                var onToggle = props.onToggle;
-                var openState = useState(false);
-                var isOpen = openState[0], setIsOpen = openState[1];
-                var copiedState = useState(false);
-                var copied = copiedState[0], setCopied = copiedState[1];
+            const TaskItem = (props) => {
+                const { task, onToggle } = props;
+                const [isOpen, setIsOpen] = useState(false);
+                const [copied, setCopied] = useState(false);
 
-                var copyToClipboard = function(e, text) {
+                const copyToClipboard = (e, text) => {
                     e.stopPropagation();
                     if (navigator.clipboard) {
                         navigator.clipboard.writeText(text);
                         setCopied(true);
-                        setTimeout(function() { setCopied(false); }, 1500);
+                        setTimeout(() => setCopied(false), 1500);
                     }
                 };
 
@@ -470,7 +443,7 @@
                                     {task.manual && (
                                         <button 
                                             type="button"
-                                            onClick={function() { setIsOpen(!isOpen); }} 
+                                            onClick={() => setIsOpen(!isOpen)} 
                                             className={"text-[11px] font-medium flex items-center gap-1 px-2 py-0.5 rounded transition-colors " + (isOpen ? "bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300" : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-brand-600")}
                                         >
                                             {Icons.BookOpen} <span>{isOpen ? 'Fechar' : 'Manual'}</span>
@@ -490,7 +463,7 @@
                                                         <span className="text-[10px] uppercase font-bold text-slate-400">Comando / Parâmetro:</span>
                                                         <button 
                                                             type="button"
-                                                            onClick={function(e) { copyToClipboard(e, task.copyText); }}
+                                                            onClick={(e) => copyToClipboard(e, task.copyText)}
                                                             className="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-[11px] font-mono font-bold text-brand-600 dark:text-brand-400 hover:border-brand-500 flex items-center gap-1.5 transition-all shadow-sm"
                                                         >
                                                             {Icons.Copy}
@@ -509,39 +482,35 @@
                 );
             };
 
-            var ActiveChecklist = function(props) {
-                var ticket = props.ticket;
-                var onUpdate = props.onUpdate;
-                var onBack = props.onBack;
-                var onForceSave = props.onForceSave;
-                var onRequestFinish = props.onRequestFinish;
+            const ActiveChecklist = (props) => {
+                const { ticket, onUpdate, onBack, onForceSave, onRequestFinish } = props;
 
                 if (!ticket || !ticket.data) return null;
-                var data = ticket.data;
-                var meta = data.meta || {};
-                var items = data.items || {};
+                let data = ticket.data;
+                let meta = data.meta || {};
+                let items = data.items || {};
 
-                var handleMeta = function(field, value) {
-                    var newMeta = Object.assign({}, meta, { [field]: value });
+                const handleMeta = (field, value) => {
+                    let newMeta = Object.assign({}, meta, { [field]: value });
                     onUpdate(Object.assign({}, data, { meta: newMeta }));
                 };
 
-                var handleCheck = function(section, taskId) {
-                    var newData = Object.assign({}, data);
-                    var sec = newData.items && newData.items[section];
+                const handleCheck = (section, taskId) => {
+                    let newData = Object.assign({}, data);
+                    let sec = newData.items && newData.items[section];
                     if (!sec || !Array.isArray(sec.tasks)) return;
-                    sec.tasks = sec.tasks.map(function(t) {
+                    sec.tasks = sec.tasks.map((t) => {
                         return t.id === taskId ? Object.assign({}, t, { checked: !t.checked }) : t;
                     });
                     onUpdate(newData);
                 };
 
-                var progress = calcProgress(items);
-                var leftKeys = ['preventivas', 'preparacao', 'sistema'];
-                var rightKeys = ['configuracao', 'apps', 'seguranca', 'entrega'];
+                const progress = calcProgress(items);
+                const leftKeys = ['preventivas', 'preparacao', 'sistema'];
+                const rightKeys = ['configuracao', 'apps', 'seguranca', 'entrega'];
 
-                var renderCategoryCard = function(key) {
-                    var group = items[key];
+                const renderCategoryCard = (key) => {
+                    let group = items[key];
                     if (!group) return null;
                     return (
                         <Card key={key} noPadding className="overflow-hidden h-fit">
@@ -549,8 +518,8 @@
                                 <div className="text-brand-500">{Icons[group.icon] || Icons.Server}</div>
                                 <InlineEdit 
                                     value={group.title}
-                                    onSave={function(newVal) {
-                                        var newData = Object.assign({}, data);
+                                    onSave={(newVal) => {
+                                        let newData = Object.assign({}, data);
                                         if(newData.items[key]) {
                                             newData.items[key].title = newVal;
                                             onUpdate(newData);
@@ -563,15 +532,13 @@
                                 />
                             </div>
                             <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                                {(group.tasks || []).map(function(task) {
-                                    return (
-                                        <TaskItem 
-                                            key={task.id} 
-                                            task={task} 
-                                            onToggle={function() { handleCheck(key, task.id); }} 
-                                        />
-                                    );
-                                })}
+                                {(group.tasks || []).map((task) => (
+                                    <TaskItem 
+                                        key={task.id} 
+                                        task={task} 
+                                        onToggle={() => handleCheck(key, task.id)} 
+                                    />
+                                ))}
                             </div>
                         </Card>
                     );
@@ -613,15 +580,15 @@
                                 <div className="p-6 col-span-full grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">DATA</label>
-                                        <Input type="date" value={meta.data || ''} onChange={function(e) { handleMeta('data', e.target.value); }} />
+                                        <Input type="date" value={meta.data || ''} onChange={(e) => handleMeta('data', e.target.value)} />
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">ATIVO / DEPARTAMENTO</label>
-                                        <Input placeholder="Ex: PAT-01020" value={meta.ativo || ''} onChange={function(e) { handleMeta('ativo', e.target.value); }} />
+                                        <Input placeholder="Ex: PAT-01020" value={meta.ativo || ''} onChange={(e) => handleMeta('ativo', e.target.value)} />
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">MÁQUINA / FINALIDADE</label>
-                                        <Input placeholder="Ex: CORP-PC-01" value={meta.maquina || ''} onChange={function(e) { handleMeta('maquina', e.target.value); }} />
+                                        <Input placeholder="Ex: CORP-PC-01" value={meta.maquina || ''} onChange={(e) => handleMeta('maquina', e.target.value)} />
                                     </div>
                                 </div>
                             </Card>
@@ -641,39 +608,35 @@
                 );
             };
 
-            var ReceiptView = function(props) {
-                var ticket = props.ticket;
-                var onBack = props.onBack;
-                var onArchive = props.onArchive;
-                var logo = props.logo;
-                var obsState = useState('');
-                var obs = obsState[0], setObs = obsState[1];
+            const ReceiptView = (props) => {
+                const { ticket, onBack, onArchive, logo } = props;
+                const [obs, setObs] = useState('');
 
                 if (!ticket || !ticket.data) return null;
-                var meta = ticket.data.meta || {};
-                var items = ticket.data.items || {};
-                var identificador = meta.maquina || meta.ativo || "N/A";
+                let meta = ticket.data.meta || {};
+                let items = ticket.data.items || {};
+                let identificador = meta.maquina || meta.ativo || "N/A";
                 
-                var totalTasks = 0, checkedTasks = 0;
-                var pendingList = [];
-                var categorySummary = Object.keys(items).map(function(k) {
-                    var group = items[k];
-                    var tasks = group.tasks || [];
-                    var total = tasks.length;
-                    var checked = tasks.filter(function(t) { return t.checked; }).length;
-                    tasks.forEach(function(t) { if (!t.checked) pendingList.push("- [" + group.title + "] " + t.label); });
+                let totalTasks = 0, checkedTasks = 0;
+                let pendingList = [];
+                let categorySummary = Object.keys(items).map((k) => {
+                    let group = items[k];
+                    let tasks = group.tasks || [];
+                    let total = tasks.length;
+                    let checked = tasks.filter((t) => t.checked).length;
+                    tasks.forEach((t) => { if (!t.checked) pendingList.push("- [" + group.title + "] " + t.label); });
                     totalTasks += total;
                     checkedTasks += checked;
                     return { title: group.title, status: checked === total ? "OK" : "PENDENTE" };
                 });
-                var percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
-                var statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
+                let percent = totalTasks === 0 ? 0 : Math.round((checkedTasks / totalTasks) * 100);
+                let statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
 
-                var handleSendOutlook = function() {
-                    var subject = "[" + statusGlobal + "] Registo #" + ticket.visualId + " - " + identificador;
-                    var body = "RELATÓRIO TÉCNICO\n----------------------------------------\nID: #" + ticket.visualId + "\nATIVO: " + (meta.ativo || 'N/A') + "\nMÁQUINA: " + identificador + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO:\n" + categorySummary.map(function(c) { return "[" + c.status + "] " + c.title; }).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações.") + "\n\nGerado via InfraChecklist Cobrecom";
+                const handleSendOutlook = () => {
+                    let subject = "[" + statusGlobal + "] Registo #" + ticket.visualId + " - " + identificador;
+                    let body = "RELATÓRIO TÉCNICO\n----------------------------------------\nID: #" + ticket.visualId + "\nATIVO: " + (meta.ativo || 'N/A') + "\nMÁQUINA: " + identificador + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO:\n" + categorySummary.map((c) => "[" + c.status + "] " + c.title).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações.") + "\n\nGerado via InfraChecklist Cobrecom";
                     window.location.href = "mailto:" + EMAIL_DESTINO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-                    setTimeout(function() {
+                    setTimeout(() => {
                         if (confirm("E-mail aberto? Clique OK para arquivar.")) onArchive(ticket);
                     }, 1000);
                 };
@@ -691,11 +654,11 @@
                             <Card className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
-                                    <textarea value={obs} onChange={function(e) { setObs(e.target.value); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
+                                    <textarea value={obs} onChange={(e) => setObs(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
                                 </div>
                                 <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
                                     <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações de Encerramento</h3>
-                                    <Button className="w-full justify-start" onClick={function() { window.print(); }} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
+                                    <Button className="w-full justify-start" onClick={() => window.print()} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
                                     <Button className="w-full justify-start" onClick={handleSendOutlook}>{Icons.Mail} Enviar E-mail & Arquivar</Button>
                                 </div>
                             </Card>
@@ -713,9 +676,9 @@
                                 <div className={"p-3 text-center flex flex-col justify-center " + (percent === 100 ? 'bg-gray-100' : 'bg-gray-200')}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
                             </div>
                             <div className="p-6 flex gap-8">
-                                <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map(function(cat, i) { return (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>); })}</tbody></table></div>
+                                <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map((cat, i) => (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>))}</tbody></table></div>
                                 <div className="w-1/2 flex flex-col gap-4">
-                                    {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map(function(p, i) { return <li key={i} className="truncate">{p.replace('- ', '')}</li>; })}</ul></div>)}
+                                    {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map((p, i) => <li key={i} className="truncate">{p.replace('- ', '')}</li>)}</ul></div>)}
                                     <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16">{obs || "Sem observações adicionais."}</p></div>
                                 </div>
                             </div>
@@ -724,12 +687,9 @@
                 );
             };
 
-            var Dashboard = function(props) {
-                var activeTickets = props.activeTickets || [];
-                var onOpenTicket = props.onOpenTicket;
-                var onDeleteTicket = props.onDeleteTicket;
-                var historyCount = props.historyCount || 0;
-                var formatCount = activeTickets.filter(function(t) { return t.type === 'formatacao'; }).length;
+            const Dashboard = (props) => {
+                const { activeTickets, onOpenTicket, onDeleteTicket, historyCount } = props;
+                const formatCount = activeTickets.filter((t) => t.type === 'formatacao').length;
 
                 return (
                     <div className="p-6 md:p-10 space-y-8 fade-in">
@@ -762,13 +722,13 @@
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {activeTickets.map(function(ticket) {
-                                        var meta = (ticket.data && ticket.data.meta) || {};
-                                        var pct = calcProgress(ticket.data && ticket.data.items);
-                                        var nomeAtivo = meta.maquina || meta.ativo || "Sem Identificação";
+                                    {activeTickets.map((ticket) => {
+                                        let meta = (ticket.data && ticket.data.meta) || {};
+                                        let pct = calcProgress(ticket.data && ticket.data.items);
+                                        let nomeAtivo = meta.maquina || meta.ativo || "Sem Identificação";
                                         
                                         return (
-                                            <div key={ticket.id} onClick={function() { onOpenTicket(ticket.id); }} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
+                                            <div key={ticket.id} onClick={() => onOpenTicket(ticket.id)} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
                                                 <div className="absolute top-0 left-0 w-1 h-full bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div className="flex items-center gap-2">
@@ -790,7 +750,7 @@
                                                     </div>
                                                     <span className="text-xs font-bold text-brand-600">{pct}%</span>
                                                 </div>
-                                                <button onClick={function(e) { onDeleteTicket(e, ticket.id); }} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100" title="Excluir registo">{Icons.Trash}</button>
+                                                <button onClick={(e) => onDeleteTicket(e, ticket.id)} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100" title="Excluir registo">{Icons.Trash}</button>
                                             </div>
                                         );
                                     })}
@@ -801,16 +761,15 @@
                 );
             };
 
-            var HistoryView = function(props) {
-                var history = props.history || [];
-                var searchState = useState('');
-                var search = searchState[0], setSearch = searchState[1];
+            const HistoryView = (props) => {
+                const { history } = props;
+                const [search, setSearch] = useState('');
 
-                var filtered = history.filter(function(h) {
-                    var s = search.toLowerCase();
-                    var at = (h.ativo || '').toLowerCase();
-                    var tc = (h.tecnico || '').toLowerCase();
-                    var vid = (h.visualId || '').toLowerCase();
+                const filtered = history.filter((h) => {
+                    let s = search.toLowerCase();
+                    let at = (h.ativo || '').toLowerCase();
+                    let tc = (h.tecnico || '').toLowerCase();
+                    let vid = (h.visualId || '').toLowerCase();
                     return at.indexOf(s) !== -1 || tc.indexOf(s) !== -1 || vid.indexOf(s) !== -1;
                 });
 
@@ -823,7 +782,7 @@
                             </div>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
-                                <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={function(e) { setSearch(e.target.value); }} className="pl-10 w-64" />
+                                <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 w-64" />
                             </div>
                         </div>
                         
@@ -841,22 +800,20 @@
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                        {filtered.map(function(h, i) {
-                                            return (
-                                                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                                    <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
-                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date || Date.now()).toLocaleDateString()}</td>
-                                                    <td className="px-6 py-3">
-                                                        <Badge color={h.type === 'formatacao' ? 'blue' : h.type === 'diario' ? 'green' : h.type === 'rack' ? 'indigo' : 'amber'}>
-                                                            {h.type === 'formatacao' ? 'Formatação' : h.type === 'diario' ? 'Diário' : h.type === 'rack' ? 'Rack/Switch' : 'Zebra'}
-                                                        </Badge>
-                                                    </td>
-                                                    <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
-                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico || 'N/A'}</td>
-                                                    <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
-                                                </tr>
-                                            );
-                                        })}
+                                        {filtered.map((h, i) => (
+                                            <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
+                                                <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date || Date.now()).toLocaleDateString()}</td>
+                                                <td className="px-6 py-3">
+                                                    <Badge color={h.type === 'formatacao' ? 'blue' : h.type === 'diario' ? 'green' : h.type === 'rack' ? 'indigo' : 'amber'}>
+                                                        {h.type === 'formatacao' ? 'Formatação' : h.type === 'diario' ? 'Diário' : h.type === 'rack' ? 'Rack/Switch' : 'Zebra'}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
+                                                <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico || 'N/A'}</td>
+                                                <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
+                                            </tr>
+                                        ))}
                                         {filtered.length === 0 && <tr><td colSpan="6" className="text-center py-8 text-slate-400">Nenhum registro encontrado.</td></tr>}
                                     </tbody>
                                 </table>
@@ -866,59 +823,220 @@
                 );
             };
 
-            var ConfigModal = function(props) {
-                var onClose = props.onClose;
-                var users = props.users || [];
-                var currentUser = props.currentUser;
-                
-                var globalTitulos = props.globalTitulos || {col1: '', col2: '', col3: ''};
-                var titulosState = useState(globalTitulos);
-                var titulos = titulosState[0], setTitulos = titulosState[1];
+            const KanbanView = (props) => {
+                const { tasks, users, onSaveTask, onDeleteTask, onMoveTask } = props;
+                const [isModalOpen, setIsModalOpen] = useState(false);
+                const [form, setForm] = useState({ title: '', assignee: users[0] ? users[0].name : 'Danilo', priority: 'Média', status: 'a_fazer' });
 
-                var userState = useState({ id: '', name: '', pass: '' });
-                var newUser = userState[0], setNewUser = userState[1];
-                var filterState = useState('');
-                var filter = filterState[0], setFilter = filterState[1];
-                var savingState = useState(false);
-                var saving = savingState[0], setSaving = savingState[1];
-
-                var handleAddUser = function(e) {
+                const handleCreate = (e) => {
                     e.preventDefault();
-                    var cleanId = (newUser.id || '').trim();
-                    var cleanName = (newUser.name || '').trim();
-                    var cleanPass = (newUser.pass || '').trim();
+                    if (!form.title.trim()) return;
+                    let seq = Math.floor(100 + Math.random() * 900);
+                    let newTask = {
+                        code: 'SCRUM-' + seq,
+                        title: form.title.trim(),
+                        assignee: form.assignee,
+                        priority: form.priority,
+                        status: form.status,
+                        createdAt: new Date().toISOString()
+                    };
+                    onSaveTask(newTask);
+                    setForm({ title: '', assignee: users[0] ? users[0].name : 'Danilo', priority: 'Média', status: 'a_fazer' });
+                    setIsModalOpen(false);
+                };
+
+                const columns = [
+                    { id: 'a_fazer', title: 'A Fazer' },
+                    { id: 'em_andamento', title: 'Em Andamento' },
+                    { id: 'impedimentos', title: 'Impedimentos' },
+                    { id: 'concluido', title: 'Concluído' }
+                ];
+
+                return (
+                    <div className="p-6 md:p-10 h-full flex flex-col fade-in overflow-x-auto bg-[#1D2125]">
+                        <div className="flex justify-between items-end mb-6 shrink-0">
+                            <div>
+                                <h2 className="text-2xl font-bold text-white">Quadro Kanban (Tarefas TI)</h2>
+                                <p className="text-[#8C9BAB] text-sm mt-1">Gestão de demandas e chamados no estilo Jira.</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4 flex-1 pb-4 min-w-[1000px]">
+                            {columns.map((col) => {
+                                let colTasks = tasks.filter((t) => t.status === col.id);
+                                return (
+                                    <div key={col.id} className="bg-jira-col rounded-xl p-3 flex flex-col w-[280px] min-w-[280px] h-full max-h-[calc(100vh-180px)] border border-slate-800/50">
+                                        <div className="flex items-center gap-3 mb-4 shrink-0 px-1 pt-1">
+                                            <h3 className="text-xs font-bold uppercase tracking-wider text-[#8C9BAB]">{col.title}</h3>
+                                            <span className="bg-[#22272B] text-[#B6C2CF] px-2 py-0.5 rounded text-[10px] font-bold">{colTasks.length}</span>
+                                        </div>
+
+                                        <div className="space-y-2 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+                                            {colTasks.map((task) => {
+                                                let initials = '';
+                                                let avatarBg = 'bg-slate-600 text-white';
+                                                
+                                                if (!task.assignee || task.assignee.trim() === '') {
+                                                    avatarBg = 'bg-transparent border border-slate-500 text-slate-500';
+                                                    initials = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+                                                } else {
+                                                    let nameUpper = task.assignee.toUpperCase();
+                                                    if (nameUpper.includes('DANILO')) { initials = 'DI'; avatarBg = 'bg-orange-600 text-white'; }
+                                                    else if (nameUpper.includes('KAUAN')) { initials = 'KF'; avatarBg = 'bg-blue-600 text-white'; }
+                                                    else if (nameUpper.includes('OUTRO')) { initials = 'O'; avatarBg = 'bg-red-600 text-white'; }
+                                                    else { initials = task.assignee.substring(0, 2).toUpperCase(); avatarBg = 'bg-indigo-600 text-white'; }
+                                                }
+
+                                                let priorityIcon = null;
+                                                if (task.priority === 'Alta') {
+                                                    priorityIcon = <div className="text-red-500 font-black text-lg leading-none" title="Alta">=</div>;
+                                                } else if (task.priority === 'Média') {
+                                                    priorityIcon = <div className="text-orange-500 font-black text-lg leading-none" title="Média">=</div>;
+                                                } else {
+                                                    priorityIcon = <div className="text-blue-500 font-black text-lg leading-none" title="Baixa">-</div>;
+                                                }
+                                                
+                                                return (
+                                                    <div key={task.id} className="bg-jira-card hover:bg-jira-cardHover border border-transparent hover:border-slate-600 transition-colors p-3 rounded-lg shadow-sm group flex flex-col gap-3 relative">
+                                                        <h4 className="text-[13px] text-jira-text leading-snug">{task.title}</h4>
+
+                                                        <div className="flex justify-between items-center mt-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-4 h-4 bg-blue-600 rounded flex items-center justify-center">
+                                                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" /></svg>
+                                                                </div>
+                                                                <span className="text-[11px] font-bold text-jira-subtext">{task.code}</span>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                {priorityIcon}
+                                                                <div className={"w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shadow-sm " + avatarBg} title={task.assignee || 'Não atribuído'}>
+                                                                    {initials}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Ações ocultas (Hover) */}
+                                                        <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-jira-cardHover rounded shadow-sm p-1">
+                                                            {col.id !== 'a_fazer' && (
+                                                                <button onClick={() => {
+                                                                    let prev = col.id === 'em_andamento' ? 'a_fazer' : col.id === 'impedimentos' ? 'em_andamento' : 'impedimentos';
+                                                                    onMoveTask(task.id, prev);
+                                                                }} className="p-1 hover:bg-slate-700 text-slate-400 hover:text-white rounded" title="Recuar">{Icons.ArrowLeft}</button>
+                                                            )}
+                                                            {col.id !== 'concluido' && (
+                                                                <button onClick={() => {
+                                                                    let next = col.id === 'a_fazer' ? 'em_andamento' : col.id === 'em_andamento' ? 'impedimentos' : 'concluido';
+                                                                    onMoveTask(task.id, next);
+                                                                }} className="p-1 hover:bg-slate-700 text-slate-400 hover:text-white rounded" title="Avançar">{Icons.ArrowRight}</button>
+                                                            )}
+                                                            <button onClick={() => onDeleteTask(task.id)} className="p-1 hover:bg-red-900/50 text-slate-400 hover:text-red-400 rounded" title="Excluir">{Icons.Trash}</button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        <div className="mt-2 pt-2 shrink-0">
+                                            <button onClick={() => { setForm(Object.assign({}, form, {status: col.id})); setIsModalOpen(true); }} className="flex items-center gap-2 text-[#8C9BAB] hover:text-white hover:bg-[#282E33] w-full px-2 py-1.5 rounded transition-colors text-xs font-semibold">
+                                                {Icons.Plus} <span>Criar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {isModalOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
+                                <Card className="w-full max-w-md bg-[#1D2125] border-slate-700" noPadding>
+                                    <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-[#161A1D]">
+                                        <h3 className="font-bold text-slate-200 text-sm">Criar Tarefa</h3>
+                                        <button onClick={() => setIsModalOpen(false)} className="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
+                                    </div>
+                                    <form onSubmit={handleCreate} className="p-6 space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Título da Tarefa</label>
+                                            <Input value={form.title} onChange={(e) => setForm(Object.assign({}, form, { title: e.target.value }))} placeholder="Ex: Substituir switch rack 02" className="bg-[#22272B] border-slate-700 text-white" autoFocus />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Responsável</label>
+                                                <select value={form.assignee} onChange={(e) => setForm(Object.assign({}, form, { assignee: e.target.value }))} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                                                    <option value="">Não Atribuído</option>
+                                                    {users.map((u) => <option key={u.id} value={u.name}>{u.name}</option>)}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Prioridade</label>
+                                                <select value={form.priority} onChange={(e) => setForm(Object.assign({}, form, { priority: e.target.value }))} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                                                    <option value="Baixa">Baixa</option>
+                                                    <option value="Média">Média</option>
+                                                    <option value="Alta">Alta</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Coluna Inicial</label>
+                                            <select value={form.status} onChange={(e) => setForm(Object.assign({}, form, { status: e.target.value }))} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                                                <option value="a_fazer">A Fazer</option>
+                                                <option value="em_andamento">Em Andamento</option>
+                                                <option value="impedimentos">Impedimentos</option>
+                                                <option value="concluido">Concluído</option>
+                                            </select>
+                                        </div>
+                                        <div className="pt-2 flex justify-end gap-2">
+                                            <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)} className="bg-transparent border-none text-slate-400 hover:bg-slate-800">Cancelar</Button>
+                                            <Button type="submit" className="bg-brand-600 hover:bg-brand-500">Criar</Button>
+                                        </div>
+                                    </form>
+                                </Card>
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const ConfigModal = (props) => {
+                const { onClose, users, currentUser } = props;
+                const [globalTitulos, setGlobalTitulos] = useState(props.globalTitulos || { col1: '', col2: '', col3: '' });
+                const [newUser, setNewUser] = useState({ id: '', name: '', pass: '' });
+                const [filter, setFilter] = useState('');
+                const [saving, setSaving] = useState(false);
+
+                const handleAddUser = (e) => {
+                    e.preventDefault();
+                    let cleanId = (newUser.id || '').trim();
+                    let cleanName = (newUser.name || '').trim();
+                    let cleanPass = (newUser.pass || '').trim();
                     if (!cleanId || !cleanName || !cleanPass) return alert("Preencha todos os campos.");
-                    if (users.some(function(u) { return (u.id || '').toLowerCase() === cleanId.toLowerCase(); })) {
+                    if (users.some((u) => (u.id || '').toLowerCase() === cleanId.toLowerCase())) {
                         return alert("Matrícula já cadastrada.");
                     }
 
                     setSaving(true);
                     db.collection('users').add({ id: cleanId, name: cleanName, pass: cleanPass })
-                        .then(function() { setNewUser({ id: '', name: '', pass: '' }); })
-                        .catch(function(err) { alert("Erro: " + err.message); })
-                        .finally(function() { setSaving(false); });
+                        .then(() => setNewUser({ id: '', name: '', pass: '' }))
+                        .catch((err) => alert("Erro: " + err.message))
+                        .finally(() => setSaving(false));
                 };
 
-                var handleDeleteUser = function(user) {
+                const handleDeleteUser = (user) => {
                     if (currentUser && user.id === currentUser.id) return alert("Você não pode remover seu próprio usuário.");
                     if (confirm("Remover técnico " + user.name + "?")) {
                         db.collection('users').doc(user.docId).delete();
                     }
                 };
-                
-                var handleSaveTitulos = function(e) {
+
+                const handleSaveTitulos = (e) => {
                     e.preventDefault();
                     setSaving(true);
-                    db.collection('settings').doc('titulos').set(titulos)
-                        .then(function() { alert("Títulos atualizados com sucesso!"); })
-                        .catch(function(err) { alert("Erro ao atualizar: " + err.message); })
-                        .finally(function() { setSaving(false); });
+                    db.collection('settings').doc('titulos').set(globalTitulos)
+                        .then(() => alert("Títulos atualizados!"))
+                        .catch((err) => alert("Erro: " + err.message))
+                        .finally(() => setSaving(false));
                 };
 
-                var list = users.filter(function(u) {
-                    return (u.name || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1 ||
-                           (u.id || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1;
-                });
+                let list = users.filter((u) => (u.name || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1 || (u.id || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1);
 
                 return (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm fade-in">
@@ -932,80 +1050,50 @@
                                     <div>
                                         <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Técnico</h3>
                                         <form onSubmit={handleAddUser} className="space-y-3">
-                                            <Input placeholder="Matrícula / ID" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
-                                            <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value })); }} />
-                                            <Input type="password" placeholder="Senha" value={newUser.pass} onChange={function(e) { setNewUser(Object.assign({}, newUser, { pass: e.target.value })); }} />
+                                            <Input placeholder="Matrícula / ID" value={newUser.id} onChange={(e) => setNewUser(Object.assign({}, newUser, { id: e.target.value }))} />
+                                            <Input placeholder="Nome Completo" value={newUser.name} onChange={(e) => setNewUser(Object.assign({}, newUser, { name: e.target.value }))} />
+                                            <Input type="password" placeholder="Senha" value={newUser.pass} onChange={(e) => setNewUser(Object.assign({}, newUser, { pass: e.target.value }))} />
                                             <Button type="submit" disabled={saving} className="w-full">{Icons.Plus} Cadastrar</Button>
                                         </form>
                                     </div>
                                     <div>
                                         <div className="flex justify-between items-center mb-3">
                                             <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Técnicos Habilitados</h3>
-                                            <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-28" />
+                                            <input placeholder="Buscar..." value={filter} onChange={(e) => setFilter(e.target.value)} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-28" />
                                         </div>
                                         <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-                                            {list.map(function(u) {
-                                                var isMe = currentUser && u.id === currentUser.id;
+                                            {list.map((u) => {
+                                                let isMe = currentUser && u.id === currentUser.id;
                                                 return (
                                                     <div key={u.docId || u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
                                                         <div>
                                                             <div className="font-semibold text-sm text-slate-700 dark:text-slate-200">{u.name}</div>
                                                             <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
                                                         </div>
-                                                        {!isMe && (
-                                                            <button onClick={function() { handleDeleteUser(u); }} className="text-slate-400 hover:text-red-500 transition-colors p-1">{Icons.Trash}</button>
-                                                        )}
+                                                        {!isMe && <button onClick={() => handleDeleteUser(u)} className="text-slate-400 hover:text-red-500 transition-colors p-1">{Icons.Trash}</button>}
                                                     </div>
                                                 );
                                             })}
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div className="border-t border-slate-100 dark:border-slate-800 pt-6 mt-6">
-                                    <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Títulos Padrão (Check Diário)</h3>
-                                    <form onSubmit={handleSaveTitulos} className="space-y-4">
-                                        <div className="grid md:grid-cols-3 gap-4">
-                                            <div>
-                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 1</label>
-                                                <Input value={titulos.col1 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col1: e.target.value})); }} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 2</label>
-                                                <Input value={titulos.col2 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col2: e.target.value})); }} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 3</label>
-                                                <Input value={titulos.col3 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col3: e.target.value})); }} />
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <Button type="submit" disabled={saving}>{Icons.Check} Salvar Títulos Globais</Button>
-                                        </div>
-                                    </form>
-                                </div>
-                                
                             </div>
                         </Card>
                     </div>
                 );
             };
 
-            var LoginScreen = function(props) {
-                var onLogin = props.onLogin;
-                var users = props.users || [];
-                var idState = useState('');
-                var id = idState[0], setId = idState[1];
-                var passState = useState('');
-                var pass = passState[0], setPass = passState[1];
-                var errState = useState('');
-                var error = errState[0], setError = errState[1];
+            const LoginScreen = (props) => {
+                const { onLogin, users } = props;
+                const [id, setId] = useState('');
+                const [pass, setPass] = useState('');
+                const [error, setError] = useState('');
 
-                var handleSubmit = function(e) {
+                const handleSubmit = (e) => {
                     e.preventDefault();
-                    var cleanId = (id || '').trim();
-                    var cleanPass = (pass || '').trim();
-                    var found = users.find(function(u) { return u.id === cleanId && u.pass === cleanPass; });
+                    let cleanId = (id || '').trim();
+                    let cleanPass = (pass || '').trim();
+                    let found = users.find((u) => u.id === cleanId && u.pass === cleanPass);
                     if (found) onLogin(found);
                     else setError('Credenciais inválidas. Verifique matrícula e senha.');
                 };
@@ -1023,11 +1111,11 @@
                             <form onSubmit={handleSubmit} className="p-8 space-y-4">
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Matrícula / ID</label>
-                                    <Input value={id} onChange={function(e) { setId(e.target.value); }} placeholder="0100xxxx" autoFocus />
+                                    <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="0100xxxx" autoFocus />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-500 uppercase mb-1.5 ml-1">Senha</label>
-                                    <Input type="password" value={pass} onChange={function(e) { setPass(e.target.value); }} placeholder="••••" />
+                                    <Input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="••••" />
                                 </div>
                                 {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</div>}
                                 <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Painel</Button>
@@ -1040,8 +1128,461 @@
                 );
             };
 
+            const App = () => {
+                const isSavingDraftRef = useRef(false);
+                const [draftTicket, setDraftTicket] = useState(null);
+
+                const [view, setView] = useState('login');
+                const [currentUser, setCurrentUser] = useState(null);
+                const [users, setUsers] = useState(DEFAULT_TEAM);
+                const [activeTickets, setActiveTickets] = useState([]);
+                const [history, setHistory] = useState([]);
+                const [kanbanTasks, setKanbanTasks] = useState([]);
+                const [logo, setLogo] = useState('');
+                const [currentTicketId, setCurrentTicketId] = useState(null);
+                const [darkMode, setDarkMode] = useState(true);
+                
+                const [showConfig, setShowConfig] = useState(false);
+                const [openFolders, setOpenFolders] = useState({ checklists: false });
+                const [customFolders, setCustomFolders] = useState([]);
+                
+                const fileInputRef = useRef(null);
+
+                const [globalTitulos, setGlobalTitulos] = useState({
+                    col1: "1. KAUAN (FÍSICO E ACESSOS)",
+                    col2: "2. LUI (DADOS E CONECTIVIDADE)",
+                    col3: "3. INÁCIO (SEGURANÇA E ENDPOINTS)"
+                });
+
+                useEffect(() => {
+                    try {
+                        let savedTheme = localStorage.getItem('sa_theme'); 
+                        if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+                        let savedLogo = localStorage.getItem('sa_logo'); 
+                        if (savedLogo) setLogo(savedLogo);
+                        let savedUser = localStorage.getItem('sa_user_session'); 
+                        if (savedUser) { 
+                            let parsed = JSON.parse(savedUser);
+                            if (parsed && parsed.id) {
+                                setCurrentUser(parsed); 
+                                setView('dashboard'); 
+                            }
+                        }
+                    } catch(e) {
+                        localStorage.removeItem('sa_user_session');
+                    }
+
+                    const unsubConfig = db.collection('settings').doc('titulos').onSnapshot((snap) => {
+                        if (snap.exists) setGlobalTitulos(snap.data());
+                        else db.collection('settings').doc('titulos').set(globalTitulos);
+                    });
+
+                    const unsubFolders = db.collection('settings').doc('sidebar_modules').onSnapshot((snap) => {
+                        if (snap.exists && snap.data() && Array.isArray(snap.data().folders)) {
+                            setCustomFolders(snap.data().folders);
+                        } else {
+                            db.collection('settings').doc('sidebar_modules').set({ folders: [] });
+                        }
+                    });
+
+                    const unsubKanban = db.collection('kanban_tasks').onSnapshot((snap) => {
+                        if (snap.empty) {
+                            DEFAULT_KANBAN.forEach((k) => {
+                                db.collection('kanban_tasks').add(Object.assign({}, k, { createdAt: new Date().toISOString() }));
+                            });
+                        } else {
+                            let list = snap.docs.map((doc) => Object.assign({ id: doc.id }, doc.data()));
+                            list.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                            setKanbanTasks(list);
+                        }
+                    });
+
+                    const unsubTickets = db.collection('tickets').onSnapshot((snap) => {
+                        let list = snap.docs.map((doc) => Object.assign({ id: doc.id }, doc.data())).filter((t) => t && t.data && t.data.items);
+                        list.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                        setActiveTickets(list);
+                    });
+
+                    const unsubHistory = db.collection('history').orderBy('date', 'desc').limit(50).onSnapshot((snap) => {
+                        setHistory(snap.docs.map((doc) => Object.assign({ id: doc.id }, doc.data())));
+                    });
+
+                    const unsubUsers = db.collection('users').onSnapshot((snap) => {
+                        if (snap.empty) {
+                            DEFAULT_TEAM.forEach((u) => db.collection('users').add(u));
+                        } else {
+                            setUsers(snap.docs.map((doc) => Object.assign({ docId: doc.id }, doc.data())));
+                        }
+                    });
+
+                    return () => { unsubTickets(); unsubHistory(); unsubUsers(); unsubConfig(); unsubFolders(); unsubKanban(); };
+                }, []);
+
+                useEffect(() => { 
+                    if (darkMode) document.documentElement.classList.add('dark'); 
+                    else document.documentElement.classList.remove('dark'); 
+                    localStorage.setItem('sa_theme', JSON.stringify(darkMode)); 
+                }, [darkMode]);
+
+                const handleLogin = (user) => { 
+                    setCurrentUser(user); 
+                    localStorage.setItem('sa_user_session', JSON.stringify(user)); 
+                    setView('dashboard'); 
+                };
+
+                const handleLogout = () => { 
+                    setCurrentUser(null); 
+                    localStorage.removeItem('sa_user_session'); 
+                    setView('login'); 
+                };
+
+                const toggleFolder = (id) => {
+                    let nextState = Object.assign({}, openFolders, { [id]: !openFolders[id] });
+                    setOpenFolders(nextState);
+                };
+
+                const handleAddFolder = () => {
+                    let title = prompt("Nome da nova pasta (ex: Firewall, Roteadores):");
+                    if (!title || !title.trim()) return;
+                    let newFolder = { id: 'f_' + Date.now(), title: title.trim(), links: [] };
+                    let updated = customFolders.concat([newFolder]);
+                    db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                    setOpenFolders(Object.assign({}, openFolders, { [newFolder.id]: true }));
+                };
+
+                const handleDeleteFolder = (e, folderId) => {
+                    e.stopPropagation();
+                    if (confirm("Deseja realmente excluir esta pasta e seus links?")) {
+                        let updated = customFolders.filter((f) => f.id !== folderId);
+                        db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                    }
+                };
+
+                const handleAddLink = (folderId) => {
+                    let label = prompt("Nome do acesso (ex: pfSense Matriz):");
+                    if (!label || !label.trim()) return;
+                    let url = prompt("Endereço IP ou URL (ex: 192.168.1.1):");
+                    if (!url || !url.trim()) return;
+
+                    let updated = customFolders.map((f) => {
+                        if (f.id === folderId) {
+                            let existing = f.links || [];
+                            let newLink = { id: 'l_' + Date.now(), label: label.trim(), url: url.trim() };
+                            return Object.assign({}, f, { links: existing.concat([newLink]) });
+                        }
+                        return f;
+                    });
+                    db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                };
+
+                const handleDeleteLink = (e, folderId, linkId) => {
+                    e.stopPropagation();
+                    if (confirm("Remover este acesso?")) {
+                        let updated = customFolders.map((f) => {
+                            if (f.id === folderId) {
+                                let filtered = (f.links || []).filter((l) => l.id !== linkId);
+                                return Object.assign({}, f, { links: filtered });
+                            }
+                            return f;
+                        });
+                        db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                    }
+                };
+
+                const handleOpenLink = (url) => {
+                    if (!url) return;
+                    let target = url.startsWith('http://') || url.startsWith('https://') ? url : 'http://' + url;
+                    window.open(target, '_blank');
+                };
+                
+                const handleCreateTicket = (type) => {
+                    let prefix = type === 'formatacao' ? 'F' : type === 'zebra' ? 'Z' : type === 'rack' ? 'R' : 'D';
+                    let seq = Math.floor(1000 + Math.random() * 9000);
+                    let newTicket = {
+                        id: 'draft',
+                        visualId: prefix + '-' + seq,
+                        type: type,
+                        data: getTemplate(type, currentUser ? currentUser.name : '', globalTitulos),
+                        createdAt: new Date().toISOString()
+                    };
+                    setDraftTicket(newTicket);
+                    setCurrentTicketId('draft');
+                    setView('checklist');
+                };
+
+                const handleUpdateTicket = (newData) => { 
+                    if (currentTicketId === 'draft') {
+                        let pct = calcProgress(newData.items);
+                        let updatedDraft = Object.assign({}, draftTicket, { data: newData });
+                        
+                        if (pct >= 10 && !isSavingDraftRef.current) {
+                            isSavingDraftRef.current = true;
+                            let ticketToSave = Object.assign({}, updatedDraft);
+                            delete ticketToSave.id;
+                            db.collection('tickets').add(ticketToSave).then((docRef) => {
+                                setCurrentTicketId(docRef.id);
+                                setDraftTicket(null);
+                                isSavingDraftRef.current = false;
+                            }).catch(() => { isSavingDraftRef.current = false; });
+                        } else {
+                            setDraftTicket(updatedDraft);
+                        }
+                    } else if (currentTicketId && currentTicketId !== 'draft') {
+                        db.collection('tickets').doc(currentTicketId).update({ data: newData }); 
+                    }
+                };
+                
+                const handleBackFromChecklist = () => {
+                    if (currentTicketId === 'draft') {
+                        setDraftTicket(null);
+                        setCurrentTicketId(null);
+                    }
+                    setView('dashboard');
+                };
+
+                const handleForceSaveChecklist = () => {
+                    if (currentTicketId === 'draft') {
+                        isSavingDraftRef.current = true;
+                        let ticketToSave = Object.assign({}, draftTicket);
+                        delete ticketToSave.id;
+                        db.collection('tickets').add(ticketToSave).then(() => {
+                            setCurrentTicketId(null);
+                            setDraftTicket(null);
+                            isSavingDraftRef.current = false;
+                            setView('dashboard');
+                        });
+                    } else {
+                        setView('dashboard');
+                    }
+                };
+
+                const handleRequestFinish = () => {
+                    if (currentTicketId === 'draft') {
+                        isSavingDraftRef.current = true;
+                        let ticketToSave = Object.assign({}, draftTicket);
+                        delete ticketToSave.id;
+                        db.collection('tickets').add(ticketToSave).then((docRef) => {
+                            setCurrentTicketId(docRef.id);
+                            setDraftTicket(null);
+                            isSavingDraftRef.current = false;
+                            setView('receipt');
+                        });
+                    } else {
+                        setView('receipt');
+                    }
+                };
+
+                const handleGlobalTitleChange = (colKey, newVal) => {
+                    let map = { coluna1: 'col1', coluna2: 'col2', coluna3: 'col3' };
+                    let gKey = map[colKey];
+                    if (gKey) {
+                        let newTitulos = Object.assign({}, globalTitulos, { [gKey]: newVal });
+                        db.collection('settings').doc('titulos').set(newTitulos);
+                    }
+                };
+                
+                const handleArchive = (ticket) => {
+                    if (!ticket) return;
+                    let meta = (ticket.data && ticket.data.meta) || {};
+                    db.collection('history').add({ 
+                        visualId: ticket.visualId, 
+                        type: ticket.type, 
+                        date: new Date().toISOString(), 
+                        tecnico: meta.tecnico || 'N/A', 
+                        ativo: meta.ativo || meta.maquina || "N/A", 
+                        data: ticket.data 
+                    }).then(() => {
+                        return db.collection('tickets').doc(ticket.id).delete();
+                    }).then(() => {
+                        setCurrentTicketId(null);
+                        setView('dashboard');
+                    });
+                };
+                
+                const handleDeleteActive = (e, id) => { 
+                    e.stopPropagation(); 
+                    if (confirm("Cancelar este registro?")) db.collection('tickets').doc(id).delete(); 
+                };
+
+                const handleLogoUpload = (e) => { 
+                    let f = e.target.files && e.target.files[0]; 
+                    if (f) { 
+                        let r = new FileReader(); 
+                        r.onloadend = () => { 
+                            setLogo(r.result); 
+                            localStorage.setItem('sa_logo', r.result); 
+                        }; 
+                        r.readAsDataURL(f); 
+                    }
+                };
+
+                const handleSaveKanbanTask = (task) => {
+                    db.collection('kanban_tasks').add(task);
+                };
+
+                const handleDeleteKanbanTask = (taskId) => {
+                    if (confirm("Excluir este cartão do Kanban?")) {
+                        db.collection('kanban_tasks').doc(taskId).delete();
+                    }
+                };
+
+                const handleMoveKanbanTask = (taskId, newStatus) => {
+                    db.collection('kanban_tasks').doc(taskId).update({ status: newStatus });
+                };
+
+                let currentTicketData = currentTicketId === 'draft' ? draftTicket : activeTickets.find((t) => t.id === currentTicketId);
+
+                if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
+
+                return (
+                    <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
+                        <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 z-20 shrink-0">
+                            <div className="h-16 flex items-center gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800 shrink-0">
+                                <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                </div>
+                                INFRA CHECK
+                            </div>
+                            
+                            <div className="flex-1 overflow-y-auto py-6">
+                                <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Principal</div>
+                                <nav className="px-3 space-y-1 mb-8">
+                                    <button onClick={() => setView('dashboard')} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.Layout} Dashboard
+                                    </button>
+                                    <button onClick={() => setView('kanban')} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.Kanban} Kanban TI
+                                    </button>
+                                    <button onClick={() => setView('history')} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.History} Histórico
+                                    </button>
+                                </nav>
+
+                                <div className="flex items-center justify-between px-6 mb-2">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Módulos</span>
+                                    <button onClick={handleAddFolder} className="text-slate-400 hover:text-brand-400 text-xs flex items-center gap-1 font-semibold" title="Criar nova pasta">{Icons.Plus} <span className="text-[10px]">Pasta</span></button>
+                                </div>
+
+                                <nav className="px-3 space-y-1">
+                                    <div className="space-y-1 mb-2">
+                                        <div onClick={() => toggleFolder('checklists')} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer " + (openFolders.checklists ? 'bg-slate-800/60 text-white' : '')}>
+                                            <div className="flex items-center gap-2.5 truncate">
+                                                <span className={openFolders.checklists ? "text-brand-400" : "text-slate-500"}>{Icons.Folder}</span> 
+                                                <span className="truncate font-semibold">Checklists de TI</span>
+                                            </div>
+                                            <div className={"transition-transform duration-200 text-slate-500 " + (openFolders.checklists ? 'rotate-180' : '')}>
+                                                {Icons.ChevronDown}
+                                            </div>
+                                        </div>
+                                        
+                                        {openFolders.checklists && (
+                                            <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
+                                                <button onClick={() => handleCreateTicket('diario')} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-emerald-500/50 group-hover:text-emerald-400">{Icons.Check}</span> Check Diário
+                                                </button>
+                                                <button onClick={() => handleCreateTicket('rack')} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-indigo-500/50 group-hover:text-indigo-400">{Icons.Server}</span> Rack Fábrica
+                                                </button>
+                                                <button onClick={() => handleCreateTicket('formatacao')} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-brand-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-brand-500/50 group-hover:text-brand-400">{Icons.Copy}</span> Formatação PC
+                                                </button>
+                                                <button onClick={() => handleCreateTicket('zebra')} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-amber-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-amber-500/50 group-hover:text-amber-400">{Icons.Printer}</span> Manutenção Zebra
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {customFolders.map((f) => {
+                                        let isOpen = !!openFolders[f.id];
+                                        return (
+                                            <div key={f.id} className="space-y-1 mb-1">
+                                                <div onClick={() => toggleFolder(f.id)} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer group " + (isOpen ? 'bg-slate-800/60 text-white' : '')}>
+                                                    <div className="flex items-center gap-2.5 truncate">
+                                                        <span className={isOpen ? "text-amber-400" : "text-slate-500"}>{Icons.Folder}</span> 
+                                                        <span className="truncate font-semibold">{f.title}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                        <button onClick={(e) => handleDeleteFolder(e, f.id)} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Pasta">{Icons.Trash}</button>
+                                                        <div className={"transition-transform duration-200 text-slate-500 " + (isOpen ? 'rotate-180' : '')}>{Icons.ChevronDown}</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {isOpen && (
+                                                    <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
+                                                        {(f.links || []).map((l) => (
+                                                            <div key={l.id} className="flex items-center justify-between group px-2 py-1 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800/50">
+                                                                <div onClick={() => handleOpenLink(l.url)} className="flex items-center gap-2 truncate cursor-pointer flex-1" title={l.url}>
+                                                                    <span className="text-slate-500 group-hover:text-brand-400">{Icons.ExternalLink}</span>
+                                                                    <span className="truncate">{l.label}</span>
+                                                                </div>
+                                                                <button onClick={(e) => handleDeleteLink(e, f.id, l.id)} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 shrink-0" title="Remover link">{Icons.Trash}</button>
+                                                            </div>
+                                                        ))}
+                                                        <button onClick={() => handleAddLink(f.id)} className="w-full text-left flex items-center gap-1.5 px-2 py-1 text-[10px] text-slate-500 hover:text-brand-400 font-semibold">
+                                                            {Icons.Plus} <span>Adicionar Link</span>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </nav>
+                            </div>
+
+                            <div className="p-4 border-t border-slate-800 shrink-0">
+                                <div className="flex items-center gap-3 mb-4 px-2">
+                                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                                        {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <p className="text-sm font-bold text-white truncate">{currentUser ? currentUser.name : ''}</p>
+                                        <p className="text-xs text-slate-500 font-mono">ID: {currentUser ? currentUser.id : ''}</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button title="Alternar tema" onClick={() => setDarkMode(!darkMode)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
+                                    <button title="Configurações" onClick={() => setShowConfig(true)} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                    <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-slate-800 text-center">
+                                    <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={() => { if (fileInputRef.current) fileInputRef.current.click(); }}>Alterar Logo</p>
+                                    <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
+                                </div>
+                            </div>
+                        </aside>
+
+                        <main className="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950 relative">
+                            <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0 border-b border-slate-800">
+                                <span className="font-bold">INFRA CHECK</span>
+                                <div className="flex gap-2">
+                                    <button onClick={() => setShowConfig(true)} className="p-2">{Icons.Settings}</button>
+                                    <button onClick={() => setView('dashboard')} className="p-2">{Icons.Layout}</button>
+                                    <button onClick={handleLogout} className="p-2">{Icons.LogOut}</button>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-auto relative">
+                                {showConfig && <ConfigModal onClose={() => setShowConfig(false)} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
+                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={(id) => { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
+                                {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} />}
+                                {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
+                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={() => setView('checklist')} onArchive={handleArchive} logo={logo} />}
+                                {view === 'history' && <HistoryView history={history} />}
+                            </div>
+                        </main>
+                    </div>
+                );
+            };
+
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(
+                <ErrorBoundary>
+                    <App />
+                </ErrorBoundary>
+            );
         } catch (err) {
-            document.getElementById('root').innerHTML = '<div style="padding:40px;color:#ef4444;font-family:sans-serif;"><h3>Erro de Inicialização</h3><pre>' + err.message + '</pre></div>';
+            document.getElementById('root').innerHTML = '<div style="padding:40px;color:#ef4444;font-family:sans-serif;"><h3>Falha Fatal de Inicialização</h3><pre>' + err.message + '</pre></div>';
         }
     </script>
 </body>
