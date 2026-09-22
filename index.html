@@ -57,6 +57,15 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // ==========================================
+        // CONFIGURAÇÕES DOS NOMES DO CHECKLIST DIÁRIO
+        // Altere aqui os nomes de quem faz cada etapa
+        // ==========================================
+        var TITULO_COLUNA_1 = "1. KAUAN (FÍSICO E ACESSOS)";
+        var TITULO_COLUNA_2 = "2. LUI (DADOS E CONECTIVIDADE)";
+        var TITULO_COLUNA_3 = "3. INÁCIO (SEGURANÇA E ENDPOINTS)";
+        // ==========================================
+
         var firebaseConfig = {
             apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
             authDomain: "checklist-infra.firebaseapp.com",
@@ -100,7 +109,6 @@
             Copy: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
         };
 
-        // --- MODELO COM O MANUAL ORIGINAL INTEGRADO E GUIAS DE REFERÊNCIA EXPANDIDOS ---
         var getTemplate = function(type, tecnicoName) {
             var tmpl = {
                 meta: { 
@@ -114,283 +122,81 @@
 
             if (type === 'formatacao') {
                 tmpl.items = {
-                    // 1. PREVENTIVAS (MANUTENÇÃO FÍSICA INICIAL)
                     preventivas: {
                         title: "1. PREVENTIVAS & FÍSICA",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_prev_1', 
-                                label: 'Limpeza interna', 
-                                checked: false, 
-                                manual: 'Abrir o gabinete, travar as ventoinhas do cooler com o dedo/pincel para evitar que girem em falso e remover todo o pó com ar comprimido/pincel antiestático.' 
-                            },
-                            { 
-                                id: 'f_prev_2', 
-                                label: 'Pasta térmica', 
-                                checked: false, 
-                                manual: 'Remover o dissipador de calor, limpar a pasta ressecada antiga do processador com álcool isopropílico e aplicar uma gota/camada fina uniforme no centro do IHS.' 
-                            },
-                            { 
-                                id: 'f_prev_3', 
-                                label: 'Limpeza memórias', 
-                                checked: false, 
-                                manual: 'Remover os pentes de memória RAM e passar borracha plástica branca sobre os contatos dourados para desoxidar. Tirar os resíduos com pincel seco.' 
-                            },
-                            { 
-                                id: 'f_prev_4', 
-                                label: 'Limpa contato', 
-                                checked: false, 
-                                manual: 'Aplicar spray limpa contato diretamente nos slots DIMM e conectores da placa-mãe. Aguardar cerca de 2 minutos para secagem total antes de reinstalar as peças.' 
-                            }
+                            { id: 'f_prev_1', label: 'Limpeza interna', checked: false, manual: 'Abrir o gabinete, travar as ventoinhas do cooler com o dedo/pincel para evitar que girem em falso e remover todo o pó com ar comprimido/pincel antiestático.' },
+                            { id: 'f_prev_2', label: 'Pasta térmica', checked: false, manual: 'Remover o dissipador de calor, limpar a pasta ressecada antiga do processador com álcool isopropílico e aplicar uma gota/camada fina uniforme no centro do IHS.' },
+                            { id: 'f_prev_3', label: 'Limpeza memórias', checked: false, manual: 'Remover os pentes de memória RAM e passar borracha plástica branca sobre os contatos dourados para desoxidar. Tirar os resíduos com pincel seco.' },
+                            { id: 'f_prev_4', label: 'Limpa contato', checked: false, manual: 'Aplicar spray limpa contato diretamente nos slots DIMM e conectores da placa-mãe. Aguardar cerca de 2 minutos para secagem total antes de reinstalar as peças.' }
                         ]
                     },
-                    // 2. BACKUP & PREP (ANTES DE FORMATAR)
                     preparacao: {
                         title: "2. BACKUP & PREP",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_prep_1', 
-                                label: 'Verif. Nome/Partições', 
-                                checked: false, 
-                                manual: 'Conferir partições existentes e anotar o nome antigo do computador.\nPara verificar discos e volumes: pressione Win+R e digite diskmgmt.msc.', 
-                                copyText: 'diskmgmt.msc' 
-                            },
-                            { 
-                                id: 'f_prep_2', 
-                                label: 'Backup Arquivos', 
-                                checked: false, 
-                                manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. No Explorador de Arquivos: clique na aba superior "Exibir" e marque a caixa "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e copie a pasta AppData inteira do usuário (contém configurações, Spark e dados de navegadores).\n3. Salvar as pastas Documentos, Desktop, Downloads e Imagens.\n4. Para ferramentas de setup: Win+R > \\\\pdc-cobrecom\\manutencao (Login: admin) > pasta "m.kauan" > copiar "Formatação w10".', 
-                                copyText: '%appdata%' 
-                            },
-                            { 
-                                id: 'f_prep_3', 
-                                label: 'Chave Office', 
-                                checked: false, 
-                                manual: 'Identificar se o pacote Office utiliza licença vinculada à conta Microsoft do usuário ou chave física OEM. Anotar ou certificar a conta vinculada.', 
-                                copyText: null 
-                            },
-                            { 
-                                id: 'f_prep_4', 
-                                label: 'Backup Navegador', 
-                                checked: false, 
-                                manual: 'No Chrome: Configurações > Favoritos > Gerenciador de favoritos > Exportar favoritos para arquivo HTML, ou copiar o diretório: %localappdata%\\Google\\Chrome\\User Data.', 
-                                copyText: '%localappdata%\\Google\\Chrome\\User Data' 
-                            },
-                            { 
-                                id: 'f_prep_5', 
-                                label: 'Backup Outlook/Spark', 
-                                checked: false, 
-                                manual: '1. Outlook: Exportar arquivo de dados .PST ou copiar de %localappdata%\\Microsoft\\Outlook.\n2. Spark: Fazer backup da pasta de histórico de conversas em %appdata%\\Spark.', 
-                                copyText: '%appdata%\\Spark' 
-                            }
+                            { id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false, manual: 'Conferir partições existentes e anotar o nome antigo do computador.\nPara verificar discos e volumes: pressione Win+R e digite diskmgmt.msc.', copyText: 'diskmgmt.msc' },
+                            { id: 'f_prep_2', label: 'Backup Arquivos', checked: false, manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. No Explorador de Arquivos: clique na aba superior "Exibir" e marque a caixa "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e copie a pasta AppData inteira do usuário (contém configurações, Spark e dados de navegadores).\n3. Salvar as pastas Documentos, Desktop, Downloads e Imagens.\n4. Para ferramentas de setup: Win+R > \\\\pdc-cobrecom\\manutencao (Login: admin) > pasta "m.kauan" > copiar "Formatação w10".', copyText: '%appdata%' },
+                            { id: 'f_prep_3', label: 'Chave Office', checked: false, manual: 'Identificar se o pacote Office utiliza licença vinculada à conta Microsoft do usuário ou chave física OEM. Anotar ou certificar a conta vinculada.', copyText: null },
+                            { id: 'f_prep_4', label: 'Backup Navegador', checked: false, manual: 'No Chrome: Configurações > Favoritos > Gerenciador de favoritos > Exportar favoritos para arquivo HTML, ou copiar o diretório: %localappdata%\\Google\\Chrome\\User Data.', copyText: '%localappdata%\\Google\\Chrome\\User Data' },
+                            { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false, manual: '1. Outlook: Exportar arquivo de dados .PST ou copiar de %localappdata%\\Microsoft\\Outlook.\n2. Spark: Fazer backup da pasta de histórico de conversas em %appdata%\\Spark.', copyText: '%appdata%\\Spark' }
                         ]
                     },
-                    // 3. SISTEMA OPERACIONAL
                     sistema: {
                         title: "3. SISTEMA OPERACIONAL",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_sis_1', 
-                                label: 'Formatação', 
-                                checked: false, 
-                                manual: '1. Reiniciar o PC e fazer a formatação pela BIOS.\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3.', 
-                                copyText: 'root' 
-                            },
-                            { 
-                                id: 'f_sis_3', 
-                                label: 'Proxy/DNS', 
-                                checked: false, 
-                                manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy\nENDEREÇO: 192.168.1.1 | PORTA: 3128', 
-                                copyText: '192.168.1.1' 
-                            },
-                            { 
-                                id: 'f_sis_4', 
-                                label: 'WINS/Hosts', 
-                                checked: false, 
-                                manual: 'Configurar WINS na placa de rede caso o departamento utilize resolução legada de NetBIOS ou editar o arquivo de hosts do Windows em: C:\\Windows\\System32\\drivers\\etc\\hosts.', 
-                                copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' 
-                            },
-                            { 
-                                id: 'f_sis_5', 
-                                label: 'Drivers', 
-                                checked: false, 
-                                manual: 'Abrir o Gerenciador de Dispositivos (devmgmt.msc) e garantir a instalação de todos os drivers de Chipset, Áudio, Rede Gigabit e Placa Gráfica oficial.', 
-                                copyText: 'devmgmt.msc' 
-                            }
+                            { id: 'f_sis_1', label: 'Formatação', checked: false, manual: '1. Reiniciar o PC e fazer a formatação pela BIOS.\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3.', copyText: 'root' },
+                            { id: 'f_sis_3', label: 'Proxy/DNS', checked: false, manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy\nENDEREÇO: 192.168.1.1 | PORTA: 3128', copyText: '192.168.1.1' },
+                            { id: 'f_sis_4', label: 'WINS/Hosts', checked: false, manual: 'Configurar WINS na placa de rede caso o departamento utilize resolução legada de NetBIOS ou editar o arquivo de hosts do Windows em: C:\\Windows\\System32\\drivers\\etc\\hosts.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
+                            { id: 'f_sis_5', label: 'Drivers', checked: false, manual: 'Abrir o Gerenciador de Dispositivos (devmgmt.msc) e garantir a instalação de todos os drivers de Chipset, Áudio, Rede Gigabit e Placa Gráfica oficial.', copyText: 'devmgmt.msc' }
                         ]
                     },
-                    // 4. CONFIGURAÇÕES & POLÍTICAS
                     configuracao: {
                         title: "4. CONFIGURAÇÕES & POLÍTICAS",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_conf_2', 
-                                label: 'Energia', 
-                                checked: false, 
-                                manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações.\n\n4. Energia e Suspensão:\n(Nunca em Tudo).' 
-                            },
-                            { 
-                                id: 'f_sec_4', 
-                                label: 'GPEDIT/Permissões', 
-                                checked: false, 
-                                manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar).\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3).', 
-                                copyText: 'gpedit.msc' 
-                            },
-                            { 
-                                id: 'f_conf_6', 
-                                label: 'Map. Rede', 
-                                checked: false, 
-                                manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS.', 
-                                copyText: 'optionalfeatures' 
-                            },
-                            { 
-                                id: 'f_prep_opt', 
-                                label: 'Melhorar Processamento', 
-                                checked: false, 
-                                manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo.\nDesativar aplicativos de inicialização (que não são importantes).', 
-                                copyText: 'msconfig' 
-                            },
-                            { 
-                                id: 'f_prep_name', 
-                                label: 'Nome da Máquina', 
-                                checked: false, 
-                                manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar.' 
-                            },
-                            { 
-                                id: 'f_conf_7', 
-                                label: 'IP Fixo (MAC)', 
-                                checked: false, 
-                                manual: 'Verificar o endereço MAC da placa de rede executando "getmac" no prompt de comando e realizar a reserva de endereço no servidor DHCP caso o setor exija IP fixo.', 
-                                copyText: 'getmac' 
-                            }
+                            { id: 'f_conf_2', label: 'Energia', checked: false, manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações.\n\n4. Energia e Suspensão:\n(Nunca em Tudo).' },
+                            { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false, manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar).\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3).', copyText: 'gpedit.msc' },
+                            { id: 'f_conf_6', label: 'Map. Rede', checked: false, manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS.', copyText: 'optionalfeatures' },
+                            { id: 'f_prep_opt', label: 'Melhorar Processamento', checked: false, manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo.\nDesativar aplicativos de inicialização (que não são importantes).', copyText: 'msconfig' },
+                            { id: 'f_prep_name', label: 'Nome da Máquina', checked: false, manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar.' },
+                            { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false, manual: 'Verificar o endereço MAC da placa de rede executando "getmac" no prompt de comando e realizar a reserva de endereço no servidor DHCP caso o setor exija IP fixo.', copyText: 'getmac' }
                         ]
                     },
-                    // 5. APLICAÇÕES & SOFTWARES
                     apps: {
                         title: "5. APLICAÇÕES & PACOTE COBRECOM",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_app_pack', 
-                                label: 'Pegar Arquivos da Rede', 
-                                checked: false, 
-                                manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar.', 
-                                copyText: '\\\\pdc-cobrecom\\manutencao' 
-                            },
-                            { 
-                                id: 'f_app_apps', 
-                                label: 'Instalar Aplicativos Base', 
-                                checked: false, 
-                                manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora.' 
-                            },
-                            { 
-                                id: 'f_app_1', 
-                                label: 'TOTVS', 
-                                checked: false, 
-                                manual: 'Instalar o client TOTVS Protheus / SmartClient, apontar para o servidor de produção e fixar o atalho no menu iniciar/área de trabalho.' 
-                            },
-                            { 
-                                id: 'f_app_2', 
-                                label: 'TOTVS-MES', 
-                                checked: false, 
-                                manual: 'Instalar a aplicação de chão de fábrica TOTVS-MES caso a estação seja destinada a apontamentos de produção na indústria.' 
-                            },
-                            { 
-                                id: 'f_conf_1', 
-                                label: 'Ativar Win/Office', 
-                                checked: false, 
-                                manual: 'Conferir o status de ativação do Windows em Configurações > Ativação e abrir o Word/Excel para autenticar e licenciar o Office.' 
-                            },
-                            { 
-                                id: 'f_conf_5', 
-                                label: 'Impressoras', 
-                                checked: false, 
-                                manual: 'Instalar drivers das impressoras departamentais (ou térmicas Zebra) e imprimir uma página de teste de impressão do Windows.', 
-                                copyText: 'control printers' 
-                            }
+                            { id: 'f_app_pack', label: 'Pegar Arquivos da Rede', checked: false, manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar.', copyText: '\\\\pdc-cobrecom\\manutencao' },
+                            { id: 'f_app_apps', label: 'Instalar Aplicativos Base', checked: false, manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora.' },
+                            { id: 'f_app_1', label: 'TOTVS', checked: false, manual: 'Instalar o client TOTVS Protheus / SmartClient, apontar para o servidor de produção e fixar o atalho no menu iniciar/área de trabalho.' },
+                            { id: 'f_app_2', label: 'TOTVS-MES', checked: false, manual: 'Instalar a aplicação de chão de fábrica TOTVS-MES caso a estação seja destinada a apontamentos de produção na indústria.' },
+                            { id: 'f_conf_1', label: 'Ativar Win/Office', checked: false, manual: 'Conferir o status de ativação do Windows em Configurações > Ativação e abrir o Word/Excel para autenticar e licenciar o Office.' },
+                            { id: 'f_conf_5', label: 'Impressoras', checked: false, manual: 'Instalar drivers das impressoras departamentais (ou térmicas Zebra) e imprimir uma página de teste de impressão do Windows.', copyText: 'control printers' }
                         ]
                     },
-                    // 6. SEGURANÇA & ACESSO REMOTO
                     seguranca: {
                         title: "6. SEGURANÇA & ACESSO REMOTO",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_sec_1', 
-                                label: 'Wazuh', 
-                                checked: false, 
-                                manual: 'Instalar o agente Wazuh, configurar o IP/hostname do servidor SIEM no arquivo ossec.conf e iniciar o serviço (services.msc > Wazuh).', 
-                                copyText: 'services.msc' 
-                            },
-                            { 
-                                id: 'f_sec_2', 
-                                label: 'ESET', 
-                                checked: false, 
-                                manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows".\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto.', 
-                                copyText: 'svchost.exe' 
-                            },
-                            { 
-                                id: 'f_sec_3', 
-                                label: 'VNC + Firewall', 
-                                checked: false, 
-                                manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)\n- Properties: MAX CPU: 90\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)' 
-                            }
+                            { id: 'f_sec_1', label: 'Wazuh', checked: false, manual: 'Instalar o agente Wazuh, configurar o IP/hostname do servidor SIEM no arquivo ossec.conf e iniciar o serviço (services.msc > Wazuh).', copyText: 'services.msc' },
+                            { id: 'f_sec_2', label: 'ESET', checked: false, manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows".\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto.', copyText: 'svchost.exe' },
+                            { id: 'f_sec_3', label: 'VNC + Firewall', checked: false, manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)\n- Properties: MAX CPU: 90\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)' }
                         ]
                     },
-                    // 7. DOMÍNIO & LIBERAÇÃO DO USUÁRIO
                     entrega: {
                         title: "7. DOMÍNIO & LIBERAÇÃO",
                         icon: "Server",
                         tasks: [
-                            { 
-                                id: 'f_sis_2', 
-                                label: 'Domínio', 
-                                checked: false, 
-                                manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root).', 
-                                copyText: 'cobrecom' 
-                            },
-                            { 
-                                id: 'f_fin_4', 
-                                label: 'Desempenho (Adicionar Usuário)', 
-                                checked: false, 
-                                manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar\nNome de usuário: (Variável) | Domínio: cobrecom\n\n16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela.', 
-                                copyText: 'control userpasswords2' 
-                            },
-                            { 
-                                id: 'f_conf_3', 
-                                label: 'Config. Email', 
-                                checked: false, 
-                                manual: 'Abrir o Microsoft Outlook, adicionar a conta de e-mail corporativa do usuário, configurar o protocolo exchange/IMAP e importar o backup PST.' 
-                            },
-                            { 
-                                id: 'f_conf_4', 
-                                label: 'Config. Spark', 
-                                checked: false, 
-                                manual: 'Abrir o Spark, autenticar com o usuário do domínio, marcar "Salvar senha" e "Conectar automaticamente" e colar a pasta de histórico salva.', 
-                                copyText: null 
-                            },
-                            { 
-                                id: 'f_fin_1', 
-                                label: 'Restore Navegador', 
-                                checked: false, 
-                                manual: 'Importar arquivo de favoritos HTML salvo no Google Chrome e restaurar as extensões do usuário.' 
-                            },
-                            { 
-                                id: 'f_fin_2', 
-                                label: 'Restore Email', 
-                                checked: false, 
-                                manual: 'Validar o recebimento e envio de e-mails pelo Outlook e checar se as assinaturas de e-mail foram restabelecidas.' 
-                            },
-                            { 
-                                id: 'f_fin_3', 
-                                label: 'Etiqueta Ativo', 
-                                checked: false, 
-                                manual: 'Fixar e conferir se a etiqueta patrimonial física está colada no gabinete e com código de barras 100% legível.' 
-                            }
+                            { id: 'f_sis_2', label: 'Domínio', checked: false, manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root).', copyText: 'cobrecom' },
+                            { id: 'f_fin_4', label: 'Desempenho (Adicionar Usuário)', checked: false, manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar\nNome de usuário: (Variável) | Domínio: cobrecom\n\n16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela.', copyText: 'control userpasswords2' },
+                            { id: 'f_conf_3', label: 'Config. Email', checked: false, manual: 'Abrir o Microsoft Outlook, adicionar a conta de e-mail corporativa do usuário, configurar o protocolo exchange/IMAP e importar o backup PST.' },
+                            { id: 'f_conf_4', label: 'Config. Spark', checked: false, manual: 'Abrir o Spark, autenticar com o usuário do domínio, marcar "Salvar senha" e "Conectar automaticamente" e colar a pasta de histórico salva.', copyText: null },
+                            { id: 'f_fin_1', label: 'Restore Navegador', checked: false, manual: 'Importar arquivo de favoritos HTML salvo no Google Chrome e restaurar as extensões do usuário.' },
+                            { id: 'f_fin_2', label: 'Restore Email', checked: false, manual: 'Validar o recebimento e envio de e-mails pelo Outlook e checar se as assinaturas de e-mail foram restabelecidas.' },
+                            { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false, manual: 'Fixar e conferir se a etiqueta patrimonial física está colada no gabinete e com código de barras 100% legível.' }
                         ]
                     }
                 };
@@ -426,8 +232,8 @@
                 };
             } else if (type === 'diario') {
                 tmpl.items = {
-                    auxiliar: {
-                        title: "1. AUXILIAR DE TI (FÍSICO E ACESSOS)",
+                    coluna1: {
+                        title: TITULO_COLUNA_1,
                         icon: "Check",
                         tasks: [
                             { id: 'd_aux_1', label: 'Verificação Visual No-Breaks', checked: false, manual: 'Inspeção visual direta no display dos no-breaks do CPD para certificar ausência de falhas ativas.' },
@@ -438,8 +244,8 @@
                             { id: 'd_aux_6', label: 'Verificação Consumo SMTP (Skymail)', checked: false, manual: 'Acessar painel do Skymail para certificar limite e volume de disparos transacionais.' }
                         ]
                     },
-                    pleno: {
-                        title: "2. PLENO (DADOS E CONECTIVIDADE)",
+                    coluna2: {
+                        title: TITULO_COLUNA_2,
                         icon: "Server",
                         tasks: [
                             { id: 'd_ple_1', label: 'Verificação Backups Veeam', checked: false, manual: 'Validar jobs de backup noturnos no Veeam. Garantir que não existem rotinas falhas ou pendentes.' },
@@ -450,8 +256,8 @@
                             { id: 'd_ple_6', label: 'Verificação PABX (Itu, TL e Pouso Alegre)', checked: false, manual: 'Certificar registros SIP e disponibilidade de troncos entre as plantas.' }
                         ]
                     },
-                    senior: {
-                        title: "3. SÊNIOR (SEGURANÇA E ENDPOINTS)",
+                    coluna3: {
+                        title: TITULO_COLUNA_3,
                         icon: "Search",
                         tasks: [
                             { id: 'd_sen_1', label: 'Verificação Log Wazuh', checked: false, manual: 'Analisar eventos críticos (nível 12+) de correlação no dashboard SIEM. Analisar falhas de integridade em servidores.' },
@@ -541,7 +347,7 @@
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                             </div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Checklist</h1>
-                            <p className="text-sm text-slate-500 mt-1">Manual Operacional • Cobrecom</p>
+                            <p className="text-sm text-slate-500 mt-1">Gestão de Rotinas • Cobrecom</p>
                         </div>
                         <form onSubmit={handleSubmit} className="p-8 space-y-4">
                             <div>
@@ -553,7 +359,7 @@
                                 <Input type="password" value={pass} onChange={function(e) { setPass(e.target.value); }} placeholder="••••" />
                             </div>
                             {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</div>}
-                            <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Checklist</Button>
+                            <Button type="submit" className="w-full h-11 text-base mt-2">Acessar Painel</Button>
                         </form>
                         <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
                             <p className="text-[10px] text-slate-400 font-mono">TI COBRECOM</p>
@@ -793,7 +599,7 @@
                                         {ticket.type === 'formatacao' ? 'Formatação PC' : ticket.type === 'diario' ? 'Check Diário' : 'Zebra'}
                                     </Badge>
                                 </div>
-                                <p className="text-xs text-slate-500 mt-1">Criado em {new Date(ticket.createdAt || Date.now()).toLocaleDateString()}</p>
+                                <p className="text-xs text-slate-500 mt-1">Registrado em {new Date(ticket.createdAt || Date.now()).toLocaleDateString()}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -834,7 +640,7 @@
                             </div>
                         ) : ticket.type === 'diario' ? (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
-                                {['auxiliar', 'pleno', 'senior'].map(renderCategoryCard)}
+                                {['coluna1', 'coluna2', 'coluna3'].map(renderCategoryCard)}
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-12">
@@ -875,7 +681,7 @@
             var statusGlobal = percent === 100 ? "CONCLUÍDO" : "PARCIAL";
 
             var handleSendOutlook = function() {
-                var subject = "[" + statusGlobal + "] Checklist #" + ticket.visualId + " - " + identificador;
+                var subject = "[" + statusGlobal + "] Registo #" + ticket.visualId + " - " + identificador;
                 var body = "RELATÓRIO TÉCNICO\n----------------------------------------\nID: #" + ticket.visualId + "\nATIVO: " + (meta.ativo || 'N/A') + "\nMÁQUINA: " + identificador + "\nSTATUS: " + statusGlobal + "\nTÉCNICO: " + (meta.tecnico || 'N/A') + "\nDATA: " + new Date().toLocaleDateString() + "\n----------------------------------------\nRESUMO:\n" + categorySummary.map(function(c) { return "[" + c.status + "] " + c.title; }).join('\n') + "\n----------------------------------------\nOBSERVAÇÕES:\n" + (obs || "Sem observações.") + "\n\nGerado via InfraChecklist Cobrecom";
                 window.location.href = "mailto:" + EMAIL_DESTINO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
                 setTimeout(function() {
@@ -947,15 +753,15 @@
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-brand-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Chamados Abertos</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Registos Ativos</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{activeTickets.length}</h3></div>
                             <div className="bg-brand-50 dark:bg-brand-900/20 p-3 rounded-xl text-brand-600">{Icons.Layout}</div>
                         </Card>
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-emerald-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Histórico Total</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total de Operações</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{historyCount}</h3></div>
                             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl text-emerald-600">{Icons.History}</div>
                         </Card>
                         <Card className="flex items-center justify-between p-5 border-l-4 border-l-indigo-500">
-                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Formatações</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
+                            <div><p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Formatações PC</p><h3 className="text-3xl font-bold text-slate-800 dark:text-white mt-1">{formatCount}</h3></div>
                             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-xl text-indigo-600">{Icons.Server}</div>
                         </Card>
                     </div>
@@ -964,7 +770,7 @@
                         <button onClick={function() { onNewTicket('formatacao'); }} className="bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white p-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">{Icons.Plus}</div>
-                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Fluxo cronológico </span></div>
+                                <div className="text-left"><span className="block font-bold">Nova Formatação</span><span className="text-xs opacity-80">Checklist cronológico</span></div>
                             </div>
                         </button>
                         <button onClick={function() { onNewTicket('zebra'); }} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-amber-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
@@ -976,17 +782,17 @@
                         <button onClick={function() { onNewTicket('diario'); }} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between group">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-500">{Icons.Check}</div>
-                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Check Diário</span><span className="text-xs text-slate-500">Rotina de Infra</span></div>
+                                <div className="text-left"><span className="block font-bold text-slate-700 dark:text-slate-200">Check Diário</span><span className="text-xs text-slate-500">Rotina de Infraestrutura</span></div>
                             </div>
                         </button>
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Fila de Atendimento</h3>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">{Icons.Server} Painel de Execução</h3>
                         {activeTickets.length === 0 ? (
                             <div className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl p-12 text-center">
-                                <p className="text-slate-400 font-medium">Nenhum chamado ativo no momento.</p>
-                                <p className="text-xs text-slate-500 mt-1">Inicie um novo atendimento acima.</p>
+                                <p className="text-slate-400 font-medium">Nenhum checklist ativo no momento.</p>
+                                <p className="text-xs text-slate-500 mt-1">Inicie uma nova tarefa acima.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1013,7 +819,7 @@
                                                 </div>
                                                 <span className="text-xs font-bold text-brand-600">{pct}%</span>
                                             </div>
-                                            <button onClick={function(e) { onDeleteTicket(e, ticket.id); }} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100">{Icons.Trash}</button>
+                                            <button onClick={function(e) { onDeleteTicket(e, ticket.id); }} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100" title="Excluir registo">{Icons.Trash}</button>
                                         </div>
                                     );
                                 })}
@@ -1039,8 +845,8 @@
                 <div className="p-6 md:p-10 h-full flex flex-col fade-in">
                     <div className="flex justify-between items-end mb-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Atendimentos</h2>
-                            <p className="text-slate-500 text-sm">Registro auditável de todas as manutenções.</p>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Operações</h2>
+                            <p className="text-slate-500 text-sm">Registro auditável de todas as atividades concluídas.</p>
                         </div>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
@@ -1182,7 +988,7 @@
                     setCurrentTicketId(docRef.id);
                     setView('checklist');
                 }).catch(function(err) {
-                    alert("Erro ao abrir chamado: " + err.message);
+                    alert("Erro ao criar registro: " + err.message);
                 });
             };
 
@@ -1210,7 +1016,7 @@
             
             var handleDeleteActive = function(e, id) { 
                 e.stopPropagation(); 
-                if (confirm("Cancelar chamado?")) db.collection('tickets').doc(id).delete(); 
+                if (confirm("Cancelar este registro?")) db.collection('tickets').doc(id).delete(); 
             };
 
             var handleLogoUpload = function(e) { 
