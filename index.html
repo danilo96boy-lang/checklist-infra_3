@@ -295,7 +295,7 @@
                         icon: "Layout",
                         tasks: [
                             { id: 'r_7', label: 'LEDs de Erro (Switches)', checked: false, manual: 'Inspecionar painel frontal. Validar alertas de falha de hardware (SYS/ALM) e portas piscando laranja de forma constante (erro de negociação).' },
-                            { id: 'r_8', label: 'Proteção de Portas Ociosas', checked: false, manual: 'Verificar se as portas RJ45 não utilizadas estão cobertas com Dust Covers (tampões) para não oxidar com os vapores da fábrica.' },
+                            { id: 'r_8', label: 'Proteção de Portas Ociosas', checked: false, manual: 'Verificar se das portas RJ45 não utilizadas estão cobertas com Dust Covers (tampões) para não oxidar com os vapores da fábrica.' },
                             { id: 'r_9', label: 'Guias e Patch Cords', checked: false, manual: 'Verificar patch cords soltos, forçados nas pontas ou obstruindo a saída de ar frontal dos equipamentos. Reacomodar nos guias de cabos.' },
                             { id: 'r_10', label: 'Fibras e Uplinks', checked: false, manual: 'Inspecionar cordões ópticos e cordões de manobra para garantir que não há estrangulamento ou curvatura excessiva.' }
                         ]
@@ -391,7 +391,6 @@
                 if (!form.title.trim()) return;
                 var seq = Math.floor(100 + Math.random() * 900);
                 var newTask = {
-                    id: 't_' + Date.now(),
                     code: 'TI-' + seq,
                     title: form.title.trim(),
                     assignee: form.assignee,
@@ -1276,7 +1275,6 @@
                 }
             };
 
-            // Kanban Handlers
             var handleSaveKanbanTask = function(task) {
                 db.collection('kanban_tasks').add(task);
             };
@@ -1331,7 +1329,6 @@
                             </div>
 
                             <nav className="px-3 space-y-1">
-                                {/* PASTA 1: CHECKLISTS DE TI */}
                                 <div className="space-y-1 mb-2">
                                     <div 
                                         onClick={function() { toggleFolder('checklists'); }} 
@@ -1364,7 +1361,6 @@
                                     )}
                                 </div>
 
-                                {/* PASTAS CUSTOMIZADAS DE SEGMENTAÇÃO */}
                                 {customFolders.map(function(f) {
                                     var isOpen = !!openFolders[f.id];
                                     return (
