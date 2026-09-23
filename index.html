@@ -145,10 +145,10 @@
             var getTemplate = function(type, tecnicoName, customTitulos) {
                 var tmpl = {
                     meta: { 
-                        tecnico: tecnicoName || '', 
+                        tecnico: tecnicoName ? tecnicoName.toUpperCase() : '', 
                         data: new Date().toISOString().split('T')[0], 
-                        ativo: type === 'diario' ? 'INFRAESTRUTURA' : (type === 'rack' ? 'RACK FÁBRICA' : ''), 
-                        maquina: type === 'diario' ? 'ROTINA DIÁRIA' : (type === 'rack' ? 'SWITCHES' : '') 
+                        ativo: (type === 'diario' ? 'INFRAESTRUTURA' : (type === 'rack' ? 'RACK FÁBRICA' : '')).toUpperCase(), 
+                        maquina: (type === 'diario' ? 'ROTINA DIÁRIA' : (type === 'rack' ? 'SWITCHES' : '')).toUpperCase() 
                     },
                     items: {}
                 };
@@ -159,77 +159,77 @@
                             title: "1. PREVENTIVAS & FÍSICA",
                             icon: "Server",
                             tasks: [
-                                { id: 'f_prev_1', label: 'Limpeza interna', checked: false, manual: 'Abrir o gabinete, travar as ventoinhas do cooler com o dedo/pincel para evitar que girem em falso e remover todo o pó com ar comprimido/pincel antiestático.' },
-                                { id: 'f_prev_2', label: 'Pasta térmica', checked: false, manual: 'Remover o dissipador de calor, limpar a pasta ressecada antiga do processador com álcool isopropílico e aplicar uma gota/camada fina uniforme no centro do IHS.' },
-                                { id: 'f_prev_3', label: 'Limpeza memórias', checked: false, manual: 'Remover os pentes de memória RAM e passar borracha plástica branca sobre os contatos dourados para desoxidar. Tirar os resíduos com pincel seco.' },
-                                { id: 'f_prev_4', label: 'Limpa contato', checked: false, manual: 'Aplicar spray limpa contato diretamente nos slots DIMM e conectores da placa-mãe. Aguardar cerca de 2 minutos para secagem total antes de reinstalar as peças.' }
+                                { id: 'f_prev_1', label: 'LIMPEZA INTERNA', checked: false, manual: 'ABRIR O GABINETE, TRAVAR AS VENTOINHAS DO COOLER COM O DEDO/PINCEL PARA EVITAR QUE GIREM EM FALSO E REMOVER TODO O PÓ COM AR COMPRIMIDO/PINCEL ANTIESTÁTICO.' },
+                                { id: 'f_prev_2', label: 'PASTA TÉRMICA', checked: false, manual: 'REMOVER O DISSIPADOR DE CALOR, LIMPAR A PASTA RESSECADA ANTIGA DO PROCESSADOR COM ÁLCOOL ISOPROPÍLICO E APLICAR UMA GOTA/CAMADA FINA UNIFORME NO CENTRO DO IHS.' },
+                                { id: 'f_prev_3', label: 'LIMPEZA MEMÓRIAS', checked: false, manual: 'REMOVER OS PENTES DE MEMÓRIA RAM E PASSAR BORRACHA PLÁSTICA BRANCA SOBRE OS CONTATOS DOURADOS PARA DESOXIDAR. TIRAR OS RESÍDUOS COM PINCEL SECO.' },
+                                { id: 'f_prev_4', label: 'LIMPA CONTATO', checked: false, manual: 'APLICAR SPRAY LIMPA CONTATO DIRETAMENTE NOS SLOTS DIMM E CONECTORES DA PLACA-MÃE. AGUARDAR CERCA DE 2 MINUTOS PARA SECAGEM TOTAL ANTES DE REINSTALAR AS PEÇAS.' }
                             ]
                         },
                         preparacao: {
                             title: "2. BACKUP & PREP",
                             icon: "Server",
                             tasks: [
-                                { id: 'f_prep_1', label: 'Verif. Nome/Partições', checked: false, manual: 'Conferir partições existentes e anotar o nome antigo do computador.\nPara verificar discos e volumes: pressione Win+R e digite diskmgmt.msc.', copyText: 'diskmgmt.msc' },
-                                { id: 'f_prep_2', label: 'Backup Arquivos', checked: false, manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. No Explorador de Arquivos: clique na aba superior "Exibir" e marque a caixa "Itens ocultos".\n2. Pressione Win+R, digite %appdata% e copie a pasta AppData inteira do usuário (contém configurações, Spark e dados de navegadores).\n3. Salvar as pastas Documentos, Desktop, Downloads e Imagens.\n4. Para ferramentas de setup: Win+R > \\\\pdc-cobrecom\\manutencao (Login: admin) > pasta "m.kauan" > copiar "Formatação w10".', copyText: '%appdata%' },
-                                { id: 'f_prep_3', label: 'Chave Office', checked: false, manual: 'Identificar se o pacote Office utiliza licença vinculada à conta Microsoft do usuário ou chave física OEM. Anotar ou certificar a conta vinculada.', copyText: null },
-                                { id: 'f_prep_4', label: 'Backup Navegador', checked: false, manual: 'No Chrome: Configurações > Favoritos > Gerenciador de favoritos > Exportar favoritos para arquivo HTML, ou copiar o diretório: %localappdata%\\Google\\Chrome\\User Data.', copyText: '%localappdata%\\Google\\Chrome\\User Data' },
-                                { id: 'f_prep_5', label: 'Backup Outlook/Spark', checked: false, manual: '1. Outlook: Exportar arquivo de dados .PST ou copiar de %localappdata%\\Microsoft\\Outlook.\n2. Spark: Fazer backup da pasta de histórico de conversas em %appdata%\\Spark.', copyText: '%appdata%\\Spark' }
+                                { id: 'f_prep_1', label: 'VERIF. NOME/PARTIÇÕES', checked: false, manual: 'CONFERIR PARTIÇÕES EXISTENTES E ANOTAR O NOME ANTIGO DO COMPUTADOR.\nPARA VERIFICAR DISCOS E VOLUMES: PRESSIONE WIN+R E DIGITE DISKMGMT.MSC.', copyText: 'diskmgmt.msc' },
+                                { id: 'f_prep_2', label: 'BACKUP ARQUIVOS', checked: false, manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. NO EXPLORADOR DE ARQUIVOS: CLIQUE NA ABA SUPERIOR "EXIBIR" E MARQUE A CAIXA "ITENS OCULTOS".\n2. PRESSIONE WIN+R, DIGITE %APPDATA% E COPIE A PASTA APPDATA INTEIRA DO USUÁRIO (CONTÉM CONFIGURAÇÕES, SPARK E DADOS DE NAVEGADORES).\n3. SALVAR AS PASTAS DOCUMENTOS, DESKTOP, DOWNLOADS E IMAGENS.\n4. PARA FERRAMENTAS DE SETUP: WIN+R > \\\\PDC-COBRECOM\\MANUTENCAO (LOGIN: ADMIN) > PASTA "M.KAUAN" > COPIAR "FORMATAÇÃO W10".', copyText: '%appdata%' },
+                                { id: 'f_prep_3', label: 'CHAVE OFFICE', checked: false, manual: 'IDENTIFICAR SE O PACOTE OFFICE UTILIZA LICENÇA VINCULADA À CONTA MICROSOFT DO USUÁRIO OU CHAVE FÍSICA OEM. ANOTAR OU CERTIFICAR A CONTA VINCULADA.', copyText: null },
+                                { id: 'f_prep_4', label: 'BACKUP NAVEGADOR', checked: false, manual: 'NO CHROME: CONFIGURAÇÕES > FAVORITOS > GERENCIADOR DE FAVORITOS > EXPORTAR FAVORITOS PARA ARQUIVO HTML, OU COPIAR O DIRETÓRIO: %LOCALAPPDATA%\\GOOGLE\\CHROME\\USER DATA.', copyText: '%localappdata%\\Google\\Chrome\\User Data' },
+                                { id: 'f_prep_5', label: 'BACKUP OUTLOOK/SPARK', checked: false, manual: '1. OUTLOOK: EXPORTAR ARQUIVO DE DADOS .PST OU COPIAR DE %LOCALAPPDATA%\\MICROSOFT\\OUTLOOK.\n2. SPARK: FAZER BACKUP DA PASTA DE HISTÓRICO DE CONVERSAS EM %APPDATA%\\SPARK.', copyText: '%appdata%\\Spark' }
                             ]
                         },
                         sistema: {
                             title: "3. SISTEMA OPERACIONAL",
                             icon: "Server",
                             tasks: [
-                                { id: 'f_sis_1', label: 'Formatação', checked: false, manual: '1. Reiniciar o PC e fazer a formatação pela BIOS.\n2. Usuário: root | senha: pergunta pra recuperar pode ser qualquer um a senha é cobre nas 3.', copyText: 'root' },
-                                { id: 'f_sis_3', label: 'Proxy/DNS', checked: false, manual: '8. Configurações PROXY:\nAba de pesquisa, pesquisar por PROXY > Desativar a configuração automática > Usar servidor proxy\nENDEREÇO: 192.168.1.1 | PORTA: 3128', copyText: '192.168.1.1' },
-                                { id: 'f_sis_4', label: 'WINS/Hosts', checked: false, manual: 'Configurar WINS na placa de rede caso o departamento utilize resolução legada de NetBIOS ou editar o arquivo de hosts do Windows em: C:\\Windows\\System32\\drivers\\etc\\hosts.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
-                                { id: 'f_sis_5', label: 'Drivers', checked: false, manual: 'Abrir o Gerenciador de Dispositivos (devmgmt.msc) e garantir a instalação de todos os drivers de Chipset, Áudio, Rede Gigabit e Placa Gráfica oficial.', copyText: 'devmgmt.msc' }
+                                { id: 'f_sis_1', label: 'FORMATAÇÃO', checked: false, manual: '1. REINICIAR O PC E FAZER A FORMATAÇÃO PELA BIOS.\n2. USUÁRIO: ROOT | SENHA: PERGUNTA PRA RECUPERAR PODE SER QUALQUER UM A SENHA É COBRE NAS 3.', copyText: 'root' },
+                                { id: 'f_sis_3', label: 'PROXY/DNS', checked: false, manual: '8. CONFIGURAÇÕES PROXY:\nABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nENDEREÇO: 192.168.1.1 | PORTA: 3128', copyText: '192.168.1.1' },
+                                { id: 'f_sis_4', label: 'WINS/HOSTS', checked: false, manual: 'CONFIGURAR WINS NA PLACA DE REDE CASO O DEPARTAMENTO UTILIZE RESOLUÇÃO LEGADA DE NETBIOS OU EDITAR O ARQUIVO DE HOSTS DO WINDOWS EM: C:\\WINDOWS\\SYSTEM32\\DRIVERS\\ETC\\HOSTS.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
+                                { id: 'f_sis_5', label: 'DRIVERS', checked: false, manual: 'ABRIR O GERENCIADOR DE DISPOSITIVOS (DEVMGMT.MSC) E GARANTIR A INSTALAÇÃO DE TODOS OS DRIVERS DE CHIPSET, ÁUDIO, REDE GIGABIT E PLACA GRÁFICA OFICIAL.', copyText: 'devmgmt.msc' }
                             ]
                         },
                         configuracao: {
                             title: "4. CONFIGURAÇÕES & POLÍTICAS",
                             icon: "Server",
                             tasks: [
-                                { id: 'f_conf_2', label: 'Energia', checked: false, manual: '3. Pausar atualizações:\nWindows Update > Pausar Atualizações.\n\n4. Energia e Suspensão:\n(Nunca em Tudo).' },
-                                { id: 'f_sec_4', label: 'GPEDIT/Permissões', checked: false, manual: '5. Editar política de grupo:\nModelos administrativos > Sistemas > Perfis de usuários: só permitir perfis de usuários (habilitar).\n\n6. Editar política de grupo:\nModelos administrativos > Componentes do Windows > Windows update: Configuração automática, permitir instalação, ativar atualizações (desativar as 3).', copyText: 'gpedit.msc' },
-                                { id: 'f_conf_6', label: 'Map. Rede', checked: false, manual: '7. Painel de controle:\nProgramas > Ativar ou desativar recursos do Windows > Ativar a opção SMB 1.0/CIFS.', copyText: 'optionalfeatures' },
-                                { id: 'f_prep_opt', label: 'Melhorar Processamento', checked: false, manual: '9. Melhorar o processamento:\nWIN + R > "msconfig" > Inicialização do sistema > Opções avançadas > Aumentar núcleos do processador até o máximo.\nDesativar aplicativos de inicialização (que não são importantes).', copyText: 'msconfig' },
-                                { id: 'f_prep_name', label: 'Nome da Máquina', checked: false, manual: '10. Mudar nome da máquina:\nSobre > Opções avançadas > Nome do computador > Alterar o nome da máquina > Reiniciar.' },
-                                { id: 'f_conf_7', label: 'IP Fixo (MAC)', checked: false, manual: 'Verificar o endereço MAC da placa de rede executando "getmac" no prompt de comando e realizar a reserva de endereço no servidor DHCP caso o setor exija IP fixo.', copyText: 'getmac' }
+                                { id: 'f_conf_2', label: 'ENERGIA', checked: false, manual: '3. PAUSAR ATUALIZAÇÕES:\nWINDOWS UPDATE > PAUSAR ATUALIZAÇÕES.\n\n4. ENERGIA E SUSPENSÃO:\n(NUNCA EM TUDO).' },
+                                { id: 'f_sec_4', label: 'GPEDIT/PERMISSÕES', checked: false, manual: '5. EDITAR POLÍTICA DE GRUPO:\nMODELOS ADMINISTRATIVOS > SISTEMAS > PERFIS DE USUÁRIOS: SÓ PERMITIR PERFIS DE USUÁRIOS (HABILITAR).\n\n6. EDITAR POLÍTICA DE GRUPO:\nMODELOS ADMINISTRATIVOS > COMPONENTES DO WINDOWS > WINDOWS UPDATE: CONFIGURAÇÃO AUTOMÁTICA, PERMITIR INSTALAÇÃO, ATIVAR ATUALIZAÇÕES (DESATIVAR AS 3).', copyText: 'gpedit.msc' },
+                                { id: 'f_conf_6', label: 'MAP. REDE', checked: false, manual: '7. PAINEL DE CONTROLE:\nPROGRAMAS > ATIVAR OU DESATIVAR RECURSOS DO WINDOWS > ATIVAR A OPÇÃO SMB 1.0/CIFS.', copyText: 'optionalfeatures' },
+                                { id: 'f_prep_opt', label: 'MELHORAR PROCESSAMENTO', checked: false, manual: '9. MELHORAR O PROCESSAMENTO:\nWIN + R > "MSCONFIG" > INICIALIZAÇÃO DO SISTEMA > OPÇÕES AVANÇADAS > AUMENTAR NÚCLEOS DO PROCESSADOR ATÉ O MÁXIMO.\nDESATIVAR APLICATIVOS DE INICIALIZAÇÃO (QUE NÃO SÃO IMPORTANTES).', copyText: 'msconfig' },
+                                { id: 'f_prep_name', label: 'NOME DA MÁQUINA', checked: false, manual: '10. MUDAR NOME DA MÁQUINA:\nSOBRE > OPÇÕES AVANÇADAS > NOME DO COMPUTADOR > ALTERAR O NOME DA MÁQUINA > REINICIAR.' },
+                                { id: 'f_conf_7', label: 'IP FIXO (MAC)', checked: false, manual: 'VERIFICAR O ENDEREÇO MAC DA PLACA DE REDE EXECUTANDO "GETMAC" NO PROMPT DE COMANDO E REALIZAR A RESERVA DE ENDEREÇO NO SERVIDOR DHCP CASO O SETOR EXIJA IP FIXO.', copyText: 'getmac' }
                             ]
                         },
                         apps: {
                             title: "5. APLICAÇÕES & PACOTE COBRECOM",
                             icon: "Server",
                             tasks: [
-                                { id: 'f_app_pack', label: 'Pegar Arquivos da Rede', checked: false, manual: '11. Pegar arquivo:\nWIN + R > \\\\pdc-cobrecom\\manutencao (Login: admin)\nAcessar a pasta "m.kauan" > Formatação w10 > Copiar e colar na área de trabalho e executar.', copyText: '\\\\pdc-cobrecom\\manutencao' },
-                                { id: 'f_app_apps', label: 'Instalar Aplicativos Base', checked: false, manual: '12. Instalar esses aplicativos no PC:\nESET, winrar-x64, UltraVNC, sambawindows10, Spark, TOTVS, Chrome, office, scan e impressora.' },
-                                { id: 'f_app_1', label: 'TOTVS', checked: false, manual: 'Instalar o client TOTVS Protheus / SmartClient, apontar para o servidor de produção e fixar o atalho no menu iniciar/área de trabalho.' },
-                                { id: 'f_app_2', label: 'TOTVS-MES', checked: false, manual: 'Instalar a aplicação de chão de fábrica TOTVS-MES caso a estação seja destinada a apontamentos de produção na indústria.' },
-                                { id: 'f_conf_1', label: 'Ativar Win/Office', checked: false, manual: 'Conferir o status de ativação do Windows em Configurações > Ativação e abrir o Word/Excel para autenticar e licenciar o Office.' },
-                                { id: 'f_conf_5', label: 'Impressoras', checked: false, manual: 'Instalar drivers das impressoras departamentais (ou térmicas Zebra) e imprimir uma página de teste de impressão do Windows.', copyText: 'control printers' }
+                                { id: 'f_app_pack', label: 'PEGAR ARQUIVOS DA REDE', checked: false, manual: '11. PEGAR ARQUIVO:\nWIN + R > \\\\PDC-COBRECOM\\MANUTENCAO (LOGIN: ADMIN)\nACESSAR A PASTA "M.KAUAN" > FORMATAÇÃO W10 > COPIAR E COLAR NA ÁREA DE TRABALHO E EXECUTAR.', copyText: '\\\\pdc-cobrecom\\manutencao' },
+                                { id: 'f_app_apps', label: 'INSTALAR APLICATIVOS BASE', checked: false, manual: '12. INSTALAR ESSES APLICATIVOS NO PC:\nESET, WINRAR-X64, ULTRAVNC, SAMBAWINDOWS10, SPARK, TOTVS, CHROME, OFFICE, SCAN E IMPRESSORA.' },
+                                { id: 'f_app_1', label: 'TOTVS', checked: false, manual: 'INSTALAR O CLIENT TOTVS PROTHEUS / SMARTCLIENT, APONTAR PARA O SERVIDOR DE PRODUÇÃO E FIXAR O ATALHO NO MENU INICIAR/ÁREA DE TRABALHO.' },
+                                { id: 'f_app_2', label: 'TOTVS-MES', checked: false, manual: 'INSTALAR A APLICAÇÃO DE CHÃO DE FÁBRICA TOTVS-MES CASO A ESTAÇÃO SEJA DESTINADA A APONTAMENTOS DE PRODUÇÃO NA INDÚSTRIA.' },
+                                { id: 'f_conf_1', label: 'ATIVAR WIN/OFFICE', checked: false, manual: 'CONFERIR O STATUS DE ATIVAÇÃO DO WINDOWS EM CONFIGURAÇÕES > ATIVAÇÃO E ABRIR O WORD/EXCEL PARA AUTENTICAR E LICENCIAR O OFFICE.' },
+                                { id: 'f_conf_5', label: 'IMPRESSORAS', checked: false, manual: 'INSTALAR DRIVERS DAS IMPRESSORAS DEPARTAMENTAIS (OU TÉRMICAS ZEBRA) E IMPRIMIR UMA PÁGINA DE TESTE DE IMPRESSÃO DO WINDOWS.', copyText: 'control printers' }
                             ]
                         },
                         seguranca: {
                             title: "6. SEGURANÇA & ACESSO REMOTO",
                             icon: "Server",
                             tasks: [
-                                { id: 'f_sec_1', label: 'Wazuh', checked: false, manual: 'Instalar o agente Wazuh, configurar o IP/hostname do servidor SIEM no arquivo ossec.conf e iniciar o serviço (services.msc > Wazuh).', copyText: 'services.msc' },
-                                { id: 'f_sec_2', label: 'ESET', checked: false, manual: '13. Configurações ESET:\nConfiguração > Configuração avançada > Proteção de acesso à rede > Firewall: Habilitar "avaliar também as regras do Windows".\nRegras (editar) > Adicionar > Nome: Acesso remoto | Ação: permitir | Aplicativo > Caminho: svchost.exe | Serviço: Área de trabalho remoto.', copyText: 'svchost.exe' },
-                                { id: 'f_sec_3', label: 'VNC + Firewall', checked: false, manual: '13.1. Configurações WinVNC:\n(OBS: Instalar e configurar sem ser pelo acesso remoto)\n- Properties: MAX CPU: 90\n- Admin Properties: "Remove Wallpaper for Viewers" e "Enable Blank Monitor on Viewers Request" (Desabilitar)' }
+                                { id: 'f_sec_1', label: 'WAZUH', checked: false, manual: 'INSTALAR O AGENTE WAZUH, CONFIGURAR O IP/HOSTNAME DO SERVIDOR SIEM NO ARQUIVO OSSEC.CONF E INICIAR O SERVIÇO (SERVICES.MSC > WAZUH).', copyText: 'services.msc' },
+                                { id: 'f_sec_2', label: 'ESET', checked: false, manual: '13. CONFIGURAÇÕES ESET:\nCONFIGURAÇÃO > CONFIGURAÇÃO AVANÇADA > PROTEÇÃO DE ACESSO À REDE > FIREWALL: HABILITAR "AVALIAR TAMBÉM AS REGRAS DO WINDOWS".\nREGRAS (EDITAR) > ADICIONAR > NOME: ACESSO REMOTO | AÇÃO: PERMITIR | APLICATIVO > CAMINHO: SVCHOST.EXE | SERVIÇO: ÁREA DE TRABALHO REMOTO.', copyText: 'svchost.exe' },
+                                { id: 'f_sec_3', label: 'VNC + FIREWALL', checked: false, manual: '13.1. CONFIGURAÇÕES WINVNC:\n(OBS: INSTALAR E CONFIGURAR SEM SER PELO ACESSO REMOTO)\n- PROPERTIES: MAX CPU: 90\n- ADMIN PROPERTIES: "REMOVE WALLPAPER FOR VIEWERS" E "ENABLE BLANK MONITOR ON VIEWERS REQUEST" (DESABILITAR)' }
                             ]
                         },
                         entrega: {
                             title: "7. DOMÍNIO & LIBERAÇÃO",
                             icon: "Server",
                             tasks: [
-                                { id: 'f_sis_2', label: 'Domínio', checked: false, manual: '14. Domínio Cobrecom:\nSobre > Configuração avançada > Nome de computador > Alterar > Domínio: cobrecom (Login: root).', copyText: 'cobrecom' },
-                                { id: 'f_fin_4', label: 'Desempenho (Adicionar Usuário)', checked: false, manual: '15. Adicionar usuário:\nPainel de controle > Contas de Usuário > Contas de usuário > Gerenciar contas de usuário > Adicionar\nNome de usuário: (Variável) | Domínio: cobrecom\n\n16. Configurar Usuário:\nTrocar de usuário > Fazer o processo de inicializar > Colocar os programas na tela.', copyText: 'control userpasswords2' },
-                                { id: 'f_conf_3', label: 'Config. Email', checked: false, manual: 'Abrir o Microsoft Outlook, adicionar a conta de e-mail corporativa do usuário, configurar o protocolo exchange/IMAP e importar o backup PST.' },
-                                { id: 'f_conf_4', label: 'Config. Spark', checked: false, manual: 'Abrir o Spark, autenticar com o usuário do domínio, marcar "Salvar senha" e "Conectar automaticamente" e colar a pasta de histórico salva.', copyText: null },
-                                { id: 'f_fin_1', label: 'Restore Navegador', checked: false, manual: 'Importar arquivo de favoritos HTML salvo no Google Chrome e restaurar as extensões do usuário.' },
-                                { id: 'f_fin_2', label: 'Restore Email', checked: false, manual: 'Validar o recebimento e envio de e-mails pelo Outlook e checar se as assinaturas de e-mail foram restabelecidas.' },
-                                { id: 'f_fin_3', label: 'Etiqueta Ativo', checked: false, manual: 'Fixar e conferir se a etiqueta patrimonial física está colada no gabinete e com código de barras 100% legível.' }
+                                { id: 'f_sis_2', label: 'DOMÍNIO', checked: false, manual: '14. DOMÍNIO COBRECOM:\nSOBRE > CONFIGURAÇÃO AVANÇADA > NOME DE COMPUTADOR > ALTERAR > DOMÍNIO: COBRECOM (LOGIN: ROOT).', copyText: 'cobrecom' },
+                                { id: 'f_fin_4', label: 'DESEMPENHO (ADICIONAR USUÁRIO)', checked: false, manual: '15. ADICIONAR USUÁRIO:\nPAINEL DE CONTROLE > CONTAS DE USUÁRIO > CONTAS DE USUÁRIO > GERENCIAR CONTAS DE USUÁRIO > ADICIONAR\nNOME DE USUÁRIO: (VARIÁVEL) | DOMÍNIO: COBRECOM\n\n16. CONFIGURAR USUÁRIO:\nTROCAR DE USUÁRIO > FAZER O PROCESSO DE INICIALIZAR > COLOCAR OS PROGRAMAS NA TELA.', copyText: 'control userpasswords2' },
+                                { id: 'f_conf_3', label: 'CONFIG. EMAIL', checked: false, manual: 'ABRIR O MICROSOFT OUTLOOK, ADICIONAR A CONTA DE E-MAIL CORPORATIVA DO USUÁRIO, CONFIGURAR O PROTOCOLO EXCHANGE/IMAP E IMPORTAR O BACKUP PST.' },
+                                { id: 'f_conf_4', label: 'CONFIG. SPARK', checked: false, manual: 'ABRIR O SPARK, AUTENTICAR COM O USUÁRIO DO DOMÍNIO, MARCAR "SALVAR SENHA" E "CONECTAR AUTOMATICAMENTE" E COLAR A PASTA DE HISTÓRICO SALVA.', copyText: null },
+                                { id: 'f_fin_1', label: 'RESTORE NAVEGADOR', checked: false, manual: 'IMPORTAR ARQUIVO DE FAVORITOS HTML SALVO NO GOOGLE CHROME E RESTAURAR AS EXTENSÕES DO USUÁRIO.' },
+                                { id: 'f_fin_2', label: 'RESTORE EMAIL', checked: false, manual: 'VALIDAR O RECEBIMENTO E ENVIO DE E-MAILS PELO OUTLOOK E CHECAR SE AS ASSINATURAS DE E-MAIL FORAM RESTABELECIDAS.' },
+                                { id: 'f_fin_3', label: 'ETIQUETA ATIVO', checked: false, manual: 'FIXAR E CONFERIR SE A ETIQUETA PATRIMONIAL FÍSICA ESTÁ COLADA NO GABINETE E COM CÓDIGO DE BARRAS 100% LEGÍVEL.' }
                             ]
                         }
                     };
@@ -239,27 +239,27 @@
                             title: "1. INSPEÇÃO FÍSICA",
                             icon: "Check",
                             tasks: [
-                                { id: 'z_1', label: 'Rolete', checked: false, manual: 'Verificar alinhamento e desgastes mecânicos no rolete de borracha de tração.' },
-                                { id: 'z_2', label: 'Cabeça Impressão', checked: false, manual: 'Inspecionar visualmente se há riscos ou pontos queimados na linha térmica.' },
-                                { id: 'z_3', label: 'Suporte Etiqueta', checked: false, manual: 'Verificar o travamento do suporte do rolo de etiqueta e tensão do ribbon.' },
-                                { id: 'z_4', label: 'Qualidade Inicial', checked: false, manual: 'Imprimir página inicial de diagnóstico para análise de falhas de queima.' }
+                                { id: 'z_1', label: 'ROLETE', checked: false, manual: 'VERIFICAR ALINHAMENTO E DESGASTES MECÂNICOS NO ROLETE DE BORRACHA DE TRAÇÃO.' },
+                                { id: 'z_2', label: 'CABEÇA IMPRESSÃO', checked: false, manual: 'INSPECIONAR VISUALMENTE SE HÁ RISCOS OU PONTOS QUEIMADOS NA LINHA TÉRMICA.' },
+                                { id: 'z_3', label: 'SUPORTE ETIQUETA', checked: false, manual: 'VERIFICAR O TRAVAMENTO DO SUPORTE DO ROLO DE ETIQUETA E TENSÃO DO RIBBON.' },
+                                { id: 'z_4', label: 'QUALIDADE INICIAL', checked: false, manual: 'IMPRIMIR PÁGINA INICIAL DE DIAGNÓSTICO PARA ANÁLISE DE FALHAS DE QUEIMA.' }
                             ]
                         },
                         manutencao: {
                             title: "2. MANUTENÇÃO",
                             icon: "Server",
                             tasks: [
-                                { id: 'z_5', label: 'Limpeza Rolete', checked: false, manual: 'Descontaminar rolete com álcool isopropílico girando manualmente para retirar resíduos de cola.' },
-                                { id: 'z_6', label: 'Limpeza Cabeça', checked: false, manual: 'Limpar a cabeça de impressão utilizando caneta térmica apropriada ou swab com álcool.' },
-                                { id: 'z_7', label: 'Limpeza Suporte', checked: false, manual: 'Remover poeiras internas, cola residual e fiapos de papel dos eixos de sustentação.' },
-                                { id: 'z_8', label: 'Limpeza Geral', checked: false, manual: 'Higienização geral da carcaça e remoção de poeira ótica na área do sensor de mídia/GAP.' }
+                                { id: 'z_5', label: 'LIMPEZA ROLETE', checked: false, manual: 'DESCONTAMINAR ROLETE COM ÁLCOOL ISOPROPÍLICO GIRANDO MANUALMENTE PARA RETIRAR RESÍDUOS DE COLA.' },
+                                { id: 'z_6', label: 'LIMPEZA CABEÇA', checked: false, manual: 'LIMPAR A CABEÇA DE IMPRESSÃO UTILIZANDO CANETA TÉRMICA APROPRIADA OU SWAB COM ÁLCOOL.' },
+                                { id: 'z_7', label: 'LIMPEZA SUPORTE', checked: false, manual: 'REMOVER POEIRAS INTERNAS, COLA RESIDUAL E FIAPOS DE PAPEL DOS EIXOS DE SUSTENTAÇÃO.' },
+                                { id: 'z_8', label: 'LIMPEZA GERAL', checked: false, manual: 'HIGIENIZAÇÃO GERAL DA CARCAÇA E REMOÇÃO DE POEIRA ÓTICA NA ÁREA DO SENSOR DE MÍDIA/GAP.' }
                             ]
                         },
                         teste: {
                             title: "3. VALIDAÇÃO",
                             icon: "Printer",
                             tasks: [
-                                { id: 'z_9', label: 'Teste Final', checked: false, manual: 'Efetuar calibração de GAP e imprimir etiquetas para conferência de código de barras com leitor laser.' }
+                                { id: 'z_9', label: 'TESTE FINAL', checked: false, manual: 'EFETUAR CALIBRAÇÃO DE GAP E IMPRIMIR ETIQUETAS PARA CONFERÊNCIA DE CÓDIGO DE BARRAS COM LEITOR LASER.' }
                             ]
                         }
                     };
@@ -271,38 +271,38 @@
                     };
                     tmpl.items = {
                         coluna1: {
-                            title: t.col1,
+                            title: t.col1.toUpperCase(),
                             icon: "Check",
                             tasks: [
-                                { id: 'd_aux_1', label: 'Verificação Visual No-Breaks', checked: false, manual: 'Inspeção visual direta no display dos no-breaks do CPD para certificar ausência de falhas ativas.' },
-                                { id: 'd_aux_2', label: 'Verificação Log No-Breaks (Web Interface)', checked: false, manual: 'Acesso à interface web de gerência para checar alertas de bateria e rede elétrica.' },
-                                { id: 'd_aux_3', label: 'Verificação Visual MikroTiks', checked: false, manual: 'Checar conectividade física e status das luzes (LEDs) nas portas WAN/LAN ativas.' },
-                                { id: 'd_aux_4', label: 'Verificação Server Portal ( 15.3 )', checked: false, manual: 'Confirmar disponibilidade e latência do portal principal no IP local da rede.' },
-                                { id: 'd_aux_5', label: 'Verificação Status Portal Web (15.3:8200)', checked: false, manual: 'Testar acesso e login na porta 8200.' },
-                                { id: 'd_aux_6', label: 'Verificação Consumo SMTP (Skymail)', checked: false, manual: 'Acessar painel do Skymail para certificar limite e volume de disparos transacionais.' }
+                                { id: 'd_aux_1', label: 'VERIFICAÇÃO VISUAL NO-BREAKS', checked: false, manual: 'INSPEÇÃO VISUAL DIRETA NO DISPLAY DOS NO-BREAKS DO CPD PARA CERTIFICAR AUSÊNCIA DE FALHAS ATIVAS.' },
+                                { id: 'd_aux_2', label: 'VERIFICAÇÃO LOG NO-BREAKS (WEB INTERFACE)', checked: false, manual: 'ACESSO À INTERFACE WEB DE GERÊNCIA PARA CHECAR ALERTAS DE BATERIA E REDE ELÉTRICA.' },
+                                { id: 'd_aux_3', label: 'VERIFICAÇÃO VISUAL MIKROTIKS', checked: false, manual: 'CHECAR CONECTIVIDADE FÍSICA E STATUS DAS LUZES (LEDS) NAS PORTAS WAN/LAN ATIVAS.' },
+                                { id: 'd_aux_4', label: 'VERIFICAÇÃO SERVER PORTAL ( 15.3 )', checked: false, manual: 'CONFIRMAR DISPONIBILIDADE E LATÊNCIA DO PORTAL PRINCIPAL NO IP LOCAL DA REDE.' },
+                                { id: 'd_aux_5', label: 'VERIFICAÇÃO STATUS PORTAL WEB (15.3:8200)', checked: false, manual: 'TESTAR ACESSO E LOGIN NA PORTA 8200.' },
+                                { id: 'd_aux_6', label: 'VERIFICAÇÃO CONSUMO SMTP (SKYMAIL)', checked: false, manual: 'ACESSAR PAINEL DO SKYMAIL PARA CERTIFICAR LIMITE E VOLUME DE DISPAROS TRANSACIONAIS.' }
                             ]
                         },
                         coluna2: {
-                            title: t.col2,
+                            title: t.col2.toUpperCase(),
                             icon: "Server",
                             tasks: [
-                                { id: 'd_ple_1', label: 'Verificação Backups Veeam', checked: false, manual: 'Validar jobs de backup noturnos no Veeam. Garantir que não existem rotinas falhas ou pendentes.' },
-                                { id: 'd_ple_baculum', label: 'Verificar Backups Baculum', checked: false, manual: 'Acessar o painel do Baculum (Bacula) para certificar que os jobs de backup agendados executaram com sucesso e sem erros críticos.' },
-                                { id: 'd_ple_2', label: 'Status Pool Storage (FreeNAS 7TB e 13TB)', checked: false, manual: 'Acessar a interface do TrueNAS/FreeNAS para checar integridade do array ZFS e limites de capacidade.' },
-                                { id: 'd_ple_3', label: 'Verificação MPLS / VPN (TL e Pouso Alegre)', checked: false, manual: 'Ping e teste de acesso direto para validar estabilidade da malha de rede com as filiais.' },
-                                { id: 'd_ple_4', label: 'Verificação Log OpenVPN', checked: false, manual: 'Revisar tentativas anormais de login ou quedas persistentes nos clientes de VPN externa.' },
-                                { id: 'd_ple_5', label: 'Verificação Unifi Server', checked: false, manual: 'Checar status de adoção dos Access Points e integridade geral do mapa do WiFi no controller.' },
-                                { id: 'd_ple_6', label: 'Verificação PABX (Itu, TL e Pouso Alegre)', checked: false, manual: 'Certificar registros SIP e disponibilidade de troncos entre as plantas.' }
+                                { id: 'd_ple_1', label: 'VERIFICAÇÃO BACKUPS VEEAM', checked: false, manual: 'VALIDAR JOBS DE BACKUP NOTURNOS NO VEEAM. GARANTIR QUE NÃO EXISTEM ROTINAS FALHAS OU PENDENTES.' },
+                                { id: 'd_ple_baculum', label: 'VERIFICAR BACKUPS BACULUM', checked: false, manual: 'ACESSAR O PAINEL DO BACULUM (BACULA) PARA CERTIFICAR QUE OS JOBS DE BACKUP AGENDADOS EXECUTARAM COM SUCESSO E SEM ERROS CRÍTICOS.' },
+                                { id: 'd_ple_2', label: 'STATUS POOL STORAGE (FREENAS 7TB E 13TB)', checked: false, manual: 'ACESSAR A INTERFACE DO FREENAS/FREENAS PARA CHECAR INTEGRIDADE DO ARRAY ZFS E LIMITES DE CAPACIDADE.' },
+                                { id: 'd_ple_3', label: 'VERIFICAÇÃO MPLS / VPN (TL E POUSO ALEGRE)', checked: false, manual: 'PING E TESTE DE ACESSO DIRETO PARA VALIDAR ESTABILIDADE DA MALHA DE REDE COM AS FILIAIS.' },
+                                { id: 'd_ple_4', label: 'VERIFICAÇÃO LOG OPENVPN', checked: false, manual: 'REVISAR TENTATIVAS ANORMAIS DE LOGIN OU QUEDAS PERSISTENTES NOS CLIENTES DE VPN EXTERNA.' },
+                                { id: 'd_ple_5', label: 'VERIFICAÇÃO UNIFI SERVER', checked: false, manual: 'CHECAR STATUS DE ADOÇÃO DOS ACCESS POINTS E INTEGRIDADE GERAL DO MAPA DO WIFI NO CONTROLLER.' },
+                                { id: 'd_ple_6', label: 'VERIFICAÇÃO PABX (ITU, TL E POUSO ALEGRE)', checked: false, manual: 'CERTIFICAR REGISTROS SIP E DISPONIBILIDADE DE TRONCOS ENTRE AS PLANTAS.' }
                             ]
                         },
                         coluna3: {
-                            title: t.col3,
+                            title: t.col3.toUpperCase(),
                             icon: "Search",
                             tasks: [
-                                { id: 'd_sen_1', label: 'Verificação Log Wazuh', checked: false, manual: 'Analisar eventos críticos (nível 12+) de correlação no dashboard SIEM. Analisar falhas de integridade em servidores.' },
-                                { id: 'd_sen_2', label: 'Verificação Log pfSense', checked: false, manual: 'Checar consumo excessivo de links, bloqueios massivos no Suricata/pfBlocker ou anomalias no gateway.' },
-                                { id: 'd_sen_3', label: 'Verificação ECA ESET', checked: false, manual: 'Validar máquinas desatualizadas, módulos inativos ou infecções detectadas via console de gerência ESET.' },
-                                { id: 'd_sen_4', label: 'Verificação CrowdStrike', checked: false, manual: 'Revisar painel da plataforma Falcon para identificação de ameaças ou sensores desconectados no parque ativo.' }
+                                { id: 'd_sen_1', label: 'VERIFICAÇÃO LOG WAZUH', checked: false, manual: 'ANALISAR EVENTOS CRÍTICOS (NÍVEL 12+) DE CORRELAÇÃO NO DASHBOARD SIEM. ANALISAR FALHAS DE INTEGRIDADE EM SERVIDORES.' },
+                                { id: 'd_sen_2', label: 'VERIFICAÇÃO LOG PFSENSE', checked: false, manual: 'CHECAR CONSUMO EXCESSIVO DE LINKS, BLOQUEIOS MASSIVOS NO SURICATA/PFBLOCKER OU ANOMALIAS NO GATEWAY.' },
+                                { id: 'd_sen_3', label: 'VERIFICAÇÃO ECA ESET', checked: false, manual: 'VALIDAR MÁQUINAS DESATUALIZADAS, MÓDULOS INATIVOS OU INFECÇÕES DETECTADAS VIA CONSOLE DE GERÊNCIA ESET.' },
+                                { id: 'd_sen_4', label: 'VERIFICAÇÃO CROWDSTRIKE', checked: false, manual: 'REVISAR PAINEL DA PLATAFORMA FALCON PARA IDENTIFICAÇÃO DE AMEAÇAS OU SENSORES DESCONECTADOS NO PARQUE ATIVO.' }
                             ]
                         }
                     };
@@ -312,28 +312,28 @@
                             title: "1. LIMPEZA E ESTRUTURA",
                             icon: "Server",
                             tasks: [
-                                { id: 'r_1', label: 'Limpeza Externa e Filtros', checked: false, manual: 'Remover acúmulo de poeira da porta perfurada e limpar filtros de ar do rack (pincel ou pano seco). A poeira de cobre/plástico causa superaquecimento.' },
-                                { id: 'r_2', label: 'Ventilação (Exaustores)', checked: false, manual: 'Verificar se o kit de ventilação no teto está ligado e operante. Escutar ruídos de rolamento gasto.' },
-                                { id: 'r_3', label: 'Vedação e Trancas', checked: false, manual: 'Garantir que as portas e painéis laterais estão devidamente fechados e trancados para evitar oxidação precoce.' }
+                                { id: 'r_1', label: 'LIMPEZA EXTERNA E FILTROS', checked: false, manual: 'REMOVER ACÚMULO DE POEIRA DA PORTA PERFURADA E LIMPAR FILTROS DE AR DO RACK (PINCEL OU PANO SECO). A POEIRA DE COBRE/PLÁSTICO CAUSA SUPERAQUECIMENTO.' },
+                                { id: 'r_2', label: 'VENTILAÇÃO (EXAUSTORES)', checked: false, manual: 'VERIFICAR SE O KIT DE VENTILAÇÃO NO TETO ESTÁ LIGADO E OPERANTE. ESCUTAR RUÍDOS DE ROLAMENTO GASTO.' },
+                                { id: 'r_3', label: 'VEDAÇÃO E TRANCAS', checked: false, manual: 'GARANTIR QUE AS PORTAS E PAINÉIS LATERAIS ESTÃO DEVIDAMENTE FECHADOS E TRANCADOS PARA EVITAR OXIDAÇÃO PRECOCE.' }
                             ]
                         },
                         energia: {
                             title: "2. ENERGIA E CLIMATIZAÇÃO",
                             icon: "Check",
                             tasks: [
-                                { id: 'r_4', label: 'Status No-Break (UPS)', checked: false, manual: 'Inspecionar painel do no-break interno. Verificar se há LED vermelho de bateria viciada ou alarme sonoro.' },
-                                { id: 'r_5', label: 'Régua de Tomadas (PDU)', checked: false, manual: 'Garantir que as fontes dos switches e conversores de mídia estão bem fixadas, sem cabos elétricos tensionados.' },
-                                { id: 'r_6', label: 'Temperatura Interna', checked: false, manual: 'Verificar a sensação térmica dentro do rack. Garantir a ausência de bolsões de ar quente presos no topo.' }
+                                { id: 'r_4', label: 'STATUS NO-BREAK (UPS)', checked: false, manual: 'INSPECIONAR PAINEL DO NO-BREAK INTERNO. VERIFICAR SE HÁ LED VERMELHO DE BATERIA VICIADA OU ALARME SONORO.' },
+                                { id: 'r_5', label: 'RÉGUA DE TOMADAS (PDU)', checked: false, manual: 'GARANTIR QUE AS FONTES DOS SWITCHES E CONVERSORES DE MÍDIA ESTÃO BEM FIXADAS, SEM CABOS ELÉTRICOS TENSIONADOS.' },
+                                { id: 'r_6', label: 'TEMPERATURA INTERNA', checked: false, manual: 'VERIFICAR A SENSAÇÃO TÉRMICA DENTRO DO RACK. GARANTIR A AUSÊNCIA DE BOLSÕES DE AR QUENTE PRESOS NO TOPO.' }
                             ]
                         },
                         ativos: {
                             title: "3. CABEAMENTO E SWITCHES",
                             icon: "Layout",
                             tasks: [
-                                { id: 'r_7', label: 'LEDs de Erro (Switches)', checked: false, manual: 'Inspecionar painel frontal. Validar alertas de falha de hardware (SYS/ALM) e portas piscando laranja de forma constante (erro de negociação).' },
-                                { id: 'r_8', label: 'Proteção de Portas Ociosas', checked: false, manual: 'Verificar se as portas RJ45 não utilizadas estão cobertas com Dust Covers (tampões) para não oxidar com os vapores da fábrica.' },
-                                { id: 'r_9', label: 'Guias e Patch Cords', checked: false, manual: 'Verificar patch cords soltos, forçados nas pontas ou obstruindo a saída de ar frontal dos equipamentos. Reacomodar nos guias de cabos.' },
-                                { id: 'r_10', label: 'Fibras e Uplinks', checked: false, manual: 'Inspecionar cordões ópticos e cordões de manobra para garantir que não há estrangulamento ou curvatura excessiva.' }
+                                { id: 'r_7', label: 'LEDS DE ERRO (SWITCHES)', checked: false, manual: 'INSPECIONAR PAINEL FRONTAL. VALIDAR ALERTAS DE FALHA DE HARDWARE (SYS/ALM) E PORTAS PISCANDO LARANJA DE FORMA CONSTANTE (ERRO DE NEGOCIAÇÃO).' },
+                                { id: 'r_8', label: 'PROTEÇÃO DE PORTAS OCIOSAS', checked: false, manual: 'VERIFICAR SE AS PORTAS RJ45 NÃO UTILIZADAS ESTÃO COBERTAS COM DUST COVERS (TAMPÕES) PARA NÃO OXIDAR COM OS VAPORES DA FÁBRICA.' },
+                                { id: 'r_9', label: 'GUIAS E PATCH CORDS', checked: false, manual: 'VERIFICAR PATCH CORDS SOLTOS, FORÇADOS NAS PONTAS OU OBSTRUINDO A SAÍDA DE AR FRONTAL DOS EQUIPAMENTOS. REACOMODAR NOS GUIAS DE CABOS.' },
+                                { id: 'r_10', label: 'FIBRAS E UPLINKS', checked: false, manual: 'INSPECIONAR CORDÕES ÓPTICOS E CORDÕES DE MANOBRA PARA GARANTIR QUE NÃO HÁ ESTRANGULAMENTO OU CURVATURA EXCESSIVA.' }
                             ]
                         }
                     };
@@ -498,7 +498,7 @@
                 var items = data.items || {};
 
                 var handleMeta = function(field, value) {
-                    var newMeta = Object.assign({}, meta, { [field]: value });
+                    var newMeta = Object.assign({}, meta, { [field]: value.toUpperCase() });
                     onUpdate(Object.assign({}, data, { meta: newMeta }));
                 };
 
@@ -528,10 +528,10 @@
                                     onSave={function(newVal) {
                                         var newData = Object.assign({}, data);
                                         if(newData.items[key]) {
-                                            newData.items[key].title = newVal;
+                                            newData.items[key].title = newVal.toUpperCase();
                                             onUpdate(newData);
                                             if (ticket.type === 'diario' && props.onGlobalTitleChange) {
-                                                props.onGlobalTitleChange(key, newVal);
+                                                props.onGlobalTitleChange(key, newVal.toUpperCase());
                                             }
                                         }
                                     }}
@@ -593,11 +593,11 @@
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">ATIVO / DEPARTAMENTO</label>
-                                        <Input placeholder="Ex: PAT-01020" value={meta.ativo || ''} onChange={function(e) { handleMeta('ativo', e.target.value); }} />
+                                        <Input placeholder="EX: PAT-01020" value={meta.ativo || ''} onChange={function(e) { handleMeta('ativo', e.target.value); }} className="uppercase" />
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">MÁQUINA / FINALIDADE</label>
-                                        <Input placeholder="Ex: CORP-PC-01" value={meta.maquina || ''} onChange={function(e) { handleMeta('maquina', e.target.value); }} />
+                                        <Input placeholder="EX: CORP-PC-01" value={meta.maquina || ''} onChange={function(e) { handleMeta('maquina', e.target.value); }} className="uppercase" />
                                     </div>
                                 </div>
                             </Card>
@@ -703,7 +703,7 @@
                             <Card className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
-                                    <textarea readOnly={isHistory} value={obs} onChange={function(e) { setObs(e.target.value); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Detalhes adicionais, peças trocadas, etc..."></textarea>
+                                    <textarea readOnly={isHistory} value={obs} onChange={function(e) { setObs(e.target.value.toUpperCase()); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none uppercase" placeholder="DETALHES ADICIONAIS, PEÇAS TROCADAS, ETC..."></textarea>
                                 </div>
                                 <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
                                     <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações {isHistory ? 'do Relatório' : 'de Encerramento'}</h3>
@@ -723,16 +723,16 @@
                                 <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date(ticket.createdAt || ticket.date || Date.now()).toLocaleDateString()}</div></div>
                             </div>
                             <div className="grid grid-cols-4 border-b border-black">
-                                <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate">{meta.ativo || 'N/A'}</span></div>
-                                <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Máquina</span><span className="font-bold text-sm block truncate">{identificador}</span></div>
+                                <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate uppercase">{meta.ativo || 'N/A'}</span></div>
+                                <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Máquina</span><span className="font-bold text-sm block truncate uppercase">{identificador}</span></div>
                                 <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{meta.tecnico}</span></div>
                                 <div className={"p-3 text-center flex flex-col justify-center " + (percent === 100 ? 'bg-gray-100' : 'bg-gray-200')}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
                             </div>
                             <div className="p-6 flex gap-8">
-                                <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map(function(cat, i) { return (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>); })}</tbody></table></div>
+                                <div className="w-1/2"><h3 className="font-bold uppercase text-[10px] mb-2 border-b border-black pb-1">Checklist</h3><table className="w-full text-left border-collapse"><tbody>{categorySummary.map(function(cat, i) { return (<tr key={i} className="border-b border-dotted border-gray-400"><td className="py-1.5 font-medium uppercase">{cat.title}</td><td className="py-1.5 text-right font-mono font-bold">{cat.status === 'OK' ? 'OK' : '⚠'}</td></tr>); })}</tbody></table></div>
                                 <div className="w-1/2 flex flex-col gap-4">
-                                    {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map(function(p, i) { return <li key={i} className="truncate">{p.replace('- ', '')}</li>; })}</ul></div>)}
-                                    <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16">{obs || "Sem observações adicionais."}</p></div>
+                                    {pendingList.length > 0 && (<div className="border border-black p-2 bg-gray-50"><h3 className="font-bold uppercase text-[9px] mb-1">Pendências</h3><ul className="list-disc list-inside text-[10px] space-y-0.5">{pendingList.map(function(p, i) { return <li key={i} className="truncate uppercase">{p.replace('- ', '')}</li>; })}</ul></div>)}
+                                    <div><h3 className="font-bold uppercase text-[10px] mb-1 border-b border-black pb-1">Observações</h3><p className="text-[10px] leading-relaxed italic h-16 uppercase">{obs || "Sem observações adicionais."}</p></div>
                                 </div>
                             </div>
                         </div>
@@ -781,7 +781,7 @@
                                     {activeTickets.map(function(ticket) {
                                         var meta = (ticket.data && ticket.data.meta) || {};
                                         var pct = calcProgress(ticket.data && ticket.data.items);
-                                        var nomeAtivo = meta.maquina || meta.ativo || "Sem Identificação";
+                                        var nomeAtivo = (meta.maquina || meta.ativo || "Sem Identificação").toUpperCase();
                                         
                                         return (
                                             <div key={ticket.id} onClick={function() { onOpenTicket(ticket.id); }} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
@@ -797,8 +797,8 @@
                                                     </div>
                                                     <span className="text-xs font-mono font-bold text-slate-400">#{ticket.visualId}</span>
                                                 </div>
-                                                <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1">{nomeAtivo}</h4>
-                                                <p className="text-xs text-slate-500 mb-4 flex items-center gap-1">{Icons.User} {meta.tecnico || 'Técnico'}</p>
+                                                <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1 uppercase">{nomeAtivo}</h4>
+                                                <p className="text-xs text-slate-500 mb-4 flex items-center gap-1 uppercase">{Icons.User} {meta.tecnico || 'Técnico'}</p>
                                                 
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -868,8 +868,8 @@
                                                             {h.type === 'formatacao' ? 'Formatação' : h.type === 'diario' ? 'Diário' : h.type === 'rack' ? 'Rack/Switch' : 'Zebra'}
                                                         </Badge>
                                                     </td>
-                                                    <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{h.ativo || 'N/A'}</td>
-                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{h.tecnico || 'N/A'}</td>
+                                                    <td className="px-6 py-3 font-medium text-slate-800 dark:text-white uppercase">{h.ativo || 'N/A'}</td>
+                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400 uppercase">{h.tecnico || 'N/A'}</td>
                                                     <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
                                                 </tr>
                                             );
@@ -919,7 +919,7 @@
                     var seq = Math.floor(100 + Math.random() * 900);
                     var newTask = {
                         code: 'SCRUM-' + seq,
-                        title: form.title.trim(),
+                        title: form.title.trim().toUpperCase(),
                         description: '',
                         assignee: form.assignee,
                         priority: form.priority,
@@ -1014,7 +1014,7 @@
                                                          }}
                                                          onClick={function() { setEditingTask(task); }} 
                                                          className="bg-jira-card hover:bg-jira-cardHover transition-colors p-3 rounded-lg shadow-sm group flex flex-col gap-3 relative cursor-grab active:cursor-grabbing border border-transparent">
-                                                        <h4 className="text-[13px] text-jira-text leading-snug">{task.title}</h4>
+                                                        <h4 className="text-[13px] text-jira-text leading-snug uppercase">{task.title}</h4>
 
                                                         <div className="flex justify-between items-center mt-1">
                                                             <div className="flex items-center gap-2">
@@ -1079,7 +1079,7 @@
                                     <form onSubmit={handleCreate} className="p-6 space-y-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Título da Tarefa</label>
-                                            <Input value={form.title} onChange={function(e) { setForm(Object.assign({}, form, { title: e.target.value })); }} placeholder="Ex: Substituir switch rack 02" className="bg-jira-card border-slate-700 text-white" autoFocus />
+                                            <Input value={form.title} onChange={function(e) { setForm(Object.assign({}, form, { title: e.target.value.toUpperCase() })); }} placeholder="EX: SUBSTITUIR SWITCH RACK 02" className="bg-jira-card border-slate-700 text-white uppercase" autoFocus />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
@@ -1131,11 +1131,11 @@
                                         <div className="space-y-4">
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Título</label>
-                                                <Input value={editingTask.title} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {title: e.target.value})); }} className="bg-[#22272B] border-slate-700 text-white font-semibold" />
+                                                <Input value={editingTask.title} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {title: e.target.value.toUpperCase()})); }} className="bg-[#22272B] border-slate-700 text-white font-semibold uppercase" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Descrição detalhada</label>
-                                                <textarea rows="3" value={editingTask.description || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {description: e.target.value})); }} className="w-full p-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500" placeholder="Adicione instruções, links ou contexto para esta tarefa..."></textarea>
+                                                <textarea rows="3" value={editingTask.description || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {description: e.target.value.toUpperCase()})); }} className="w-full p-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 uppercase" placeholder="ADICIONE INSTRUÇÕES, LINKS OU CONTEXTO PARA ESTA TAREFA..."></textarea>
                                             </div>
                                             <div className="grid grid-cols-3 gap-4">
                                                 <div>
@@ -1177,7 +1177,7 @@
                                                                 <span className={"text-xs font-bold " + (isMe ? "text-brand-400" : "text-slate-400")}>{c.author}</span>
                                                                 <span className="text-[10px] text-slate-500">{new Date(c.createdAt).toLocaleString()}</span>
                                                             </div>
-                                                            <p className="text-sm text-slate-300 whitespace-pre-wrap">{c.text}</p>
+                                                            <p className="text-sm text-slate-300 whitespace-pre-wrap uppercase">{c.text}</p>
                                                         </div>
                                                     );
                                                 })}
@@ -1190,13 +1190,13 @@
                                                 <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-1 shadow-sm">
                                                     {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                                                 </div>
-                                                <textarea value={newComment} onChange={function(e) { setNewComment(e.target.value); }} rows="2" className="flex-1 p-2.5 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none" placeholder="Escreva um comentário..."></textarea>
+                                                <textarea value={newComment} onChange={function(e) { setNewComment(e.target.value.toUpperCase()); }} rows="2" className="flex-1 p-2.5 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none uppercase" placeholder="ESCREVA UM COMENTÁRIO..."></textarea>
                                                 <Button onClick={function() {
                                                     if(!newComment.trim()) return;
                                                     var commentObj = {
                                                         id: 'c_' + Date.now(),
                                                         author: currentUser ? currentUser.name : 'Técnico',
-                                                        text: newComment.trim(),
+                                                        text: newComment.trim().toUpperCase(),
                                                         createdAt: new Date().toISOString()
                                                     };
                                                     var updatedComments = (editingTask.comments || []).concat([commentObj]);
@@ -1213,8 +1213,8 @@
                                         <Button variant="secondary" onClick={function() { setEditingTask(null); }} className="bg-transparent border-none text-slate-400 hover:bg-slate-800">Cancelar</Button>
                                         <Button onClick={function() {
                                             var updates = {
-                                                title: editingTask.title,
-                                                description: editingTask.description || '',
+                                                title: editingTask.title.toUpperCase(),
+                                                description: (editingTask.description || '').toUpperCase(),
                                                 status: editingTask.status,
                                                 assignee: editingTask.assignee,
                                                 priority: editingTask.priority
@@ -1249,7 +1249,7 @@
                 var handleAddUser = function(e) {
                     e.preventDefault();
                     var cleanId = (newUser.id || '').trim();
-                    var cleanName = (newUser.name || '').trim();
+                    var cleanName = (newUser.name || '').trim().toUpperCase();
                     var cleanPass = (newUser.pass || '').trim();
                     if (!cleanId || !cleanName || !cleanPass) return alert("Preencha todos os campos.");
                     if (users.some(function(u) { return (u.id || '').toLowerCase() === cleanId.toLowerCase(); })) {
@@ -1273,7 +1273,12 @@
                 var handleSaveTitulos = function(e) {
                     e.preventDefault();
                     setSaving(true);
-                    db.collection('settings').doc('titulos').set(titulos)
+                    var formattedTitulos = {
+                        col1: (titulos.col1 || '').toUpperCase(),
+                        col2: (titulos.col2 || '').toUpperCase(),
+                        col3: (titulos.col3 || '').toUpperCase()
+                    };
+                    db.collection('settings').doc('titulos').set(formattedTitulos)
                         .then(function() { alert("Títulos atualizados com sucesso!"); })
                         .catch(function(err) { alert("Erro ao atualizar: " + err.message); })
                         .finally(function() { setSaving(false); });
@@ -1297,7 +1302,7 @@
                                         <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Técnico</h3>
                                         <form onSubmit={handleAddUser} className="space-y-3">
                                             <Input placeholder="Matrícula / ID" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
-                                            <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value })); }} />
+                                            <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value.toUpperCase() })); }} className="uppercase" />
                                             <Input type="password" placeholder="Senha" value={newUser.pass} onChange={function(e) { setNewUser(Object.assign({}, newUser, { pass: e.target.value })); }} />
                                             <Button type="submit" disabled={saving} className="w-full">{Icons.Plus} Cadastrar</Button>
                                         </form>
@@ -1305,7 +1310,7 @@
                                     <div>
                                         <div className="flex justify-between items-center mb-3">
                                             <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Técnicos Habilitados</h3>
-                                            <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-28" />
+                                            <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-28 uppercase" />
                                         </div>
                                         <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                                             {list.map(function(u) {
@@ -1313,7 +1318,7 @@
                                                 return (
                                                     <div key={u.docId || u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
                                                         <div>
-                                                            <div className="font-semibold text-sm text-slate-700 dark:text-slate-200">{u.name}</div>
+                                                            <div className="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase">{u.name}</div>
                                                             <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
                                                         </div>
                                                         {!isMe && (
@@ -1332,15 +1337,15 @@
                                         <div className="grid md:grid-cols-3 gap-4">
                                             <div>
                                                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 1</label>
-                                                <Input value={titulos.col1 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col1: e.target.value})); }} />
+                                                <Input value={titulos.col1 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col1: e.target.value.toUpperCase()})); }} className="uppercase" />
                                             </div>
                                             <div>
                                                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 2</label>
-                                                <Input value={titulos.col2 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col2: e.target.value})); }} />
+                                                <Input value={titulos.col2 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col2: e.target.value.toUpperCase()})); }} className="uppercase" />
                                             </div>
                                             <div>
                                                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 3</label>
-                                                <Input value={titulos.col3 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col3: e.target.value})); }} />
+                                                <Input value={titulos.col3 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col3: e.target.value.toUpperCase()})); }} className="uppercase" />
                                             </div>
                                         </div>
                                         <div className="flex justify-end">
@@ -1548,9 +1553,9 @@
                 };
 
                 var handleAddFolder = function() {
-                    var title = prompt("Nome da nova pasta (ex: Firewall, Roteadores):");
+                    var title = prompt("NOME DA NOVA PASTA (EX: FIREWALL, ROTEADORES):");
                     if (!title || !title.trim()) return;
-                    var newFolder = { id: 'f_' + Date.now(), title: title.trim(), links: [] };
+                    var newFolder = { id: 'f_' + Date.now(), title: title.trim().toUpperCase(), links: [] };
                     var updated = customFolders.concat([newFolder]);
                     db.collection('settings').doc('sidebar_modules').set({ folders: updated });
                     
@@ -1561,22 +1566,22 @@
 
                 var handleDeleteFolder = function(e, folderId) {
                     e.stopPropagation();
-                    if (confirm("Deseja realmente excluir esta pasta e seus links?")) {
+                    if (confirm("DESEJA REALMENTE EXCLUIR ESTA PASTA E SEUS LINKS?")) {
                         var updated = customFolders.filter(function(f) { return f.id !== folderId; });
                         db.collection('settings').doc('sidebar_modules').set({ folders: updated });
                     }
                 };
 
                 var handleAddLink = function(folderId) {
-                    var label = prompt("Nome do acesso (ex: pfSense Matriz):");
+                    var label = prompt("NOME DO ACESSO (EX: PFSENSE MATRIZ):");
                     if (!label || !label.trim()) return;
-                    var url = prompt("Endereço IP ou URL (ex: 192.168.1.1):");
+                    var url = prompt("ENDEREÇO IP OU URL (EX: 192.168.1.1):");
                     if (!url || !url.trim()) return;
 
                     var updated = customFolders.map(function(f) {
                         if (f.id === folderId) {
                             var existing = f.links || [];
-                            var newLink = { id: 'l_' + Date.now(), label: label.trim(), url: url.trim() };
+                            var newLink = { id: 'l_' + Date.now(), label: label.trim().toUpperCase(), url: url.trim() };
                             return Object.assign({}, f, { links: existing.concat([newLink]) });
                         }
                         return f;
@@ -1586,7 +1591,7 @@
 
                 var handleDeleteLink = function(e, folderId, linkId) {
                     e.stopPropagation();
-                    if (confirm("Remover este acesso?")) {
+                    if (confirm("REMOVER ESTE ACESSO?")) {
                         var updated = customFolders.map(function(f) {
                             if (f.id === folderId) {
                                 var filtered = (f.links || []).filter(function(l) { return l.id !== linkId; });
@@ -1685,7 +1690,7 @@
                     var map = { coluna1: 'col1', coluna2: 'col2', coluna3: 'col3' };
                     var gKey = map[colKey];
                     if (gKey) {
-                        var newTitulos = Object.assign({}, globalTitulos, { [gKey]: newVal });
+                        var newTitulos = Object.assign({}, globalTitulos, { [gKey]: newVal.toUpperCase() });
                         db.collection('settings').doc('titulos').set(newTitulos);
                     }
                 };
@@ -1697,8 +1702,8 @@
                         visualId: ticket.visualId, 
                         type: ticket.type, 
                         date: new Date().toISOString(), 
-                        tecnico: meta.tecnico || 'N/A', 
-                        ativo: meta.ativo || meta.maquina || "N/A", 
+                        tecnico: (meta.tecnico || 'N/A').toUpperCase(), 
+                        ativo: (meta.ativo || meta.maquina || "N/A").toUpperCase(), 
                         data: ticket.data 
                     }).then(function() {
                         if(ticket.id && ticket.id !== 'draft') {
@@ -1712,7 +1717,7 @@
 
                 var handleRevertHistory = function(historyItem) {
                     if (!historyItem) return;
-                    if (confirm("Deseja retornar este checklist para os ativos em andamento?")) {
+                    if (confirm("DESEJA RETORNAR ESTE CHECKLIST PARA OS ATIVOS EM ANDAMENTO?")) {
                         var restoredTicket = {
                             visualId: historyItem.visualId,
                             type: historyItem.type || 'formatacao',
@@ -1732,7 +1737,7 @@
                 
                 var handleDeleteActive = function(e, id) { 
                     e.stopPropagation(); 
-                    if (confirm("Cancelar este registro?")) db.collection('tickets').doc(id).delete(); 
+                    if (confirm("CANCELAR ESTE REGISTRO?")) db.collection('tickets').doc(id).delete(); 
                 };
 
                 var handleLogoUpload = function(e) { 
@@ -1749,11 +1754,11 @@
 
                 var handleSaveKanbanTask = function(task) {
                     var maxOrder = kanbanTasks.length;
-                    db.collection('kanban_tasks').add(Object.assign({}, task, { order: maxOrder }));
+                    db.collection('kanban_tasks').add(Object.assign({}, task, { title: task.title.toUpperCase(), order: maxOrder }));
                 };
 
                 var handleDeleteKanbanTask = function(taskId) {
-                    if (confirm("Excluir este cartão do Kanban?")) {
+                    if (confirm("EXCLUIR ESTE CARTÃO DO KANBAN?")) {
                         db.collection('kanban_tasks').doc(taskId).delete();
                     }
                 };
@@ -1763,6 +1768,8 @@
                 };
 
                 var handleUpdateKanbanTask = function(taskId, updates) {
+                    if (updates.title) updates.title = updates.title.toUpperCase();
+                    if (updates.description) updates.description = updates.description.toUpperCase();
                     db.collection('kanban_tasks').doc(taskId).update(updates);
                 };
 
@@ -1840,7 +1847,7 @@
                                         {Icons.Kanban} Kanban TI
                                     </button>
                                     <button onClick={function() { setView('sistema176'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'sistema176' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                        {Icons.Globe} Sistema 176
+                                        {Icons.Globe} Controle de Estoque T.I
                                     </button>
                                     <button onClick={function() { setView('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.History} Histórico
@@ -1895,7 +1902,7 @@
                                                 <div onClick={function() { toggleFolder(f.id); }} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-grab active:cursor-grabbing group " + (isOpen ? 'bg-slate-800/60 text-white' : '')}>
                                                     <div className="flex items-center gap-2.5 truncate pointer-events-none">
                                                         <span className={isOpen ? "text-amber-400" : "text-slate-500"}>{Icons.Folder}</span> 
-                                                        <span className="truncate font-semibold">{f.title}</span>
+                                                        <span className="truncate font-semibold uppercase">{f.title}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1.5 shrink-0">
                                                         <button onClick={function(e){ handleDeleteFolder(e, f.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Pasta">{Icons.Trash}</button>
@@ -1910,14 +1917,14 @@
                                                                 <div key={l.id} className="flex items-center justify-between group px-2 py-1 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800/50">
                                                                     <div onClick={function() { handleOpenLink(l.url); }} className="flex items-center gap-2 truncate cursor-pointer flex-1" title={l.url}>
                                                                         <span className="text-slate-500 group-hover:text-brand-400">{Icons.ExternalLink}</span>
-                                                                        <span className="truncate">{l.label}</span>
+                                                                        <span className="truncate uppercase">{l.label}</span>
                                                                     </div>
                                                                     <button onClick={function(e) { handleDeleteLink(e, f.id, l.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 shrink-0" title="Remover link">{Icons.Trash}</button>
                                                                 </div>
                                                             );
                                                         })}
                                                         <button onClick={function() { handleAddLink(f.id); }} className="w-full text-left flex items-center gap-1.5 px-2 py-1 text-[10px] text-slate-500 hover:text-brand-400 font-semibold">
-                                                            {Icons.Plus} <span>Adicionar Link</span>
+                                                            {Icons.Plus} <span>ADICIONAR LINK</span>
                                                         </button>
                                                     </div>
                                                 )}
@@ -1933,7 +1940,7 @@
                                         {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                                     </div>
                                     <div className="overflow-hidden">
-                                        <p className="text-sm font-bold text-white truncate">{currentUser ? currentUser.name : ''}</p>
+                                        <p className="text-sm font-bold text-white truncate uppercase">{currentUser ? currentUser.name : ''}</p>
                                         <p className="text-xs text-slate-500 font-mono">ID: {currentUser ? currentUser.id : ''}</p>
                                     </div>
                                 </div>
@@ -1943,7 +1950,7 @@
                                     <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-slate-800 text-center">
-                                    <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400" onClick={function() { if (fileInputRef.current) fileInputRef.current.click(); }}>Alterar Logo</p>
+                                    <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400 uppercase" onClick={function() { if (fileInputRef.current) fileInputRef.current.click(); }}>Alterar Logo</p>
                                     <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
                                 </div>
                             </div>
@@ -1966,15 +1973,15 @@
                                 {view === 'sistema176' && (
                                     <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col">
                                         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 bg-white dark:bg-slate-900 shadow-sm z-10">
-                                            <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                                {Icons.Globe} Sistema Interno (192.168.1.176:6900)
+                                            <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2 uppercase">
+                                                {Icons.Globe} Controle de Estoque T.I (192.168.1.176:6900)
                                             </h2>
                                             <Button onClick={function(){ window.open('http://192.168.1.176:6900/', '_blank'); }} variant="secondary" className="text-xs">
                                                 {Icons.ExternalLink} Abrir em nova guia
                                             </Button>
                                         </div>
                                         <div className="flex-1 w-full relative">
-                                            <iframe src="http://192.168.1.176:6900/" className="absolute inset-0 w-full h-full border-none" title="Sistema 176" />
+                                            <iframe src="http://192.168.1.176:6900/" className="absolute inset-0 w-full h-full border-none" title="Controle de Estoque T.I" />
                                         </div>
                                     </div>
                                 )}
