@@ -170,71 +170,55 @@
                                 { id: 'f_prev_4', label: 'LIMPA CONTATO', checked: false, manual: 'APLICAR SPRAY LIMPA CONTATO DIRETAMENTE NOS SLOTS DIMM E CONECTORES DA PLACA-MÃE. AGUARDAR CERCA DE 2 MINUTOS PARA SECAGEM TOTAL ANTES DE REINSTALAR AS PEÇAS.' }
                             ]
                         },
-                        preparacao: {
-                            title: "2. BACKUP & PREP",
-                            icon: "Server",
+                        root: {
+                            title: "2. ROOT",
+                            icon: "Settings",
                             tasks: [
-                                { id: 'f_prep_1', label: 'VERIF. NOME/PARTIÇÕES', checked: false, manual: 'CONFERIR PARTIÇÕES EXISTENTES E ANOTAR O NOME ANTIGO DO COMPUTADOR.\nPARA VERIFICAR DISCOS E VOLUMES: PRESSIONE WIN+R E DIGITE DISKMGMT.MSC.', copyText: 'diskmgmt.msc' },
-                                { id: 'f_prep_2', label: 'BACKUP ARQUIVOS', checked: false, manual: 'HABILITAR ITENS OCULTOS & APPDATA:\n1. NO EXPLORADOR DE ARQUIVOS: CLIQUE NA ABA SUPERIOR "EXIBIR" E MARQUE A CAIXA "ITENS OCULTOS".\n2. PRESSIONE WIN+R, DIGITE %APPDATA% E COPIE A PASTA APPDATA INTEIRA DO USUÁRIO (CONTÉM CONFIGURAÇÕES, SPARK E DADOS DE NAVEGADORES).\n3. SALVAR AS PASTAS DOCUMENTOS, DESKTOP, DOWNLOADS E IMAGENS.\n4. PARA FERRAMENTAS DE SETUP: WIN+R > \\\\PDC-COBRECOM\\MANUTENCAO (LOGIN: ADMIN) > PASTA "M.KAUAN" > COPIAR "FORMATAÇÃO W10".', copyText: '%appdata%' },
-                                { id: 'f_prep_3', label: 'CHAVE OFFICE', checked: false, manual: 'IDENTIFICAR SE O PACOTE OFFICE UTILIZA LICENÇA VINCULADA À CONTA MICROSOFT DO USUÁRIO OU CHAVE FÍSICA OEM. ANOTAR OU CERTIFICAR A CONTA VINCULADA.', copyText: null },
-                                { id: 'f_prep_4', label: 'BACKUP NAVEGADOR', checked: false, manual: 'NO CHROME: CONFIGURAÇÕES > FAVORITOS > GERENCIADOR DE FAVORITOS > EXPORTAR FAVORITOS PARA ARQUIVO HTML, OU COPIAR O DIRETÓRIO: %LOCALAPPDATA%\\GOOGLE\\CHROME\\USER DATA.', copyText: '%localappdata%\\Google\\Chrome\\User Data' },
-                                { id: 'f_prep_5', label: 'BACKUP OUTLOOK/SPARK', checked: false, manual: '1. OUTLOOK: EXPORTAR ARQUIVO DE DADOS .PST OU COPIAR DE %LOCALAPPDATA%\\MICROSOFT\\OUTLOOK.\n2. SPARK: FAZER BACKUP DA PASTA DE HISTÓRICO DE CONVERSAS EM %APPDATA%\\SPARK.', copyText: '%appdata%\\Spark' }
+                                { id: 'f_r_1', label: 'FORMATAR A MÁQUINA', checked: false },
+                                { id: 'f_r_2', label: 'CONFIGURAR GPEDIT (PERFIS DE USUARIO/UPDATE)', checked: false },
+                                { id: 'f_r_3', label: 'PAUSAR AS ATUALIZAÇÕES NO WINDOWS UPDATE', checked: false },
+                                { id: 'f_r_4', label: 'CONFIGURAR ÁREA DE TRABALHO REMOTA', checked: false },
+                                { id: 'f_r_5', label: 'ATIVAR SMB 1.0', checked: false },
+                                { id: 'f_r_6', label: 'CONFIGURAR WINS', checked: false },
+                                { id: 'f_r_7', label: 'COLOCAR NO DOMÍNIO', checked: false },
+                                { id: 'f_r_8', label: 'CONFIGURAR PROXY (PRIMEIRO IP, DEPOIS DNS)', checked: false },
+                                { id: 'f_r_9', label: 'CONFIGURAÇÃO DE ENERGIA', checked: false },
+                                { id: 'f_r_10', label: 'CONFIGURAR (HOSTS) PAGFOR/PDC-COBRECOM/PORTAL', checked: false },
+                                { id: 'f_r_11', label: 'ATUALIZAR DRIVERS NO SITE DO FABRICANTE', checked: false },
+                                { id: 'f_r_12', label: 'INSTALAR PROGRAMAS PADRÕES DE FORMATAÇÃO', checked: false },
+                                { id: 'f_r_13', label: 'ATIVAR ESET E SUAS ATUALIZAÇÕES', checked: false },
+                                { id: 'f_r_14', label: 'CONFIGURAR ACESSO REMOTO ESET', checked: false },
+                                { id: 'f_r_15', label: 'ATIVAR WINDOWS', checked: false },
+                                { id: 'f_r_16', label: 'ATIVAR OFFICE', checked: false },
+                                { id: 'f_r_17', label: 'CONFIGURAR ULTRA VNC', checked: false },
+                                { id: 'f_r_18', label: 'CONFIGURAR REGRA FIREWALL ULTRA VNC', checked: false },
+                                { id: 'f_r_19', label: 'CONFIGURAR FIREWALL SPARK', checked: false },
+                                { id: 'f_r_20', label: 'CONFIGURAR MELHOR DESEMPENHO (SE NECESSÁRIO)', checked: false },
+                                { id: 'f_r_21', label: 'CONFIGURAR IP', checked: false },
+                                { id: 'f_r_22', label: 'INSTALAR E CONFIGURAR WAZUH', checked: false },
+                                { id: 'f_r_23', label: 'CONFIGURAR USUÁRIO COM PERMISSÕES DE USUÁRIO', checked: false },
+                                { id: 'f_r_24', label: 'CONFIGURAR PERMISSÃO DE ACESSO REMOTO USER', checked: false }
                             ]
                         },
-                        sistema: {
-                            title: "3. SISTEMA OPERACIONAL",
-                            icon: "Server",
+                        usuario: {
+                            title: "3. USUÁRIO",
+                            icon: "User",
                             tasks: [
-                                { id: 'f_sis_1', label: 'FORMATAÇÃO', checked: false, manual: '1. REINICIAR O PC E FAZER A FORMATAÇÃO PELA BIOS.\n2. USUÁRIO: ROOT | SENHA: PERGUNTA PRA RECUPERAR PODE SER QUALQUER UM A SENHA É COBRE NAS 3.', copyText: 'root' },
-                                { id: 'f_sis_3', label: 'PROXY/DNS', checked: false, manual: '8. CONFIGURAÇÕES PROXY:\nABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nENDEREÇO: 192.168.1.1 | PORTA: 3128', copyText: '192.168.1.1' },
-                                { id: 'f_sis_4', label: 'WINS/HOSTS', checked: false, manual: 'CONFIGURAR WINS NA PLACA DE REDE CASO O DEPARTAMENTO UTILIZE RESOLUÇÃO LEGADA DE NETBIOS OU EDITAR O ARQUIVO DE HOSTS DO WINDOWS EM: C:\\WINDOWS\\SYSTEM32\\DRIVERS\\ETC\\HOSTS.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
-                                { id: 'f_sis_5', label: 'DRIVERS', checked: false, manual: 'ABRIR O GERENCIADOR DE DISPOSITIVOS (DEVMGMT.MSC) E GARANTIR A INSTALAÇÃO DE TODOS OS DRIVERS DE CHIPSET, ÁUDIO, REDE GIGABIT E PLACA GRÁFICA OFICIAL.', copyText: 'devmgmt.msc' }
-                            ]
-                        },
-                        configuracao: {
-                            title: "4. CONFIGURAÇÕES & POLÍTICAS",
-                            icon: "Server",
-                            tasks: [
-                                { id: 'f_conf_2', label: 'ENERGIA', checked: false, manual: '3. PAUSAR ATUALIZAÇÕES:\nWINDOWS UPDATE > PAUSAR ATUALIZAÇÕES.\n\n4. ENERGIA E SUSPENSÃO:\n(NUNCA EM TUDO).' },
-                                { id: 'f_sec_4', label: 'GPEDIT/PERMISSÕES', checked: false, manual: '5. EDITAR POLÍTICA DE GRUPO:\nMODELOS ADMINISTRATIVOS > SISTEMAS > PERFIS DE USUÁRIOS: SÓ PERMITIR PERFIS DE USUÁRIOS (HABILITAR).\n\n6. EDITAR POLÍTICA DE GRUPO:\nMODELOS ADMINISTRATIVOS > COMPONENTES DO WINDOWS > WINDOWS UPDATE: CONFIGURAÇÃO AUTOMÁTICA, PERMITIR INSTALAÇÃO, ATIVAR ATUALIZAÇÕES (DESATIVAR AS 3).', copyText: 'gpedit.msc' },
-                                { id: 'f_conf_6', label: 'MAP. REDE', checked: false, manual: '7. PAINEL DE CONTROLE:\nPROGRAMAS > ATIVAR OU DESATIVAR RECURSOS DO WINDOWS > ATIVAR A OPÇÃO SMB 1.0/CIFS.', copyText: 'optionalfeatures' },
-                                { id: 'f_prep_opt', label: 'MELHORAR PROCESSAMENTO', checked: false, manual: '9. MELHORAR O PROCESSAMENTO:\nWIN + R > "MSCONFIG" > INICIALIZAÇÃO DO SISTEMA > OPÇÕES AVANÇADAS > AUMENTAR NÚCLEOS DO PROCESSADOR ATÉ O MÁXIMO.\nDESATIVAR APLICATIVOS DE INICIALIZAÇÃO (QUE NÃO SÃO IMPORTANTES).', copyText: 'msconfig' },
-                                { id: 'f_prep_name', label: 'NOME DA MÁQUINA', checked: false, manual: '10. MUDAR NOME DA MÁQUINA:\nSOBRE > OPÇÕES AVANÇADAS > NOME DO COMPUTADOR > ALTERAR O NOME DA MÁQUINA > REINICIAR.' },
-                                { id: 'f_conf_7', label: 'IP FIXO (MAC)', checked: false, manual: 'VERIFICAR O ENDEREÇO MAC DA PLACA DE REDE EXECUTANDO "GETMAC" NO PROMPT DE COMANDO E REALIZAR A RESERVA DE ENDEREÇO NO SERVIDOR DHCP CASO O SETOR EXIJA IP FIXO.', copyText: 'getmac' }
-                            ]
-                        },
-                        apps: {
-                            title: "5. APLICAÇÕES & PACOTE COBRECOM",
-                            icon: "Server",
-                            tasks: [
-                                { id: 'f_app_pack', label: 'PEGAR ARQUIVOS DA REDE', checked: false, manual: '11. PEGAR ARQUIVO:\nWIN + R > \\\\PDC-COBRECOM\\MANUTENCAO (LOGIN: ADMIN)\nACESSAR A PASTA "M.KAUAN" > FORMATAÇÃO W10 > COPIAR E COLAR NA ÁREA DE TRABALHO E EXECUTAR.', copyText: '\\\\pdc-cobrecom\\manutencao' },
-                                { id: 'f_app_apps', label: 'INSTALAR APLICATIVOS BASE', checked: false, manual: '12. INSTALAR ESSES APLICATIVOS NO PC:\nESET, WINRAR-X64, ULTRAVNC, SAMBAWINDOWS10, SPARK, TOTVS, CHROME, OFFICE, SCAN E IMPRESSORA.' },
-                                { id: 'f_app_1', label: 'TOTVS', checked: false, manual: 'INSTALAR O CLIENT TOTVS PROTHEUS / SMARTCLIENT, APONTAR PARA O SERVIDOR DE PRODUÇÃO E FIXAR O ATALHO NO MENU INICIAR/ÁREA DE TRABALHO.' },
-                                { id: 'f_app_2', label: 'TOTVS-MES', checked: false, manual: 'INSTALAR A APLICAÇÃO DE CHÃO DE FÁBRICA TOTVS-MES CASO A ESTAÇÃO SEJA DESTINADA A APONTAMENTOS DE PRODUÇÃO NA INDÚSTRIA.' },
-                                { id: 'f_conf_1', label: 'ATIVAR WIN/OFFICE', checked: false, manual: 'CONFERIR O STATUS DE ATIVAÇÃO DO WINDOWS EM CONFIGURAÇÕES > ATIVAÇÃO E ABRIR O WORD/EXCEL PARA AUTENTICAR E LICENCIAR O OFFICE.' },
-                                { id: 'f_conf_5', label: 'IMPRESSORAS', checked: false, manual: 'INSTALAR DRIVERS DAS IMPRESSORAS DEPARTAMENTAIS (OU TÉRMICAS ZEBRA) E IMPRIMIR UMA PÁGINA DE TESTE DE IMPRESSÃO DO WINDOWS.', copyText: 'control printers' }
-                            ]
-                        },
-                        seguranca: {
-                            title: "6. SEGURANÇA & ACESSO REMOTO",
-                            icon: "Server",
-                            tasks: [
-                                { id: 'f_sec_1', label: 'WAZUH', checked: false, manual: 'INSTALAR O AGENTE WAZUH, CONFIGURAR O IP/HOSTNAME DO SERVIDOR SIEM NO ARQUIVO OSSEC.CONF E INICIAR O SERVIÇO (SERVICES.MSC > WAZUH).', copyText: 'services.msc' },
-                                { id: 'f_sec_2', label: 'ESET', checked: false, manual: '13. CONFIGURAÇÕES ESET:\nCONFIGURAÇÃO > CONFIGURAÇÃO AVANÇADA > PROTEÇÃO DE ACESSO À REDE > FIREWALL: HABILITAR "AVALIAR TAMBÉM AS REGRAS DO WINDOWS".\nREGRAS (EDITAR) > ADICIONAR > NOME: ACESSO REMOTO | AÇÃO: PERMITIR | APLICATIVO > CAMINHO: SVCHOST.EXE | SERVIÇO: ÁREA DE TRABALHO REMOTO.', copyText: 'svchost.exe' },
-                                { id: 'f_sec_3', label: 'VNC + FIREWALL', checked: false, manual: '13.1. CONFIGURAÇÕES WINVNC:\n(OBS: INSTALAR E CONFIGURAR SEM SER PELO ACESSO REMOTO)\n- PROPERTIES: MAX CPU: 90\n- ADMIN PROPERTIES: "REMOVE WALLPAPER FOR VIEWERS" E "ENABLE BLANK MONITOR ON VIEWERS REQUEST" (DESABILITAR)' }
-                            ]
-                        },
-                        entrega: {
-                            title: "7. DOMÍNIO & LIBERAÇÃO",
-                            icon: "Server",
-                            tasks: [
-                                { id: 'f_sis_2', label: 'DOMÍNIO', checked: false, manual: '14. DOMÍNIO COBRECOM:\nSOBRE > CONFIGURAÇÃO AVANÇADA > NOME DE COMPUTADOR > ALTERAR > DOMÍNIO: COBRECOM (LOGIN: ROOT).', copyText: 'cobrecom' },
-                                { id: 'f_fin_4', label: 'DESEMPENHO (ADICIONAR USUÁRIO)', checked: false, manual: '15. ADICIONAR USUÁRIO:\nPAINEL DE CONTROLE > CONTAS DE USUÁRIO > CONTAS DE USUÁRIO > GERENCIAR CONTAS DE USUÁRIO > ADICIONAR\nNOME DE USUÁRIO: (VARIÁVEL) | DOMÍNIO: COBRECOM\n\n16. CONFIGURAR USUÁRIO:\nTROCAR DE USUÁRIO > FAZER O PROCESSO DE INICIALIZAR > COLOCAR OS PROGRAMAS NA TELA.', copyText: 'control userpasswords2' },
-                                { id: 'f_conf_3', label: 'CONFIG. EMAIL', checked: false, manual: 'ABRIR O MICROSOFT OUTLOOK, ADICIONAR A CONTA DE E-MAIL CORPORATIVA DO USUÁRIO, CONFIGURAR O PROTOCOLO EXCHANGE/IMAP E IMPORTAR O BACKUP PST.' },
-                                { id: 'f_conf_4', label: 'CONFIG. SPARK', checked: false, manual: 'ABRIR O SPARK, AUTENTICAR COM O USUÁRIO DO DOMÍNIO, MARCAR "SALVAR SENHA" E "CONECTAR AUTOMATICAMENTE" E COLAR A PASTA DE HISTÓRICO SALVA.', copyText: null },
-                                { id: 'f_fin_1', label: 'RESTORE NAVEGADOR', checked: false, manual: 'IMPORTAR ARQUIVO DE FAVORITOS HTML SALVO NO GOOGLE CHROME E RESTAURAR AS EXTENSÕES DO USUÁRIO.' },
-                                { id: 'f_fin_2', label: 'RESTORE EMAIL', checked: false, manual: 'VALIDAR O RECEBIMENTO E ENVIO DE E-MAILS PELO OUTLOOK E CHECAR SE AS ASSINATURAS DE E-MAIL FORAM RESTABELECIDAS.' },
-                                { id: 'f_fin_3', label: 'ETIQUETA ATIVO', checked: false, manual: 'FIXAR E CONFERIR SE A ETIQUETA PATRIMONIAL FÍSICA ESTÁ COLADA NO GABINETE E COM CÓDIGO DE BARRAS 100% LEGÍVEL.' }
+                                { id: 'f_u_1', label: 'SPARK E VNC NO INICIALIZAR', checked: false },
+                                { id: 'f_u_2', label: 'CONFIGURAR MICROSIP (SE HOUVER)', checked: false },
+                                { id: 'f_u_3', label: 'CONFIGURAR E-MAIL (COLOCAR PST)', checked: false },
+                                { id: 'f_u_4', label: 'CONFIGURAR SPARK', checked: false },
+                                { id: 'f_u_5', label: 'CONFIGURAR IMPRESSORAS', checked: false },
+                                { id: 'f_u_6', label: 'CONFIGURAR SCANNER', checked: false },
+                                { id: 'f_u_7', label: 'MAPEAR PASTAS DA REDE', checked: false },
+                                { id: 'f_u_8', label: 'INSTALAR TOTVS', checked: false },
+                                { id: 'f_u_9', label: 'CONFIGURAR PROXY', checked: false },
+                                { id: 'f_u_10', label: 'IMPORTAR DADOS (CASO FEITO BKP)', checked: false },
+                                { id: 'f_u_11', label: 'IMPORTAR SENHAS PARA O NAVEGADOR', checked: false },
+                                { id: 'f_u_12', label: 'IMPORTAR FAVORITOS PARA O NAVEGADOR', checked: false },
+                                { id: 'f_u_13', label: 'IMPORTAR REGRAS OUTLOOK', checked: false },
+                                { id: 'f_u_14', label: 'IMPORTAR HISTÓRICO SPARK', checked: false },
+                                { id: 'f_u_15', label: 'COLOCAR ATIVO (NOVO PC)', checked: false }
                             ]
                         }
                     };
@@ -519,8 +503,8 @@
                 };
 
                 var progress = calcProgress(items);
-                var leftKeys = ['preventivas', 'preparacao', 'sistema'];
-                var rightKeys = ['configuracao', 'apps', 'seguranca', 'entrega'];
+                var leftKeys = ['preventivas', 'root', 'preparacao', 'sistema'];
+                var rightKeys = ['usuario', 'configuracao', 'apps', 'seguranca', 'entrega'];
 
                 var renderCategoryCard = function(key) {
                     var group = items[key];
