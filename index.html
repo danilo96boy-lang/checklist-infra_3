@@ -90,6 +90,11 @@
 
     <script type="text/babel">
         try {
+            // CONFIGURAÇÕES SEGURAS (Não exponha IPs reais aqui. Use variáveis ou resoluções de DNS interno)
+            var APP_CONFIG = {
+                ESTOQUE_URL: "http://[IP_SERVIDOR_ESTOQUE]:[PORTA]/" // Oculte o IP real no código fonte web
+            };
+
             var firebaseConfig = {
                 apiKey: "AIzaSyC10F9wJuw36E0zz00ou2-t2-7TXtEjUl8",
                 authDomain: "checklist-infra.firebaseapp.com",
@@ -109,12 +114,13 @@
             var EMAIL_DESTINO = "infra@cobrecom.com.br";
             var ALLOWED_GMAILS = ["cobrechkti@gmail.com", "danilo96boy@gmail.com", "kauan.cobrecom@gmail.com"];
 
+            // Senhas removidas por segurança (Google Auth é a única via de acesso)
             var DEFAULT_TEAM = [
-                { id: '01001071', name: 'DANILO', pass: '1234' },
-                { id: '01001440', name: 'KAUAN', pass: '1234' },
-                { id: '01001691', name: 'LUI', pass: '1234' },
-                { id: 'outros', name: 'OUTRO', pass: '1234' },
-                { id: 'admin', name: 'ADMIN', pass: 'admin' }
+                { id: '01001071', name: 'DANILO' },
+                { id: '01001440', name: 'KAUAN' },
+                { id: '01001691', name: 'LUI' },
+                { id: 'outros', name: 'OUTRO' },
+                { id: 'admin', name: 'ADMIN' }
             ];
 
             var Icons = {
@@ -174,18 +180,18 @@
                             title: "2. ROOT",
                             icon: "Settings",
                             tasks: [
-                                { id: 'f_r_1', label: 'FORMATAR A MÁQUINA', checked: false, manual: '1. REINICIAR O PC E FAZER A FORMATAÇÃO PELA BIOS.\n2. USUÁRIO: ROOT | SENHA: PERGUNTA PRA RECUPERAR PODE SER QUALQUER UM A SENHA É COBRE NAS 3.', copyText: 'root' },
+                                { id: 'f_r_1', label: 'FORMATAR A MÁQUINA', checked: false, manual: '1. REINICIAR O PC E FAZER A FORMATAÇÃO PELA BIOS.\n2. CREDENCIAIS: UTILIZAR CONTA DE ADMINISTRAÇÃO LOCAL (CONSULTAR COFRE DE SENHAS DA TI).', copyText: null },
                                 { id: 'f_r_2', label: 'CONFIGURAR GPEDIT (PERFIS DE USUARIO/UPDATE)', checked: false, manual: 'EDITAR POLÍTICA DE GRUPO:\nMODELOS ADMINISTRATIVOS > SISTEMAS > PERFIS DE USUÁRIOS: SÓ PERMITIR PERFIS DE USUÁRIOS (HABILITAR).\n\nMODELOS ADMINISTRATIVOS > COMPONENTES DO WINDOWS > WINDOWS UPDATE:\nCONFIGURAÇÃO AUTOMÁTICA, PERMITIR INSTALAÇÃO, ATIVAR ATUALIZAÇÕES (DESATIVAR AS 3).', copyText: 'gpedit.msc' },
                                 { id: 'f_r_3', label: 'PAUSAR AS ATUALIZAÇÕES NO WINDOWS UPDATE', checked: false, manual: 'WINDOWS UPDATE > PAUSAR ATUALIZAÇÕES.' },
                                 { id: 'f_r_4', label: 'CONFIGURAR ÁREA DE TRABALHO REMOTA', checked: false, manual: 'WIN + R > SYSDM.CPL > ABA REMOTO > PERMITIR CONEXÕES REMOTAS.', copyText: 'sysdm.cpl' },
                                 { id: 'f_r_5', label: 'ATIVAR SMB 1.0', checked: false, manual: 'PAINEL DE CONTROLE > PROGRAMAS > ATIVAR OU DESATIVAR RECURSOS DO WINDOWS > ATIVAR A OPÇÃO SMB 1.0/CIFS.', copyText: 'optionalfeatures' },
                                 { id: 'f_r_6', label: 'CONFIGURAR WINS', checked: false, manual: 'CONFIGURAR WINS NA PLACA DE REDE (TCP/IPv4 > AVANÇADO > WINS) CASO O DEPARTAMENTO UTILIZE RESOLUÇÃO LEGADA DE NETBIOS.' },
-                                { id: 'f_r_7', label: 'COLOCAR NO DOMÍNIO', checked: false, manual: 'SOBRE > CONFIGURAÇÃO AVANÇADA > NOME DE COMPUTADOR > ALTERAR > DOMÍNIO: COBRECOM (LOGIN: ROOT).', copyText: 'cobrecom' },
-                                { id: 'f_r_8', label: 'CONFIGURAR PROXY (PRIMEIRO IP, DEPOIS DNS)', checked: false, manual: 'ABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nENDEREÇO: 192.168.1.1 | PORTA: 3128', copyText: '192.168.1.1' },
+                                { id: 'f_r_7', label: 'COLOCAR NO DOMÍNIO', checked: false, manual: 'SOBRE > CONFIGURAÇÃO AVANÇADA > NOME DE COMPUTADOR > ALTERAR > DOMÍNIO: INSERIR O DOMÍNIO CORPORATIVO PADRÃO DA REDE.', copyText: null },
+                                { id: 'f_r_8', label: 'CONFIGURAR PROXY (PRIMEIRO IP, DEPOIS DNS)', checked: false, manual: 'ABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nINSERIR IP E PORTA DO PROXY PADRÃO DA REDE.', copyText: null },
                                 { id: 'f_r_9', label: 'CONFIGURAÇÃO DE ENERGIA', checked: false, manual: 'ENERGIA E SUSPENSÃO: NUNCA EM TUDO.' },
-                                { id: 'f_r_10', label: 'CONFIGURAR (HOSTS) PAGFOR/PDC-COBRECOM/PORTAL', checked: false, manual: 'EDITAR O ARQUIVO DE HOSTS DO WINDOWS EM: C:\\WINDOWS\\SYSTEM32\\DRIVERS\\ETC\\HOSTS PARA ADICIONAR APONTAMENTOS MANUAIS.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
-                                { id: 'f_r_11', label: 'ATUALIZAR DRIVERS NO SITE DO FABRICANTE', checked: false, manual: 'ABRIR O GERENCIADOR DE DISPOSITIVOS (DEVMGMT.MSC) E GARANTIR A INSTALAÇÃO DE TODOS OS DRIVERS DE CHIPSET, ÁUDIO, REDE GIGABIT E PLACA GRÁFICA OFICIAL.', copyText: 'devmgmt.msc' },
-                                { id: 'f_r_12', label: 'INSTALAR PROGRAMAS PADRÕES DE FORMATAÇÃO', checked: false, manual: 'WIN + R > \\\\PDC-COBRECOM\\MANUTENCAO (LOGIN: ADMIN)\nACESSAR A PASTA "M.KAUAN" > FORMATAÇÃO W10 > COPIAR E COLAR NA ÁREA DE TRABALHO E EXECUTAR.\n\nINSTALAR ESET, WINRAR-X64, ULTRAVNC, SAMBAWINDOWS10, SPARK, TOTVS, CHROME, OFFICE, SCAN E IMPRESSORA.', copyText: '\\\\pdc-cobrecom\\manutencao' },
+                                { id: 'f_r_10', label: 'CONFIGURAR (HOSTS)', checked: false, manual: 'EDITAR O ARQUIVO DE HOSTS DO WINDOWS EM: C:\\WINDOWS\\SYSTEM32\\DRIVERS\\ETC\\HOSTS PARA ADICIONAR APONTAMENTOS MANUAIS NECESSÁRIOS DE SISTEMAS INTERNOS.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
+                                { id: 'f_r_11', label: 'ATUALIZAR DRIVERS NO SITE DO FABRICANTE', checked: false, manual: 'ABRIR O GERENCIADOR DE DISPOSITIVOS E GARANTIR A INSTALAÇÃO DE TODOS OS DRIVERS DE CHIPSET, ÁUDIO, REDE GIGABIT E PLACA GRÁFICA OFICIAL.', copyText: 'devmgmt.msc' },
+                                { id: 'f_r_12', label: 'INSTALAR PROGRAMAS PADRÕES DE FORMATAÇÃO', checked: false, manual: 'ACESSAR O DIRETÓRIO DE REDE DE MANUTENÇÃO E EXECUTAR OS SCRIPTS E INSTALADORES PADRÕES DE FORMATAÇÃO DO DEPARTAMENTO DE TI.', copyText: null },
                                 { id: 'f_r_13', label: 'ATIVAR ESET E SUAS ATUALIZAÇÕES', checked: false },
                                 { id: 'f_r_14', label: 'CONFIGURAR ACESSO REMOTO ESET', checked: false, manual: 'CONFIGURAÇÃO > CONFIGURAÇÃO AVANÇADA > PROTEÇÃO DE ACESSO À REDE > FIREWALL: HABILITAR "AVALIAR TAMBÉM AS REGRAS DO WINDOWS".\nREGRAS (EDITAR) > ADICIONAR > NOME: ACESSO REMOTO | AÇÃO: PERMITIR | APLICATIVO > CAMINHO: SVCHOST.EXE | SERVIÇO: ÁREA DE TRABALHO REMOTO.', copyText: 'svchost.exe' },
                                 { id: 'f_r_15', label: 'ATIVAR WINDOWS', checked: false, manual: 'CONFERIR O STATUS DE ATIVAÇÃO DO WINDOWS EM CONFIGURAÇÕES > ATIVAÇÃO.' },
@@ -195,8 +201,8 @@
                                 { id: 'f_r_19', label: 'CONFIGURAR FIREWALL SPARK', checked: false },
                                 { id: 'f_r_20', label: 'CONFIGURAR MELHOR DESEMPENHO (SE NECESSÁRIO)', checked: false, manual: 'WIN + R > "MSCONFIG" > INICIALIZAÇÃO DO SISTEMA > OPÇÕES AVANÇADAS > AUMENTAR NÚCLEOS DO PROCESSADOR ATÉ O MÁXIMO.\nDESATIVAR APLICATIVOS DE INICIALIZAÇÃO (QUE NÃO SÃO IMPORTANTES).', copyText: 'msconfig' },
                                 { id: 'f_r_21', label: 'CONFIGURAR IP', checked: false, manual: 'VERIFICAR O ENDEREÇO MAC DA PLACA DE REDE EXECUTANDO "GETMAC" NO PROMPT DE COMANDO E REALIZAR A RESERVA DE ENDEREÇO NO SERVIDOR DHCP CASO O SETOR EXIJA IP FIXO.', copyText: 'getmac' },
-                                { id: 'f_r_22', label: 'INSTALAR E CONFIGURAR WAZUH', checked: false, manual: 'INSTALAR O AGENTE WAZUH, CONFIGURAR O IP/HOSTNAME DO SERVIDOR SIEM NO ARQUIVO OSSEC.CONF E INICIAR O SERVIÇO (SERVICES.MSC > WAZUH).', copyText: 'services.msc' },
-                                { id: 'f_r_23', label: 'CONFIGURAR USUÁRIO COM PERMISSÕES DE USUÁRIO', checked: false, manual: 'PAINEL DE CONTROLE > CONTAS DE USUÁRIO > GERENCIAR CONTAS DE USUÁRIO > ADICIONAR\nNOME DE USUÁRIO: (VARIÁVEL) | DOMÍNIO: COBRECOM\n\nTROCAR DE USUÁRIO E FAZER O PROCESSO DE INICIALIZAR.', copyText: 'control userpasswords2' },
+                                { id: 'f_r_22', label: 'INSTALAR E CONFIGURAR WAZUH', checked: false, manual: 'INSTALAR O AGENTE WAZUH, CONFIGURAR O IP/HOSTNAME DO SERVIDOR SIEM NO ARQUIVO OSSEC.CONF E INICIAR O SERVIÇO.', copyText: 'services.msc' },
+                                { id: 'f_r_23', label: 'CONFIGURAR USUÁRIO COM PERMISSÕES DE USUÁRIO', checked: false, manual: 'PAINEL DE CONTROLE > CONTAS DE USUÁRIO > GERENCIAR CONTAS DE USUÁRIO > ADICIONAR O USUÁRIO DOMÍNIO.\nTROCAR DE USUÁRIO E FAZER O PROCESSO DE INICIALIZAR.', copyText: 'control userpasswords2' },
                                 { id: 'f_r_24', label: 'CONFIGURAR PERMISSÃO DE ACESSO REMOTO USER', checked: false }
                             ]
                         },
@@ -204,21 +210,21 @@
                             title: "3. USUÁRIO",
                             icon: "User",
                             tasks: [
-                                { id: 'f_u_1', label: 'SPARK E VNC NO INICIALIZAR', checked: false, manual: 'ADICIONAR ATALHO DO SPARK E VNC NA PASTA DE INICIALIZAÇÃO. WIN+R > SHELL:STARTUP', copyText: 'shell:startup' },
+                                { id: 'f_u_1', label: 'SPARK E VNC NO INICIALIZAR', checked: false, manual: 'ADICIONAR ATALHO DO MENSAGEIRO E VNC NA PASTA DE INICIALIZAÇÃO DO WINDOWS.', copyText: 'shell:startup' },
                                 { id: 'f_u_2', label: 'CONFIGURAR MICROSIP (SE HOUVER)', checked: false },
-                                { id: 'f_u_3', label: 'CONFIGURAR E-MAIL (COLOCAR PST)', checked: false, manual: 'ABRIR O MICROSOFT OUTLOOK, ADICIONAR A CONTA DE E-MAIL CORPORATIVA DO USUÁRIO, CONFIGURAR O PROTOCOLO EXCHANGE/IMAP E IMPORTAR O BACKUP PST.' },
-                                { id: 'f_u_4', label: 'CONFIGURAR SPARK', checked: false, manual: 'ABRIR O SPARK, AUTENTICAR COM O USUÁRIO DO DOMÍNIO, MARCAR "SALVAR SENHA" E "CONECTAR AUTOMATICAMENTE" E COLAR A PASTA DE HISTÓRICO SALVA.' },
-                                { id: 'f_u_5', label: 'CONFIGURAR IMPRESSORAS', checked: false, manual: 'INSTALAR DRIVERS DAS IMPRESSORAS DEPARTAMENTAIS (OU TÉRMICAS ZEBRA) E IMPRIMIR UMA PÁGINA DE TESTE DE IMPRESSÃO DO WINDOWS.', copyText: 'control printers' },
+                                { id: 'f_u_3', label: 'CONFIGURAR E-MAIL (COLOCAR PST)', checked: false, manual: 'ABRIR O CLIENTE DE E-MAIL, ADICIONAR A CONTA CORPORATIVA DO USUÁRIO, CONFIGURAR O PROTOCOLO PADRÃO E IMPORTAR O BACKUP PST.' },
+                                { id: 'f_u_4', label: 'CONFIGURAR SPARK', checked: false, manual: 'ABRIR O MENSAGEIRO, AUTENTICAR COM O USUÁRIO DO DOMÍNIO E COLAR A PASTA DE HISTÓRICO SALVA.' },
+                                { id: 'f_u_5', label: 'CONFIGURAR IMPRESSORAS', checked: false, manual: 'INSTALAR DRIVERS DAS IMPRESSORAS DEPARTAMENTAIS PADRÕES DO SETOR E IMPRIMIR PÁGINA DE TESTE.', copyText: 'control printers' },
                                 { id: 'f_u_6', label: 'CONFIGURAR SCANNER', checked: false },
-                                { id: 'f_u_7', label: 'MAPEAR PASTAS DA REDE', checked: false, manual: 'MAPEAR UNIDADES DE REDE NECESSÁRIAS PARA O DEPARTAMENTO DO USUÁRIO.' },
-                                { id: 'f_u_8', label: 'INSTALAR TOTVS', checked: false, manual: 'INSTALAR O CLIENT TOTVS PROTHEUS / SMARTCLIENT, APONTAR PARA O SERVIDOR DE PRODUÇÃO E FIXAR O ATALHO NO MENU INICIAR/ÁREA DE TRABALHO.' },
-                                { id: 'f_u_9', label: 'CONFIGURAR PROXY', checked: false, manual: 'ABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nENDEREÇO: 192.168.1.1 | PORTA: 3128', copyText: '192.168.1.1' },
-                                { id: 'f_u_10', label: 'IMPORTAR DADOS (CASO FEITO BKP)', checked: false, manual: 'RESTAURAR AS PASTAS DOCUMENTOS, DESKTOP, DOWNLOADS E IMAGENS DO BACKUP PARA O PERFIL DO USUÁRIO.' },
+                                { id: 'f_u_7', label: 'MAPEAR PASTAS DA REDE', checked: false, manual: 'MAPEAR UNIDADES DE REDE NECESSÁRIAS PARA O DEPARTAMENTO DO USUÁRIO CONFORME POLÍTICA DE ACESSOS.' },
+                                { id: 'f_u_8', label: 'INSTALAR TOTVS', checked: false, manual: 'INSTALAR O CLIENTE ERP PADRÃO E FIXAR O ATALHO NO MENU INICIAR/ÁREA DE TRABALHO.' },
+                                { id: 'f_u_9', label: 'CONFIGURAR PROXY', checked: false, manual: 'ABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nINSERIR DADOS DO PROXY PADRÃO.' },
+                                { id: 'f_u_10', label: 'IMPORTAR DADOS (CASO FEITO BKP)', checked: false, manual: 'RESTAURAR AS PASTAS DOCUMENTOS, DESKTOP E OUTROS ARQUIVOS DO BACKUP PARA O PERFIL DO USUÁRIO.' },
                                 { id: 'f_u_11', label: 'IMPORTAR SENHAS PARA O NAVEGADOR', checked: false },
-                                { id: 'f_u_12', label: 'IMPORTAR FAVORITOS PARA O NAVEGADOR', checked: false, manual: 'IMPORTAR ARQUIVO DE FAVORITOS HTML SALVO NO GOOGLE CHROME E RESTAURAR AS EXTENSÕES DO USUÁRIO.' },
+                                { id: 'f_u_12', label: 'IMPORTAR FAVORITOS PARA O NAVEGADOR', checked: false, manual: 'IMPORTAR ARQUIVO DE FAVORITOS HTML SALVO PREVIAMENTE E RESTAURAR AS EXTENSÕES UTILIZADAS.' },
                                 { id: 'f_u_13', label: 'IMPORTAR REGRAS OUTLOOK', checked: false },
-                                { id: 'f_u_14', label: 'IMPORTAR HISTÓRICO SPARK', checked: false, manual: 'COPIAR A PASTA DE BACKUP DO SPARK PARA %APPDATA%\\SPARK', copyText: '%appdata%\\Spark' },
-                                { id: 'f_u_15', label: 'COLOCAR ATIVO (NOVO PC)', checked: false, manual: 'FIXAR E CONFERIR SE A ETIQUETA PATRIMONIAL FÍSICA ESTÁ COLADA NO GABINETE E COM CÓDIGO DE BARRAS 100% LEGÍVEL.' }
+                                { id: 'f_u_14', label: 'IMPORTAR HISTÓRICO SPARK', checked: false, manual: 'COPIAR A PASTA DE BACKUP DO MENSAGEIRO PARA O DIRETÓRIO APPDATA LOCAL DO USUÁRIO.', copyText: '%appdata%' },
+                                { id: 'f_u_15', label: 'COLOCAR ATIVO (NOVO PC)', checked: false, manual: 'FIXAR E CONFERIR SE A ETIQUETA PATRIMONIAL FÍSICA ESTÁ COLADA NO GABINETE E COM CÓDIGO 100% LEGÍVEL.' }
                             ]
                         }
                     };
@@ -1240,14 +1246,14 @@
                     e.preventDefault();
                     var cleanId = (newUser.id || '').trim();
                     var cleanName = (newUser.name || '').trim().toUpperCase();
-                    var cleanPass = (newUser.pass || '').trim();
-                    if (!cleanId || !cleanName || !cleanPass) return alert("Preencha todos os campos.");
+                    // Removido envio de senha
+                    if (!cleanId || !cleanName) return alert("Preencha a Matrícula e o Nome.");
                     if (users.some(function(u) { return (u.id || '').toLowerCase() === cleanId.toLowerCase(); })) {
                         return alert("Matrícula já cadastrada.");
                     }
 
                     setSaving(true);
-                    db.collection('users').add({ id: cleanId, name: cleanName, pass: cleanPass })
+                    db.collection('users').add({ id: cleanId, name: cleanName })
                         .then(function() { setNewUser({ id: '', name: '', pass: '' }); })
                         .catch(function(err) { alert("Erro: " + err.message); })
                         .finally(function() { setSaving(false); });
@@ -1293,7 +1299,7 @@
                                         <form onSubmit={handleAddUser} className="space-y-3">
                                             <Input placeholder="Matrícula / ID" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
                                             <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value.toUpperCase() })); }} className="uppercase" />
-                                            <Input type="password" placeholder="Senha" value={newUser.pass} onChange={function(e) { setNewUser(Object.assign({}, newUser, { pass: e.target.value })); }} />
+                                            {/* Input de senha removido por segurança */}
                                             <Button type="submit" disabled={saving} className="w-full">{Icons.Plus} Cadastrar</Button>
                                         </form>
                                     </div>
@@ -1975,14 +1981,14 @@
                                     <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col">
                                         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 bg-white dark:bg-slate-900 shadow-sm z-10">
                                             <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2 uppercase">
-                                                {Icons.Globe} Controle de Estoque T.I (192.168.1.176:6900)
+                                                {Icons.Globe} Controle de Estoque T.I
                                             </h2>
-                                            <Button onClick={function(){ window.open('http://192.168.1.176:6900/', '_blank'); }} variant="secondary" className="text-xs">
+                                            <Button onClick={function(){ window.open(APP_CONFIG.ESTOQUE_URL, '_blank'); }} variant="secondary" className="text-xs">
                                                 {Icons.ExternalLink} Abrir em nova guia
                                             </Button>
                                         </div>
                                         <div className="flex-1 w-full relative">
-                                            <iframe src="http://192.168.1.176:6900/" className="absolute inset-0 w-full h-full border-none" title="Controle de Estoque T.I" />
+                                            <iframe src={APP_CONFIG.ESTOQUE_URL} className="absolute inset-0 w-full h-full border-none" title="Controle de Estoque T.I" />
                                         </div>
                                     </div>
                                 )}
