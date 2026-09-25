@@ -15,9 +15,6 @@
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Permite Drag and Drop em ecrãs táteis (Mobile) -->
-    <script src="https://unpkg.com/drag-drop-touch"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -25,36 +22,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <script>
-        // Setup PWA Dinâmico (Manifest e Service Worker)
-        window.addEventListener('load', () => {
-            if ('serviceWorker' in navigator) {
-                const swCode = `
-                    self.addEventListener('install', e => self.skipWaiting());
-                    self.addEventListener('activate', e => self.clients.claim());
-                    self.addEventListener('fetch', e => {});
-                `;
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(console.error);
-            }
-            const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3b82f6"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`;
-            const manifest = {
-                name: "Infra Hub", short_name: "InfraHub", display: "standalone",
-                background_color: "#020617", theme_color: "#020617", start_url: ".",
-                icons: [{ src: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(iconSvg), sizes: "192x192", type: "image/svg+xml" }]
-            };
-            const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-            const link = document.createElement('link'); link.rel = 'manifest'; link.href = URL.createObjectURL(manifestBlob);
-            document.head.appendChild(link);
-        });
-
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
                     colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
-                        jira: { bg: '#1D2125', col: '#161A1D', card: '#22272B', cardHover: '#282E33', text: '#B6C2CF', subtext: '#8C9BAB' }
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
+                        },
+                        jira: {
+                            bg: '#1D2125',
+                            col: '#161A1D',
+                            card: '#22272B',
+                            cardHover: '#282E33',
+                            text: '#B6C2CF',
+                            subtext: '#8C9BAB'
+                        }
                     }
                 }
             }
@@ -62,7 +49,7 @@
     </script>
 
     <style>
-        body { -webkit-print-color-adjust: exact; background-color: #020617; overscroll-behavior-y: none; }
+        body { -webkit-print-color-adjust: exact; background-color: #020617; }
         .fade-in { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -73,11 +60,26 @@
 
         @media print {
             @page { margin: 0.5cm; size: auto; }
-            body, html, #root { background-color: white !important; color: black !important; height: auto !important; overflow: visible !important; }
+            body, html, #root { 
+                background-color: white !important; 
+                color: black !important; 
+                height: auto !important; 
+                overflow: visible !important; 
+            }
             body * { visibility: hidden; }
             div { overflow: visible !important; }
+            
             #receipt-area, #receipt-area * { visibility: visible !important; }
-            #receipt-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; z-index: 9999 !important; display: block !important; }
+            #receipt-area { 
+                position: absolute !important; 
+                left: 0 !important; 
+                top: 0 !important; 
+                width: 100% !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                z-index: 9999 !important;
+                display: block !important; 
+            }
             .no-print { display: none !important; }
         }
     </style>
@@ -130,7 +132,6 @@
             ];
 
             var Icons = {
-                Menu: <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>,
                 Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
                 User: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
                 History: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
@@ -158,17 +159,17 @@
                 Refresh: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>,
                 Archive: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>,
                 List: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>,
-                Globe: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>,
+                Globe: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>,
                 Google: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.18v3.14C3.15 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.62H1.18C.43 8.12 0 9.81 0 12s.43 3.88 1.18 5.38l3.15-2.44-.06-.7z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.15 2.68 1.18 6.62l4.09 3.14c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
             };
 
             var getTemplate = function(type, tecnicoName, customTitulos) {
                 var tmpl = {
                     meta: { 
-                        tecnico: tecnicoName ? String(tecnicoName).toUpperCase() : '', 
+                        tecnico: tecnicoName ? tecnicoName.toUpperCase() : '', 
                         data: new Date().toISOString().split('T')[0], 
-                        ativo: String(type === 'diario' ? 'INFRAESTRUTURA' : (type === 'rack' ? 'RACK FÁBRICA' : '')).toUpperCase(), 
-                        maquina: String(type === 'diario' ? 'ROTINA DIÁRIA' : (type === 'rack' ? 'SWITCHES' : '')).toUpperCase() 
+                        ativo: (type === 'diario' ? 'INFRAESTRUTURA' : (type === 'rack' ? 'RACK FÁBRICA' : '')).toUpperCase(), 
+                        maquina: (type === 'diario' ? 'ROTINA DIÁRIA' : (type === 'rack' ? 'SWITCHES' : '')).toUpperCase() 
                     },
                     items: {}
                 };
@@ -275,7 +276,7 @@
                     };
                     tmpl.items = {
                         coluna1: {
-                            title: String(t.col1).toUpperCase(),
+                            title: t.col1.toUpperCase(),
                             icon: "Check",
                             tasks: [
                                 { id: 'd_aux_1', label: 'VERIFICAÇÃO VISUAL NO-BREAKS', checked: false, manual: 'INSPEÇÃO VISUAL DIRETA NO DISPLAY DOS NO-BREAKS DO CPD PARA CERTIFICAR AUSÊNCIA DE FALHAS ATIVAS.' },
@@ -287,7 +288,7 @@
                             ]
                         },
                         coluna2: {
-                            title: String(t.col2).toUpperCase(),
+                            title: t.col2.toUpperCase(),
                             icon: "Server",
                             tasks: [
                                 { id: 'd_ple_1', label: 'VERIFICAÇÃO BACKUPS VEEAM', checked: false, manual: 'VALIDAR JOBS DE BACKUP NOTURNOS NO VEEAM. GARANTIR QUE NÃO EXISTEM ROTINAS FALHAS OU PENDENTES.' },
@@ -300,7 +301,7 @@
                             ]
                         },
                         coluna3: {
-                            title: String(t.col3).toUpperCase(),
+                            title: t.col3.toUpperCase(),
                             icon: "Search",
                             tasks: [
                                 { id: 'd_sen_1', label: 'VERIFICAÇÃO LOG WAZUH', checked: false, manual: 'ANALISAR EVENTOS CRÍTICOS (NÍVEL 12+) DE CORRELAÇÃO NO DASHBOARD SIEM. ANALISAR FALHAS DE INTEGRIDADE EM SERVIDORES.' },
@@ -404,8 +405,8 @@
                 return (
                     <input 
                         value={val}
-                        onChange={function(e) { setVal(String(e.target.value).toUpperCase()); }}
-                        onBlur={function() { if(val !== props.value) props.onSave(String(val).toUpperCase()); }}
+                        onChange={function(e) { setVal(e.target.value.toUpperCase()); }}
+                        onBlur={function() { if(val !== props.value) props.onSave(val.toUpperCase()); }}
                         className={"bg-transparent focus:outline-none w-full text-ellipsis uppercase " + (props.className || '')}
                         title="Clique para editar este título"
                     />
@@ -497,14 +498,13 @@
                 var onForceSave = props.onForceSave;
                 var onRequestFinish = props.onRequestFinish;
 
-                if (!ticket || !ticket.data) return <div className="p-8 text-center text-slate-500 fade-in">Relatório não encontrado ou corrompido.<br/><br/><Button onClick={onBack} className="mx-auto">Voltar</Button></div>;
-                
-                var data = ticket.data || { meta: {}, items: {} };
+                if (!ticket || !ticket.data) return null;
+                var data = ticket.data;
                 var meta = data.meta || {};
                 var items = data.items || {};
 
                 var handleMeta = function(field, value) {
-                    var newMeta = Object.assign({}, meta, { [field]: String(value).toUpperCase() });
+                    var newMeta = Object.assign({}, meta, { [field]: value.toUpperCase() });
                     onUpdate(Object.assign({}, data, { meta: newMeta }));
                 };
 
@@ -552,10 +552,10 @@
                                         onSave={function(newVal) {
                                             var newData = Object.assign({}, data);
                                             if(newData.items[key]) {
-                                                newData.items[key].title = String(newVal).toUpperCase();
+                                                newData.items[key].title = newVal.toUpperCase();
                                                 onUpdate(newData);
                                                 if (ticket.type === 'diario' && props.onGlobalTitleChange) {
-                                                    props.onGlobalTitleChange(key, String(newVal).toUpperCase());
+                                                    props.onGlobalTitleChange(key, newVal.toUpperCase());
                                                 }
                                             }
                                         }}
@@ -655,12 +655,10 @@
                 var obsState = useState(ticket && ticket.data && ticket.data.obs ? ticket.data.obs : (ticket && ticket.obs ? ticket.obs : ''));
                 var obs = obsState[0], setObs = obsState[1];
 
-                if (!ticket) return <div className="p-8 text-center text-slate-500 fade-in">Relatório não encontrado ou corrompido.<br/><br/><Button onClick={onBack} className="mx-auto">Voltar</Button></div>;
-                
-                var data = ticket.data || { meta: {}, items: {} };
-                var meta = data.meta || {};
-                var items = data.items || {};
-                var identificador = String(meta.maquina || meta.ativo || ticket.ativo || "N/A").toUpperCase();
+                if (!ticket || !ticket.data) return null;
+                var meta = ticket.data.meta || {};
+                var items = ticket.data.items || {};
+                var identificador = meta.maquina || meta.ativo || "N/A";
                 
                 var totalTasks = 0, checkedTasks = 0;
                 var pendingList = [];
@@ -733,7 +731,7 @@
                             <Card className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
-                                    <textarea readOnly={isHistory} value={obs} onChange={function(e) { setObs(String(e.target.value).toUpperCase()); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none uppercase" placeholder="DETALHES ADICIONAIS, PEÇAS TROCADAS, ETC..."></textarea>
+                                    <textarea readOnly={isHistory} value={obs} onChange={function(e) { setObs(e.target.value.toUpperCase()); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none uppercase" placeholder="DETALHES ADICIONAIS, PEÇAS TROCADAS, ETC..."></textarea>
                                 </div>
                                 <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
                                     <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações {isHistory ? 'do Relatório' : 'de Encerramento'}</h3>
@@ -753,9 +751,9 @@
                                 <div className="text-right"><div className="text-2xl font-mono font-bold">#{ticket.visualId || 'PEND'}</div><div className="text-[10px] font-bold">{new Date(ticket.createdAt || ticket.date || Date.now()).toLocaleDateString()}</div></div>
                             </div>
                             <div className="grid grid-cols-4 border-b border-black">
-                                <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate uppercase">{String(meta.ativo || 'N/A')}</span></div>
+                                <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Ativo</span><span className="font-bold text-sm block truncate uppercase">{meta.ativo || 'N/A'}</span></div>
                                 <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Máquina</span><span className="font-bold text-sm block truncate uppercase">{identificador}</span></div>
-                                <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{String(meta.tecnico || 'N/A')}</span></div>
+                                <div className="p-3 border-r border-black"><span className="block text-[9px] font-bold uppercase text-gray-500">Técnico</span><span className="font-bold uppercase truncate">{meta.tecnico}</span></div>
                                 <div className={"p-3 text-center flex flex-col justify-center " + (percent === 100 ? 'bg-gray-100' : 'bg-gray-200')}><span className="block text-[9px] font-bold uppercase text-gray-500">Status</span><span className="font-bold text-sm">{statusGlobal}</span></div>
                             </div>
                             <div className="p-6 flex gap-8">
@@ -811,7 +809,7 @@
                                     {activeTickets.map(function(ticket) {
                                         var meta = (ticket.data && ticket.data.meta) || {};
                                         var pct = calcProgress(ticket.data && ticket.data.items);
-                                        var nomeAtivo = String(meta.maquina || meta.ativo || "Sem Identificação").toUpperCase();
+                                        var nomeAtivo = (meta.maquina || meta.ativo || "Sem Identificação").toUpperCase();
                                         
                                         return (
                                             <div key={ticket.id} onClick={function() { onOpenTicket(ticket.id); }} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:shadow-lg hover:border-brand-400 dark:hover:border-brand-500 transition-all cursor-pointer relative overflow-hidden">
@@ -828,7 +826,7 @@
                                                     <span className="text-xs font-mono font-bold text-slate-400">#{ticket.visualId}</span>
                                                 </div>
                                                 <h4 className="font-bold text-slate-800 dark:text-white text-lg truncate mb-1 uppercase">{nomeAtivo}</h4>
-                                                <p className="text-xs text-slate-500 mb-4 flex items-center gap-1 uppercase">{Icons.User} {String(meta.tecnico || 'Técnico')}</p>
+                                                <p className="text-xs text-slate-500 mb-4 flex items-center gap-1 uppercase">{Icons.User} {meta.tecnico || 'Técnico'}</p>
                                                 
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -848,16 +846,16 @@
             };
 
             var HistoryView = function(props) {
-                var historyItems = props.historyItems || [];
+                var history = props.history || [];
                 var onOpenHistory = props.onOpenHistory;
                 var searchState = useState('');
                 var search = searchState[0], setSearch = searchState[1];
 
-                var filtered = historyItems.filter(function(h) {
-                    var s = String(search).toLowerCase();
-                    var at = String(h.ativo || '').toLowerCase();
-                    var tc = String(h.tecnico || '').toLowerCase();
-                    var vid = String(h.visualId || '').toLowerCase();
+                var filtered = history.filter(function(h) {
+                    var s = search.toLowerCase();
+                    var at = (h.ativo || '').toLowerCase();
+                    var tc = (h.tecnico || '').toLowerCase();
+                    var vid = (h.visualId || '').toLowerCase();
                     return at.indexOf(s) !== -1 || tc.indexOf(s) !== -1 || vid.indexOf(s) !== -1;
                 });
 
@@ -889,19 +887,17 @@
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                         {filtered.map(function(h, i) {
-                                            var dateStr = "N/A";
-                                            try { dateStr = new Date(h.date || Date.now()).toLocaleDateString(); } catch(e) {}
                                             return (
                                                 <tr key={i} onClick={function() { if (onOpenHistory) onOpenHistory(h); }} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
                                                     <td className="px-6 py-3 font-mono text-xs font-bold text-slate-500">#{h.visualId}</td>
-                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{dateStr}</td>
+                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{new Date(h.date || Date.now()).toLocaleDateString()}</td>
                                                     <td className="px-6 py-3">
                                                         <Badge color={h.type === 'formatacao' ? 'blue' : h.type === 'diario' ? 'green' : h.type === 'rack' ? 'indigo' : 'amber'}>
                                                             {h.type === 'formatacao' ? 'Formatação' : h.type === 'diario' ? 'Diário' : h.type === 'rack' ? 'Rack/Switch' : 'Zebra'}
                                                         </Badge>
                                                     </td>
-                                                    <td className="px-6 py-3 font-medium text-slate-800 dark:text-white uppercase">{String(h.ativo || 'N/A')}</td>
-                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400 uppercase">{String(h.tecnico || 'N/A')}</td>
+                                                    <td className="px-6 py-3 font-medium text-slate-800 dark:text-white uppercase">{h.ativo || 'N/A'}</td>
+                                                    <td className="px-6 py-3 text-slate-600 dark:text-slate-400 uppercase">{h.tecnico || 'N/A'}</td>
                                                     <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
                                                 </tr>
                                             );
@@ -957,7 +953,7 @@
                     var seq = Math.floor(100 + Math.random() * 900);
                     var newTask = {
                         code: 'SCRUM-' + seq,
-                        title: String(form.title).trim().toUpperCase(),
+                        title: form.title.trim().toUpperCase(),
                         description: '',
                         assignee: form.assignee,
                         priority: form.priority,
@@ -997,17 +993,17 @@
 
                 return (
                     <div className="p-6 md:p-10 h-full flex flex-col fade-in overflow-x-auto bg-jira-bg">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6 shrink-0">
+                        <div className="flex justify-between items-center mb-6 shrink-0">
                             <div>
                                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                                     {Icons.Kanban} Quadro Kanban (Tarefas TI)
                                 </h2>
                             </div>
-                            <div className="flex gap-2 w-full sm:w-auto">
-                                <Button onClick={function(){ setIsArchiveModalOpen(true); }} variant="secondary" className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 text-xs sm:text-sm flex-1 sm:flex-none">
+                            <div className="flex gap-2">
+                                <Button onClick={function(){ setIsArchiveModalOpen(true); }} variant="secondary" className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 text-xs sm:text-sm">
                                     {Icons.List} Ver Arquivados
                                 </Button>
-                                <Button onClick={handleCloseSprint} className="bg-brand-600 hover:bg-brand-500 text-xs sm:text-sm shadow-lg shadow-brand-500/20 flex-1 sm:flex-none">
+                                <Button onClick={handleCloseSprint} className="bg-brand-600 hover:bg-brand-500 text-xs sm:text-sm shadow-lg shadow-brand-500/20">
                                     {Icons.Archive} Encerrar Sprint
                                 </Button>
                             </div>
@@ -1035,11 +1031,11 @@
                                                     avatarBg = 'bg-transparent border border-slate-500 text-slate-500';
                                                     initials = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
                                                 } else {
-                                                    var nameUpper = String(task.assignee).toUpperCase();
+                                                    var nameUpper = task.assignee.toUpperCase();
                                                     if (nameUpper.indexOf('DANILO') !== -1) { initials = 'DI'; avatarBg = 'bg-orange-600 text-white'; }
                                                     else if (nameUpper.indexOf('KAUAN') !== -1) { initials = 'KF'; avatarBg = 'bg-blue-600 text-white'; }
                                                     else if (nameUpper.indexOf('OUTRO') !== -1) { initials = 'O'; avatarBg = 'bg-red-600 text-white'; }
-                                                    else { initials = nameUpper.substring(0, 2); avatarBg = 'bg-indigo-600 text-white'; }
+                                                    else { initials = task.assignee.substring(0, 2).toUpperCase(); avatarBg = 'bg-indigo-600 text-white'; }
                                                 }
 
                                                 var priorityIcon = null;
@@ -1079,7 +1075,7 @@
                                                          }}
                                                          onClick={function() { setEditingTask(task); }} 
                                                          className="bg-jira-card hover:bg-jira-cardHover transition-colors p-3 rounded-lg shadow-sm group flex flex-col gap-3 relative cursor-grab active:cursor-grabbing border border-transparent">
-                                                        <h4 className="text-[13px] text-jira-text leading-snug uppercase">{String(task.title)}</h4>
+                                                        <h4 className="text-[13px] text-jira-text leading-snug uppercase">{task.title}</h4>
 
                                                         <div className="flex justify-between items-center mt-1">
                                                             <div className="flex items-center gap-2">
@@ -1145,32 +1141,28 @@
                                         {archivedTasks.length === 0 ? (
                                             <p className="text-slate-500 text-center py-8">Nenhuma tarefa arquivada.</p>
                                         ) : (
-                                            <div className="overflow-x-auto">
-                                                <table className="w-full text-sm text-left text-slate-300">
-                                                    <thead className="text-xs uppercase bg-[#161A1D] text-slate-500 sticky top-0">
-                                                        <tr>
-                                                            <th className="px-4 py-3">Código</th>
-                                                            <th className="px-4 py-3">Título</th>
-                                                            <th className="px-4 py-3">Responsável</th>
-                                                            <th className="px-4 py-3">Arquivado em</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-slate-800">
-                                                        {archivedTasks.sort(function(a, b) { return new Date(b.archivedAt || 0) - new Date(a.archivedAt || 0); }).map(function(t) {
-                                                            var dateStr = "N/A";
-                                                            try { dateStr = new Date(t.archivedAt || t.createdAt).toLocaleDateString() } catch(e) {}
-                                                            return (
-                                                                <tr key={t.id} className="hover:bg-slate-800/50">
-                                                                    <td className="px-4 py-3 font-mono text-xs font-bold text-brand-400">{t.code}</td>
-                                                                    <td className="px-4 py-3 font-semibold uppercase min-w-[200px]">{String(t.title)}</td>
-                                                                    <td className="px-4 py-3 uppercase">{String(t.assignee || 'N/A')}</td>
-                                                                    <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{dateStr}</td>
-                                                                </tr>
-                                                            );
-                                                        })}
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                            <table className="w-full text-sm text-left text-slate-300">
+                                                <thead className="text-xs uppercase bg-[#161A1D] text-slate-500 sticky top-0">
+                                                    <tr>
+                                                        <th className="px-4 py-3">Código</th>
+                                                        <th className="px-4 py-3">Título</th>
+                                                        <th className="px-4 py-3">Responsável</th>
+                                                        <th className="px-4 py-3">Arquivado em</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-800">
+                                                    {archivedTasks.sort(function(a, b) { return new Date(b.archivedAt || 0) - new Date(a.archivedAt || 0); }).map(function(t) {
+                                                        return (
+                                                            <tr key={t.id} className="hover:bg-slate-800/50">
+                                                                <td className="px-4 py-3 font-mono text-xs font-bold text-brand-400">{t.code}</td>
+                                                                <td className="px-4 py-3 font-semibold uppercase">{t.title}</td>
+                                                                <td className="px-4 py-3 uppercase">{t.assignee || 'N/A'}</td>
+                                                                <td className="px-4 py-3 text-xs text-slate-500">{new Date(t.archivedAt || t.createdAt).toLocaleDateString()}</td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
                                         )}
                                     </div>
                                 </Card>
@@ -1187,7 +1179,7 @@
                                     <form onSubmit={handleCreate} className="p-6 space-y-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Título da Tarefa</label>
-                                            <Input value={form.title} onChange={function(e) { setForm(Object.assign({}, form, { title: String(e.target.value).toUpperCase() })); }} placeholder="EX: SUBSTITUIR SWITCH RACK 02" className="bg-jira-card border-slate-700 text-white uppercase" autoFocus />
+                                            <Input value={form.title} onChange={function(e) { setForm(Object.assign({}, form, { title: e.target.value.toUpperCase() })); }} placeholder="EX: SUBSTITUIR SWITCH RACK 02" className="bg-jira-card border-slate-700 text-white uppercase" autoFocus />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
@@ -1239,11 +1231,11 @@
                                         <div className="space-y-4">
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Título</label>
-                                                <Input value={editingTask.title} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {title: String(e.target.value).toUpperCase()})); }} className="bg-[#22272B] border-slate-700 text-white font-semibold uppercase" />
+                                                <Input value={editingTask.title} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {title: e.target.value.toUpperCase()})); }} className="bg-[#22272B] border-slate-700 text-white font-semibold uppercase" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Descrição detalhada</label>
-                                                <textarea rows="3" value={editingTask.description || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {description: String(e.target.value).toUpperCase()})); }} className="w-full p-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 uppercase" placeholder="ADICIONE INSTRUÇÕES, LINKS OU CONTEXTO PARA ESTA TAREFA..."></textarea>
+                                                <textarea rows="3" value={editingTask.description || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {description: e.target.value.toUpperCase()})); }} className="w-full p-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 uppercase" placeholder="ADICIONE INSTRUÇÕES, LINKS OU CONTEXTO PARA ESTA TAREFA..."></textarea>
                                             </div>
                                             <div className="grid grid-cols-3 gap-4">
                                                 <div>
@@ -1279,15 +1271,13 @@
                                             <div className="space-y-3 mb-5">
                                                 {(editingTask.comments || []).map(function(c, i) {
                                                     var isMe = currentUser && c.author === currentUser.name;
-                                                    var dateStr = "N/A";
-                                                    try { dateStr = new Date(c.createdAt).toLocaleString(); } catch(e){}
                                                     return (
                                                         <div key={i} className={"p-3 rounded-lg border flex flex-col gap-1 " + (isMe ? "bg-brand-900/10 border-brand-800/30 ml-4" : "bg-[#22272B] border-slate-800 mr-4")}>
                                                             <div className="flex justify-between items-center">
-                                                                <span className={"text-xs font-bold " + (isMe ? "text-brand-400" : "text-slate-400")}>{String(c.author)}</span>
-                                                                <span className="text-[10px] text-slate-500">{dateStr}</span>
+                                                                <span className={"text-xs font-bold " + (isMe ? "text-brand-400" : "text-slate-400")}>{c.author}</span>
+                                                                <span className="text-[10px] text-slate-500">{new Date(c.createdAt).toLocaleString()}</span>
                                                             </div>
-                                                            <p className="text-sm text-slate-300 whitespace-pre-wrap uppercase">{String(c.text)}</p>
+                                                            <p className="text-sm text-slate-300 whitespace-pre-wrap uppercase">{c.text}</p>
                                                         </div>
                                                     );
                                                 })}
@@ -1300,13 +1290,13 @@
                                                 <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-1 shadow-sm">
                                                     {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                                                 </div>
-                                                <textarea value={newComment} onChange={function(e) { setNewComment(String(e.target.value).toUpperCase()); }} rows="2" className="flex-1 p-2.5 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none uppercase" placeholder="ESCREVA UM COMENTÁRIO..."></textarea>
+                                                <textarea value={newComment} onChange={function(e) { setNewComment(e.target.value.toUpperCase()); }} rows="2" className="flex-1 p-2.5 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none uppercase" placeholder="ESCREVA UM COMENTÁRIO..."></textarea>
                                                 <Button onClick={function() {
                                                     if(!newComment.trim()) return;
                                                     var commentObj = {
                                                         id: 'c_' + Date.now(),
                                                         author: currentUser ? currentUser.name : 'Técnico',
-                                                        text: String(newComment).trim().toUpperCase(),
+                                                        text: newComment.trim().toUpperCase(),
                                                         createdAt: new Date().toISOString()
                                                     };
                                                     var updatedComments = (editingTask.comments || []).concat([commentObj]);
@@ -1323,8 +1313,8 @@
                                         <Button variant="secondary" onClick={function() { setEditingTask(null); }} className="bg-transparent border-none text-slate-400 hover:bg-slate-800">Cancelar</Button>
                                         <Button onClick={function() {
                                             var updates = {
-                                                title: String(editingTask.title).toUpperCase(),
-                                                description: String(editingTask.description || '').toUpperCase(),
+                                                title: editingTask.title.toUpperCase(),
+                                                description: (editingTask.description || '').toUpperCase(),
                                                 status: editingTask.status,
                                                 assignee: editingTask.assignee,
                                                 priority: editingTask.priority
@@ -1358,10 +1348,10 @@
 
                 var handleAddUser = function(e) {
                     e.preventDefault();
-                    var cleanId = String(newUser.id || '').trim();
-                    var cleanName = String(newUser.name || '').trim().toUpperCase();
+                    var cleanId = (newUser.id || '').trim();
+                    var cleanName = (newUser.name || '').trim().toUpperCase();
                     if (!cleanId || !cleanName) return alert("Preencha a Matrícula e o Nome.");
-                    if (users.some(function(u) { return String(u.id || '').toLowerCase() === cleanId.toLowerCase(); })) {
+                    if (users.some(function(u) { return (u.id || '').toLowerCase() === cleanId.toLowerCase(); })) {
                         return alert("Matrícula já cadastrada.");
                     }
 
@@ -1383,9 +1373,9 @@
                     e.preventDefault();
                     setSaving(true);
                     var formattedTitulos = {
-                        col1: String(titulos.col1 || '').toUpperCase(),
-                        col2: String(titulos.col2 || '').toUpperCase(),
-                        col3: String(titulos.col3 || '').toUpperCase()
+                        col1: (titulos.col1 || '').toUpperCase(),
+                        col2: (titulos.col2 || '').toUpperCase(),
+                        col3: (titulos.col3 || '').toUpperCase()
                     };
                     db.collection('settings').doc('titulos').set(formattedTitulos)
                         .then(function() { alert("Títulos atualizados com sucesso!"); })
@@ -1394,8 +1384,8 @@
                 };
 
                 var list = users.filter(function(u) {
-                    return String(u.name || '').toLowerCase().indexOf(String(filter).toLowerCase()) !== -1 ||
-                           String(u.id || '').toLowerCase().indexOf(String(filter).toLowerCase()) !== -1;
+                    return (u.name || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1 ||
+                           (u.id || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1;
                 });
 
                 return (
@@ -1411,7 +1401,7 @@
                                         <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Técnico</h3>
                                         <form onSubmit={handleAddUser} className="space-y-3">
                                             <Input placeholder="Matrícula / ID" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
-                                            <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: String(e.target.value).toUpperCase() })); }} className="uppercase" />
+                                            <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value.toUpperCase() })); }} className="uppercase" />
                                             <Button type="submit" disabled={saving} className="w-full">{Icons.Plus} Cadastrar</Button>
                                         </form>
                                     </div>
@@ -1426,8 +1416,8 @@
                                                 return (
                                                     <div key={u.docId || u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
                                                         <div>
-                                                            <div className="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase">{String(u.name)}</div>
-                                                            <div className="text-[10px] text-slate-400 font-mono">{String(u.id)}</div>
+                                                            <div className="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase">{u.name}</div>
+                                                            <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
                                                         </div>
                                                         {!isMe && (
                                                             <button onClick={function() { handleDeleteUser(u); }} className="text-slate-400 hover:text-red-500 transition-colors p-1">{Icons.Trash}</button>
@@ -1445,15 +1435,15 @@
                                         <div className="grid md:grid-cols-3 gap-4">
                                             <div>
                                                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 1</label>
-                                                <Input value={titulos.col1 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col1: String(e.target.value).toUpperCase()})); }} className="uppercase" />
+                                                <Input value={titulos.col1 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col1: e.target.value.toUpperCase()})); }} className="uppercase" />
                                             </div>
                                             <div>
                                                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 2</label>
-                                                <Input value={titulos.col2 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col2: String(e.target.value).toUpperCase()})); }} className="uppercase" />
+                                                <Input value={titulos.col2 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col2: e.target.value.toUpperCase()})); }} className="uppercase" />
                                             </div>
                                             <div>
                                                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 3</label>
-                                                <Input value={titulos.col3 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col3: String(e.target.value).toUpperCase()})); }} className="uppercase" />
+                                                <Input value={titulos.col3 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col3: e.target.value.toUpperCase()})); }} className="uppercase" />
                                             </div>
                                         </div>
                                         <div className="flex justify-end">
@@ -1464,6 +1454,56 @@
                                 
                             </div>
                         </Card>
+                    </div>
+                );
+            };
+
+            var LoginScreen = function(props) {
+                var onLogin = props.onLogin;
+                var errState = useState('');
+                var error = errState[0], setError = errState[1];
+
+                var handleGoogleLogin = function() {
+                    var provider = new firebase.auth.GoogleAuthProvider();
+                    auth.signInWithPopup(provider).then(function(result) {
+                        var user = result.user;
+                        var email = (user.email || '').toLowerCase();
+                        
+                        if (ALLOWED_GMAILS.indexOf(email) !== -1) {
+                            onLogin({
+                                id: user.uid,
+                                name: (user.displayName || email.split('@')[0]).toUpperCase(),
+                                email: email
+                            });
+                        } else {
+                            auth.signOut();
+                            setError('Acesso negado. Esta conta do Google não está autorizada.');
+                        }
+                    }).catch(function(err) {
+                        setError('Erro no login com Google: ' + err.message);
+                    });
+                };
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
+                        <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden fade-in">
+                            <div className="p-8 pb-6 text-center border-b border-slate-100 dark:border-slate-800">
+                                <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-brand-500/30">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                </div>
+                                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Hub</h1>
+                                <p className="text-sm text-slate-500 mt-1">Gestão de Rotinas • Cobrecom</p>
+                            </div>
+                            <div className="p-8 space-y-4">
+                                {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2.5 rounded-lg border border-red-200 dark:border-red-900/40">{error}</div>}
+                                <Button variant="google" onClick={handleGoogleLogin} className="w-full h-12 text-sm font-semibold flex items-center justify-center gap-3">
+                                    {Icons.Google} Entrar com Conta Google
+                                </Button>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
+                                <p className="text-[10px] text-slate-400 font-mono uppercase">Acesso restrito à TI Cobrecom</p>
+                            </div>
+                        </div>
                     </div>
                 );
             };
@@ -1481,10 +1521,8 @@
                 var users = usersState[0], setUsers = usersState[1];
                 var ticketsState = useState([]);
                 var activeTickets = ticketsState[0], setActiveTickets = ticketsState[1];
-                
-                var historyItemsState = useState([]);
-                var historyItems = historyItemsState[0], setHistoryItems = historyItemsState[1];
-                
+                var historyState = useState([]);
+                var history = historyState[0], setHistory = historyState[1];
                 var kanbanState = useState([]);
                 var kanbanTasks = kanbanState[0], setKanbanTasks = kanbanState[1];
                 var logoState = useState('');
@@ -1508,10 +1546,6 @@
                 
                 var fileInputRef = useRef(null);
 
-                // Controle do Menu Mobile
-                var mobileMenuState = useState(false);
-                var isMobileMenuOpen = mobileMenuState[0], setIsMobileMenuOpen = mobileMenuState[1];
-
                 var titlesState = useState({
                     col1: "1. FÍSICO E ACESSOS",
                     col2: "2. DADOS E CONECTIVIDADE",
@@ -1529,11 +1563,11 @@
 
                     var unsubAuth = auth.onAuthStateChanged(function(user) {
                         if (user && user.email) {
-                            var email = String(user.email).toLowerCase();
+                            var email = user.email.toLowerCase();
                             if (ALLOWED_GMAILS.indexOf(email) !== -1) {
                                 var sessionUser = {
                                     id: user.uid,
-                                    name: String(user.displayName || email.split('@')[0]).toUpperCase(),
+                                    name: (user.displayName || email.split('@')[0]).toUpperCase(),
                                     email: email
                                 };
                                 setCurrentUser(sessionUser);
@@ -1565,6 +1599,11 @@
                             var list = snap.docs.map(function(doc) {
                                 return Object.assign({ id: doc.id }, doc.data());
                             });
+                            list.sort(function(a, b) { 
+                                var valA = a.order !== undefined ? a.order : new Date(a.createdAt).getTime();
+                                var valB = b.order !== undefined ? b.order : new Date(b.createdAt).getTime();
+                                return valA - valB; 
+                            });
                             setKanbanTasks(list);
                         }
                     });
@@ -1580,7 +1619,7 @@
                     });
 
                     var unsubHistory = db.collection('history').orderBy('date', 'desc').onSnapshot(function(snap) {
-                        setHistoryItems(snap.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); }));
+                        setHistory(snap.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); }));
                     });
 
                     var unsubUsers = db.collection('users').onSnapshot(function(snap) {
@@ -1612,11 +1651,6 @@
                     });
                 };
 
-                var handleNav = function(targetView) {
-                    setView(targetView);
-                    setIsMobileMenuOpen(false); 
-                };
-
                 var toggleFolder = function(id) {
                     var nextState = Object.assign({}, openFolders);
                     nextState[id] = !nextState[id];
@@ -1625,8 +1659,8 @@
 
                 var handleAddFolder = function() {
                     var title = prompt("NOME DA NOVA PASTA (EX: FIREWALL, ROTEADORES):");
-                    if (!title || !String(title).trim()) return;
-                    var newFolder = { id: 'f_' + Date.now(), title: String(title).trim().toUpperCase(), links: [] };
+                    if (!title || !title.trim()) return;
+                    var newFolder = { id: 'f_' + Date.now(), title: title.trim().toUpperCase(), links: [] };
                     var updated = customFolders.concat([newFolder]);
                     db.collection('settings').doc('sidebar_modules').set({ folders: updated });
                     
@@ -1645,14 +1679,14 @@
 
                 var handleAddLink = function(folderId) {
                     var label = prompt("NOME DO ACESSO (EX: PFSENSE MATRIZ):");
-                    if (!label || !String(label).trim()) return;
+                    if (!label || !label.trim()) return;
                     var url = prompt("ENDEREÇO IP OU URL (EX: 192.168.1.1):");
-                    if (!url || !String(url).trim()) return;
+                    if (!url || !url.trim()) return;
 
                     var updated = customFolders.map(function(f) {
                         if (f.id === folderId) {
                             var existing = f.links || [];
-                            var newLink = { id: 'l_' + Date.now(), label: String(label).trim().toUpperCase(), url: String(url).trim() };
+                            var newLink = { id: 'l_' + Date.now(), label: label.trim().toUpperCase(), url: url.trim() };
                             return Object.assign({}, f, { links: existing.concat([newLink]) });
                         }
                         return f;
@@ -1676,7 +1710,7 @@
 
                 var handleOpenLink = function(url) {
                     if (!url) return;
-                    var target = String(url).startsWith('http://') || String(url).startsWith('https://') ? url : 'http://' + url;
+                    var target = url.startsWith('http://') || url.startsWith('https://') ? url : 'http://' + url;
                     window.open(target, '_blank');
                 };
                 
@@ -1692,7 +1726,7 @@
                     };
                     setDraftTicket(newTicket);
                     setCurrentTicketId('draft');
-                    handleNav('checklist');
+                    setView('checklist');
                 };
 
                 var handleUpdateTicket = function(newData) { 
@@ -1722,7 +1756,7 @@
                         setDraftTicket(null);
                         setCurrentTicketId(null);
                     }
-                    handleNav('dashboard');
+                    setView('dashboard');
                 };
 
                 var handleForceSaveChecklist = function() {
@@ -1734,10 +1768,10 @@
                             setCurrentTicketId(null);
                             setDraftTicket(null);
                             isSavingDraftRef.current = false;
-                            handleNav('dashboard');
+                            setView('dashboard');
                         });
                     } else {
-                        handleNav('dashboard');
+                        setView('dashboard');
                     }
                 };
 
@@ -1750,10 +1784,10 @@
                             setCurrentTicketId(docRef.id);
                             setDraftTicket(null);
                             isSavingDraftRef.current = false;
-                            handleNav('receipt');
+                            setView('receipt');
                         });
                     } else {
-                        handleNav('receipt');
+                        setView('receipt');
                     }
                 };
 
@@ -1761,7 +1795,7 @@
                     var map = { coluna1: 'col1', coluna2: 'col2', coluna3: 'col3' };
                     var gKey = map[colKey];
                     if (gKey) {
-                        var newTitulos = Object.assign({}, globalTitulos, { [gKey]: String(newVal).toUpperCase() });
+                        var newTitulos = Object.assign({}, globalTitulos, { [gKey]: newVal.toUpperCase() });
                         db.collection('settings').doc('titulos').set(newTitulos);
                     }
                 };
@@ -1773,8 +1807,8 @@
                         visualId: ticket.visualId, 
                         type: ticket.type, 
                         date: new Date().toISOString(), 
-                        tecnico: String(meta.tecnico || 'N/A').toUpperCase(), 
-                        ativo: String(meta.ativo || meta.maquina || "N/A").toUpperCase(), 
+                        tecnico: (meta.tecnico || 'N/A').toUpperCase(), 
+                        ativo: (meta.ativo || meta.maquina || "N/A").toUpperCase(), 
                         data: ticket.data 
                     }).then(function() {
                         if(ticket.id && ticket.id !== 'draft') {
@@ -1782,7 +1816,7 @@
                         }
                     }).then(function() {
                         setCurrentTicketId(null);
-                        handleNav('dashboard');
+                        setView('dashboard');
                     });
                 };
 
@@ -1801,7 +1835,7 @@
                             }
                         }).then(function() {
                             setSelectedHistoryTicket(null);
-                            handleNav('dashboard');
+                            setView('dashboard');
                         });
                     }
                 };
@@ -1825,7 +1859,7 @@
 
                 var handleSaveKanbanTask = function(task) {
                     var maxOrder = kanbanTasks.length;
-                    db.collection('kanban_tasks').add(Object.assign({}, task, { title: String(task.title).toUpperCase(), order: maxOrder }));
+                    db.collection('kanban_tasks').add(Object.assign({}, task, { title: task.title.toUpperCase(), order: maxOrder }));
                 };
 
                 var handleDeleteKanbanTask = function(taskId) {
@@ -1839,8 +1873,8 @@
                 };
 
                 var handleUpdateKanbanTask = function(taskId, updates) {
-                    if (updates.title) updates.title = String(updates.title).toUpperCase();
-                    if (updates.description) updates.description = String(updates.description).toUpperCase();
+                    if (updates.title) updates.title = updates.title.toUpperCase();
+                    if (updates.description) updates.description = updates.description.toUpperCase();
                     db.collection('kanban_tasks').doc(taskId).update(updates);
                 };
 
@@ -1900,35 +1934,27 @@
 
                 return (
                     <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
-                        
-                        {isMobileMenuOpen && (
-                            <div className="fixed inset-0 bg-black/60 z-30 md:hidden fade-in" onClick={function() { setIsMobileMenuOpen(false); }}></div>
-                        )}
-
-                        <aside className={"fixed md:static inset-y-0 left-0 transform " + (isMobileMenuOpen ? "translate-x-0" : "-translate-x-full") + " md:translate-x-0 transition-transform duration-300 ease-in-out w-64 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 z-40 shrink-0"}>
-                            <div className="h-16 flex items-center justify-between gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800 shrink-0">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                                    </div>
-                                    INFRA HUB
+                        <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 z-20 shrink-0">
+                            <div className="h-16 flex items-center gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800 shrink-0">
+                                <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                                 </div>
-                                <button onClick={function() { setIsMobileMenuOpen(false); }} className="md:hidden text-slate-400 hover:text-white">&times;</button>
+                                INFRA HUB
                             </div>
                             
                             <div className="flex-1 overflow-y-auto py-6">
                                 <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Principal</div>
                                 <nav className="px-3 space-y-1 mb-8">
-                                    <button onClick={function() { handleNav('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                    <button onClick={function() { setView('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.Layout} Dashboard
                                     </button>
-                                    <button onClick={function() { handleNav('kanban'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                    <button onClick={function() { setView('kanban'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.Kanban} Kanban TI
                                     </button>
-                                    <button onClick={function() { handleNav('sistema176'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'sistema176' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                        {Icons.Globe} Controle de Estoque
+                                    <button onClick={function() { setView('sistema176'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'sistema176' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.Globe} Controle de Estoque T.I
                                     </button>
-                                    <button onClick={function() { handleNav('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                    <button onClick={function() { setView('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.History} Histórico
                                     </button>
                                 </nav>
@@ -2025,7 +2051,7 @@
                                 </div>
                                 <div className="grid grid-cols-3 gap-2">
                                     <button title="Alternar tema" onClick={function() { setDarkMode(!darkMode); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                                    <button title="Configurações" onClick={function() { setShowConfig(true); setIsMobileMenuOpen(false); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                    <button title="Configurações" onClick={function() { setShowConfig(true); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
                                     <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-slate-800 text-center">
@@ -2036,32 +2062,27 @@
                         </aside>
 
                         <main className="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950 relative">
-                            {/* Header Mobile */}
-                            <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0 border-b border-slate-800 z-20">
-                                <div className="flex items-center gap-3">
-                                    <button onClick={function() { setIsMobileMenuOpen(true); }} className="p-2 -ml-2 text-slate-400 hover:text-white">
-                                        {Icons.Menu}
-                                    </button>
-                                    <span className="font-bold tracking-wide">INFRA HUB</span>
-                                </div>
+                            <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0 border-b border-slate-800">
+                                <span className="font-bold">INFRA HUB</span>
                                 <div className="flex gap-2">
-                                    <button onClick={function() { handleNav('dashboard'); }} className="p-2 text-slate-400 hover:text-brand-400">{Icons.Layout}</button>
-                                    <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-400">{Icons.LogOut}</button>
+                                    <button onClick={function() { setShowConfig(true); }} className="p-2">{Icons.Settings}</button>
+                                    <button onClick={function() { setView('dashboard'); }} className="p-2">{Icons.Layout}</button>
+                                    <button onClick={handleLogout} className="p-2">{Icons.LogOut}</button>
                                 </div>
                             </div>
 
                             <div className="flex-1 overflow-auto relative">
                                 {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
-                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); handleNav('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={historyItems.length} />}
+                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
                                 {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} currentUser={currentUser} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} onReorderTask={handleReorderKanbanTask} onUpdateTask={handleUpdateKanbanTask} />}
                                 {view === 'sistema176' && (
                                     <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col">
                                         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 bg-white dark:bg-slate-900 shadow-sm z-10">
                                             <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2 uppercase">
-                                                {Icons.Globe} Controle de Estoque
+                                                {Icons.Globe} Controle de Estoque T.I
                                             </h2>
                                             <Button onClick={function(){ window.open(APP_CONFIG.ESTOQUE_URL, '_blank'); }} variant="secondary" className="text-xs">
-                                                {Icons.ExternalLink} <span className="hidden sm:inline">Abrir em nova guia</span>
+                                                {Icons.ExternalLink} Abrir em nova guia
                                             </Button>
                                         </div>
                                         <div className="flex-1 w-full relative">
@@ -2070,9 +2091,9 @@
                                     </div>
                                 )}
                                 {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
-                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { handleNav('checklist'); }} onArchive={handleArchive} logo={logo} />}
-                                {view === 'history' && <HistoryView historyItems={historyItems} onOpenHistory={function(h) { setSelectedHistoryTicket(h); handleNav('history_receipt'); }} />}
-                                {view === 'history_receipt' && <ReceiptView ticket={selectedHistoryTicket} isHistory={true} onBack={function() { handleNav('history'); setSelectedHistoryTicket(null); }} logo={logo} onArchive={null} onRevertHistory={handleRevertHistory} />}
+                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { setView('checklist'); }} onArchive={handleArchive} logo={logo} />}
+                                {view === 'history' && <HistoryView history={history} onOpenHistory={function(h) { setSelectedHistoryTicket(h); setView('history_receipt'); }} />}
+                                {view === 'history_receipt' && <ReceiptView ticket={selectedHistoryTicket} isHistory={true} onBack={function() { setView('history'); setSelectedHistoryTicket(null); }} logo={logo} onArchive={null} onRevertHistory={handleRevertHistory} />}
                             </div>
                         </main>
                     </div>
