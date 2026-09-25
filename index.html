@@ -21,6 +21,38 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
+    <!-- Script para Habilitar PWA em Arquivo Único (Manifest e Service Worker injetados via Blob) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const manifest = {
+                    name: "Infra Hub Cobrecom",
+                    short_name: "Infra Hub",
+                    start_url: location.href,
+                    display: "standalone",
+                    background_color: "#020617",
+                    theme_color: "#020617",
+                    icons: [
+                        { src: "https://via.placeholder.com/192/2563eb/ffffff?text=IH", sizes: "192x192", type: "image/png" },
+                        { src: "https://via.placeholder.com/512/2563eb/ffffff?text=IH", sizes: "512x512", type: "image/png" }
+                    ]
+                };
+                const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+                const manifestUrl = URL.createObjectURL(manifestBlob);
+                document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestUrl}">`);
+
+                const swCode = `
+                    self.addEventListener('install', e => self.skipWaiting());
+                    self.addEventListener('activate', e => self.clients.claim());
+                    self.addEventListener('fetch', e => {});
+                `;
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                const swUrl = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swUrl).catch(console.error);
+            });
+        }
+    </script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -31,17 +63,8 @@
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
-                        brand: {
-                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
-                        },
-                        jira: {
-                            bg: '#1D2125',
-                            col: '#161A1D',
-                            card: '#22272B',
-                            cardHover: '#282E33',
-                            text: '#B6C2CF',
-                            subtext: '#8C9BAB'
-                        }
+                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+                        jira: { bg: '#1D2125', col: '#161A1D', card: '#22272B', cardHover: '#282E33', text: '#B6C2CF', subtext: '#8C9BAB' }
                     }
                 }
             }
@@ -56,7 +79,7 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
 
         @media print {
             @page { margin: 0.5cm; size: auto; }
@@ -84,7 +107,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300 overscroll-none">
     <div id="root">
         <div style="display:flex;height:100vh;align-items:center;justify-content:center;color:#94a3b8;font-family:monospace;flex-direction:column;gap:10px;">
             <div style="width: 40px; height: 40px; border: 4px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
@@ -132,6 +155,7 @@
             ];
 
             var Icons = {
+                Menu: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>,
                 Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
                 User: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
                 History: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>,
@@ -733,7 +757,7 @@
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Observações Finais</label>
                                     <textarea readOnly={isHistory} value={obs} onChange={function(e) { setObs(e.target.value.toUpperCase()); }} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-brand-500/20 outline-none uppercase" placeholder="DETALHES ADICIONAIS, PEÇAS TROCADAS, ETC..."></textarea>
                                 </div>
-                                <div className="flex flex-col justify-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-6">
+                                <div className="flex flex-col justify-center gap-3 md:border-l border-slate-100 dark:border-slate-800 md:pl-6">
                                     <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Ações {isHistory ? 'do Relatório' : 'de Encerramento'}</h3>
                                     <Button className="w-full justify-start" onClick={function() { window.print(); }} variant="secondary">{Icons.Printer} Imprimir Relatório</Button>
                                     {isHistory ? (
@@ -834,7 +858,7 @@
                                                     </div>
                                                     <span className="text-xs font-bold text-brand-600">{pct}%</span>
                                                 </div>
-                                                <button onClick={function(e) { onDeleteTicket(e, ticket.id); }} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 group-hover:opacity-100" title="Excluir registo">{Icons.Trash}</button>
+                                                <button onClick={function(e) { onDeleteTicket(e, ticket.id); }} className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors opacity-0 md:group-hover:opacity-100" title="Excluir registo">{Icons.Trash}</button>
                                             </div>
                                         );
                                     })}
@@ -860,21 +884,21 @@
                 });
 
                 return (
-                    <div className="p-6 md:p-10 h-full flex flex-col fade-in">
-                        <div className="flex justify-between items-end mb-6">
+                    <div className="p-4 md:p-10 h-full flex flex-col fade-in">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Histórico de Operações</h2>
                                 <p className="text-slate-500 text-sm">Registro auditável de todas as atividades concluídas.</p>
                             </div>
-                            <div className="relative">
+                            <div className="relative w-full md:w-auto">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
-                                <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={function(e) { setSearch(e.target.value); }} className="pl-10 w-64" />
+                                <Input placeholder="Buscar por ID, Ativo..." value={search} onChange={function(e) { setSearch(e.target.value); }} className="pl-10 w-full md:w-64" />
                             </div>
                         </div>
                         
                         <Card className="flex-1 overflow-hidden flex flex-col" noPadding>
-                            <div className="overflow-auto flex-1">
-                                <table className="w-full text-sm text-left">
+                            <div className="overflow-x-auto flex-1">
+                                <table className="w-full text-sm text-left min-w-[600px]">
                                     <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-500 uppercase sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
                                         <tr>
                                             <th className="px-6 py-3">ID</th>
@@ -992,31 +1016,31 @@
                 ];
 
                 return (
-                    <div className="p-6 md:p-10 h-full flex flex-col fade-in overflow-x-auto bg-jira-bg">
-                        <div className="flex justify-between items-center mb-6 shrink-0">
+                    <div className="p-4 md:p-10 h-full flex flex-col fade-in overflow-x-auto bg-jira-bg">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 shrink-0">
                             <div>
                                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                                     {Icons.Kanban} Quadro Kanban (Tarefas TI)
                                 </h2>
                             </div>
-                            <div className="flex gap-2">
-                                <Button onClick={function(){ setIsArchiveModalOpen(true); }} variant="secondary" className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 text-xs sm:text-sm">
+                            <div className="flex gap-2 w-full md:w-auto">
+                                <Button onClick={function(){ setIsArchiveModalOpen(true); }} variant="secondary" className="flex-1 md:flex-none bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 text-xs sm:text-sm">
                                     {Icons.List} Ver Arquivados
                                 </Button>
-                                <Button onClick={handleCloseSprint} className="bg-brand-600 hover:bg-brand-500 text-xs sm:text-sm shadow-lg shadow-brand-500/20">
+                                <Button onClick={handleCloseSprint} className="flex-1 md:flex-none bg-brand-600 hover:bg-brand-500 text-xs sm:text-sm shadow-lg shadow-brand-500/20">
                                     {Icons.Archive} Encerrar Sprint
                                 </Button>
                             </div>
                         </div>
 
-                        <div className="flex gap-4 flex-1 pb-4 min-w-[1000px]">
+                        <div className="flex gap-4 flex-1 pb-4 w-max min-w-full">
                             {columns.map(function(col) {
                                 var colTasks = tasks.filter(function(t) { return t.status === col.id; });
                                 return (
                                     <div key={col.id} 
                                          onDragOver={function(e) { e.preventDefault(); }}
                                          onDrop={function(e) { handleDropOnCol(e, col.id); }}
-                                         className="bg-jira-col rounded-xl p-3 flex flex-col w-[280px] min-w-[280px] h-full max-h-[calc(100vh-180px)] border border-slate-800/50">
+                                         className="bg-jira-col rounded-xl p-3 flex flex-col w-[85vw] sm:w-[280px] max-w-[280px] h-full max-h-[calc(100vh-180px)] border border-slate-800/50">
                                         <div className="flex items-center gap-3 mb-4 shrink-0 px-1 pt-1">
                                             <h3 className="text-xs font-bold uppercase tracking-wider text-jira-subtext">{col.title}</h3>
                                             <span className="bg-jira-card text-jira-text px-2 py-0.5 rounded text-[10px] font-bold">{colTasks.length}</span>
@@ -1099,7 +1123,8 @@
                                                             </div>
                                                         </div>
 
-                                                        <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-jira-cardHover rounded shadow-sm p-1">
+                                                        {/* CONTROLES MOBILE / TOUCH-FRIENDLY */}
+                                                        <div className="absolute top-2 right-2 flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity bg-jira-cardHover rounded shadow-sm p-1">
                                                             {col.id !== 'a_fazer' && (
                                                                 <button onClick={function(e) {
                                                                     e.stopPropagation();
@@ -1134,14 +1159,14 @@
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
                                 <Card className="w-full max-w-4xl bg-jira-bg border-slate-700 flex flex-col max-h-[90vh]" noPadding>
                                     <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-jira-col shrink-0">
-                                        <h3 className="font-bold text-slate-200 text-sm flex items-center gap-2">{Icons.Archive} Tarefas Arquivadas (Sprints Anteriores)</h3>
+                                        <h3 className="font-bold text-slate-200 text-sm flex items-center gap-2">{Icons.Archive} Tarefas Arquivadas</h3>
                                         <button onClick={function() { setIsArchiveModalOpen(false); }} className="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
                                     </div>
-                                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                                    <div className="flex-1 overflow-auto p-0 md:p-4 custom-scrollbar">
                                         {archivedTasks.length === 0 ? (
                                             <p className="text-slate-500 text-center py-8">Nenhuma tarefa arquivada.</p>
                                         ) : (
-                                            <table className="w-full text-sm text-left text-slate-300">
+                                            <table className="w-full text-sm text-left text-slate-300 min-w-[500px]">
                                                 <thead className="text-xs uppercase bg-[#161A1D] text-slate-500 sticky top-0">
                                                     <tr>
                                                         <th className="px-4 py-3">Código</th>
@@ -1227,7 +1252,7 @@
                                         <button onClick={function() { setEditingTask(null); }} className="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
                                     </div>
                                     
-                                    <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
                                         <div className="space-y-4">
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Título</label>
@@ -1237,7 +1262,7 @@
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Descrição detalhada</label>
                                                 <textarea rows="3" value={editingTask.description || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {description: e.target.value.toUpperCase()})); }} className="w-full p-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 uppercase" placeholder="ADICIONE INSTRUÇÕES, LINKS OU CONTEXTO PARA ESTA TAREFA..."></textarea>
                                             </div>
-                                            <div className="grid grid-cols-3 gap-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                 <div>
                                                     <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Status</label>
                                                     <select value={editingTask.status} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {status: e.target.value})); }} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none">
@@ -1272,7 +1297,7 @@
                                                 {(editingTask.comments || []).map(function(c, i) {
                                                     var isMe = currentUser && c.author === currentUser.name;
                                                     return (
-                                                        <div key={i} className={"p-3 rounded-lg border flex flex-col gap-1 " + (isMe ? "bg-brand-900/10 border-brand-800/30 ml-4" : "bg-[#22272B] border-slate-800 mr-4")}>
+                                                        <div key={i} className={"p-3 rounded-lg border flex flex-col gap-1 " + (isMe ? "bg-brand-900/10 border-brand-800/30 ml-4 md:ml-12" : "bg-[#22272B] border-slate-800 mr-4 md:mr-12")}>
                                                             <div className="flex justify-between items-center">
                                                                 <span className={"text-xs font-bold " + (isMe ? "text-brand-400" : "text-slate-400")}>{c.author}</span>
                                                                 <span className="text-[10px] text-slate-500">{new Date(c.createdAt).toLocaleString()}</span>
@@ -1286,11 +1311,11 @@
                                                 )}
                                             </div>
                                             
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-1 shadow-sm">
+                                            <div className="flex flex-col sm:flex-row items-start gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-brand-600 text-white hidden sm:flex items-center justify-center text-xs font-bold shrink-0 mt-1 shadow-sm">
                                                     {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                                                 </div>
-                                                <textarea value={newComment} onChange={function(e) { setNewComment(e.target.value.toUpperCase()); }} rows="2" className="flex-1 p-2.5 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none uppercase" placeholder="ESCREVA UM COMENTÁRIO..."></textarea>
+                                                <textarea value={newComment} onChange={function(e) { setNewComment(e.target.value.toUpperCase()); }} rows="2" className="w-full sm:flex-1 p-2.5 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none uppercase" placeholder="ESCREVA UM COMENTÁRIO..."></textarea>
                                                 <Button onClick={function() {
                                                     if(!newComment.trim()) return;
                                                     var commentObj = {
@@ -1304,7 +1329,7 @@
                                                     setEditingTask(updatedTask);
                                                     onUpdateTask(updatedTask.id, { comments: updatedComments });
                                                     setNewComment('');
-                                                }} className="shrink-0 h-10 mt-1 px-5">Enviar</Button>
+                                                }} className="shrink-0 h-10 w-full sm:w-auto mt-1 px-5">Enviar</Button>
                                             </div>
                                         </div>
                                     </div>
@@ -1390,12 +1415,12 @@
 
                 return (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm fade-in">
-                        <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden" noPadding>
+                        <Card className="w-full max-w-2xl max-h-[95vh] md:max-h-[85vh] flex flex-col overflow-hidden" noPadding>
                             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-                                <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Configurações do Sistema</h2>
+                                <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Configurações</h2>
                                 <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
                             </div>
-                            <div className="p-6 overflow-y-auto">
+                            <div className="p-4 md:p-6 overflow-y-auto">
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
                                         <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Técnico</h3>
@@ -1408,7 +1433,7 @@
                                     <div>
                                         <div className="flex justify-between items-center mb-3">
                                             <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Técnicos Habilitados</h3>
-                                            <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-28 uppercase" />
+                                            <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-24 md:w-28 uppercase" />
                                         </div>
                                         <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                                             {list.map(function(u) {
@@ -1432,7 +1457,7 @@
                                 <div className="border-t border-slate-100 dark:border-slate-800 pt-6 mt-6">
                                     <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Títulos Padrão (Check Diário)</h3>
                                     <form onSubmit={handleSaveTitulos} className="space-y-4">
-                                        <div className="grid md:grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             <div>
                                                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 1</label>
                                                 <Input value={titulos.col1 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col1: e.target.value.toUpperCase()})); }} className="uppercase" />
@@ -1545,6 +1570,9 @@
                 var selectedHistoryTicket = selectedHistState[0], setSelectedHistoryTicket = selectedHistState[1];
                 
                 var fileInputRef = useRef(null);
+                
+                var mobileMenuState = useState(false);
+                var isMobileMenuOpen = mobileMenuState[0], setIsMobileMenuOpen = mobileMenuState[1];
 
                 var titlesState = useState({
                     col1: "1. FÍSICO E ACESSOS",
@@ -1639,15 +1667,20 @@
                     localStorage.setItem('sa_theme', JSON.stringify(darkMode)); 
                 }, [darkMode]);
 
+                var navTo = function(v) {
+                    setView(v);
+                    setIsMobileMenuOpen(false);
+                };
+
                 var handleLogin = function(user) { 
                     setCurrentUser(user); 
-                    setView('dashboard'); 
+                    navTo('dashboard'); 
                 };
 
                 var handleLogout = function() { 
                     auth.signOut().then(function() {
                         setCurrentUser(null); 
-                        setView('login'); 
+                        navTo('login'); 
                     });
                 };
 
@@ -1726,7 +1759,7 @@
                     };
                     setDraftTicket(newTicket);
                     setCurrentTicketId('draft');
-                    setView('checklist');
+                    navTo('checklist');
                 };
 
                 var handleUpdateTicket = function(newData) { 
@@ -1756,7 +1789,7 @@
                         setDraftTicket(null);
                         setCurrentTicketId(null);
                     }
-                    setView('dashboard');
+                    navTo('dashboard');
                 };
 
                 var handleForceSaveChecklist = function() {
@@ -1768,10 +1801,10 @@
                             setCurrentTicketId(null);
                             setDraftTicket(null);
                             isSavingDraftRef.current = false;
-                            setView('dashboard');
+                            navTo('dashboard');
                         });
                     } else {
-                        setView('dashboard');
+                        navTo('dashboard');
                     }
                 };
 
@@ -1784,10 +1817,10 @@
                             setCurrentTicketId(docRef.id);
                             setDraftTicket(null);
                             isSavingDraftRef.current = false;
-                            setView('receipt');
+                            navTo('receipt');
                         });
                     } else {
-                        setView('receipt');
+                        navTo('receipt');
                     }
                 };
 
@@ -1816,7 +1849,7 @@
                         }
                     }).then(function() {
                         setCurrentTicketId(null);
-                        setView('dashboard');
+                        navTo('dashboard');
                     });
                 };
 
@@ -1835,7 +1868,7 @@
                             }
                         }).then(function() {
                             setSelectedHistoryTicket(null);
-                            setView('dashboard');
+                            navTo('dashboard');
                         });
                     }
                 };
@@ -1934,27 +1967,38 @@
 
                 return (
                     <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
-                        <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-r border-slate-800 z-20 shrink-0">
-                            <div className="h-16 flex items-center gap-3 px-6 font-bold text-white tracking-wide border-b border-slate-800 shrink-0">
-                                <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        
+                        {/* Overlay do Menu Mobile */}
+                        {isMobileMenuOpen && (
+                            <div className="fixed inset-0 bg-black/60 z-40 md:hidden fade-in" onClick={function(){ setIsMobileMenuOpen(false); }}></div>
+                        )}
+
+                        <aside className={"fixed md:relative inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 z-50 shrink-0 transform transition-transform duration-300 " + (isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0")}>
+                            <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800 shrink-0">
+                                <div className="flex items-center gap-3 font-bold text-white tracking-wide">
+                                    <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                    </div>
+                                    INFRA HUB
                                 </div>
-                                INFRA HUB
+                                <button className="md:hidden text-slate-400 hover:text-white" onClick={function(){ setIsMobileMenuOpen(false); }}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
                             </div>
                             
                             <div className="flex-1 overflow-y-auto py-6">
                                 <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Principal</div>
                                 <nav className="px-3 space-y-1 mb-8">
-                                    <button onClick={function() { setView('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                    <button onClick={function() { navTo('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.Layout} Dashboard
                                     </button>
-                                    <button onClick={function() { setView('kanban'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                    <button onClick={function() { navTo('kanban'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.Kanban} Kanban TI
                                     </button>
-                                    <button onClick={function() { setView('sistema176'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'sistema176' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                        {Icons.Globe} Controle de Estoque T.I
+                                    <button onClick={function() { navTo('sistema176'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'sistema176' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.Globe} Controle de Estoque
                                     </button>
-                                    <button onClick={function() { setView('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                    <button onClick={function() { navTo('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.History} Histórico
                                     </button>
                                 </nav>
@@ -1978,16 +2022,16 @@
                                         
                                         {openFolders.checklists && (
                                             <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
-                                                <button onClick={function() { handleCreateTicket('diario'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 group truncate">
+                                                <button onClick={function() { handleCreateTicket('diario'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 group truncate">
                                                     <span className="text-emerald-500/50 group-hover:text-emerald-400">{Icons.Check}</span> Check Diário
                                                 </button>
-                                                <button onClick={function() { handleCreateTicket('rack'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-400 hover:bg-slate-800/50 group truncate">
+                                                <button onClick={function() { handleCreateTicket('rack'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-400 hover:bg-slate-800/50 group truncate">
                                                     <span className="text-indigo-500/50 group-hover:text-indigo-400">{Icons.Server}</span> Rack Fábrica
                                                 </button>
-                                                <button onClick={function() { handleCreateTicket('formatacao'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-brand-400 hover:bg-slate-800/50 group truncate">
+                                                <button onClick={function() { handleCreateTicket('formatacao'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-brand-400 hover:bg-slate-800/50 group truncate">
                                                     <span className="text-brand-500/50 group-hover:text-brand-400">{Icons.Copy}</span> Formatação PC
                                                 </button>
-                                                <button onClick={function() { handleCreateTicket('zebra'); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-amber-400 hover:bg-slate-800/50 group truncate">
+                                                <button onClick={function() { handleCreateTicket('zebra'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-amber-400 hover:bg-slate-800/50 group truncate">
                                                     <span className="text-amber-500/50 group-hover:text-amber-400">{Icons.Printer}</span> Manutenção Zebra
                                                 </button>
                                             </div>
@@ -2020,7 +2064,7 @@
                                                         {(f.links || []).map(function(l) {
                                                             return (
                                                                 <div key={l.id} className="flex items-center justify-between group px-2 py-1 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800/50">
-                                                                    <div onClick={function() { handleOpenLink(l.url); }} className="flex items-center gap-2 truncate cursor-pointer flex-1" title={l.url}>
+                                                                    <div onClick={function() { handleOpenLink(l.url); setIsMobileMenuOpen(false); }} className="flex items-center gap-2 truncate cursor-pointer flex-1" title={l.url}>
                                                                         <span className="text-slate-500 group-hover:text-brand-400">{Icons.ExternalLink}</span>
                                                                         <span className="truncate uppercase">{l.label}</span>
                                                                     </div>
@@ -2039,7 +2083,7 @@
                                 </nav>
                             </div>
 
-                            <div className="p-4 border-t border-slate-800 shrink-0">
+                            <div className="p-4 border-t border-slate-800 shrink-0 bg-slate-900 z-10">
                                 <div className="flex items-center gap-3 mb-4 px-2">
                                     <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
                                         {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
@@ -2051,7 +2095,7 @@
                                 </div>
                                 <div className="grid grid-cols-3 gap-2">
                                     <button title="Alternar tema" onClick={function() { setDarkMode(!darkMode); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                                    <button title="Configurações" onClick={function() { setShowConfig(true); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                    <button title="Configurações" onClick={function() { setShowConfig(true); setIsMobileMenuOpen(false); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
                                     <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-slate-800 text-center">
@@ -2061,28 +2105,32 @@
                             </div>
                         </aside>
 
-                        <main className="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950 relative">
+                        <main className="flex-1 flex flex-col min-w-0 w-full bg-slate-100 dark:bg-slate-950 relative overflow-hidden">
                             <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0 border-b border-slate-800">
-                                <span className="font-bold">INFRA HUB</span>
-                                <div className="flex gap-2">
-                                    <button onClick={function() { setShowConfig(true); }} className="p-2">{Icons.Settings}</button>
-                                    <button onClick={function() { setView('dashboard'); }} className="p-2">{Icons.Layout}</button>
-                                    <button onClick={handleLogout} className="p-2">{Icons.LogOut}</button>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={function() { setIsMobileMenuOpen(true); }} className="p-2 -ml-2 text-slate-300 active:bg-slate-800 rounded">
+                                        {Icons.Menu}
+                                    </button>
+                                    <span className="font-bold text-sm tracking-wide">INFRA HUB</span>
+                                </div>
+                                <div className="flex gap-1">
+                                    <button onClick={function() { setShowConfig(true); }} className="p-2 text-slate-400">{Icons.Settings}</button>
                                 </div>
                             </div>
 
                             <div className="flex-1 overflow-auto relative">
                                 {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
-                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); setView('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
+                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); navTo('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
                                 {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} currentUser={currentUser} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} onReorderTask={handleReorderKanbanTask} onUpdateTask={handleUpdateKanbanTask} />}
                                 {view === 'sistema176' && (
                                     <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col">
                                         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 bg-white dark:bg-slate-900 shadow-sm z-10">
-                                            <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2 uppercase">
-                                                {Icons.Globe} Controle de Estoque T.I
+                                            <h2 className="text-sm md:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2 uppercase">
+                                                {Icons.Globe} <span className="hidden sm:inline">Controle de</span> Estoque T.I
                                             </h2>
                                             <Button onClick={function(){ window.open(APP_CONFIG.ESTOQUE_URL, '_blank'); }} variant="secondary" className="text-xs">
-                                                {Icons.ExternalLink} Abrir em nova guia
+                                                <span className="hidden sm:inline">{Icons.ExternalLink} Abrir em nova guia</span>
+                                                <span className="sm:hidden">{Icons.ExternalLink} Abrir</span>
                                             </Button>
                                         </div>
                                         <div className="flex-1 w-full relative">
@@ -2091,9 +2139,9 @@
                                     </div>
                                 )}
                                 {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
-                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { setView('checklist'); }} onArchive={handleArchive} logo={logo} />}
-                                {view === 'history' && <HistoryView history={history} onOpenHistory={function(h) { setSelectedHistoryTicket(h); setView('history_receipt'); }} />}
-                                {view === 'history_receipt' && <ReceiptView ticket={selectedHistoryTicket} isHistory={true} onBack={function() { setView('history'); setSelectedHistoryTicket(null); }} logo={logo} onArchive={null} onRevertHistory={handleRevertHistory} />}
+                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { navTo('checklist'); }} onArchive={handleArchive} logo={logo} />}
+                                {view === 'history' && <HistoryView history={history} onOpenHistory={function(h) { setSelectedHistoryTicket(h); navTo('history_receipt'); }} />}
+                                {view === 'history_receipt' && <ReceiptView ticket={selectedHistoryTicket} isHistory={true} onBack={function() { navTo('history'); setSelectedHistoryTicket(null); }} logo={logo} onArchive={null} onRevertHistory={handleRevertHistory} />}
                             </div>
                         </main>
                     </div>
