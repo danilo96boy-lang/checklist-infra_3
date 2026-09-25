@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Para comportamento de App Nativa no Mobile -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#020617">
+    
     <title>INFRA HUB | Enterprise Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -105,6 +110,16 @@
 
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             var db = firebase.firestore();
+            
+            // --- ATIVAR MODO OFFLINE ---
+            db.enablePersistence().catch(function(err) {
+                if (err.code == 'failed-precondition') {
+                    console.warn("Múltiplas abas abertas, persistência ativada apenas na primeira.");
+                } else if (err.code == 'unimplemented') {
+                    console.warn("Navegador não suporta persistência offline.");
+                }
+            });
+            
             var auth = firebase.auth();
             var useState = React.useState;
             var useEffect = React.useEffect;
@@ -147,6 +162,7 @@
                 ArrowRight: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>,
                 ArrowLeft: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>,
                 Refresh: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>,
+                Archive: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>,
                 Globe: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>,
                 Google: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.18v3.14C3.15 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.62H1.18C.43 8.12 0 9.81 0 12s.43 3.88 1.18 5.38l3.15-2.44-.06-.7z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.15 2.68 1.18 6.62l4.09 3.14c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
             };
@@ -948,6 +964,26 @@
                     setIsModalOpen(false);
                 };
 
+                var handleCloseSprint = function() {
+                    var completed = tasks.filter(function(t) { return t.status === 'concluido'; });
+                    if (completed.length === 0) {
+                        return alert("Não há tarefas na coluna 'Concluído' para arquivar.");
+                    }
+                    
+                    if (confirm("Encerrar Sprint atual?\n\nIsto limpará o quadro e arquivará " + completed.length + " tarefa(s) concluída(s).")) {
+                        var batch = db.batch();
+                        completed.forEach(function(t) {
+                            var ref = db.collection('kanban_tasks').doc(t.id);
+                            batch.update(ref, { archived: true, archivedAt: new Date().toISOString() });
+                        });
+                        batch.commit().then(function() {
+                            // Sucesso (Firebase atualiza a view em tempo real)
+                        }).catch(function(err) {
+                            alert("Erro ao arquivar: " + err.message);
+                        });
+                    }
+                };
+
                 var columns = [
                     { id: 'a_fazer', title: 'A Fazer' },
                     { id: 'em_andamento', title: 'Em Andamento' },
@@ -957,11 +993,15 @@
 
                 return (
                     <div className="p-6 md:p-10 h-full flex flex-col fade-in overflow-x-auto bg-jira-bg">
-                        <div className="flex justify-between items-end mb-6 shrink-0">
+                        <div className="flex justify-between items-center mb-6 shrink-0">
                             <div>
-                                <h2 className="text-2xl font-bold text-white">Quadro Kanban (Tarefas TI)</h2>
-                                <p className="text-jira-subtext text-sm mt-1">Gestão de demandas e chamados no estilo Jira.</p>
+                                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                    {Icons.Kanban} Quadro Kanban (Tarefas TI)
+                                </h2>
                             </div>
+                            <Button onClick={handleCloseSprint} className="bg-brand-600 hover:bg-brand-500 text-xs sm:text-sm shadow-lg shadow-brand-500/20">
+                                {Icons.Archive} Encerrar Sprint
+                            </Button>
                         </div>
 
                         <div className="flex gap-4 flex-1 pb-4 min-w-[1000px]">
@@ -1511,11 +1551,11 @@
                     });
 
                     var unsubKanban = db.collection('kanban_tasks').onSnapshot(function(snap) {
-                        if (snap.empty) {
-                            // Empty by default
-                        } else {
+                        if (!snap.empty) {
                             var list = snap.docs.map(function(doc) {
                                 return Object.assign({ id: doc.id }, doc.data());
+                            }).filter(function(t) { 
+                                return t.archived !== true; 
                             });
                             list.sort(function(a, b) { 
                                 var valA = a.order !== undefined ? a.order : new Date(a.createdAt).getTime();
