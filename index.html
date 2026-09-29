@@ -1552,7 +1552,7 @@
                         if (ALLOWED_GMAILS.indexOf(email) !== -1) {
                             onLogin({
                                 id: user.uid,
-                                name: (user.displayName || email.split('@')[0]).toUpperCase(),
+                                name: (email === 'cobrechkti@gmail.com' ? 'PAULO' : (user.displayName || email.split('@')[0])).toUpperCase(),
                                 email: email
                             });
                         } else {
@@ -1650,7 +1650,7 @@
                             if (ALLOWED_GMAILS.indexOf(email) !== -1) {
                                 var sessionUser = {
                                     id: user.uid,
-                                    name: (user.displayName || email.split('@')[0]).toUpperCase(),
+                                    name: (email === 'cobrechkti@gmail.com' ? 'PAULO' : (user.displayName || email.split('@')[0])).toUpperCase(),
                                     email: email
                                 };
                                 setCurrentUser(sessionUser);
