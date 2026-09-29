@@ -24,7 +24,6 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Script para Habilitar PWA em Arquivo Único (Manifest e Service Worker injetados via Blob) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -1423,6 +1422,15 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Coluna Inicial</label>
+                                            <select value={form.status} onChange={function(e) { setForm(Object.assign({}, form, { status: e.target.value })); }} className="w-full h-10 px-3 bg-jira-card border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                                                <option value="a_fazer">A Fazer</option>
+                                                <option value="em_andamento">Em Andamento</option>
+                                                <option value="impedimentos">Impedimentos</option>
+                                                <option value="concluido">Concluído</option>
+                                            </select>
+                                        </div>
                                         <div className="pt-2 flex justify-end gap-2">
                                             <Button type="button" variant="secondary" onClick={function() { setIsModalOpen(false); }} className="bg-transparent border-none text-slate-400 hover:bg-slate-800">Cancelar</Button>
                                             <Button type="submit" className="bg-brand-600 hover:bg-brand-500">Criar</Button>
@@ -1785,6 +1793,48 @@
                     col3: "3. SEGURANÇA E ENDPOINTS"
                 });
                 var globalTitulos = titlesState[0], setGlobalTitulos = titlesState[1];
+
+                // EFETUA A VERIFICAÇÃO AUTOMÁTICA DE CRIAÇÃO DO CHECKLIST (SEG A SEX, A PARTIR DAS 07:50)
+                useEffect(function() {
+                    if (!currentUser) return;
+
+                    var checkAndCreateDaily = function() {
+                        var now = new Date();
+                        var dayOfWeek = now.getDay(); // 0 = Dom, 1 = Seg... 5 = Sex
+                        var hour = now.getHours();
+                        var minutes = now.getMinutes();
+
+                        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                            if (hour > 7 || (hour === 7 && minutes >= 50)) {
+                                var todayStr = now.toISOString().split('T')[0];
+                                var dailyRef = db.collection('settings').doc('lastDailyChecklist');
+                                
+                                db.runTransaction(function(transaction) {
+                                    return transaction.get(dailyRef).then(function(doc) {
+                                        if (!doc.exists || doc.data().date !== todayStr) {
+                                            var seq = Math.floor(1000 + Math.random() * 9000);
+                                            var newTicket = {
+                                                visualId: 'D-' + seq,
+                                                type: 'diario',
+                                                data: getTemplate('diario', '', globalTitulos),
+                                                createdAt: now.toISOString()
+                                            };
+                                            var ticketRef = db.collection('tickets').doc();
+                                            transaction.set(ticketRef, newTicket);
+                                            transaction.set(dailyRef, { date: todayStr });
+                                        }
+                                    });
+                                }).catch(function(e) { 
+                                    console.error("Erro na geração automática:", e); 
+                                });
+                            }
+                        }
+                    };
+
+                    checkAndCreateDaily();
+                    var interval = setInterval(checkAndCreateDaily, 60000); // Valida a cada 1 minuto enquanto o app estiver aberto
+                    return function() { clearInterval(interval); };
+                }, [currentUser, globalTitulos]);
 
                 useEffect(function() {
                     try {
