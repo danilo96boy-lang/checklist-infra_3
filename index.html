@@ -18,8 +18,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <!-- Adicionado o Firebase Storage para upload de arquivos -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     
     <!-- Biblioteca Chart.js para o Dashboard Analítico -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -135,7 +133,6 @@
 
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             var db = firebase.firestore();
-            var storage = firebase.storage(); // Inicialização do Storage
             
             db.enablePersistence().catch(function(err) {
                 if (err.code == 'failed-precondition') console.warn("Múltiplas abas abertas, persistência ativada apenas na primeira.");
@@ -1177,22 +1174,58 @@
                 var handleUploadAttachment = function(e) {
                     var file = e.target.files[0];
                     if (!file || !editingTask) return;
-                    setIsUploading(true);
-                    var ref = storage.ref('kanban_attachments/' + editingTask.id + '/' + Date.now() + '_' + file.name);
-                    ref.put(file).then(function(snapshot) {
-                        return snapshot.ref.getDownloadURL();
-                    }).then(function(url) {
-                        var newAttachment = { name: file.name, url: url, uploadedAt: new Date().toISOString() };
-                        var updatedAttachments = (editingTask.attachments || []).concat([newAttachment]);
-                        var updatedTask = Object.assign({}, editingTask, { attachments: updatedAttachments });
-                        setEditingTask(updatedTask);
-                        onUpdateTask(updatedTask.id, { attachments: updatedAttachments });
-                        setIsUploading(false);
+
+                    // Limite de segurança para ficheiros normais (500KB) para não exceder o limite de 1MB do Firestore
+                    if (!file.type.startsWith('image/') && file.size > 500 * 1024) {
+                        alert("Ficheiros que não sejam imagens devem ter no máximo 500KB.");
                         e.target.value = '';
-                    }).catch(function(err) {
-                        alert("Erro ao enviar anexo: " + err.message);
-                        setIsUploading(false);
-                    });
+                        return;
+                    }
+
+                    setIsUploading(true);
+                    var reader = new FileReader();
+
+                    reader.onload = function(event) {
+                        var dataUrl = event.target.result;
+
+                        var saveToFirestore = function(finalDataUrl) {
+                            var newAttachment = { name: file.name, url: finalDataUrl, uploadedAt: new Date().toISOString() };
+                            var updatedAttachments = (editingTask.attachments || []).concat([newAttachment]);
+                            var updatedTask = Object.assign({}, editingTask, { attachments: updatedAttachments });
+                            
+                            setEditingTask(updatedTask);
+                            onUpdateTask(updatedTask.id, { attachments: updatedAttachments });
+                            setIsUploading(false);
+                            e.target.value = '';
+                        };
+
+                        // Se for uma imagem, aplica compressão automática usando Canvas
+                        if (file.type.startsWith('image/')) {
+                            var img = new Image();
+                            img.onload = function() {
+                                var canvas = document.createElement('canvas');
+                                var ctx = canvas.getContext('2d');
+                                
+                                // Redimensiona imagens grandes para um máximo de 1024px de largura
+                                var maxWidth = 1024;
+                                var scaleSize = img.width > maxWidth ? (maxWidth / img.width) : 1;
+                                canvas.width = img.width * scaleSize;
+                                canvas.height = img.height * scaleSize;
+                                
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                
+                                // Converte para JPEG com 60% de qualidade para poupar espaço
+                                var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                                saveToFirestore(compressedDataUrl);
+                            };
+                            img.src = dataUrl;
+                        } else {
+                            // Se for PDF, TXT, etc., guarda o ficheiro diretamente
+                            saveToFirestore(dataUrl);
+                        }
+                    };
+                    
+                    reader.readAsDataURL(file);
                 };
 
                 var handleRemoveAttachment = function(index) {
@@ -1554,7 +1587,7 @@
                                                 {(editingTask.attachments || []).map(function(att, idx) {
                                                     return (
                                                         <div key={idx} className="flex justify-between items-center bg-[#161A1D] border border-slate-800 p-2.5 rounded-lg group">
-                                                            <a href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-brand-400 hover:text-brand-300 text-xs truncate max-w-[85%] uppercase font-semibold">
+                                                            <a href={att.url} download={att.name} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-brand-400 hover:text-brand-300 text-xs truncate max-w-[85%] uppercase font-semibold">
                                                                 {Icons.File} <span className="truncate">{att.name}</span>
                                                             </a>
                                                             <button type="button" onClick={function() { handleRemoveAttachment(idx); }} className="text-slate-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
