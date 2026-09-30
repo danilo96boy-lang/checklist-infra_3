@@ -18,6 +18,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Adicionado o Firebase Storage para upload de arquivos -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     
     <!-- Biblioteca Chart.js para o Dashboard Analítico -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -133,6 +135,7 @@
 
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             var db = firebase.firestore();
+            var storage = firebase.storage(); // Inicialização do Storage
             
             db.enablePersistence().catch(function(err) {
                 if (err.code == 'failed-precondition') console.warn("Múltiplas abas abertas, persistência ativada apenas na primeira.");
@@ -188,7 +191,9 @@
                 Google: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.18v3.14C3.15 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.62H1.18C.43 8.12 0 9.81 0 12s.43 3.88 1.18 5.38l3.15-2.44-.06-.7z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.15 2.68 1.18 6.62l4.09 3.14c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>,
                 BarChart: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>,
                 Clock: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>,
-                Tag: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                Tag: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>,
+                Paperclip: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>,
+                File: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             };
 
             var getTemplate = function(type, tecnicoName, customTitulos) {
@@ -1118,6 +1123,9 @@
                 var commentState = useState('');
                 var newComment = commentState[0], setNewComment = commentState[1];
 
+                var isUploadState = useState(false);
+                var isUploading = isUploadState[0], setIsUploading = isUploadState[1];
+
                 var handleDropOnCol = function(e, colId) {
                     e.preventDefault();
                     var draggedId = e.dataTransfer.getData('taskId');
@@ -1140,6 +1148,7 @@
                         dueDate: form.dueDate,
                         tag: form.tag,
                         comments: [],
+                        attachments: [],
                         createdAt: new Date().toISOString()
                     };
                     onSaveTask(newTask);
@@ -1163,6 +1172,36 @@
                             alert("Erro ao arquivar: " + err.message);
                         });
                     }
+                };
+
+                var handleUploadAttachment = function(e) {
+                    var file = e.target.files[0];
+                    if (!file || !editingTask) return;
+                    setIsUploading(true);
+                    var ref = storage.ref('kanban_attachments/' + editingTask.id + '/' + Date.now() + '_' + file.name);
+                    ref.put(file).then(function(snapshot) {
+                        return snapshot.ref.getDownloadURL();
+                    }).then(function(url) {
+                        var newAttachment = { name: file.name, url: url, uploadedAt: new Date().toISOString() };
+                        var updatedAttachments = (editingTask.attachments || []).concat([newAttachment]);
+                        var updatedTask = Object.assign({}, editingTask, { attachments: updatedAttachments });
+                        setEditingTask(updatedTask);
+                        onUpdateTask(updatedTask.id, { attachments: updatedAttachments });
+                        setIsUploading(false);
+                        e.target.value = '';
+                    }).catch(function(err) {
+                        alert("Erro ao enviar anexo: " + err.message);
+                        setIsUploading(false);
+                    });
+                };
+
+                var handleRemoveAttachment = function(index) {
+                    if (!confirm("Remover este anexo?")) return;
+                    var updatedAttachments = [].concat(editingTask.attachments || []);
+                    updatedAttachments.splice(index, 1);
+                    var updatedTask = Object.assign({}, editingTask, { attachments: updatedAttachments });
+                    setEditingTask(updatedTask);
+                    onUpdateTask(updatedTask.id, { attachments: updatedAttachments });
                 };
 
                 var columns = [
@@ -1249,6 +1288,7 @@
                                                 }
                                                 
                                                 var commentCount = task.comments ? task.comments.length : 0;
+                                                var attachmentCount = task.attachments ? task.attachments.length : 0;
                                                 var tagClass = tagColors[task.tag] || 'bg-slate-700 text-slate-300';
                                                 
                                                 return (
@@ -1300,6 +1340,12 @@
                                                                     <div className="flex items-center gap-1 text-slate-500 ml-1" title="Comentários">
                                                                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                                                                         <span className="text-[10px] font-bold">{commentCount}</span>
+                                                                    </div>
+                                                                )}
+                                                                {attachmentCount > 0 && (
+                                                                    <div className="flex items-center gap-1 text-slate-500 ml-2" title="Anexos">
+                                                                        {Icons.Paperclip}
+                                                                        <span className="text-[10px] font-bold">{attachmentCount}</span>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -1501,7 +1547,35 @@
                                             </div>
                                         </div>
 
-                                        <div className="border-t border-slate-800 pt-6">
+                                        {/* ANEXOS DO KANBAN */}
+                                        <div className="border-t border-slate-800 pt-6 mt-4">
+                                            <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">{Icons.Paperclip} Anexos</h4>
+                                            <div className="space-y-2 mb-4">
+                                                {(editingTask.attachments || []).map(function(att, idx) {
+                                                    return (
+                                                        <div key={idx} className="flex justify-between items-center bg-[#161A1D] border border-slate-800 p-2.5 rounded-lg group">
+                                                            <a href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-brand-400 hover:text-brand-300 text-xs truncate max-w-[85%] uppercase font-semibold">
+                                                                {Icons.File} <span className="truncate">{att.name}</span>
+                                                            </a>
+                                                            <button type="button" onClick={function() { handleRemoveAttachment(idx); }} className="text-slate-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                {Icons.Trash}
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                                {(!editingTask.attachments || editingTask.attachments.length === 0) && (
+                                                    <div className="text-center p-4 text-xs text-slate-500 italic bg-[#161A1D] rounded-lg">Nenhum anexo adicionado.</div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <input type="file" id="upload-attachment" className="hidden" onChange={handleUploadAttachment} />
+                                                <Button type="button" onClick={function() { document.getElementById('upload-attachment').click(); }} disabled={isUploading} variant="secondary" className="w-full sm:w-auto text-xs bg-[#22272B] border-slate-700 text-slate-300 hover:bg-slate-700">
+                                                    {isUploading ? 'Enviando aguarde...' : '+ Adicionar Arquivo'}
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        <div className="border-t border-slate-800 pt-6 mt-4">
                                             <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">{Icons.BookOpen} Comentários e Atividade</h4>
                                             
                                             <div className="space-y-3 mb-5">
@@ -1555,7 +1629,8 @@
                                                 assignee: editingTask.assignee,
                                                 priority: editingTask.priority,
                                                 dueDate: editingTask.dueDate,
-                                                tag: editingTask.tag
+                                                tag: editingTask.tag,
+                                                attachments: editingTask.attachments || []
                                             };
                                             onUpdateTask(editingTask.id, updates);
                                             setEditingTask(null);
@@ -1794,13 +1869,12 @@
                 });
                 var globalTitulos = titlesState[0], setGlobalTitulos = titlesState[1];
 
-                // EFETUA A VERIFICAÇÃO AUTOMÁTICA DE CRIAÇÃO DO CHECKLIST (SEG A SEX, A PARTIR DAS 07:50)
                 useEffect(function() {
                     if (!currentUser) return;
 
                     var checkAndCreateDaily = function() {
                         var now = new Date();
-                        var dayOfWeek = now.getDay(); // 0 = Dom, 1 = Seg... 5 = Sex
+                        var dayOfWeek = now.getDay();
                         var hour = now.getHours();
                         var minutes = now.getMinutes();
 
@@ -1832,7 +1906,7 @@
                     };
 
                     checkAndCreateDaily();
-                    var interval = setInterval(checkAndCreateDaily, 60000); // Valida a cada 1 minuto enquanto o app estiver aberto
+                    var interval = setInterval(checkAndCreateDaily, 60000);
                     return function() { clearInterval(interval); };
                 }, [currentUser, globalTitulos]);
 
@@ -2223,7 +2297,6 @@
                 return (
                     <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
                         
-                        {/* Overlay do Menu Mobile */}
                         {isMobileMenuOpen && (
                             <div className="fixed inset-0 bg-black/60 z-40 md:hidden fade-in" onClick={function(){ setIsMobileMenuOpen(false); }}></div>
                         )}
