@@ -1139,7 +1139,7 @@
                         code: 'SCRUM-' + seq,
                         title: form.title.trim().toUpperCase(),
                         description: '',
-                        assignee: form.assignee,
+                        assignee: form.assignee.toUpperCase(),
                         priority: form.priority,
                         status: form.status,
                         dueDate: form.dueDate,
@@ -1482,10 +1482,7 @@
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Responsável</label>
-                                                <select value={form.assignee} onChange={function(e) { setForm(Object.assign({}, form, { assignee: e.target.value })); }} className="w-full h-10 px-3 bg-jira-card border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 uppercase">
-                                                    <option value="">Não Atribuído</option>
-                                                    {users.map(function(u) { return <option key={u.id} value={u.name}>{u.name}</option>; })}
-                                                </select>
+                                                <Input value={form.assignee} onChange={function(e) { setForm(Object.assign({}, form, { assignee: e.target.value.toUpperCase() })); }} placeholder="NOME DO RESPONSÁVEL" className="bg-jira-card border-slate-700 text-white uppercase text-sm" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Prioridade</label>
@@ -1567,14 +1564,12 @@
                                             <div className="grid grid-cols-1 gap-4">
                                                 <div>
                                                     <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Responsável</label>
-                                                    <select value={editingTask.assignee || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {assignee: e.target.value})); }} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none uppercase">
-                                                        <option value="">Não Atribuído</option>
-                                                        {users.map(function(u) { return <option key={u.id} value={u.name}>{u.name}</option>; })}
-                                                        {/* Garante que se houver um responsável legado/customizado que não esteja na lista padrão, ele ainda apareça como opção para edição livre */}
-                                                        {editingTask.assignee && !users.some(function(u) { return u.name === editingTask.assignee; }) && (
-                                                            <option value={editingTask.assignee}>{editingTask.assignee}</option>
-                                                        )}
-                                                    </select>
+                                                    <Input 
+                                                        value={editingTask.assignee || ''} 
+                                                        onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {assignee: e.target.value.toUpperCase()})); }} 
+                                                        placeholder="DIGITE O NOME DO RESPONSÁVEL" 
+                                                        className="bg-[#22272B] border-slate-700 text-white uppercase text-sm" 
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
@@ -1658,7 +1653,7 @@
                                                 title: editingTask.title.toUpperCase(),
                                                 description: (editingTask.description || '').toUpperCase(),
                                                 status: editingTask.status,
-                                                assignee: editingTask.assignee,
+                                                assignee: (editingTask.assignee || '').toUpperCase(),
                                                 priority: editingTask.priority,
                                                 dueDate: editingTask.dueDate,
                                                 tag: editingTask.tag,
@@ -2269,6 +2264,7 @@
                 var handleUpdateKanbanTask = function(taskId, updates) {
                     if (updates.title) updates.title = updates.title.toUpperCase();
                     if (updates.description) updates.description = updates.description.toUpperCase();
+                    if (updates.assignee) updates.assignee = updates.assignee.toUpperCase();
                     db.collection('kanban_tasks').doc(taskId).update(updates);
                 };
 
