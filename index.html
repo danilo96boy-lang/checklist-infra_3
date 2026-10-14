@@ -43,13 +43,12 @@
                 const manifestUrl = URL.createObjectURL(manifestBlob);
                 document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestUrl}">`);
 
-                const swCode = `
-                    self.addEventListener('install', e => self.skipWaiting());
-                    self.addEventListener('activate', e => self.clients.claim());
-                    self.addEventListener('fetch', e => {});
-                `;
-                
-                // CORREÇÃO: Registro do SW desativado para evitar erro de protocolo Blob na Vercel
+                // Registro via Blob comentado para evitar erro de protocolo na Vercel/Chrome:
+                // const swCode = `
+                //     self.addEventListener('install', e => self.skipWaiting());
+                //     self.addEventListener('activate', e => self.clients.claim());
+                //     self.addEventListener('fetch', e => {});
+                // `;
                 // const swBlob = new Blob([swCode], {type: 'application/javascript'});
                 // const swUrl = URL.createObjectURL(swBlob);
                 // navigator.serviceWorker.register(swUrl).catch(console.error);
@@ -1235,7 +1234,7 @@
                                                     </td>
                                                     <td className="px-6 py-3 font-medium text-slate-800 dark:text-white uppercase">{h.ativo || 'N/A'}</td>
                                                     <td className="px-6 py-3 text-slate-600 dark:text-slate-400 uppercase">{h.type === 'diario' ? 'EQUIPE' : (h.tecnico || 'N/A')}</td>
-                                                    <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:textemerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
+                                                    <td className="px-6 py-3 text-right"><span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">Concluído</span></td>
                                                 </tr>
                                             );
                                         })}
