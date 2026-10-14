@@ -43,15 +43,14 @@
                 const manifestUrl = URL.createObjectURL(manifestBlob);
                 document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestUrl}">`);
 
-                // Registro via Blob comentado para evitar erro de protocolo na Vercel/Chrome:
-                // const swCode = `
-                //     self.addEventListener('install', e => self.skipWaiting());
-                //     self.addEventListener('activate', e => self.clients.claim());
-                //     self.addEventListener('fetch', e => {});
-                // `;
-                // const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                // const swUrl = URL.createObjectURL(swBlob);
-                // navigator.serviceWorker.register(swUrl).catch(console.error);
+                const swCode = `
+                    self.addEventListener('install', e => self.skipWaiting());
+                    self.addEventListener('activate', e => self.clients.claim());
+                    self.addEventListener('fetch', e => {});
+                `;
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                const swUrl = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swUrl).catch(console.error);
             });
         }
     </script>
@@ -190,8 +189,7 @@
                 Clock: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>,
                 Tag: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>,
                 Paperclip: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>,
-                File: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
-                Monitor: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                File: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             };
 
             var getTemplate = function(type, tecnicoName, customTitulos) {
@@ -230,7 +228,7 @@
                                 { id: 'f_r_7', label: 'COLOCAR NO DOMÍNIO', checked: false, manual: 'SOBRE > CONFIGURAÇÃO AVANÇADA > NOME DE COMPUTADOR > ALTERAR > DOMÍNIO: INSERIR O DOMÍNIO CORPORATIVO PADRÃO DA REDE.', copyText: null },
                                 { id: 'f_r_8', label: 'CONFIGURAR PROXY (PRIMEIRO IP, DEPOIS DNS)', checked: false, manual: 'ABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nINSERIR IP E PORTA DO PROXY PADRÃO DA REDE.', copyText: null },
                                 { id: 'f_r_9', label: 'CONFIGURAÇÃO DE ENERGIA', checked: false, manual: 'ENERGIA E SUSPENSÃO: NUNCA EM TUDO.' },
-                                { id: 'f_r_10', label: 'CONFIGURAR (HOSTS)', checked: false, manual: 'EDITAR O ARQUIVO DE HOSTS DO WINDOWS EM: C:\\WINDOWS\\SYSTEM32\\DRIVERS\\ETC\\HOSTS PARA ADICIONAR APONTAMENTOS MANUAIS NECESSÁRIOS DE SISTEMAS INTERNOS.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
+                                { id: 'f_r_10', label: 'CONFIGURAR (HOSTS)', checked: false, manual: 'EDITAR O ARQUIVO DE HOSTS DO WINDOWS EM: C:\WINDOWS\SYSTEM32\DRIVERS\ETC\HOSTS PARA ADICIONAR APONTAMENTOS MANUAIS NECESSÁRIOS DE SISTEMAS INTERNOS.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
                                 { id: 'f_r_11', label: 'ATUALIZAR DRIVERS NO SITE DO FABRICANTE', checked: false, manual: 'ABRIR O GERENCIADOR DE DISPOSITIVOS E GARANTIR A INSTALAÇÃO DE TODOS OS DRIVERS DE CHIPSET, ÁUDIO, REDE GIGABIT E PLACA GRÁFICA OFICIAL.', copyText: 'devmgmt.msc' },
                                 { id: 'f_r_12', label: 'INSTALAR PROGRAMAS PADRÕES DE FORMATAÇÃO', checked: false, manual: 'ACESSAR O DIRETÓRIO DE REDE DE MANUTENÇÃO E EXECUTAR OS SCRIPTS E INSTALADORES PADRÕES DE FORMATAÇÃO DO DEPARTAMENTO DE TI.', copyText: null },
                                 { id: 'f_r_13', label: 'ATIVAR ESET E SUAS ATUALIZAÇÕES', checked: false },
@@ -850,160 +848,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                );
-            };
-
-            var CadastroMaquinasView = function(props) {
-                var db = props.db;
-                var Icons = props.Icons;
-                var [maquinas, setMaquinas] = useState([]);
-                var [form, setForm] = useState({ nome: '', mac: '' });
-                var [zplCode, setZplCode] = useState(null);
-
-                useEffect(function() {
-                    var unsub = db.collection('computadores').orderBy('createdAt', 'desc').onSnapshot(function(snap) {
-                        setMaquinas(snap.docs.map(function(doc) {
-                            return Object.assign({ id: doc.id }, doc.data());
-                        }));
-                    });
-                    return function() { unsub(); };
-                }, [db]);
-
-                var handleSave = function(e) {
-                    e.preventDefault();
-                    if (!form.nome || !form.mac) return alert("Preencha Nome e MAC da máquina.");
-                    db.collection('computadores').add({
-                        nome: form.nome.toUpperCase().trim(),
-                        mac: form.mac.toUpperCase().trim(),
-                        createdAt: new Date().toISOString()
-                    }).then(function() {
-                        setForm({ nome: '', mac: '' });
-                    });
-                };
-
-                var handleDelete = function(id) {
-                    if(confirm("Remover o cadastro desta máquina?")) db.collection('computadores').doc(id).delete();
-                };
-
-                var generateZPL = function(maq) {
-                    var qr = "NOME:" + maq.nome + " MAC:" + maq.mac;
-                    // Fita de 10cm(larg) x 2cm(alt), 3 etiquetas lado a lado.
-                    // Resolução 203dpi = 800 dots (X) x 160 dots (Y).
-                    // As origens X de cada coluna: ~10, ~276, ~542
-                    var code = "^XA\n^PW800\n^LL160\n^PON\n" +
-                    "^FO10,15^BQN,2,3^FDQA," + qr + "^FS\n" +
-                    "^FO100,20^A0N,22,22^FDCOBRECOM^FS\n" +
-                    "^FO100,50^A0N,20,20^FD" + maq.nome + "^FS\n" +
-                    "^FO100,80^A0N,18,18^FD" + maq.mac + "^FS\n\n" +
-                    "^FO276,15^BQN,2,3^FDQA," + qr + "^FS\n" +
-                    "^FO366,20^A0N,22,22^FDCOBRECOM^FS\n" +
-                    "^FO366,50^A0N,20,20^FD" + maq.nome + "^FS\n" +
-                    "^FO366,80^A0N,18,18^FD" + maq.mac + "^FS\n\n" +
-                    "^FO542,15^BQN,2,3^FDQA," + qr + "^FS\n" +
-                    "^FO632,20^A0N,22,22^FDCOBRECOM^FS\n" +
-                    "^FO632,50^A0N,20,20^FD" + maq.nome + "^FS\n" +
-                    "^FO632,80^A0N,18,18^FD" + maq.mac + "^FS\n" +
-                    "^XZ";
-                    setZplCode({ code: code, nome: maq.nome });
-                };
-
-                var copyZpl = function() {
-                    navigator.clipboard.writeText(zplCode.code);
-                    alert("ZPL Copiado! Cole no Bloco de Notas ou envie via Zebra Browser Print/Setup Utilities.");
-                };
-
-                var downloadZpl = function() {
-                    var blob = new Blob([zplCode.code], { type: "text/plain" });
-                    var url = URL.createObjectURL(blob);
-                    var a = document.createElement("a");
-                    a.href = url;
-                    a.download = zplCode.nome.replace(/\s+/g, '_') + "_etiqueta.zpl";
-                    a.click();
-                    URL.revokeObjectURL(url);
-                };
-
-                return (
-                    <div className="p-4 md:p-10 h-full flex flex-col fade-in overflow-auto">
-                        <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                {Icons.Monitor} Cadastro de Máquinas
-                            </h2>
-                            <p className="text-slate-500 text-sm mt-1">Gerencie computadores e imprima etiquetas patrimoniais na Zebra ZD220.</p>
-                        </div>
-
-                        <Card className="mb-8" noPadding>
-                            <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-                                <h3 className="font-bold text-slate-700 dark:text-slate-200">Novo Cadastro</h3>
-                            </div>
-                            <form onSubmit={handleSave} className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Nome da Máquina</label>
-                                    <Input placeholder="EX: CORP-PC-01" value={form.nome} onChange={function(e){ setForm(Object.assign({}, form, {nome: e.target.value})); }} className="uppercase font-mono" />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Endereço MAC</label>
-                                    <Input placeholder="EX: 1A:2B:3C:4D:5E:6F" value={form.mac} onChange={function(e){ setForm(Object.assign({}, form, {mac: e.target.value})); }} className="uppercase font-mono" />
-                                </div>
-                                <Button type="submit" className="h-10">{Icons.Plus} Adicionar Máquina</Button>
-                            </form>
-                        </Card>
-
-                        <Card className="flex-1 overflow-hidden flex flex-col" noPadding>
-                            <div className="overflow-x-auto flex-1">
-                                <table className="w-full text-sm text-left min-w-[600px]">
-                                    <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-500 uppercase sticky top-0 border-b border-slate-200 dark:border-slate-700">
-                                        <tr>
-                                            <th className="px-6 py-3">Nome da Máquina</th>
-                                            <th className="px-6 py-3">Endereço MAC</th>
-                                            <th className="px-6 py-3">Data Registro</th>
-                                            <th className="px-6 py-3 text-right">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                        {maquinas.map(function(m) {
-                                            return (
-                                                <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                                    <td className="px-6 py-3 font-bold text-slate-800 dark:text-white uppercase">{m.nome}</td>
-                                                    <td className="px-6 py-3 font-mono text-slate-500 uppercase">{m.mac}</td>
-                                                    <td className="px-6 py-3 text-slate-500">{new Date(m.createdAt).toLocaleDateString()}</td>
-                                                    <td className="px-6 py-3 text-right flex justify-end gap-2">
-                                                        <Button variant="secondary" onClick={function(){ generateZPL(m); }} className="text-xs py-1.5 px-3 border-brand-200 dark:border-brand-900/30 text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 shadow-none">{Icons.Printer} Etiqueta</Button>
-                                                        <button onClick={function(){ handleDelete(m.id); }} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">{Icons.Trash}</button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                        {maquinas.length === 0 && <tr><td colSpan="4" className="text-center py-8 text-slate-400">Nenhuma máquina cadastrada.</td></tr>}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </Card>
-
-                        {zplCode && (
-                            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
-                                <Card className="w-full max-w-2xl bg-white dark:bg-slate-900 border-slate-700 flex flex-col shadow-2xl" noPadding>
-                                    <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-                                        <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">{Icons.Printer} Impressão ZD220 - {zplCode.nome}</h3>
-                                        <button onClick={function() { setZplCode(null); }} className="text-2xl leading-none text-slate-400 hover:text-slate-600 dark:hover:text-white">&times;</button>
-                                    </div>
-                                    <div className="p-6 space-y-4">
-                                        <div className="p-4 bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-900/30 rounded-lg text-xs text-brand-800 dark:text-brand-300">
-                                            <p>Este código está formatado matematicamente para <strong>Zebra ZD220 (203 DPI)</strong> usando o rolo de <strong>10x2cm (3 colunas/carreiras)</strong>. QR Code contendo Nome e MAC + texto legível inclusos em cada uma das 3 etiquetas da linha.</p>
-                                        </div>
-                                        <div className="relative">
-                                            <pre className="w-full h-48 overflow-auto p-4 bg-slate-100 dark:bg-black border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-mono text-slate-700 dark:text-green-400">
-                                                {zplCode.code}
-                                            </pre>
-                                        </div>
-                                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                                            <Button onClick={copyZpl} className="flex-1 bg-brand-600 hover:bg-brand-500">{Icons.Copy} Copiar Código ZPL</Button>
-                                            <Button onClick={downloadZpl} variant="secondary" className="flex-1 text-slate-700">{Icons.File} Baixar Arquivo .zpl</Button>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </div>
-                        )}
                     </div>
                 );
             };
@@ -1830,6 +1674,844 @@
                                 </Card>
                             </div>
                         )}
+                    </div>
+                );
+            };
+
+            var ConfigModal = function(props) {
+                var onClose = props.onClose;
+                var users = props.users || [];
+                var currentUser = props.currentUser;
+                
+                var globalTitulos = props.globalTitulos || {col1: '', col2: '', col3: ''};
+                var titulosState = useState(globalTitulos);
+                var titulos = titulosState[0], setTitulos = titulosState[1];
+
+                var userState = useState({ id: '', name: '', pass: '' });
+                var newUser = userState[0], setNewUser = userState[1];
+                var filterState = useState('');
+                var filter = filterState[0], setFilter = filterState[1];
+                var savingState = useState(false);
+                var saving = savingState[0], setSaving = savingState[1];
+
+                var handleAddUser = function(e) {
+                    e.preventDefault();
+                    var cleanId = (newUser.id || '').trim();
+                    var cleanName = (newUser.name || '').trim().toUpperCase();
+                    if (!cleanId || !cleanName) return alert("Preencha a Matrícula e o Nome.");
+                    if (users.some(function(u) { return (u.id || '').toLowerCase() === cleanId.toLowerCase(); })) {
+                        return alert("Matrícula já cadastrada.");
+                    }
+
+                    setSaving(true);
+                    db.collection('users').add({ id: cleanId, name: cleanName })
+                        .then(function() { setNewUser({ id: '', name: '', pass: '' }); })
+                        .catch(function(err) { alert("Erro: " + err.message); })
+                        .finally(function() { setSaving(false); });
+                };
+
+                var handleDeleteUser = function(user) {
+                    if (currentUser && user.id === currentUser.id) return alert("Você não pode remover seu próprio usuário.");
+                    if (confirm("Remover técnico " + user.name + "?")) {
+                        db.collection('users').doc(user.docId).delete();
+                    }
+                };
+                
+                var handleSaveTitulos = function(e) {
+                    e.preventDefault();
+                    setSaving(true);
+                    var formattedTitulos = {
+                        col1: (titulos.col1 || '').toUpperCase(),
+                        col2: (titulos.col2 || '').toUpperCase(),
+                        col3: (titulos.col3 || '').toUpperCase()
+                    };
+                    db.collection('settings').doc('titulos').set(formattedTitulos)
+                        .then(function() { alert("Títulos atualizados com sucesso!"); })
+                        .catch(function(err) { alert("Erro ao atualizar: " + err.message); })
+                        .finally(function() { setSaving(false); });
+                };
+
+                var list = users.filter(function(u) {
+                    return (u.name || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1 ||
+                           (u.id || '').toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+                });
+
+                return (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm fade-in">
+                        <Card className="w-full max-w-2xl max-h-[95vh] md:max-h-[85vh] flex flex-col overflow-hidden" noPadding>
+                            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                                <h2 className="font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200">{Icons.Settings} Configurações</h2>
+                                <button onClick={onClose} className="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                            </div>
+                            <div className="p-4 md:p-6 overflow-y-auto">
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Novo Técnico</h3>
+                                        <form onSubmit={handleAddUser} className="space-y-3">
+                                            <Input placeholder="Matrícula / ID" value={newUser.id} onChange={function(e) { setNewUser(Object.assign({}, newUser, { id: e.target.value })); }} />
+                                            <Input placeholder="Nome Completo" value={newUser.name} onChange={function(e) { setNewUser(Object.assign({}, newUser, { name: e.target.value.toUpperCase() })); }} className="uppercase" />
+                                            <Button type="submit" disabled={saving} className="w-full">{Icons.Plus} Cadastrar</Button>
+                                        </form>
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h3 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Técnicos Habilitados</h3>
+                                            <input placeholder="Buscar..." value={filter} onChange={function(e) { setFilter(e.target.value); }} className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 outline-none w-24 md:w-28 uppercase" />
+                                        </div>
+                                        <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                                            {list.map(function(u) {
+                                                var isMe = currentUser && u.id === currentUser.id;
+                                                return (
+                                                    <div key={u.docId || u.id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
+                                                        <div>
+                                                            <div className="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase">{u.name}</div>
+                                                            <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
+                                                        </div>
+                                                        {!isMe && (
+                                                            <button onClick={function() { handleDeleteUser(u); }} className="text-slate-400 hover:text-red-500 transition-colors p-1">{Icons.Trash}</button>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="border-t border-slate-100 dark:border-slate-800 pt-6 mt-6">
+                                    <h3 className="text-xs font-bold uppercase text-slate-500 mb-4 tracking-wider">Títulos Padrão (Check Diário)</h3>
+                                    <form onSubmit={handleSaveTitulos} className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 1</label>
+                                                <Input value={titulos.col1 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col1: e.target.value.toUpperCase()})); }} className="uppercase" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 2</label>
+                                                <Input value={titulos.col2 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col2: e.target.value.toUpperCase()})); }} className="uppercase" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 ml-1">Coluna 3</label>
+                                                <Input value={titulos.col3 || ''} onChange={function(e){ setTitulos(Object.assign({}, titulos, {col3: e.target.value.toUpperCase()})); }} className="uppercase" />
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <Button type="submit" disabled={saving}>{Icons.Check} Salvar Títulos Globais</Button>
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                            </div>
+                        </Card>
+                    </div>
+                );
+            };
+
+            var LoginScreen = function(props) {
+                var onLogin = props.onLogin;
+                var errState = useState('');
+                var error = errState[0], setError = errState[1];
+
+                var handleGoogleLogin = function() {
+                    var provider = new firebase.auth.GoogleAuthProvider();
+                    auth.signInWithPopup(provider).then(function(result) {
+                        var user = result.user;
+                        var email = (user.email || '').toLowerCase();
+                        
+                        if (ALLOWED_GMAILS.indexOf(email) !== -1) {
+                            onLogin({
+                                id: user.uid,
+                                name: (email === 'cobrechkti@gmail.com' ? 'PAULO' : (user.displayName || email.split('@')[0])).toUpperCase(),
+                                email: email
+                            });
+                        } else {
+                            auth.signOut();
+                            setError('Acesso negado. Esta conta do Google não está autorizada.');
+                        }
+                    }).catch(function(err) {
+                        setError('Erro no login com Google: ' + err.message);
+                    });
+                };
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 p-4">
+                        <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden fade-in">
+                            <div className="p-8 pb-6 text-center border-b border-slate-100 dark:border-slate-800">
+                                <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-brand-500/30">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                </div>
+                                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Infra Hub</h1>
+                                <p className="text-sm text-slate-500 mt-1">Gestão de Rotinas • Cobrecom</p>
+                            </div>
+                            <div className="p-8 space-y-4">
+                                {error && <div className="text-red-500 text-xs font-medium text-center bg-red-50 dark:bg-red-900/20 py-2.5 rounded-lg border border-red-200 dark:border-red-900/40">{error}</div>}
+                                <Button variant="google" onClick={handleGoogleLogin} className="w-full h-12 text-sm font-semibold flex items-center justify-center gap-3">
+                                    {Icons.Google} Entrar com Conta Google
+                                </Button>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-slate-950/50 p-4 text-center border-t border-slate-100 dark:border-slate-800">
+                                <p className="text-[10px] text-slate-400 font-mono uppercase">Acesso restrito à TI Cobrecom</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            var App = function() {
+                var isSavingDraftRef = useRef(false);
+                var draftState = useState(null);
+                var draftTicket = draftState[0], setDraftTicket = draftState[1];
+
+                var viewState = useState('login');
+                var view = viewState[0], setView = viewState[1];
+                var userState = useState(null);
+                var currentUser = userState[0], setCurrentUser = userState[1];
+                var usersState = useState(DEFAULT_TEAM);
+                var users = usersState[0], setUsers = usersState[1];
+                var ticketsState = useState([]);
+                var activeTickets = ticketsState[0], setActiveTickets = ticketsState[1];
+                var historyState = useState([]);
+                var history = historyState[0], setHistory = historyState[1];
+                var kanbanState = useState([]);
+                var kanbanTasks = kanbanState[0], setKanbanTasks = kanbanState[1];
+                var logoState = useState('');
+                var logo = logoState[0], setLogo = logoState[1];
+                var curTicketState = useState(null);
+                var currentTicketId = curTicketState[0], setCurrentTicketId = curTicketState[1];
+                var darkState = useState(true);
+                var darkMode = darkState[0], setDarkMode = darkState[1];
+                
+                var cfgState = useState(false);
+                var showConfig = cfgState[0], setShowConfig = cfgState[1];
+                
+                var openFoldersState = useState({ checklists: false });
+                var openFolders = openFoldersState[0], setOpenFolders = openFoldersState[1];
+
+                var customFoldersState = useState([]);
+                var customFolders = customFoldersState[0], setCustomFolders = customFoldersState[1];
+
+                var selectedHistState = useState(null);
+                var selectedHistoryTicket = selectedHistState[0], setSelectedHistoryTicket = selectedHistState[1];
+                
+                var fileInputRef = useRef(null);
+                
+                var mobileMenuState = useState(false);
+                var isMobileMenuOpen = mobileMenuState[0], setIsMobileMenuOpen = mobileMenuState[1];
+
+                var titlesState = useState({
+                    col1: "1. FÍSICO E ACESSOS",
+                    col2: "2. DADOS E CONECTIVIDADE",
+                    col3: "3. SEGURANÇA E ENDPOINTS"
+                });
+                var globalTitulos = titlesState[0], setGlobalTitulos = titlesState[1];
+
+                useEffect(function() {
+                    if (!currentUser) return;
+
+                    var checkAndCreateDaily = function() {
+                        var now = new Date();
+                        var dayOfWeek = now.getDay();
+                        var hour = now.getHours();
+                        var minutes = now.getMinutes();
+
+                        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                            if (hour > 7 || (hour === 7 && minutes >= 50)) {
+                                var todayStr = now.toISOString().split('T')[0];
+                                var dailyRef = db.collection('settings').doc('lastDailyChecklist');
+                                
+                                db.runTransaction(function(transaction) {
+                                    return transaction.get(dailyRef).then(function(doc) {
+                                        if (!doc.exists || doc.data().date !== todayStr) {
+                                            var seq = Math.floor(1000 + Math.random() * 9000);
+                                            var newTicket = {
+                                                visualId: 'D-' + seq,
+                                                type: 'diario',
+                                                data: getTemplate('diario', '', globalTitulos),
+                                                createdAt: now.toISOString()
+                                            };
+                                            var ticketRef = db.collection('tickets').doc();
+                                            transaction.set(ticketRef, newTicket);
+                                            transaction.set(dailyRef, { date: todayStr });
+                                        }
+                                    });
+                                }).catch(function(e) { 
+                                    console.error("Erro na geração automática:", e); 
+                                });
+                            }
+                        }
+                    };
+
+                    checkAndCreateDaily();
+                    var interval = setInterval(checkAndCreateDaily, 60000);
+                    return function() { clearInterval(interval); };
+                }, [currentUser, globalTitulos]);
+
+                useEffect(function() {
+                    try {
+                        var savedTheme = localStorage.getItem('sa_theme'); 
+                        if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+                        var savedLogo = localStorage.getItem('sa_logo'); 
+                        if (savedLogo) setLogo(savedLogo);
+                    } catch(e) {}
+
+                    var unsubAuth = auth.onAuthStateChanged(function(user) {
+                        if (user && user.email) {
+                            var email = user.email.toLowerCase();
+                            if (ALLOWED_GMAILS.indexOf(email) !== -1) {
+                                var sessionUser = {
+                                    id: user.uid,
+                                    name: (email === 'cobrechkti@gmail.com' ? 'PAULO' : (user.displayName || email.split('@')[0])).toUpperCase(),
+                                    email: email
+                                };
+                                setCurrentUser(sessionUser);
+                                setView('dashboard');
+                            } else {
+                                auth.signOut();
+                                setView('login');
+                            }
+                        } else {
+                            setView('login');
+                        }
+                    });
+
+                    var unsubConfig = db.collection('settings').doc('titulos').onSnapshot(function(snap) {
+                        if (snap.exists) setGlobalTitulos(snap.data());
+                        else db.collection('settings').doc('titulos').set(globalTitulos);
+                    });
+
+                    var unsubFolders = db.collection('settings').doc('sidebar_modules').onSnapshot(function(snap) {
+                        if (snap.exists && snap.data() && Array.isArray(snap.data().folders)) {
+                            setCustomFolders(snap.data().folders);
+                        } else {
+                            db.collection('settings').doc('sidebar_modules').set({ folders: [] });
+                        }
+                    });
+
+                    var unsubKanban = db.collection('kanban_tasks').onSnapshot(function(snap) {
+                        if (!snap.empty) {
+                            var list = snap.docs.map(function(doc) {
+                                return Object.assign({ id: doc.id }, doc.data());
+                            });
+                            list.sort(function(a, b) { 
+                                var valA = a.order !== undefined ? a.order : new Date(a.createdAt).getTime();
+                                var valB = b.order !== undefined ? b.order : new Date(b.createdAt).getTime();
+                                return valA - valB; 
+                            });
+                            setKanbanTasks(list);
+                        }
+                    });
+
+                    var unsubTickets = db.collection('tickets').onSnapshot(function(snap) {
+                        var list = snap.docs.map(function(doc) {
+                            return Object.assign({ id: doc.id }, doc.data());
+                        }).filter(function(t) {
+                            return t && t.data && t.data.items;
+                        });
+                        list.sort(function(a,b) { return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); });
+                        setActiveTickets(list);
+                    });
+
+                    var unsubHistory = db.collection('history').orderBy('date', 'desc').onSnapshot(function(snap) {
+                        setHistory(snap.docs.map(function(doc) { return Object.assign({ id: doc.id }, doc.data()); }));
+                    });
+
+                    var unsubUsers = db.collection('users').onSnapshot(function(snap) {
+                        if (snap.empty) {
+                            DEFAULT_TEAM.forEach(function(u) { db.collection('users').add(u); });
+                        } else {
+                            setUsers(snap.docs.map(function(doc) { return Object.assign({ docId: doc.id }, doc.data()); }));
+                        }
+                    });
+
+                    return function() { unsubAuth(); unsubTickets(); unsubHistory(); unsubUsers(); unsubConfig(); unsubFolders(); unsubKanban(); };
+                }, []);
+
+                useEffect(function() { 
+                    if (darkMode) document.documentElement.classList.add('dark'); 
+                    else document.documentElement.classList.remove('dark'); 
+                    localStorage.setItem('sa_theme', JSON.stringify(darkMode)); 
+                }, [darkMode]);
+
+                var navTo = function(v) {
+                    setView(v);
+                    setIsMobileMenuOpen(false);
+                };
+
+                var handleLogin = function(user) { 
+                    setCurrentUser(user); 
+                    navTo('dashboard'); 
+                };
+
+                var handleLogout = function() { 
+                    auth.signOut().then(function() {
+                        setCurrentUser(null); 
+                        navTo('login'); 
+                    });
+                };
+
+                var toggleFolder = function(id) {
+                    var nextState = Object.assign({}, openFolders);
+                    nextState[id] = !nextState[id];
+                    setOpenFolders(nextState);
+                };
+
+                var handleAddFolder = function() {
+                    var title = prompt("NOME DA NOVA PASTA (EX: FIREWALL, ROTEADORES):");
+                    if (!title || !title.trim()) return;
+                    var newFolder = { id: 'f_' + Date.now(), title: title.trim().toUpperCase(), links: [] };
+                    var updated = customFolders.concat([newFolder]);
+                    db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                    
+                    var nextOpen = Object.assign({}, openFolders);
+                    nextOpen[newFolder.id] = true;
+                    setOpenFolders(nextOpen);
+                };
+
+                var handleDeleteFolder = function(e, folderId) {
+                    e.stopPropagation();
+                    if (confirm("DESEJA REALMENTE EXCLUIR ESTA PASTA E SEUS LINKS?")) {
+                        var updated = customFolders.filter(function(f) { return f.id !== folderId; });
+                        db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                    }
+                };
+
+                var handleAddLink = function(folderId) {
+                    var label = prompt("NOME DO ACESSO (EX: PFSENSE MATRIZ):");
+                    if (!label || !label.trim()) return;
+                    var url = prompt("ENDEREÇO IP OU URL (EX: 192.168.1.1):");
+                    if (!url || !url.trim()) return;
+
+                    var updated = customFolders.map(function(f) {
+                        if (f.id === folderId) {
+                            var existing = f.links || [];
+                            var newLink = { id: 'l_' + Date.now(), label: label.trim().toUpperCase(), url: url.trim() };
+                            return Object.assign({}, f, { links: existing.concat([newLink]) });
+                        }
+                        return f;
+                    });
+                    db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                };
+
+                var handleDeleteLink = function(e, folderId, linkId) {
+                    e.stopPropagation();
+                    if (confirm("REMOVER ESTE ACESSO?")) {
+                        var updated = customFolders.map(function(f) {
+                            if (f.id === folderId) {
+                                var filtered = (f.links || []).filter(function(l) { return l.id !== linkId; });
+                                return Object.assign({}, f, { links: filtered });
+                            }
+                            return f;
+                        });
+                        db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+                    }
+                };
+
+                var handleOpenLink = function(url) {
+                    if (!url) return;
+                    var target = url.startsWith('http://') || url.startsWith('https://') ? url : 'http://' + url;
+                    window.open(target, '_blank');
+                };
+                
+                var handleCreateTicket = function(type) {
+                    var prefix = type === 'formatacao' ? 'F' : type === 'zebra' ? 'Z' : type === 'rack' ? 'R' : 'D';
+                    var seq = Math.floor(1000 + Math.random() * 9000);
+                    var newTicket = {
+                        id: 'draft',
+                        visualId: prefix + '-' + seq,
+                        type: type,
+                        data: getTemplate(type, currentUser ? currentUser.name : '', globalTitulos),
+                        createdAt: new Date().toISOString()
+                    };
+                    setDraftTicket(newTicket);
+                    setCurrentTicketId('draft');
+                    navTo('checklist');
+                };
+
+                var handleUpdateTicket = function(newData) { 
+                    if (currentTicketId === 'draft') {
+                        var pct = calcProgress(newData.items);
+                        var updatedDraft = Object.assign({}, draftTicket, { data: newData });
+                        
+                        if (pct >= 10 && !isSavingDraftRef.current) {
+                            isSavingDraftRef.current = true;
+                            var ticketToSave = Object.assign({}, updatedDraft);
+                            delete ticketToSave.id;
+                            db.collection('tickets').add(ticketToSave).then(function(docRef) {
+                                setCurrentTicketId(docRef.id);
+                                setDraftTicket(null);
+                                isSavingDraftRef.current = false;
+                            }).catch(function() { isSavingDraftRef.current = false; });
+                        } else {
+                            setDraftTicket(updatedDraft);
+                        }
+                    } else if (currentTicketId && currentTicketId !== 'draft') {
+                        db.collection('tickets').doc(currentTicketId).update({ data: newData }); 
+                    }
+                };
+                
+                var handleBackFromChecklist = function() {
+                    if (currentTicketId === 'draft') {
+                        setDraftTicket(null);
+                        setCurrentTicketId(null);
+                    }
+                    navTo('dashboard');
+                };
+
+                var handleForceSaveChecklist = function() {
+                    if (currentTicketId === 'draft') {
+                        isSavingDraftRef.current = true;
+                        var ticketToSave = Object.assign({}, draftTicket);
+                        delete ticketToSave.id;
+                        db.collection('tickets').add(ticketToSave).then(function() {
+                            setCurrentTicketId(null);
+                            setDraftTicket(null);
+                            isSavingDraftRef.current = false;
+                            navTo('dashboard');
+                        });
+                    } else {
+                        navTo('dashboard');
+                    }
+                };
+
+                var handleRequestFinish = function() {
+                    if (currentTicketId === 'draft') {
+                        isSavingDraftRef.current = true;
+                        var ticketToSave = Object.assign({}, draftTicket);
+                        delete ticketToSave.id;
+                        db.collection('tickets').add(ticketToSave).then(function(docRef) {
+                            setCurrentTicketId(docRef.id);
+                            setDraftTicket(null);
+                            isSavingDraftRef.current = false;
+                            navTo('receipt');
+                        });
+                    } else {
+                        navTo('receipt');
+                    }
+                };
+
+                var handleGlobalTitleChange = function(colKey, newVal) {
+                    var map = { coluna1: 'col1', coluna2: 'col2', coluna3: 'col3' };
+                    var gKey = map[colKey];
+                    if (gKey) {
+                        var newTitulos = Object.assign({}, globalTitulos, { [gKey]: newVal.toUpperCase() });
+                        db.collection('settings').doc('titulos').set(newTitulos);
+                    }
+                };
+                
+                var handleArchive = function(ticket) {
+                    if (!ticket) return;
+                    var meta = (ticket.data && ticket.data.meta) || {};
+                    db.collection('history').add({ 
+                        visualId: ticket.visualId, 
+                        type: ticket.type, 
+                        date: new Date().toISOString(), 
+                        tecnico: (meta.tecnico || 'N/A').toUpperCase(), 
+                        ativo: (meta.ativo || meta.maquina || "N/A").toUpperCase(), 
+                        data: ticket.data 
+                    }).then(function() {
+                        if(ticket.id && ticket.id !== 'draft') {
+                            return db.collection('tickets').doc(ticket.id).delete();
+                        }
+                    }).then(function() {
+                        setCurrentTicketId(null);
+                        navTo('dashboard');
+                    });
+                };
+
+                var handleRevertHistory = function(historyItem) {
+                    if (!historyItem) return;
+                    if (confirm("DESEJA RETORNAR ESTE CHECKLIST PARA OS ATIVOS EM ANDAMENTO?")) {
+                        var restoredTicket = {
+                            visualId: historyItem.visualId,
+                            type: historyItem.type || 'formatacao',
+                            createdAt: historyItem.date || new Date().toISOString(),
+                            data: historyItem.data
+                        };
+                        db.collection('tickets').add(restoredTicket).then(function() {
+                            if (historyItem.id) {
+                                return db.collection('history').doc(historyItem.id).delete();
+                            }
+                        }).then(function() {
+                            setSelectedHistoryTicket(null);
+                            navTo('dashboard');
+                        });
+                    }
+                };
+                
+                var handleDeleteActive = function(e, id) { 
+                    e.stopPropagation(); 
+                    if (confirm("CANCELAR ESTE REGISTRO?")) db.collection('tickets').doc(id).delete(); 
+                };
+
+                var handleLogoUpload = function(e) { 
+                    var f = e.target.files && e.target.files[0]; 
+                    if (f) { 
+                        var r = new FileReader(); 
+                        r.onloadend = function() { 
+                            setLogo(r.result); 
+                            localStorage.setItem('sa_logo', r.result); 
+                        }; 
+                        r.readAsDataURL(f); 
+                    }
+                };
+
+                var handleSaveKanbanTask = function(task) {
+                    var maxOrder = kanbanTasks.length;
+                    db.collection('kanban_tasks').add(Object.assign({}, task, { title: task.title.toUpperCase(), order: maxOrder }));
+                };
+
+                var handleDeleteKanbanTask = function(taskId) {
+                    if (confirm("EXCLUIR ESTE CARTÃO DO KANBAN?")) {
+                        db.collection('kanban_tasks').doc(taskId).delete();
+                    }
+                };
+
+                var handleMoveKanbanTask = function(taskId, newStatus) {
+                    db.collection('kanban_tasks').doc(taskId).update({ status: newStatus });
+                };
+
+                var handleUpdateKanbanTask = function(taskId, updates) {
+                    if (updates.title) updates.title = updates.title.toUpperCase();
+                    if (updates.description) updates.description = updates.description.toUpperCase();
+                    if (updates.assignee) updates.assignee = updates.assignee.toUpperCase();
+                    db.collection('kanban_tasks').doc(taskId).update(updates);
+                };
+
+                var handleReorderKanbanTask = function(draggedId, targetId, newStatus) {
+                    var draggedTask = kanbanTasks.find(function(t) { return t.id === draggedId; });
+                    if (!draggedTask) return;
+
+                    var colTasks = kanbanTasks.filter(function(t) { return t.status === newStatus && t.id !== draggedId && t.archived !== true; });
+                    
+                    if (targetId) {
+                        var targetIndex = colTasks.findIndex(function(t) { return t.id === targetId; });
+                        if (targetIndex !== -1) {
+                            colTasks.splice(targetIndex, 0, draggedTask);
+                        } else {
+                            colTasks.push(draggedTask);
+                        }
+                    } else {
+                        colTasks.push(draggedTask);
+                    }
+
+                    var batch = db.batch();
+                    colTasks.forEach(function(t, i) {
+                        var ref = db.collection('kanban_tasks').doc(t.id);
+                        batch.update(ref, { status: newStatus, order: i });
+                    });
+                    batch.commit();
+                };
+
+                var handleDragStartFolder = function(e, folderId) {
+                    e.dataTransfer.setData('folderId', folderId);
+                };
+
+                var handleDropFolder = function(e, targetFolderId) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.currentTarget.style.borderTop = ''; 
+                    
+                    var draggedId = e.dataTransfer.getData('folderId');
+                    if (draggedId && draggedId !== targetFolderId) {
+                        var currentFolders = [].concat(customFolders); 
+                        var draggedIndex = currentFolders.findIndex(function(f) { return f.id === draggedId; });
+                        var targetIndex = currentFolders.findIndex(function(f) { return f.id === targetFolderId; });
+
+                        if (draggedIndex > -1 && targetIndex > -1) {
+                            var draggedItem = currentFolders.splice(draggedIndex, 1)[0];
+                            currentFolders.splice(targetIndex, 0, draggedItem);
+                            
+                            setCustomFolders(currentFolders);
+                            db.collection('settings').doc('sidebar_modules').set({ folders: currentFolders });
+                        }
+                    }
+                };
+
+                var currentTicketData = currentTicketId === 'draft' ? draftTicket : activeTickets.find(function(t) { return t.id === currentTicketId; });
+
+                if (view === 'login') return <LoginScreen onLogin={handleLogin} users={users} />;
+
+                return (
+                    <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
+                        
+                        {isMobileMenuOpen && (
+                            <div className="fixed inset-0 bg-black/60 z-40 md:hidden fade-in" onClick={function(){ setIsMobileMenuOpen(false); }}></div>
+                        )}
+
+                        <aside className={"fixed md:relative inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 z-50 shrink-0 transform transition-transform duration-300 " + (isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0")}>
+                            <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800 shrink-0">
+                                <div className="flex items-center gap-3 font-bold text-white tracking-wide">
+                                    <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                    </div>
+                                    INFRA HUB
+                                </div>
+                                <button className="md:hidden text-slate-400 hover:text-white" onClick={function(){ setIsMobileMenuOpen(false); }}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+                            </div>
+                            
+                            <div className="flex-1 overflow-y-auto py-6">
+                                <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Principal</div>
+                                <nav className="px-3 space-y-1 mb-8">
+                                    <button onClick={function() { navTo('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.Layout} Dashboard
+                                    </button>
+                                    <button onClick={function() { navTo('kanban'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.Kanban} Kanban TI
+                                    </button>
+                                    <button onClick={function() { navTo('analytics'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'analytics' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.BarChart} Analytics
+                                    </button>
+                                    <button onClick={function() { navTo('sistema176'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'sistema176' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.Globe} Controle de Estoque
+                                    </button>
+                                    <button onClick={function() { navTo('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.History} Histórico
+                                    </button>
+                                </nav>
+
+                                <div className="flex items-center justify-between px-6 mb-2">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Módulos</span>
+                                    <button onClick={handleAddFolder} className="text-slate-400 hover:text-brand-400 text-xs flex items-center gap-1 font-semibold" title="Criar nova pasta">{Icons.Plus} <span className="text-[10px]">Pasta</span></button>
+                                </div>
+
+                                <nav className="px-3 space-y-1">
+                                    <div className="space-y-1 mb-2">
+                                        <div onClick={function() { toggleFolder('checklists'); }} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer " + (openFolders.checklists ? 'bg-slate-800/60 text-white' : '')}>
+                                            <div className="flex items-center gap-2.5 truncate">
+                                                <span className={openFolders.checklists ? "text-brand-400" : "text-slate-500"}>{Icons.Folder}</span> 
+                                                <span className="truncate font-semibold">Checklists de TI</span>
+                                            </div>
+                                            <div className={"transition-transform duration-200 text-slate-500 " + (openFolders.checklists ? 'rotate-180' : '')}>
+                                                {Icons.ChevronDown}
+                                            </div>
+                                        </div>
+                                        
+                                        {openFolders.checklists && (
+                                            <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
+                                                <button onClick={function() { handleCreateTicket('diario'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-emerald-500/50 group-hover:text-emerald-400">{Icons.Check}</span> Check Diário
+                                                </button>
+                                                <button onClick={function() { handleCreateTicket('rack'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-indigo-500/50 group-hover:text-indigo-400">{Icons.Server}</span> Rack Fábrica
+                                                </button>
+                                                <button onClick={function() { handleCreateTicket('formatacao'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-brand-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-brand-500/50 group-hover:text-brand-400">{Icons.Copy}</span> Formatação PC
+                                                </button>
+                                                <button onClick={function() { handleCreateTicket('zebra'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-amber-400 hover:bg-slate-800/50 group truncate">
+                                                    <span className="text-amber-500/50 group-hover:text-amber-400">{Icons.Printer}</span> Manutenção Zebra
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {customFolders.map(function(f) {
+                                        var isOpen = !!openFolders[f.id];
+                                        return (
+                                            <div key={f.id} className="space-y-1 mb-1"
+                                                 draggable={true}
+                                                 onDragStart={function(e) { handleDragStartFolder(e, f.id); }}
+                                                 onDragOver={function(e) { e.preventDefault(); e.currentTarget.style.borderTop = '2px solid #3b82f6'; }}
+                                                 onDragLeave={function(e) { e.currentTarget.style.borderTop = ''; }}
+                                                 onDrop={function(e) { handleDropFolder(e, f.id); }}
+                                            >
+                                                <div onClick={function() { toggleFolder(f.id); }} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-grab active:cursor-grabbing group " + (isOpen ? 'bg-slate-800/60 text-white' : '')}>
+                                                    <div className="flex items-center gap-2.5 truncate pointer-events-none">
+                                                        <span className={isOpen ? "text-amber-400" : "text-slate-500"}>{Icons.Folder}</span> 
+                                                        <span className="truncate font-semibold uppercase">{f.title}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                        <button onClick={function(e){ handleDeleteFolder(e, f.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Pasta">{Icons.Trash}</button>
+                                                        <div className={"transition-transform duration-200 text-slate-500 " + (isOpen ? 'rotate-180' : '')}>{Icons.ChevronDown}</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {isOpen && (
+                                                    <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
+                                                        {(f.links || []).map(function(l) {
+                                                            return (
+                                                                <div key={l.id} className="flex items-center justify-between group px-2 py-1 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800/50">
+                                                                    <div onClick={function() { handleOpenLink(l.url); setIsMobileMenuOpen(false); }} className="flex items-center gap-2 truncate cursor-pointer flex-1" title={l.url}>
+                                                                        <span className="text-slate-500 group-hover:text-brand-400">{Icons.ExternalLink}</span>
+                                                                        <span className="truncate uppercase">{l.label}</span>
+                                                                    </div>
+                                                                    <button onClick={function(e) { handleDeleteLink(e, f.id, l.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 shrink-0" title="Remover link">{Icons.Trash}</button>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        <button onClick={function() { handleAddLink(f.id); }} className="w-full text-left flex items-center gap-1.5 px-2 py-1 text-[10px] text-slate-500 hover:text-brand-400 font-semibold">
+                                                            {Icons.Plus} <span>ADICIONAR LINK</span>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </nav>
+                            </div>
+
+                            <div className="p-4 border-t border-slate-800 shrink-0 bg-slate-900 z-10">
+                                <div className="flex items-center gap-3 mb-4 px-2">
+                                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                                        {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <p className="text-sm font-bold text-white truncate uppercase">{currentUser ? currentUser.name : ''}</p>
+                                        <p className="text-xs text-slate-500 font-mono">GOOGLE AUTH</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button title="Alternar tema" onClick={function() { setDarkMode(!darkMode); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
+                                    <button title="Configurações" onClick={function() { setShowConfig(true); setIsMobileMenuOpen(false); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
+                                    <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-slate-800 text-center">
+                                    <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400 uppercase" onClick={function() { if (fileInputRef.current) fileInputRef.current.click(); }}>Alterar Logo</p>
+                                    <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
+                                </div>
+                            </div>
+                        </aside>
+
+                        <main className="flex-1 flex flex-col min-w-0 w-full bg-slate-100 dark:bg-slate-950 relative overflow-hidden">
+                            <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0 border-b border-slate-800">
+                                <div className="flex items-center gap-2">
+                                    <button onClick={function() { setIsMobileMenuOpen(true); }} className="p-2 -ml-2 text-slate-300 active:bg-slate-800 rounded">
+                                        {Icons.Menu}
+                                    </button>
+                                    <span className="font-bold text-sm tracking-wide">INFRA HUB</span>
+                                </div>
+                                <div className="flex gap-1">
+                                    <button onClick={function() { setShowConfig(true); }} className="p-2 text-slate-400">{Icons.Settings}</button>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-auto relative">
+                                {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
+                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); navTo('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
+                                {view === 'analytics' && <AnalyticsView history={history} />}
+                                {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} currentUser={currentUser} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} onReorderTask={handleReorderKanbanTask} onUpdateTask={handleUpdateKanbanTask} />}
+                                {view === 'sistema176' && (
+                                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col">
+                                        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 bg-white dark:bg-slate-900 shadow-sm z-10">
+                                            <h2 className="text-sm md:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2 uppercase">
+                                                {Icons.Globe} <span className="hidden sm:inline">Controle de</span> Estoque T.I
+                                            </h2>
+                                            <Button onClick={function(){ window.open(APP_CONFIG.ESTOQUE_URL, '_blank'); }} variant="secondary" className="text-xs">
+                                                <span className="hidden sm:inline">{Icons.ExternalLink} Abrir em nova guia</span>
+                                                <span className="sm:hidden">{Icons.ExternalLink} Abrir</span>
+                                            </Button>
+                                        </div>
+                                        <div className="flex-1 w-full relative">
+                                            <iframe src={APP_CONFIG.ESTOQUE_URL} className="absolute inset-0 w-full h-full border-none" title="Controle de Estoque T.I" />
+                                        </div>
+                                    </div>
+                                )}
+                                {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} currentUser={currentUser} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
+                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { navTo('checklist'); }} onArchive={handleArchive} logo={logo} />}
+                                {view === 'history' && <HistoryView history={history} onOpenHistory={function(h) { setSelectedHistoryTicket(h); navTo('history_receipt'); }} />}
+                                {view === 'history_receipt' && <ReceiptView ticket={selectedHistoryTicket} isHistory={true} onBack={function() { navTo('history'); setSelectedHistoryTicket(null); }} logo={logo} onArchive={null} onRevertHistory={handleRevertHistory} />}
+                            </div>
+                        </main>
                     </div>
                 );
             };
