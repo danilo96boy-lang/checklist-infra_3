@@ -21,8 +21,10 @@
     
     <!-- Biblioteca Chart.js para o Dashboard Analítico -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Biblioteca QRCode para geração instantânea em SVG/DataURL -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -74,7 +76,7 @@
     </script>
 
     <style>
-        body { -webkit-print-color-adjust: exact; background-color: #020617; }
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: #020617; }
         .fade-in { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -190,7 +192,208 @@
                 Clock: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>,
                 Tag: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>,
                 Paperclip: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>,
-                File: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                File: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+                QrCode: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>,
+                Edit: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            };
+
+            // Função geradora de DataURL do QR Code
+            var generateQRDataURL = function(text) {
+                try {
+                    if (typeof qrcode === 'undefined') return '';
+                    var qr = qrcode(0, 'M');
+                    qr.addData(text || 'COBRECOM');
+                    qr.make();
+                    return qr.createDataURL(4, 0);
+                } catch (e) {
+                    console.error("Erro ao gerar QR Code:", e);
+                    return '';
+                }
+            };
+
+            // Motor de Impressão para Zebra ZD220 (10cm largura total -> 3 etiquetas de 3cm + 0.2cm gap)
+            var printZebraZD220Labels = function(itemsArray, labelHeightCm) {
+                var heightCm = labelHeightCm || 2.0; // Altura padrão configurável (ex: 2.0cm ou 3.0cm)
+                
+                // Garante sempre 3 slots preenchidos na linha (se passar 1 item, repete 3x na linha)
+                var rowItems = [];
+                if (itemsArray.length === 1) {
+                    rowItems = [itemsArray[0], itemsArray[0], itemsArray[0]];
+                } else {
+                    rowItems = [
+                        itemsArray[0] || null,
+                        itemsArray[1] || null,
+                        itemsArray[2] || null
+                    ];
+                }
+
+                var labelsHtml = rowItems.map(function(item) {
+                    if (!item) {
+                        return '<div class="label-box empty"></div>';
+                    }
+                    var qrPayload = "ATIVO:" + (item.ativo || '') + "|NOME:" + (item.nome || '') + "|SETOR:" + (item.setor || '') + "|MAC:" + (item.mac || '');
+                    var qrImg = generateQRDataURL(qrPayload);
+
+                    return (
+                        '<div class="label-box">' +
+                            '<div class="label-header">COBRECOM TI</div>' +
+                            '<div class="label-body">' +
+                                '<div class="qr-container">' +
+                                    '<img src="' + qrImg + '" class="qr-img" />' +
+                                '</div>' +
+                                '<div class="info-container">' +
+                                    '<div class="ativo-code">' + (item.ativo || 'S/ ATIVO') + '</div>' +
+                                    '<div class="info-line"><strong>' + (item.nome || '-') + '</strong></div>' +
+                                    '<div class="info-line">' + (item.setor || '-') + '</div>' +
+                                    '<div class="info-mac">' + (item.mac || '-') + '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>'
+                    );
+                }).join('');
+
+                var printWindow = window.open('', '_blank', 'width=600,height=400');
+                if (!printWindow) {
+                    alert("Por favor, permita pop-ups neste navegador para acionar a impressão da etiqueta.");
+                    return;
+                }
+
+                var htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Etiqueta ZD220 - Cobrecom</title>
+                        <style>
+                            @page {
+                                size: 10cm ${heightCm}cm;
+                                margin: 0mm !important;
+                            }
+                            * {
+                                box-sizing: border-box;
+                                margin: 0;
+                                padding: 0;
+                                -webkit-print-color-adjust: exact;
+                                print-color-adjust: exact;
+                            }
+                            html, body {
+                                width: 10cm;
+                                height: ${heightCm}cm;
+                                margin: 0;
+                                padding: 0;
+                                background: #ffffff;
+                                font-family: Arial, Helvetica, sans-serif;
+                                overflow: hidden;
+                            }
+                            .strip-container {
+                                display: flex;
+                                flex-direction: row;
+                                align-items: stretch;
+                                justify-content: flex-start;
+                                width: 10cm;
+                                height: ${heightCm}cm;
+                                padding-left: 0.3cm; /* Margem de compensação lateral para centralizar 9.4cm (3+0.2+3+0.2+3) em 10cm */
+                                column-gap: 0.2cm;
+                            }
+                            .label-box {
+                                width: 3cm;
+                                height: ${heightCm}cm;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: space-between;
+                                padding: 1.2mm 1.2mm;
+                                overflow: hidden;
+                                color: #000;
+                            }
+                            .label-header {
+                                font-size: 5.5pt;
+                                font-weight: 900;
+                                text-align: center;
+                                letter-spacing: 0.5px;
+                                border-bottom: 0.3mm solid #000;
+                                padding-bottom: 0.4mm;
+                                margin-bottom: 0.8mm;
+                                line-height: 1;
+                            }
+                            .label-body {
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                gap: 1.2mm;
+                                flex: 1;
+                                overflow: hidden;
+                            }
+                            .qr-container {
+                                width: 11.5mm;
+                                height: 11.5mm;
+                                flex-shrink: 0;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            }
+                            .qr-img {
+                                width: 100%;
+                                height: 100%;
+                                object-fit: contain;
+                                image-rendering: pixelated;
+                            }
+                            .info-container {
+                                flex: 1;
+                                min-width: 0;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                gap: 0.3mm;
+                            }
+                            .ativo-code {
+                                font-size: 6.5pt;
+                                font-weight: 900;
+                                font-family: 'Courier New', monospace;
+                                line-height: 1.05;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            }
+                            .info-line {
+                                font-size: 5pt;
+                                line-height: 1.1;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                text-transform: uppercase;
+                            }
+                            .info-mac {
+                                font-size: 4.3pt;
+                                font-family: 'Courier New', monospace;
+                                font-weight: bold;
+                                line-height: 1;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                margin-top: 0.3mm;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="strip-container">
+                            ${labelsHtml}
+                        </div>
+                        <script>
+                            window.onload = function() {
+                                setTimeout(function() {
+                                    window.focus();
+                                    window.print();
+                                    setTimeout(function() { window.close(); }, 400);
+                                }, 150);
+                            };
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+
+                printWindow.document.open();
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
             };
 
             var getTemplate = function(type, tecnicoName, customTitulos) {
@@ -229,7 +432,7 @@
                                 { id: 'f_r_7', label: 'COLOCAR NO DOMÍNIO', checked: false, manual: 'SOBRE > CONFIGURAÇÃO AVANÇADA > NOME DE COMPUTADOR > ALTERAR > DOMÍNIO: INSERIR O DOMÍNIO CORPORATIVO PADRÃO DA REDE.', copyText: null },
                                 { id: 'f_r_8', label: 'CONFIGURAR PROXY (PRIMEIRO IP, DEPOIS DNS)', checked: false, manual: 'ABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nINSERIR IP E PORTA DO PROXY PADRÃO DA REDE.', copyText: null },
                                 { id: 'f_r_9', label: 'CONFIGURAÇÃO DE ENERGIA', checked: false, manual: 'ENERGIA E SUSPENSÃO: NUNCA EM TUDO.' },
-                                { id: 'f_r_10', label: 'CONFIGURAR (HOSTS)', checked: false, manual: 'EDITAR O ARQUIVO DE HOSTS DO WINDOWS EM: C:\WINDOWS\SYSTEM32\DRIVERS\ETC\HOSTS PARA ADICIONAR APONTAMENTOS MANUAIS NECESSÁRIOS DE SISTEMAS INTERNOS.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
+                                { id: 'f_r_10', label: 'CONFIGURAR (HOSTS)', checked: false, manual: 'EDITAR O ARQUIVO DE HOSTS DO WINDOWS EM: C:\\WINDOWS\\SYSTEM32\\DRIVERS\\ETC\\HOSTS PARA ADICIONAR APONTAMENTOS MANUAIS NECESSÁRIOS DE SISTEMAS INTERNOS.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
                                 { id: 'f_r_11', label: 'ATUALIZAR DRIVERS NO SITE DO FABRICANTE', checked: false, manual: 'ABRIR O GERENCIADOR DE DISPOSITIVOS E GARANTIR A INSTALAÇÃO DE TODOS OS DRIVERS DE CHIPSET, ÁUDIO, REDE GIGABIT E PLACA GRÁFICA OFICIAL.', copyText: 'devmgmt.msc' },
                                 { id: 'f_r_12', label: 'INSTALAR PROGRAMAS PADRÕES DE FORMATAÇÃO', checked: false, manual: 'ACESSAR O DIRETÓRIO DE REDE DE MANUTENÇÃO E EXECUTAR OS SCRIPTS E INSTALADORES PADRÕES DE FORMATAÇÃO DO DEPARTAMENTO DE TI.', copyText: null },
                                 { id: 'f_r_13', label: 'ATIVAR ESET E SUAS ATUALIZAÇÕES', checked: false },
@@ -381,6 +584,7 @@
                 var variants = {
                     primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
                     secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700',
+                    success: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border border-transparent',
                     danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/40 dark:text-red-400',
                     ghost: 'bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
                     google: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm'
@@ -440,6 +644,406 @@
                         className={"bg-transparent focus:outline-none w-full text-ellipsis uppercase " + (props.className || '')}
                         title="Clique para editar este título"
                     />
+                );
+            };
+
+            // COMPONENTE DE CONTROLE DE DESKTOPS + IMPRESSÃO ZEBRA ZD220
+            var DesktopControlView = function(props) {
+                var desktops = props.desktops || [];
+                var currentUser = props.currentUser;
+
+                var formState = useState({ id: null, nome: '', setor: '', mac: '', ativo: '' });
+                var form = formState[0], setForm = formState[1];
+
+                var searchState = useState('');
+                var search = searchState[0], setSearch = searchState[1];
+
+                var heightState = useState('2.0');
+                var labelHeight = heightState[0], setLabelHeight = heightState[1];
+
+                var queueState = useState([]);
+                var printQueue = queueState[0], setPrintQueue = queueState[1];
+
+                var previewItemState = useState(null);
+                var previewItem = previewItemState[0], setPreviewItem = previewItemState[1];
+
+                var formatMac = function(val) {
+                    var clean = val.replace(/[^a-fA-F0-9]/g, '').toUpperCase().slice(0, 12);
+                    var parts = clean.match(/.{1,2}/g) || [];
+                    return parts.join(':');
+                };
+
+                var handleSave = function(shouldPrintAfter) {
+                    if (!form.nome.trim() && !form.ativo.trim()) {
+                        alert("Preencha pelo menos o Nome ou a identificação do Ativo.");
+                        return;
+                    }
+
+                    var payload = {
+                        nome: (form.nome || '').trim().toUpperCase(),
+                        setor: (form.setor || '').trim().toUpperCase(),
+                        mac: (form.mac || '').trim().toUpperCase(),
+                        ativo: (form.ativo || '').trim().toUpperCase(),
+                        updatedAt: new Date().toISOString(),
+                        updatedBy: currentUser ? currentUser.name : 'TI'
+                    };
+
+                    var promise;
+                    if (form.id) {
+                        promise = db.collection('desktops').doc(form.id).update(payload);
+                    } else {
+                        payload.createdAt = new Date().toISOString();
+                        promise = db.collection('desktops').add(payload);
+                    }
+
+                    promise.then(function() {
+                        if (shouldPrintAfter) {
+                            printZebraZD220Labels([payload], labelHeight);
+                        }
+                        setForm({ id: null, nome: '', setor: '', mac: '', ativo: '' });
+                    }).catch(function(err) {
+                        alert("Erro ao salvar cadastro: " + err.message);
+                    });
+                };
+
+                var handleEdit = function(item) {
+                    setForm({
+                        id: item.id,
+                        nome: item.nome || '',
+                        setor: item.setor || '',
+                        mac: item.mac || '',
+                        ativo: item.ativo || ''
+                    });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                var handleDelete = function(id, nome) {
+                    if (confirm("Deseja remover o desktop " + (nome || '') + " do controle?")) {
+                        db.collection('desktops').doc(id).delete();
+                    }
+                };
+
+                var toggleQueueItem = function(item) {
+                    var exists = printQueue.some(function(q) { return q.id === item.id; });
+                    if (exists) {
+                        setPrintQueue(printQueue.filter(function(q) { return q.id !== item.id; }));
+                    } else {
+                        if (printQueue.length >= 3) {
+                            alert("A fila da carreira comporta 3 etiquetas (3x3cm em 10cm). Imprima ou limpe a fila atual.");
+                            return;
+                        }
+                        setPrintQueue(printQueue.concat([item]));
+                    }
+                };
+
+                var filtered = desktops.filter(function(d) {
+                    var q = search.toLowerCase();
+                    return (d.nome || '').toLowerCase().indexOf(q) !== -1 ||
+                           (d.setor || '').toLowerCase().indexOf(q) !== -1 ||
+                           (d.mac || '').toLowerCase().indexOf(q) !== -1 ||
+                           (d.ativo || '').toLowerCase().indexOf(q) !== -1;
+                });
+
+                // Dados ativos para pré-visualização ao vivo da etiqueta
+                var activePreviewData = previewItem || (form.nome || form.ativo || form.setor || form.mac ? form : {
+                    nome: 'DESKTOP-01',
+                    setor: 'ENGENHARIA',
+                    mac: '00:1A:2B:3C:4D:5E',
+                    ativo: 'DT-0042'
+                });
+
+                var previewQrUrl = generateQRDataURL("ATIVO:" + (activePreviewData.ativo || '') + "|NOME:" + (activePreviewData.nome || '') + "|SETOR:" + (activePreviewData.setor || '') + "|MAC:" + (activePreviewData.mac || ''));
+
+                return (
+                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-10 fade-in overflow-auto">
+                        <div className="max-w-6xl mx-auto w-full space-y-6 pb-12">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase">
+                                        {Icons.Monitor} Controle de Desktop's
+                                    </h2>
+                                    <p className="text-slate-500 text-sm">Cadastro, consulta e impressão térmica Zebra ZD220 (10cm • 3 col de 3cm • gap 0.2cm).</p>
+                                </div>
+
+                                <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <span className="text-[11px] font-bold uppercase text-slate-400 pl-2">Altura Etiqueta:</span>
+                                    <select 
+                                        value={labelHeight} 
+                                        onChange={function(e) { setLabelHeight(e.target.value); }}
+                                        className="bg-slate-100 dark:bg-slate-800 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 outline-none"
+                                    >
+                                        <option value="1.5">3.0 x 1.5 cm</option>
+                                        <option value="2.0">3.0 x 2.0 cm (Padrão)</option>
+                                        <option value="2.5">3.0 x 2.5 cm</option>
+                                        <option value="3.0">3.0 x 3.0 cm (Quadrada)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                                {/* FORMULÁRIO DE CADASTRO / EDIÇÃO */}
+                                <Card className="lg:col-span-7">
+                                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+                                        <h3 className="font-bold text-sm uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                                            {form.id ? 'Editar Cadastro de Desktop' : 'Novo Cadastro de Desktop'}
+                                        </h3>
+                                        {form.id && (
+                                            <button 
+                                                type="button" 
+                                                onClick={function() { setForm({ id: null, nome: '', setor: '', mac: '', ativo: '' }); }}
+                                                className="text-xs text-brand-500 hover:underline font-semibold"
+                                            >
+                                                Cancelar Edição
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <form className="space-y-4" onSubmit={function(e){ e.preventDefault(); handleSave(false); }}>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Ativo / Identificador</label>
+                                                <Input 
+                                                    placeholder="EX: DT-0105" 
+                                                    value={form.ativo}
+                                                    onChange={function(e) { setForm(Object.assign({}, form, { ativo: e.target.value.toUpperCase() })); }}
+                                                    className="uppercase font-mono font-bold" 
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Nome (Usuário / Hostname)</label>
+                                                <Input 
+                                                    placeholder="EX: JOAO.SILVA / PC-VENDAS" 
+                                                    value={form.nome}
+                                                    onChange={function(e) { setForm(Object.assign({}, form, { nome: e.target.value.toUpperCase() })); }}
+                                                    className="uppercase" 
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Setor</label>
+                                                <Input 
+                                                    placeholder="EX: LOGÍSTICA / EXPEDIÇÃO" 
+                                                    value={form.setor}
+                                                    onChange={function(e) { setForm(Object.assign({}, form, { setor: e.target.value.toUpperCase() })); }}
+                                                    className="uppercase" 
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Endereço MAC</label>
+                                                <Input 
+                                                    placeholder="EX: 00:1B:44:11:3A:B7" 
+                                                    value={form.mac}
+                                                    onChange={function(e) { setForm(Object.assign({}, form, { mac: formatMac(e.target.value) })); }}
+                                                    className="uppercase font-mono" 
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-3 flex flex-wrap items-center gap-3 border-t border-slate-100 dark:border-slate-800">
+                                            <Button type="submit" className="text-xs flex-1 sm:flex-none">
+                                                {Icons.Save} {form.id ? 'Atualizar Cadastro' : 'Salvar Cadastro'}
+                                            </Button>
+                                            <Button 
+                                                type="button" 
+                                                variant="success" 
+                                                onClick={function() { handleSave(true); }}
+                                                className="text-xs flex-1 sm:flex-none"
+                                            >
+                                                {Icons.Printer} {form.id ? 'Atualizar & Imprimir (ZD220)' : 'Salvar & Imprimir (ZD220)'}
+                                            </Button>
+                                            {(form.nome || form.ativo) && (
+                                                <Button 
+                                                    type="button" 
+                                                    variant="secondary" 
+                                                    onClick={function() { printZebraZD220Labels([form], labelHeight); }}
+                                                    className="text-xs w-full sm:w-auto"
+                                                    title="Imprimir sem salvar novamente"
+                                                >
+                                                    {Icons.QrCode} Testar Impressão
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </form>
+                                </Card>
+
+                                {/* PREVIEW DA CARREIRA DE 3 ETIQUETAS (10CM -> 3x 3CM + 0.2CM GAP) */}
+                                <Card className="lg:col-span-5 bg-slate-50/60 dark:bg-slate-900/90">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                            {Icons.QrCode} Prévia da Bobina ZD220 (10cm)
+                                        </span>
+                                        <Badge color="blue">3x 3.0cm | Gap 0.2cm</Badge>
+                                    </div>
+
+                                    <div className="p-3 bg-amber-50/70 dark:bg-slate-950 rounded-xl border border-dashed border-amber-300 dark:border-slate-800 overflow-x-auto">
+                                        <div className="text-[10px] text-center text-slate-400 font-mono mb-2">
+                                            ← Largura Total do Rolo: 10.0 cm (3 etiquetas por linha) →
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-2 min-w-[340px]">
+                                            {[0, 1, 2].map(function(idx) {
+                                                var slotItem = printQueue.length > 0 ? printQueue[idx] : activePreviewData;
+                                                if (!slotItem) {
+                                                    return (
+                                                        <div key={idx} className="bg-white/40 dark:bg-slate-900/40 border border-dashed border-slate-300 dark:border-slate-700 rounded p-2 h-20 flex items-center justify-center text-[10px] text-slate-400">
+                                                            Etiqueta {idx + 1} Vazia
+                                                        </div>
+                                                    );
+                                                }
+                                                var slotQr = printQueue.length > 0 
+                                                    ? generateQRDataURL("ATIVO:" + (slotItem.ativo || '') + "|NOME:" + (slotItem.nome || '') + "|SETOR:" + (slotItem.setor || '') + "|MAC:" + (slotItem.mac || ''))
+                                                    : previewQrUrl;
+
+                                                return (
+                                                    <div key={idx} className="bg-white text-black border border-slate-300 rounded shadow-sm p-1.5 flex flex-col justify-between overflow-hidden">
+                                                        <div className="text-[7px] font-black text-center border-b border-black pb-0.5 mb-1 tracking-wider">
+                                                            COBRECOM TI
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <img src={slotQr} alt="QR" className="w-9 h-9 object-contain shrink-0" />
+                                                            <div className="min-w-0 flex-1 leading-tight">
+                                                                <div className="text-[9px] font-mono font-black truncate">{slotItem.ativo || 'S/ ATIVO'}</div>
+                                                                <div className="text-[7px] font-bold truncate uppercase">{slotItem.nome || '-'}</div>
+                                                                <div className="text-[7px] truncate uppercase text-slate-700">{slotItem.setor || '-'}</div>
+                                                                <div className="text-[6px] font-mono truncate text-slate-600">{slotItem.mac || '-'}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {printQueue.length > 0 ? (
+                                        <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                                            <span className="text-xs font-semibold text-brand-500">
+                                                Fila personalizada: {printQueue.length}/3 selecionadas
+                                            </span>
+                                            <div className="flex gap-2">
+                                                <Button variant="ghost" className="text-xs py-1 px-2" onClick={function() { setPrintQueue([]); }}>
+                                                    Limpar
+                                                </Button>
+                                                <Button variant="primary" className="text-xs py-1.5 px-3" onClick={function() { printZebraZD220Labels(printQueue, labelHeight); }}>
+                                                    {Icons.Printer} Imprimir Fila ({printQueue.length})
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-[11px] text-slate-400 mt-3 leading-relaxed">
+                                            💡 Ao clicar em <strong>Imprimir</strong> em um item abaixo, as 3 etiquetas da linha saem com o mesmo QR Code. Para imprimir 3 máquinas diferentes na mesma linha, marque a opção <strong>+Fila</strong> na tabela.
+                                        </p>
+                                    )}
+                                </Card>
+                            </div>
+
+                            {/* LISTA DE CONSULTA E IMPRESSÃO RÁPIDA */}
+                            <Card noPadding className="overflow-hidden">
+                                <div className="p-4 md:px-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/30">
+                                    <div>
+                                        <h3 className="font-bold text-slate-800 dark:text-white text-sm uppercase tracking-wider">
+                                            Desktops Cadastrados ({filtered.length})
+                                        </h3>
+                                        <p className="text-xs text-slate-500">Consulte cadastros existentes para reimpressão imediata na ZD220.</p>
+                                    </div>
+                                    <div className="relative w-full sm:w-72">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
+                                        <Input 
+                                            placeholder="Consultar Ativo, Nome, Setor, MAC..." 
+                                            value={search} 
+                                            onChange={function(e) { setSearch(e.target.value); }} 
+                                            className="pl-10" 
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-left min-w-[750px]">
+                                        <thead className="bg-slate-50 dark:bg-slate-800/70 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800">
+                                            <tr>
+                                                <th className="px-4 py-3">QR / Ativo</th>
+                                                <th className="px-4 py-3">Nome / Usuário</th>
+                                                <th className="px-4 py-3">Setor</th>
+                                                <th className="px-4 py-3">Endereço MAC</th>
+                                                <th className="px-4 py-3 text-right">Ações / Impressão ZD220</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                            {filtered.map(function(item) {
+                                                var isQueued = printQueue.some(function(q) { return q.id === item.id; });
+                                                var thumbQr = generateQRDataURL("ATIVO:" + (item.ativo || '') + "|NOME:" + (item.nome || '') + "|SETOR:" + (item.setor || '') + "|MAC:" + (item.mac || ''));
+                                                return (
+                                                    <tr 
+                                                        key={item.id} 
+                                                        onMouseEnter={function() { setPreviewItem(item); }}
+                                                        onMouseLeave={function() { setPreviewItem(null); }}
+                                                        className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                                                    >
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <img src={thumbQr} alt="QR" className="w-8 h-8 rounded bg-white p-0.5 border border-slate-200 shrink-0" />
+                                                                <span className="font-mono font-bold text-brand-600 dark:text-brand-400 uppercase">
+                                                                    {item.ativo || 'S/ ATIVO'}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3 font-semibold text-slate-800 dark:text-white uppercase">{item.nome || '-'}</td>
+                                                        <td className="px-4 py-3">
+                                                            <Badge color="slate">{item.setor || 'N/A'}</Badge>
+                                                        </td>
+                                                        <td className="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">{item.mac || '-'}</td>
+                                                        <td className="px-4 py-3 text-right">
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={function() { printZebraZD220Labels([item], labelHeight); }}
+                                                                    className="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+                                                                    title="Imprimir 3 etiquetas desta máquina na ZD220"
+                                                                >
+                                                                    {Icons.Printer} Imprimir
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={function() { toggleQueueItem(item); }}
+                                                                    className={"px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all " + (isQueued ? "bg-amber-500/20 border-amber-500 text-amber-400" : "border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white")}
+                                                                    title="Adicionar à fila para imprimir 3 computadores diferentes na mesma carreira"
+                                                                >
+                                                                    {isQueued ? '✓ Na Fila' : '+ Fila'}
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={function() { handleEdit(item); }}
+                                                                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-brand-500 hover:border-brand-500 transition-colors"
+                                                                    title="Editar cadastro"
+                                                                >
+                                                                    {Icons.Edit}
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={function() { handleDelete(item.id, item.nome || item.ativo); }}
+                                                                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:border-red-500 transition-colors"
+                                                                    title="Excluir cadastro"
+                                                                >
+                                                                    {Icons.Trash}
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            {filtered.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="5" className="text-center py-10 text-slate-400">
+                                                        Nenhum desktop encontrado. Cadastre um equipamento acima para gerar etiquetas.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+                        </div>
+                    </div>
                 );
             };
 
@@ -1392,7 +1996,6 @@
                                                             </div>
                                                         </div>
 
-                                                        {/* CONTROLES MOBILE / TOUCH-FRIENDLY */}
                                                         <div className="absolute top-2 right-2 flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity bg-jira-cardHover rounded shadow-sm p-1">
                                                             {col.id !== 'a_fazer' && (
                                                                 <button onClick={function(e) {
@@ -1583,7 +2186,6 @@
                                             </div>
                                         </div>
 
-                                        {/* ANEXOS DO KANBAN */}
                                         <div className="border-t border-slate-800 pt-6 mt-4">
                                             <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">{Icons.Paperclip} Anexos</h4>
                                             <div className="space-y-2 mb-4">
@@ -1874,6 +2476,8 @@
                 var history = historyState[0], setHistory = historyState[1];
                 var kanbanState = useState([]);
                 var kanbanTasks = kanbanState[0], setKanbanTasks = kanbanState[1];
+                var desktopsState = useState([]);
+                var desktops = desktopsState[0], setDesktops = desktopsState[1];
                 var logoState = useState('');
                 var logo = logoState[0], setLogo = logoState[1];
                 var curTicketState = useState(null);
@@ -1998,7 +2602,19 @@
                                 return valA - valB; 
                             });
                             setKanbanTasks(list);
+                        } else {
+                            setKanbanTasks([]);
                         }
+                    });
+
+                    var unsubDesktops = db.collection('desktops').onSnapshot(function(snap) {
+                        var list = snap.docs.map(function(doc) {
+                            return Object.assign({ id: doc.id }, doc.data());
+                        });
+                        list.sort(function(a, b) {
+                            return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+                        });
+                        setDesktops(list);
                     });
 
                     var unsubTickets = db.collection('tickets').onSnapshot(function(snap) {
@@ -2023,7 +2639,7 @@
                         }
                     });
 
-                    return function() { unsubAuth(); unsubTickets(); unsubHistory(); unsubUsers(); unsubConfig(); unsubFolders(); unsubKanban(); };
+                    return function() { unsubAuth(); unsubTickets(); unsubHistory(); unsubUsers(); unsubConfig(); unsubFolders(); unsubKanban(); unsubDesktops(); };
                 }, []);
 
                 useEffect(function() { 
@@ -2511,39 +3127,7 @@
                                     </div>
                                 )}
                                 {view === 'controleDesktops' && (
-                                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-10 fade-in overflow-auto">
-                                        <div className="max-w-2xl mx-auto w-full space-y-6">
-                                            <div>
-                                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase">
-                                                    {Icons.Monitor} Controle de Desktop's
-                                                </h2>
-                                                <p className="text-slate-500 text-sm">Controle interno de desktops (Não ativo / patrimonial).</p>
-                                            </div>
-                                            <Card>
-                                                <form className="space-y-4" onSubmit={function(e){ e.preventDefault(); }}>
-                                                    <div>
-                                                        <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Nome</label>
-                                                        <Input placeholder="Digite o nome do usuário ou desktop" className="uppercase" />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Setor</label>
-                                                        <Input placeholder="Digite o setor correspondente" className="uppercase" />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">MAC</label>
-                                                        <Input placeholder="Digite o endereço MAC" className="uppercase" />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Ativo</label>
-                                                        <Input placeholder="Digite a identificação do ativo" className="uppercase" />
-                                                    </div>
-                                                    <div className="pt-2">
-                                                        <Button type="button" className="w-full sm:w-auto text-xs">{Icons.Save} Salvar</Button>
-                                                    </div>
-                                                </form>
-                                            </Card>
-                                        </div>
-                                    </div>
+                                    <DesktopControlView desktops={desktops} currentUser={currentUser} />
                                 )}
                                 {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} currentUser={currentUser} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
                                 {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { navTo('checklist'); }} onArchive={handleArchive} logo={logo} />}
