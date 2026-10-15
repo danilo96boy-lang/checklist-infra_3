@@ -114,7 +114,7 @@
             body.printing-zebra #root { display: none !important; }
             body.printing-zebra #zebra-print-root { 
                 display: block !important; 
-                position: absolute !important;
+                position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
                 margin: 0 !important;
@@ -230,8 +230,6 @@
             };
 
             // Gerador de código ZPL Nativo para Zebra ZD220 (203 DPI = 8 dots/mm)
-            // Bobina 100mm (800 dots) x 20mm (160 dots)
-            // Coluna 1: 2mm (16 dots), Coluna 2: 35mm (280 dots), Coluna 3: 68mm (544 dots)
             var generateZPLCode = function(itemsArray, offsetTopMm, offsetLeftMm) {
                 var rowItems = [];
                 if (itemsArray.length === 1) {
@@ -257,13 +255,9 @@
                     var setor = (item.setor || '-').substring(0, 14);
                     var qrPayload = "ATIVO:" + (item.ativo || '') + "|NOME:" + (item.nome || '') + "|SETOR:" + (item.setor || '');
 
-                    // Título COBRECOM TI centralizado na etiqueta de 30mm (240 dots)
                     zpl += "^FO" + x + "," + y + "^A0N,16,16^FB240,1,0,C^FDCOBRECOM TI^FS\n";
-                    // Linha horizontal abaixo do título
                     zpl += "^FO" + (x + 10) + "," + (y + 19) + "^GB220,2,2^FS\n";
-                    // QR Code
                     zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,3^FDLA," + qrPayload + "^FS\n";
-                    // Textos ao lado direito do QR Code
                     zpl += "^FO" + (x + 98) + "," + (y + 30) + "^A0N,20,20^FD" + ativo + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 56) + "^A0N,16,16^FD" + nome + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 78) + "^A0N,15,15^FD" + setor + "^FS\n";
@@ -273,14 +267,13 @@
                 return zpl;
             };
 
-            // Motor de Impressão via Canvas de Alta Precisão (Sem cortar o COBRECOM TI)
-            // Resolve o problema em que o driver do Windows centraliza verticalmente ou corta valores negativos:
-            // O `@page` usa `size: 100mm 100mm` para impedir que o Chrome centralize verticalmente uma página pequena dentro de um papel grande do driver,
-            // e o `yOffsetMm` desloca o desenho dentro do próprio Canvas sem nunca cortar o topo!
-            var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, offsetLeftMm) {
+            // Motor de Impressão via Canvas com Bloqueio de Auto-Encolhimento Horizontal
+            // Impede que o driver do Windows esprema os 100mm em 38mm no meio da bobina
+            var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, offsetLeftMm, widthScalePct) {
                 var heightMm = Math.round(parseFloat(labelHeightCm || '2.0') * 10);
-                var yOffsetMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0');
+                var yOffsetMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '9');
                 var leftShiftMm = parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '0');
+                var widthPct = parseFloat(widthScalePct || '250'); //Compensa o encolhimento de 38mm -> 100mm do driver
 
                 var rowItems = [];
                 if (itemsArray.length === 1) {
@@ -293,9 +286,8 @@
                     ];
                 }
 
-                // Escala de alta definição: 12 pixels por milímetro (~305 DPI)
+                // Escala de alta definição: 12 pixels por milímetro
                 var scale = 12;
-                // Altura total do canvas acomoda qualquer deslocamento positivo sem cortar
                 var extraTopMm = Math.max(0, yOffsetMm);
                 var canvasHeightMm = heightMm + extraTopMm;
 
@@ -304,18 +296,16 @@
                 canvas.height = canvasHeightMm * scale;
                 var ctx = canvas.getContext('2d');
 
-                // Fundo 100% branco
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Posições X iniciais de cada etiqueta segundo a régua na foto: 2mm, 35mm, 68mm
-                var colStartMm = [2.0 + leftShiftMm, 35.0 + leftShiftMm, 68.0 + leftShiftMm];
+                // Posições X iniciais de cada etiqueta na régua de 100mm: 2mm, 35mm, 68mm
+                var colStartMm = [2.0, 35.0, 68.0];
                 var labelW = 30.0 * scale;
 
                 rowItems.forEach(function(item, idx) {
                     if (!item) return;
                     var x0 = colStartMm[idx] * scale;
-                    // Se yOffsetMm for positivo, desce dentro do canvas; se for 0, fica colado no topo absoluto (0px) sem cortar o COBRECOM TI
                     var y0 = Math.max(0, yOffsetMm * scale);
 
                     ctx.save();
@@ -323,17 +313,17 @@
                     ctx.rect(x0, y0, labelW, heightMm * scale);
                     ctx.clip();
 
-                    // 1. Cabeçalho "COBRECOM TI" (idêntico ao primeiro print)
+                    // 1. Cabeçalho "COBRECOM TI"
                     ctx.fillStyle = '#000000';
-                    ctx.font = '900 ' + Math.round(2.0 * scale) + 'px Arial, Helvetica, sans-serif';
+                    ctx.font = '900 ' + Math.round(2.1 * scale) + 'px Arial, Helvetica, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'top';
                     ctx.fillText('COBRECOM TI', x0 + (labelW / 2), y0 + (0.6 * scale));
 
                     // 2. Linha horizontal preta abaixo do cabeçalho
-                    var lineY = y0 + (3.0 * scale);
+                    var lineY = y0 + (3.1 * scale);
                     ctx.strokeStyle = '#000000';
-                    ctx.lineWidth = Math.max(2, Math.round(0.28 * scale));
+                    ctx.lineWidth = Math.max(2, Math.round(0.3 * scale));
                     ctx.beginPath();
                     ctx.moveTo(x0 + (1.2 * scale), lineY);
                     ctx.lineTo(x0 + labelW - (1.2 * scale), lineY);
@@ -346,7 +336,7 @@
                     qr.make();
                     var modCount = qr.getModuleCount();
 
-                    var qrSizeMm = Math.min(11.0, heightMm - 4.5);
+                    var qrSizeMm = Math.min(11.2, heightMm - 4.5);
                     var qrSizePx = qrSizeMm * scale;
                     var qrX = x0 + (1.4 * scale);
                     var qrY = lineY + (0.7 * scale);
@@ -366,7 +356,7 @@
                     }
 
                     // 4. Textos à direita do QR Code: ATIVO, NOME, SETOR
-                    var textX = qrX + qrSizePx + (1.3 * scale);
+                    var textX = qrX + qrSizePx + (1.4 * scale);
                     var maxTextW = (x0 + labelW - (1.0 * scale)) - textX;
 
                     var truncateToFit = function(str, fontSpec) {
@@ -382,30 +372,32 @@
                     ctx.textBaseline = 'top';
                     ctx.fillStyle = '#000000';
 
-                    // Linha 1: ATIVO (ex: DT-0042)
-                    var fontAtivo = '900 ' + Math.round(2.4 * scale) + 'px "Courier New", monospace';
+                    // Linha 1: ATIVO (ex: 10541)
+                    var fontAtivo = '900 ' + Math.round(2.5 * scale) + 'px "Courier New", monospace';
                     var txtAtivo = truncateToFit(item.ativo || 'S/ ATIVO', fontAtivo);
                     ctx.fillText(txtAtivo, textX, qrY + (0.5 * scale));
 
-                    // Linha 2: NOME (ex: DESKTOP-01)
-                    var fontNome = '800 ' + Math.round(1.95 * scale) + 'px Arial, Helvetica, sans-serif';
+                    // Linha 2: NOME (ex: TI10)
+                    var fontNome = '800 ' + Math.round(2.0 * scale) + 'px Arial, Helvetica, sans-serif';
                     var txtNome = truncateToFit(item.nome || '-', fontNome);
-                    ctx.fillText(txtNome, textX, qrY + (4.0 * scale));
+                    ctx.fillText(txtNome, textX, qrY + (4.1 * scale));
 
-                    // Linha 3: SETOR (ex: ENGENHARIA)
-                    var fontSetor = '600 ' + Math.round(1.8 * scale) + 'px Arial, Helvetica, sans-serif';
+                    // Linha 3: SETOR (ex: TI)
+                    var fontSetor = '600 ' + Math.round(1.85 * scale) + 'px Arial, Helvetica, sans-serif';
                     var txtSetor = truncateToFit(item.setor || '-', fontSetor);
-                    ctx.fillText(txtSetor, textX, qrY + (7.0 * scale));
+                    ctx.fillText(txtSetor, textX, qrY + (7.2 * scale));
 
                     ctx.restore();
                 });
 
                 var stripDataUrl = canvas.toDataURL('image/png');
-
-                // Truque crucial: se o driver do Windows estiver configurado com papel 100x100mm ou 100x50mm,
-                // quando o CSS pede @page 100x20mm o Chrome centraliza os 20mm no meio do papel do driver (criando os 12mm em branco no topo).
-                // Forçando @page size: 100mm 100mm com imagem ancorada em top:0, o Chrome NÃO centraliza verticalmente e imprime no 0mm real da Zebra!
                 var cssTopMm = yOffsetMm < 0 ? yOffsetMm : 0;
+
+                // Se widthPct = 100%, usa 100mm diretos.
+                // Se o driver do Windows estiver configurado como etiqueta única estreita (~38mm) e espremendo os 100mm no meio,
+                // widthPct permite expandir horizontalmente a partir do centro da bobina para abrir nas 3 colunas!
+                var renderWidthMm = Math.round(100 * (widthPct / 100) * 10) / 10;
+
                 var styleEl = document.getElementById('dynamic-print-page-style');
                 styleEl.innerHTML = `
                     @media print {
@@ -414,22 +406,24 @@
                             margin: 0mm !important;
                         }
                         html, body {
-                            width: 100mm !important;
+                            width: 100% !important;
                             margin: 0mm !important;
                             padding: 0mm !important;
                             overflow: visible !important;
                         }
                         .zd-canvas-wrap {
-                            position: absolute !important;
-                            left: 0mm !important;
+                            position: fixed !important;
+                            left: 50% !important;
                             top: 0mm !important;
-                            transform: translateY(${cssTopMm}mm) !important;
-                            width: 100mm !important;
+                            transform: translate(calc(-50% + ${leftShiftMm}mm), ${cssTopMm}mm) !important;
+                            width: ${renderWidthMm}mm !important;
+                            max-width: none !important;
                             margin: 0 !important;
                             padding: 0 !important;
                         }
                         .zd-canvas-img {
-                            width: 100mm !important;
+                            width: ${renderWidthMm}mm !important;
+                            max-width: none !important;
                             height: ${canvasHeightMm}mm !important;
                             display: block !important;
                         }
@@ -716,14 +710,19 @@
                 var searchState = useState('');
                 var search = searchState[0], setSearch = searchState[1];
 
-                var heightState = useState(localStorage.getItem('zd_label_height_v3') || '2.0');
+                var heightState = useState(localStorage.getItem('zd_label_height_v4') || '2.0');
                 var labelHeight = heightState[0], setLabelHeight = heightState[1];
 
-                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v3') || '0');
+                // Já inicia em 9mm conforme acertado no teste do usuário
+                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v4') || '9');
                 var offsetTop = topOffsetState[0], setOffsetTop = topOffsetState[1];
 
-                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v3') || '0');
+                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v4') || '0');
                 var offsetLeft = leftOffsetState[0], setOffsetLeft = leftOffsetState[1];
+
+                // Escala de abertura horizontal (100% = 100mm; se o driver espremer, pode subir p/ 260%)
+                var widthScaleState = useState(localStorage.getItem('zd_width_scale_v4') || '100');
+                var widthScale = widthScaleState[0], setWidthScale = widthScaleState[1];
 
                 var queueState = useState([]);
                 var printQueue = queueState[0], setPrintQueue = queueState[1];
@@ -736,17 +735,22 @@
 
                 var handleHeightChange = function(val) {
                     setLabelHeight(val);
-                    localStorage.setItem('zd_label_height_v3', val);
+                    localStorage.setItem('zd_label_height_v4', val);
                 };
 
                 var handleTopOffsetChange = function(val) {
                     setOffsetTop(val);
-                    localStorage.setItem('zd_offset_top_v3', val);
+                    localStorage.setItem('zd_offset_top_v4', val);
                 };
 
                 var handleLeftOffsetChange = function(val) {
                     setOffsetLeft(val);
-                    localStorage.setItem('zd_offset_left_v3', val);
+                    localStorage.setItem('zd_offset_left_v4', val);
+                };
+
+                var handleWidthScaleChange = function(val) {
+                    setWidthScale(val);
+                    localStorage.setItem('zd_width_scale_v4', val);
                 };
 
                 var formatMac = function(val) {
@@ -756,7 +760,7 @@
                 };
 
                 var triggerPrint = function(items) {
-                    printZebraZD220Labels(items, labelHeight, offsetTop, offsetLeft);
+                    printZebraZD220Labels(items, labelHeight, offsetTop, offsetLeft, widthScale);
                 };
 
                 var handleSave = function(shouldPrintAfter) {
@@ -865,7 +869,7 @@
                                         </select>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="0 = Topo Absoluto. Valores positivos (ex: 2, 5) descem o desenho sem cortar o COBRECOM TI">Posição Topo (mm):</span>
+                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Posição vertical (9mm ficou cravado na sua bobina)">Posição Topo (mm):</span>
                                         <input 
                                             type="number" 
                                             step="0.5"
@@ -882,6 +886,16 @@
                                             value={offsetLeft} 
                                             onChange={function(e) { handleLeftOffsetChange(e.target.value); }}
                                             className="w-14 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="100 = 10cm reais. Se o driver espremer no meio, aumente para 260">Abertura Larg (%):</span>
+                                        <input 
+                                            type="number" 
+                                            step="10"
+                                            value={widthScale} 
+                                            onChange={function(e) { handleWidthScaleChange(e.target.value); }}
+                                            className="w-16 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
                                         />
                                     </div>
                                 </div>
