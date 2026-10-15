@@ -117,11 +117,10 @@
                 position: absolute !important;
                 top: 0 !important;
                 left: 0 !important;
-                width: 100mm !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 z-index: 99999 !important;
-                background: transparent !important;
+                background: #ffffff !important;
             }
             .no-print { display: none !important; }
         }
@@ -230,16 +229,57 @@
                 }
             };
 
-            // Motor de Impressão via Canvas de Alta Precisão (Calibrado pela Régua: 100mm x 20mm)
-            // Posições Horizontais exatas da régua:
-            // Coluna 1: 2mm até 32mm (30mm)
-            // Gap 1:    32mm até 35mm (3mm)
-            // Coluna 2: 35mm até 65mm (30mm)
-            // Gap 2:    65mm até 68mm (3mm)
-            // Coluna 3: 68mm até 98mm (30mm)
+            // Gerador de código ZPL Nativo para Zebra ZD220 (203 DPI = 8 dots/mm)
+            // Bobina 100mm (800 dots) x 20mm (160 dots)
+            // Coluna 1: 2mm (16 dots), Coluna 2: 35mm (280 dots), Coluna 3: 68mm (544 dots)
+            var generateZPLCode = function(itemsArray, offsetTopMm, offsetLeftMm) {
+                var rowItems = [];
+                if (itemsArray.length === 1) {
+                    rowItems = [itemsArray[0], itemsArray[0], itemsArray[0]];
+                } else {
+                    rowItems = [itemsArray[0] || null, itemsArray[1] || null, itemsArray[2] || null];
+                }
+
+                var dpmm = 8; // 203 dpi = 8 dots por mm
+                var shiftY = Math.round(parseFloat(offsetTopMm || '0') * dpmm);
+                var shiftX = Math.round(parseFloat(offsetLeftMm || '0') * dpmm);
+                var colX = [16 + shiftX, 280 + shiftX, 544 + shiftX];
+
+                var zpl = "^XA\n^CI28\n^PW800\n^LL160\n^LH0,0\n";
+
+                rowItems.forEach(function(item, idx) {
+                    if (!item) return;
+                    var x = Math.max(0, colX[idx]);
+                    var y = Math.max(0, 8 + shiftY);
+
+                    var ativo = (item.ativo || 'S/ ATIVO').substring(0, 12);
+                    var nome = (item.nome || '-').substring(0, 14);
+                    var setor = (item.setor || '-').substring(0, 14);
+                    var qrPayload = "ATIVO:" + (item.ativo || '') + "|NOME:" + (item.nome || '') + "|SETOR:" + (item.setor || '');
+
+                    // Título COBRECOM TI centralizado na etiqueta de 30mm (240 dots)
+                    zpl += "^FO" + x + "," + y + "^A0N,16,16^FB240,1,0,C^FDCOBRECOM TI^FS\n";
+                    // Linha horizontal abaixo do título
+                    zpl += "^FO" + (x + 10) + "," + (y + 19) + "^GB220,2,2^FS\n";
+                    // QR Code
+                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,3^FDLA," + qrPayload + "^FS\n";
+                    // Textos ao lado direito do QR Code
+                    zpl += "^FO" + (x + 98) + "," + (y + 30) + "^A0N,20,20^FD" + ativo + "^FS\n";
+                    zpl += "^FO" + (x + 98) + "," + (y + 56) + "^A0N,16,16^FD" + nome + "^FS\n";
+                    zpl += "^FO" + (x + 98) + "," + (y + 78) + "^A0N,15,15^FD" + setor + "^FS\n";
+                });
+
+                zpl += "^XZ";
+                return zpl;
+            };
+
+            // Motor de Impressão via Canvas de Alta Precisão (Sem cortar o COBRECOM TI)
+            // Resolve o problema em que o driver do Windows centraliza verticalmente ou corta valores negativos:
+            // O `@page` usa `size: 100mm 100mm` para impedir que o Chrome centralize verticalmente uma página pequena dentro de um papel grande do driver,
+            // e o `yOffsetMm` desloca o desenho dentro do próprio Canvas sem nunca cortar o topo!
             var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, offsetLeftMm) {
                 var heightMm = Math.round(parseFloat(labelHeightCm || '2.0') * 10);
-                var topMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '-11');
+                var yOffsetMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0');
                 var leftShiftMm = parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '0');
 
                 var rowItems = [];
@@ -255,9 +295,13 @@
 
                 // Escala de alta definição: 12 pixels por milímetro (~305 DPI)
                 var scale = 12;
+                // Altura total do canvas acomoda qualquer deslocamento positivo sem cortar
+                var extraTopMm = Math.max(0, yOffsetMm);
+                var canvasHeightMm = heightMm + extraTopMm;
+
                 var canvas = document.createElement('canvas');
                 canvas.width = 100 * scale; // 100mm = 1200px
-                canvas.height = heightMm * scale; // 20mm = 240px
+                canvas.height = canvasHeightMm * scale;
                 var ctx = canvas.getContext('2d');
 
                 // Fundo 100% branco
@@ -271,41 +315,41 @@
                 rowItems.forEach(function(item, idx) {
                     if (!item) return;
                     var x0 = colStartMm[idx] * scale;
-                    var y0 = 0;
+                    // Se yOffsetMm for positivo, desce dentro do canvas; se for 0, fica colado no topo absoluto (0px) sem cortar o COBRECOM TI
+                    var y0 = Math.max(0, yOffsetMm * scale);
 
                     ctx.save();
-                    // Clipping na área exata da etiqueta (30mm x heightMm)
                     ctx.beginPath();
                     ctx.rect(x0, y0, labelW, heightMm * scale);
                     ctx.clip();
 
                     // 1. Cabeçalho "COBRECOM TI" (idêntico ao primeiro print)
                     ctx.fillStyle = '#000000';
-                    ctx.font = '900 ' + Math.round(2.1 * scale) + 'px Arial, Helvetica, sans-serif';
+                    ctx.font = '900 ' + Math.round(2.0 * scale) + 'px Arial, Helvetica, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'top';
-                    ctx.fillText('COBRECOM TI', x0 + (labelW / 2), y0 + (1.0 * scale));
+                    ctx.fillText('COBRECOM TI', x0 + (labelW / 2), y0 + (0.6 * scale));
 
                     // 2. Linha horizontal preta abaixo do cabeçalho
-                    var lineY = y0 + (3.6 * scale);
+                    var lineY = y0 + (3.0 * scale);
                     ctx.strokeStyle = '#000000';
-                    ctx.lineWidth = Math.max(2, Math.round(0.3 * scale));
+                    ctx.lineWidth = Math.max(2, Math.round(0.28 * scale));
                     ctx.beginPath();
-                    ctx.moveTo(x0 + (1.5 * scale), lineY);
-                    ctx.lineTo(x0 + labelW - (1.5 * scale), lineY);
+                    ctx.moveTo(x0 + (1.2 * scale), lineY);
+                    ctx.lineTo(x0 + labelW - (1.2 * scale), lineY);
                     ctx.stroke();
 
-                    // 3. Desenho direto do QR Code Matriz (nítido, sem blur)
+                    // 3. Desenho direto do QR Code Matriz
                     var qrPayload = "ATIVO:" + (item.ativo || '') + "|NOME:" + (item.nome || '') + "|SETOR:" + (item.setor || '');
                     var qr = qrcode(0, 'L');
                     qr.addData(qrPayload);
                     qr.make();
                     var modCount = qr.getModuleCount();
 
-                    var qrSizeMm = Math.min(11.2, heightMm - 5.2);
+                    var qrSizeMm = Math.min(11.0, heightMm - 4.5);
                     var qrSizePx = qrSizeMm * scale;
-                    var qrX = x0 + (1.6 * scale);
-                    var qrY = lineY + (0.9 * scale);
+                    var qrX = x0 + (1.4 * scale);
+                    var qrY = lineY + (0.7 * scale);
                     var cellSize = qrSizePx / modCount;
 
                     ctx.fillStyle = '#000000';
@@ -322,8 +366,8 @@
                     }
 
                     // 4. Textos à direita do QR Code: ATIVO, NOME, SETOR
-                    var textX = qrX + qrSizePx + (1.4 * scale);
-                    var maxTextW = (x0 + labelW - (1.2 * scale)) - textX;
+                    var textX = qrX + qrSizePx + (1.3 * scale);
+                    var maxTextW = (x0 + labelW - (1.0 * scale)) - textX;
 
                     var truncateToFit = function(str, fontSpec) {
                         ctx.font = fontSpec;
@@ -339,51 +383,54 @@
                     ctx.fillStyle = '#000000';
 
                     // Linha 1: ATIVO (ex: DT-0042)
-                    var fontAtivo = '900 ' + Math.round(2.5 * scale) + 'px "Courier New", monospace';
+                    var fontAtivo = '900 ' + Math.round(2.4 * scale) + 'px "Courier New", monospace';
                     var txtAtivo = truncateToFit(item.ativo || 'S/ ATIVO', fontAtivo);
-                    ctx.fillText(txtAtivo, textX, qrY + (0.6 * scale));
+                    ctx.fillText(txtAtivo, textX, qrY + (0.5 * scale));
 
                     // Linha 2: NOME (ex: DESKTOP-01)
-                    var fontNome = '800 ' + Math.round(2.0 * scale) + 'px Arial, Helvetica, sans-serif';
+                    var fontNome = '800 ' + Math.round(1.95 * scale) + 'px Arial, Helvetica, sans-serif';
                     var txtNome = truncateToFit(item.nome || '-', fontNome);
-                    ctx.fillText(txtNome, textX, qrY + (4.2 * scale));
+                    ctx.fillText(txtNome, textX, qrY + (4.0 * scale));
 
                     // Linha 3: SETOR (ex: ENGENHARIA)
-                    var fontSetor = '600 ' + Math.round(1.85 * scale) + 'px Arial, Helvetica, sans-serif';
+                    var fontSetor = '600 ' + Math.round(1.8 * scale) + 'px Arial, Helvetica, sans-serif';
                     var txtSetor = truncateToFit(item.setor || '-', fontSetor);
-                    ctx.fillText(txtSetor, textX, qrY + (7.3 * scale));
+                    ctx.fillText(txtSetor, textX, qrY + (7.0 * scale));
 
                     ctx.restore();
                 });
 
                 var stripDataUrl = canvas.toDataURL('image/png');
 
+                // Truque crucial: se o driver do Windows estiver configurado com papel 100x100mm ou 100x50mm,
+                // quando o CSS pede @page 100x20mm o Chrome centraliza os 20mm no meio do papel do driver (criando os 12mm em branco no topo).
+                // Forçando @page size: 100mm 100mm com imagem ancorada em top:0, o Chrome NÃO centraliza verticalmente e imprime no 0mm real da Zebra!
+                var cssTopMm = yOffsetMm < 0 ? yOffsetMm : 0;
                 var styleEl = document.getElementById('dynamic-print-page-style');
                 styleEl.innerHTML = `
                     @media print {
                         @page {
-                            size: 100mm ${heightMm}mm !important;
+                            size: 100mm 100mm !important;
                             margin: 0mm !important;
                         }
                         html, body {
                             width: 100mm !important;
-                            height: ${heightMm}mm !important;
                             margin: 0mm !important;
                             padding: 0mm !important;
-                            overflow: hidden !important;
+                            overflow: visible !important;
                         }
                         .zd-canvas-wrap {
-                            position: fixed !important;
+                            position: absolute !important;
                             left: 0mm !important;
-                            top: ${topMm}mm !important;
+                            top: 0mm !important;
+                            transform: translateY(${cssTopMm}mm) !important;
                             width: 100mm !important;
-                            height: ${heightMm}mm !important;
                             margin: 0 !important;
                             padding: 0 !important;
                         }
                         .zd-canvas-img {
                             width: 100mm !important;
-                            height: ${heightMm}mm !important;
+                            height: ${canvasHeightMm}mm !important;
                             display: block !important;
                         }
                     }
@@ -669,15 +716,13 @@
                 var searchState = useState('');
                 var search = searchState[0], setSearch = searchState[1];
 
-                // Altura 2.0cm como padrão conforme medição na régua (0 a 2cm)
-                var heightState = useState(localStorage.getItem('zd_label_height_v2') || '2.0');
+                var heightState = useState(localStorage.getItem('zd_label_height_v3') || '2.0');
                 var labelHeight = heightState[0], setLabelHeight = heightState[1];
 
-                // Offset de topo para puxar a impressão caso o driver da Zebra empurre para baixo
-                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v2') || '0');
+                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v3') || '0');
                 var offsetTop = topOffsetState[0], setOffsetTop = topOffsetState[1];
 
-                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v2') || '0');
+                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v3') || '0');
                 var offsetLeft = leftOffsetState[0], setOffsetLeft = leftOffsetState[1];
 
                 var queueState = useState([]);
@@ -686,19 +731,22 @@
                 var previewItemState = useState(null);
                 var previewItem = previewItemState[0], setPreviewItem = previewItemState[1];
 
+                var zplModalState = useState(null);
+                var zplModalCode = zplModalState[0], setZplModalCode = zplModalState[1];
+
                 var handleHeightChange = function(val) {
                     setLabelHeight(val);
-                    localStorage.setItem('zd_label_height_v2', val);
+                    localStorage.setItem('zd_label_height_v3', val);
                 };
 
                 var handleTopOffsetChange = function(val) {
                     setOffsetTop(val);
-                    localStorage.setItem('zd_offset_top_v2', val);
+                    localStorage.setItem('zd_offset_top_v3', val);
                 };
 
                 var handleLeftOffsetChange = function(val) {
                     setOffsetLeft(val);
-                    localStorage.setItem('zd_offset_left_v2', val);
+                    localStorage.setItem('zd_offset_left_v3', val);
                 };
 
                 var formatMac = function(val) {
@@ -782,7 +830,6 @@
                            (d.ativo || '').toLowerCase().indexOf(q) !== -1;
                 });
 
-                // Dados ativos para pré-visualização ao vivo da etiqueta (Sem MAC)
                 var activePreviewData = previewItem || (form.nome || form.ativo || form.setor ? form : {
                     nome: 'DESKTOP-01',
                     setor: 'ENGENHARIA',
@@ -818,10 +865,10 @@
                                         </select>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Use valores negativos (ex: -10) para subir a impressão ou positivos para descer">Ajuste Topo (mm):</span>
+                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="0 = Topo Absoluto. Valores positivos (ex: 2, 5) descem o desenho sem cortar o COBRECOM TI">Posição Topo (mm):</span>
                                         <input 
                                             type="number" 
-                                            step="1"
+                                            step="0.5"
                                             value={offsetTop} 
                                             onChange={function(e) { handleTopOffsetChange(e.target.value); }}
                                             className="w-14 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
@@ -934,7 +981,20 @@
                                         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                                             {Icons.QrCode} Prévia da Bobina ZD220 (10cm)
                                         </span>
-                                        <Badge color="blue">3x 3.0x{labelHeight}cm</Badge>
+                                        <div className="flex items-center gap-2">
+                                            <button 
+                                                type="button"
+                                                onClick={function() {
+                                                    var targetItems = printQueue.length > 0 ? printQueue : [activePreviewData];
+                                                    setZplModalCode(generateZPLCode(targetItems, offsetTop, offsetLeft));
+                                                }}
+                                                className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white border border-slate-700"
+                                                title="Ver código ZPL nativo para Zebra"
+                                            >
+                                                ZPL
+                                            </button>
+                                            <Badge color="blue">3x 3.0x{labelHeight}cm</Badge>
+                                        </div>
                                     </div>
 
                                     <div className="p-3 bg-slate-950 rounded-xl border border-dashed border-slate-800 overflow-x-auto">
@@ -988,6 +1048,27 @@
                                     )}
                                 </Card>
                             </div>
+
+                            {/* MODAL ZPL NATIVO CASO QUEIRA ENVIAR VIA ZEBRA UTILITIES / RAW */}
+                            {zplModalCode && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
+                                    <Card className="w-full max-w-lg bg-slate-900 border-slate-700" noPadding>
+                                        <div className="p-4 border-b border-slate-800 flex justify-between items-center">
+                                            <h3 className="font-bold text-white text-sm">Código ZPL Nativo (ZD220 - 203dpi)</h3>
+                                            <button onClick={function() { setZplModalCode(null); }} className="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
+                                        </div>
+                                        <div className="p-4 space-y-3">
+                                            <textarea readOnly value={zplModalCode} className="w-full h-48 p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-lg border border-slate-800 outline-none" />
+                                            <div className="flex justify-end gap-2">
+                                                <Button variant="secondary" className="text-xs" onClick={function() { navigator.clipboard.writeText(zplModalCode); alert("Código ZPL copiado!"); }}>
+                                                    {Icons.Copy} Copiar ZPL
+                                                </Button>
+                                                <Button className="text-xs" onClick={function() { setZplModalCode(null); }}>Fechar</Button>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </div>
+                            )}
 
                             {/* LISTA DE CONSULTA E IMPRESSÃO RÁPIDA */}
                             <Card noPadding className="overflow-hidden">
