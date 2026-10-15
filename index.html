@@ -114,7 +114,7 @@
             body.printing-zebra #root { display: none !important; }
             body.printing-zebra #zebra-print-root { 
                 display: block !important; 
-                position: fixed !important;
+                position: absolute !important;
                 top: 0 !important;
                 left: 0 !important;
                 margin: 0 !important;
@@ -230,7 +230,8 @@
             };
 
             // Gerador de código ZPL Nativo para Zebra ZD220 (203 DPI = 8 dots/mm)
-            var generateZPLCode = function(itemsArray, offsetTopMm, offsetLeftMm) {
+            // Bobina 100mm (800 dots) x 20mm (160 dots)
+            var generateZPLCode = function(itemsArray, offsetTopMm, x1Mm, x2Mm, x3Mm) {
                 var rowItems = [];
                 if (itemsArray.length === 1) {
                     rowItems = [itemsArray[0], itemsArray[0], itemsArray[0]];
@@ -239,16 +240,19 @@
                 }
 
                 var dpmm = 8; // 203 dpi = 8 dots por mm
-                var shiftY = Math.round(parseFloat(offsetTopMm || '0') * dpmm);
-                var shiftX = Math.round(parseFloat(offsetLeftMm || '0') * dpmm);
-                var colX = [16 + shiftX, 280 + shiftX, 544 + shiftX];
+                var shiftY = Math.round(parseFloat(offsetTopMm || '1') * dpmm);
+                var colX = [
+                    Math.round(parseFloat(x1Mm !== undefined ? x1Mm : '2') * dpmm),
+                    Math.round(parseFloat(x2Mm !== undefined ? x2Mm : '35') * dpmm),
+                    Math.round(parseFloat(x3Mm !== undefined ? x3Mm : '68') * dpmm)
+                ];
 
                 var zpl = "^XA\n^CI28\n^PW800\n^LL160\n^LH0,0\n";
 
                 rowItems.forEach(function(item, idx) {
                     if (!item) return;
                     var x = Math.max(0, colX[idx]);
-                    var y = Math.max(0, 8 + shiftY);
+                    var y = Math.max(0, shiftY);
 
                     var ativo = (item.ativo || 'S/ ATIVO').substring(0, 12);
                     var nome = (item.nome || '-').substring(0, 14);
@@ -267,13 +271,31 @@
                 return zpl;
             };
 
-            // Motor de Impressão via Canvas com Bloqueio de Auto-Encolhimento Horizontal
-            // Impede que o driver do Windows esprema os 100mm em 38mm no meio da bobina
-            var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, offsetLeftMm, widthScalePct) {
+            // Tenta enviar ZPL direto para Zebra Browser Print (porta local 9100) se estiver ativo no Windows
+            var trySendZebraBrowserPrint = function(zplString, onSuccess, onFail) {
+                fetch('http://127.0.0.1:9100/default?type=printer', { method: 'GET' })
+                    .then(function(res) { return res.json(); })
+                    .then(function(device) {
+                        if (!device || !device.uid) throw new Error("Sem Zebra Browser Print");
+                        return fetch('http://127.0.0.1:9100/write', {
+                            method: 'POST',
+                            body: JSON.stringify({ device: device, data: zplString })
+                        });
+                    })
+                    .then(function(res) {
+                        if (res.ok) onSuccess();
+                        else onFail();
+                    })
+                    .catch(function() { onFail(); });
+            };
+
+            // Motor de Impressão via Canvas com Dimensões Reais 100mm x 20mm e Posições X1, X2, X3 Independentes
+            var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, x1Mm, x2Mm, x3Mm) {
                 var heightMm = Math.round(parseFloat(labelHeightCm || '2.0') * 10);
-                var yOffsetMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '9');
-                var leftShiftMm = parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '0');
-                var widthPct = parseFloat(widthScalePct || '250'); //Compensa o encolhimento de 38mm -> 100mm do driver
+                var yOffsetMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '1');
+                var pos1 = parseFloat(x1Mm !== undefined ? x1Mm : '2.0');
+                var pos2 = parseFloat(x2Mm !== undefined ? x2Mm : '35.0');
+                var pos3 = parseFloat(x3Mm !== undefined ? x3Mm : '68.0');
 
                 var rowItems = [];
                 if (itemsArray.length === 1) {
@@ -286,10 +308,9 @@
                     ];
                 }
 
-                // Escala de alta definição: 12 pixels por milímetro
+                // Escala de alta definição: 12 pixels por milímetro (~305 DPI)
                 var scale = 12;
-                var extraTopMm = Math.max(0, yOffsetMm);
-                var canvasHeightMm = heightMm + extraTopMm;
+                var canvasHeightMm = Math.max(heightMm, heightMm + Math.max(0, yOffsetMm - 2));
 
                 var canvas = document.createElement('canvas');
                 canvas.width = 100 * scale; // 100mm = 1200px
@@ -299,8 +320,8 @@
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Posições X iniciais de cada etiqueta na régua de 100mm: 2mm, 35mm, 68mm
-                var colStartMm = [2.0, 35.0, 68.0];
+                // Posições X iniciais de cada etiqueta na régua de 100mm (ajustáveis pelo usuário)
+                var colStartMm = [pos1, pos2, pos3];
                 var labelW = 30.0 * scale;
 
                 rowItems.forEach(function(item, idx) {
@@ -318,10 +339,10 @@
                     ctx.font = '900 ' + Math.round(2.1 * scale) + 'px Arial, Helvetica, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'top';
-                    ctx.fillText('COBRECOM TI', x0 + (labelW / 2), y0 + (0.6 * scale));
+                    ctx.fillText('COBRECOM TI', x0 + (labelW / 2), y0 + (0.5 * scale));
 
                     // 2. Linha horizontal preta abaixo do cabeçalho
-                    var lineY = y0 + (3.1 * scale);
+                    var lineY = y0 + (3.0 * scale);
                     ctx.strokeStyle = '#000000';
                     ctx.lineWidth = Math.max(2, Math.round(0.3 * scale));
                     ctx.beginPath();
@@ -391,39 +412,33 @@
                 });
 
                 var stripDataUrl = canvas.toDataURL('image/png');
-                var cssTopMm = yOffsetMm < 0 ? yOffsetMm : 0;
 
-                // Se widthPct = 100%, usa 100mm diretos.
-                // Se o driver do Windows estiver configurado como etiqueta única estreita (~38mm) e espremendo os 100mm no meio,
-                // widthPct permite expandir horizontalmente a partir do centro da bobina para abrir nas 3 colunas!
-                var renderWidthMm = Math.round(100 * (widthPct / 100) * 10) / 10;
-
+                // Define exatamente 100mm x 20mm (Paisagem 5:1) para que o Chrome não aplique redução de 50% (shrink-to-fit)
                 var styleEl = document.getElementById('dynamic-print-page-style');
                 styleEl.innerHTML = `
                     @media print {
                         @page {
-                            size: 100mm 100mm !important;
+                            size: 100mm ${heightMm}mm !important;
                             margin: 0mm !important;
                         }
                         html, body {
-                            width: 100% !important;
+                            width: 100mm !important;
+                            height: ${heightMm}mm !important;
                             margin: 0mm !important;
                             padding: 0mm !important;
-                            overflow: visible !important;
+                            overflow: hidden !important;
                         }
                         .zd-canvas-wrap {
-                            position: fixed !important;
-                            left: 50% !important;
+                            position: absolute !important;
+                            left: 0mm !important;
                             top: 0mm !important;
-                            transform: translate(calc(-50% + ${leftShiftMm}mm), ${cssTopMm}mm) !important;
-                            width: ${renderWidthMm}mm !important;
-                            max-width: none !important;
+                            width: 100mm !important;
+                            height: ${canvasHeightMm}mm !important;
                             margin: 0 !important;
                             padding: 0 !important;
                         }
                         .zd-canvas-img {
-                            width: ${renderWidthMm}mm !important;
-                            max-width: none !important;
+                            width: 100mm !important;
                             height: ${canvasHeightMm}mm !important;
                             display: block !important;
                         }
@@ -710,19 +725,22 @@
                 var searchState = useState('');
                 var search = searchState[0], setSearch = searchState[1];
 
-                var heightState = useState(localStorage.getItem('zd_label_height_v4') || '2.0');
+                var heightState = useState(localStorage.getItem('zd_label_height_v5') || '2.0');
                 var labelHeight = heightState[0], setLabelHeight = heightState[1];
 
-                // Já inicia em 9mm conforme acertado no teste do usuário
-                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v4') || '9');
+                // Topo ajustável (padrão 1mm com @page 100x20mm real)
+                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v5') || '1');
                 var offsetTop = topOffsetState[0], setOffsetTop = topOffsetState[1];
 
-                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v4') || '0');
-                var offsetLeft = leftOffsetState[0], setOffsetLeft = leftOffsetState[1];
+                // Posição em mm de cada coluna na régua de 100mm: Col 1 = 2mm, Col 2 = 35mm, Col 3 = 68mm
+                var x1State = useState(localStorage.getItem('zd_col_x1_v5') || '2');
+                var colX1 = x1State[0], setColX1 = x1State[1];
 
-                // Escala de abertura horizontal (100% = 100mm; se o driver espremer, pode subir p/ 260%)
-                var widthScaleState = useState(localStorage.getItem('zd_width_scale_v4') || '100');
-                var widthScale = widthScaleState[0], setWidthScale = widthScaleState[1];
+                var x2State = useState(localStorage.getItem('zd_col_x2_v5') || '35');
+                var colX2 = x2State[0], setColX2 = x2State[1];
+
+                var x3State = useState(localStorage.getItem('zd_col_x3_v5') || '68');
+                var colX3 = x3State[0], setColX3 = x3State[1];
 
                 var queueState = useState([]);
                 var printQueue = queueState[0], setPrintQueue = queueState[1];
@@ -735,22 +753,27 @@
 
                 var handleHeightChange = function(val) {
                     setLabelHeight(val);
-                    localStorage.setItem('zd_label_height_v4', val);
+                    localStorage.setItem('zd_label_height_v5', val);
                 };
 
                 var handleTopOffsetChange = function(val) {
                     setOffsetTop(val);
-                    localStorage.setItem('zd_offset_top_v4', val);
+                    localStorage.setItem('zd_offset_top_v5', val);
                 };
 
-                var handleLeftOffsetChange = function(val) {
-                    setOffsetLeft(val);
-                    localStorage.setItem('zd_offset_left_v4', val);
+                var handleX1Change = function(val) {
+                    setColX1(val);
+                    localStorage.setItem('zd_col_x1_v5', val);
                 };
 
-                var handleWidthScaleChange = function(val) {
-                    setWidthScale(val);
-                    localStorage.setItem('zd_width_scale_v4', val);
+                var handleX2Change = function(val) {
+                    setColX2(val);
+                    localStorage.setItem('zd_col_x2_v5', val);
+                };
+
+                var handleX3Change = function(val) {
+                    setColX3(val);
+                    localStorage.setItem('zd_col_x3_v5', val);
                 };
 
                 var formatMac = function(val) {
@@ -760,7 +783,16 @@
                 };
 
                 var triggerPrint = function(items) {
-                    printZebraZD220Labels(items, labelHeight, offsetTop, offsetLeft, widthScale);
+                    var zpl = generateZPLCode(items, offsetTop, colX1, colX2, colX3);
+                    // Tenta primeiro via Zebra Browser Print (se instalado na máquina, ignora driver Windows e abre 100mm direto via ZPL ^PW800);
+                    // Caso contrário, aciona imediatamente a impressão do Windows calibrada em 100x20mm.
+                    trySendZebraBrowserPrint(
+                        zpl,
+                        function() {},
+                        function() {
+                            printZebraZD220Labels(items, labelHeight, offsetTop, colX1, colX2, colX3);
+                        }
+                    );
                 };
 
                 var handleSave = function(shouldPrintAfter) {
@@ -853,49 +885,46 @@
                                     <p className="text-slate-500 text-sm">Cadastro, consulta e impressão térmica Zebra ZD220 (100mm • 3 col de 30x20mm • gap 3mm).</p>
                                 </div>
 
-                                {/* BARRA DE CALIBRAÇÃO FINA DA ETIQUETA */}
-                                <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-[10px] font-bold uppercase text-slate-400">Medida:</span>
-                                        <select 
-                                            value={labelHeight} 
-                                            onChange={function(e) { handleHeightChange(e.target.value); }}
-                                            className="bg-slate-100 dark:bg-slate-800 text-xs font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none"
-                                        >
-                                            <option value="2.0">3.0 x 2.0 cm (Régua)</option>
-                                            <option value="1.5">3.0 x 1.5 cm</option>
-                                            <option value="2.5">3.0 x 2.5 cm</option>
-                                            <option value="3.0">3.0 x 3.0 cm</option>
-                                        </select>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Posição vertical (9mm ficou cravado na sua bobina)">Posição Topo (mm):</span>
+                                {/* BARRA DE CALIBRAÇÃO MILIMÉTRICA PELA RÉGUA (X1, X2, X3 e TOPO) */}
+                                <div className="flex flex-wrap items-center gap-2.5 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] font-bold uppercase text-slate-400">Topo (mm):</span>
                                         <input 
                                             type="number" 
                                             step="0.5"
                                             value={offsetTop} 
                                             onChange={function(e) { handleTopOffsetChange(e.target.value); }}
-                                            className="w-14 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
+                                            className="w-12 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-1.5 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
                                         />
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Ajuste lateral fino em milímetros">Ajuste Esq (mm):</span>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Início da Etiqueta 1 na régua (padrão 2mm)">Col 1 (mm):</span>
                                         <input 
                                             type="number" 
                                             step="0.5"
-                                            value={offsetLeft} 
-                                            onChange={function(e) { handleLeftOffsetChange(e.target.value); }}
-                                            className="w-14 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
+                                            value={colX1} 
+                                            onChange={function(e) { handleX1Change(e.target.value); }}
+                                            className="w-12 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-1.5 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
                                         />
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="100 = 10cm reais. Se o driver espremer no meio, aumente para 260">Abertura Larg (%):</span>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Início da Etiqueta 2 na régua (padrão 35mm)">Col 2 (mm):</span>
                                         <input 
                                             type="number" 
-                                            step="10"
-                                            value={widthScale} 
-                                            onChange={function(e) { handleWidthScaleChange(e.target.value); }}
-                                            className="w-16 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
+                                            step="0.5"
+                                            value={colX2} 
+                                            onChange={function(e) { handleX2Change(e.target.value); }}
+                                            className="w-12 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-1.5 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Início da Etiqueta 3 na régua (padrão 68mm)">Col 3 (mm):</span>
+                                        <input 
+                                            type="number" 
+                                            step="0.5"
+                                            value={colX3} 
+                                            onChange={function(e) { handleX3Change(e.target.value); }}
+                                            className="w-12 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-1.5 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
                                         />
                                     </div>
                                 </div>
@@ -1000,7 +1029,7 @@
                                                 type="button"
                                                 onClick={function() {
                                                     var targetItems = printQueue.length > 0 ? printQueue : [activePreviewData];
-                                                    setZplModalCode(generateZPLCode(targetItems, offsetTop, offsetLeft));
+                                                    setZplModalCode(generateZPLCode(targetItems, offsetTop, colX1, colX2, colX3));
                                                 }}
                                                 className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white border border-slate-700"
                                                 title="Ver código ZPL nativo para Zebra"
@@ -3096,202 +3125,3 @@
 
                 return (
                     <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
-                        
-                        {isMobileMenuOpen && (
-                            <div className="fixed inset-0 bg-black/60 z-40 md:hidden fade-in" onClick={function(){ setIsMobileMenuOpen(false); }}></div>
-                        )}
-
-                        <aside className={"fixed md:relative inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 z-50 shrink-0 transform transition-transform duration-300 " + (isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0")}>
-                            <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800 shrink-0">
-                                <div className="flex items-center gap-3 font-bold text-white tracking-wide">
-                                    <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                                    </div>
-                                    INFRA HUB
-                                </div>
-                                <button className="md:hidden text-slate-400 hover:text-white" onClick={function(){ setIsMobileMenuOpen(false); }}>
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                </button>
-                            </div>
-                            
-                            <div className="flex-1 overflow-y-auto py-6">
-                                <div className="px-6 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Principal</div>
-                                <nav className="px-3 space-y-1 mb-8">
-                                    <button onClick={function() { navTo('dashboard'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'dashboard' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                        {Icons.Layout} Dashboard
-                                    </button>
-                                    <button onClick={function() { navTo('kanban'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'kanban' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                        {Icons.Kanban} Kanban TI
-                                    </button>
-                                    <button onClick={function() { navTo('analytics'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'analytics' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                        {Icons.BarChart} Analytics
-                                    </button>
-                                    <button onClick={function() { navTo('sistema176'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'sistema176' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                        {Icons.Globe} Controle de Estoque
-                                    </button>
-                                    <button onClick={function() { navTo('controleDesktops'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'controleDesktops' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                        {Icons.Monitor} Controle de Desktop's
-                                    </button>
-                                    <button onClick={function() { navTo('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
-                                        {Icons.History} Histórico
-                                    </button>
-                                </nav>
-
-                                <div className="flex items-center justify-between px-6 mb-2">
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Módulos</span>
-                                    <button onClick={handleAddFolder} className="text-slate-400 hover:text-brand-400 text-xs flex items-center gap-1 font-semibold" title="Criar nova pasta">{Icons.Plus} <span className="text-[10px]">Pasta</span></button>
-                                </div>
-
-                                <nav className="px-3 space-y-1">
-                                    <div className="space-y-1 mb-2">
-                                        <div onClick={function() { toggleFolder('checklists'); }} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-pointer " + (openFolders.checklists ? 'bg-slate-800/60 text-white' : '')}>
-                                            <div className="flex items-center gap-2.5 truncate">
-                                                <span className={openFolders.checklists ? "text-brand-400" : "text-slate-500"}>{Icons.Folder}</span> 
-                                                <span className="truncate font-semibold">Checklists de TI</span>
-                                            </div>
-                                            <div className={"transition-transform duration-200 text-slate-500 " + (openFolders.checklists ? 'rotate-180' : '')}>
-                                                {Icons.ChevronDown}
-                                            </div>
-                                        </div>
-                                        
-                                        {openFolders.checklists && (
-                                            <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
-                                                <button onClick={function() { handleCreateTicket('diario'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 group truncate">
-                                                    <span className="text-emerald-500/50 group-hover:text-emerald-400">{Icons.Check}</span> Check Diário
-                                                </button>
-                                                <button onClick={function() { handleCreateTicket('rack'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-400 hover:bg-slate-800/50 group truncate">
-                                                    <span className="text-indigo-500/50 group-hover:text-indigo-400">{Icons.Server}</span> Rack Fábrica
-                                                </button>
-                                                <button onClick={function() { handleCreateTicket('formatacao'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-brand-400 hover:bg-slate-800/50 group truncate">
-                                                    <span className="text-brand-500/50 group-hover:text-brand-400">{Icons.Copy}</span> Formatação PC
-                                                </button>
-                                                <button onClick={function() { handleCreateTicket('zebra'); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-amber-400 hover:bg-slate-800/50 group truncate">
-                                                    <span className="text-amber-500/50 group-hover:text-amber-400">{Icons.Printer}</span> Manutenção Zebra
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {customFolders.map(function(f) {
-                                        var isOpen = !!openFolders[f.id];
-                                        return (
-                                            <div key={f.id} className="space-y-1 mb-1"
-                                                 draggable={true}
-                                                 onDragStart={function(e) { handleDragStartFolder(e, f.id); }}
-                                                 onDragOver={function(e) { e.preventDefault(); e.currentTarget.style.borderTop = '2px solid #3b82f6'; }}
-                                                 onDragLeave={function(e) { e.currentTarget.style.borderTop = ''; }}
-                                                 onDrop={function(e) { handleDropFolder(e, f.id); }}
-                                            >
-                                                <div onClick={function() { toggleFolder(f.id); }} className={"w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors font-medium text-xs text-slate-300 hover:bg-slate-800 cursor-grab active:cursor-grabbing group " + (isOpen ? 'bg-slate-800/60 text-white' : '')}>
-                                                    <div className="flex items-center gap-2.5 truncate pointer-events-none">
-                                                        <span className={isOpen ? "text-amber-400" : "text-slate-500"}>{Icons.Folder}</span> 
-                                                        <span className="truncate font-semibold uppercase">{f.title}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 shrink-0">
-                                                        <button onClick={function(e){ handleDeleteFolder(e, f.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Pasta">{Icons.Trash}</button>
-                                                        <div className={"transition-transform duration-200 text-slate-500 " + (isOpen ? 'rotate-180' : '')}>{Icons.ChevronDown}</div>
-                                                    </div>
-                                                </div>
-                                                
-                                                {isOpen && (
-                                                    <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 fade-in">
-                                                        {(f.links || []).map(function(l) {
-                                                            return (
-                                                                <div key={l.id} className="flex items-center justify-between group px-2 py-1 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800/50">
-                                                                    <div onClick={function() { handleOpenLink(l.url); setIsMobileMenuOpen(false); }} className="flex items-center gap-2 truncate cursor-pointer flex-1" title={l.url}>
-                                                                        <span className="text-slate-500 group-hover:text-brand-400">{Icons.ExternalLink}</span>
-                                                                        <span className="truncate uppercase">{l.label}</span>
-                                                                    </div>
-                                                                    <button onClick={function(e) { handleDeleteLink(e, f.id, l.id); }} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 shrink-0" title="Remover link">{Icons.Trash}</button>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                        <button onClick={function() { handleAddLink(f.id); }} className="w-full text-left flex items-center gap-1.5 px-2 py-1 text-[10px] text-slate-500 hover:text-brand-400 font-semibold">
-                                                            {Icons.Plus} <span>ADICIONAR LINK</span>
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </nav>
-                            </div>
-
-                            <div className="p-4 border-t border-slate-800 shrink-0 bg-slate-900 z-10">
-                                <div className="flex items-center gap-3 mb-4 px-2">
-                                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                                        {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
-                                    </div>
-                                    <div className="overflow-hidden">
-                                        <p className="text-sm font-bold text-white truncate uppercase">{currentUser ? currentUser.name : ''}</p>
-                                        <p className="text-xs text-slate-500 font-mono">GOOGLE AUTH</p>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <button title="Alternar tema" onClick={function() { setDarkMode(!darkMode); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-colors flex justify-center">{darkMode ? Icons.Sun : Icons.Moon}</button>
-                                    <button title="Configurações" onClick={function() { setShowConfig(true); setIsMobileMenuOpen(false); }} className="p-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex justify-center">{Icons.Settings}</button>
-                                    <button title="Sair" onClick={handleLogout} className="p-2 rounded bg-red-900/20 hover:bg-red-900/40 text-red-400 transition-colors flex justify-center">{Icons.LogOut}</button>
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-slate-800 text-center">
-                                    <p className="text-[10px] text-slate-600 cursor-pointer hover:text-slate-400 uppercase" onClick={function() { if (fileInputRef.current) fileInputRef.current.click(); }}>Alterar Logo</p>
-                                    <input type="file" ref={fileInputRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
-                                </div>
-                            </div>
-                        </aside>
-
-                        <main className="flex-1 flex flex-col min-w-0 w-full bg-slate-100 dark:bg-slate-950 relative overflow-hidden">
-                            <div className="md:hidden h-16 bg-slate-900 text-white flex items-center justify-between px-4 shrink-0 border-b border-slate-800">
-                                <div className="flex items-center gap-2">
-                                    <button onClick={function() { setIsMobileMenuOpen(true); }} className="p-2 -ml-2 text-slate-300 active:bg-slate-800 rounded">
-                                        {Icons.Menu}
-                                    </button>
-                                    <span className="font-bold text-sm tracking-wide">INFRA HUB</span>
-                                </div>
-                                <div className="flex gap-1">
-                                    <button onClick={function() { setShowConfig(true); }} className="p-2 text-slate-400">{Icons.Settings}</button>
-                                </div>
-                            </div>
-
-                            <div className="flex-1 overflow-auto relative">
-                                {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
-                                {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); navTo('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
-                                {view === 'analytics' && <AnalyticsView history={history} />}
-                                {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} currentUser={currentUser} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} onReorderTask={handleReorderKanbanTask} onUpdateTask={handleUpdateKanbanTask} />}
-                                {view === 'sistema176' && (
-                                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col">
-                                        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 bg-white dark:bg-slate-900 shadow-sm z-10">
-                                            <h2 className="text-sm md:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2 uppercase">
-                                                {Icons.Globe} <span className="hidden sm:inline">Controle de</span> Estoque T.I
-                                            </h2>
-                                            <Button onClick={function(){ window.open(APP_CONFIG.ESTOQUE_URL, '_blank'); }} variant="secondary" className="text-xs">
-                                                <span className="hidden sm:inline">{Icons.ExternalLink} Abrir em nova guia</span>
-                                                <span className="sm:hidden">{Icons.ExternalLink} Abrir</span>
-                                            </Button>
-                                        </div>
-                                        <div className="flex-1 w-full relative">
-                                            <iframe src={APP_CONFIG.ESTOQUE_URL} className="absolute inset-0 w-full h-full border-none" title="Controle de Estoque T.I" />
-                                        </div>
-                                    </div>
-                                )}
-                                {view === 'controleDesktops' && (
-                                    <DesktopControlView desktops={desktops} currentUser={currentUser} />
-                                )}
-                                {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} currentUser={currentUser} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
-                                {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { navTo('checklist'); }} onArchive={handleArchive} logo={logo} />}
-                                {view === 'history' && <HistoryView history={history} onOpenHistory={function(h) { setSelectedHistoryTicket(h); navTo('history_receipt'); }} />}
-                                {view === 'history_receipt' && <ReceiptView ticket={selectedHistoryTicket} isHistory={true} onBack={function() { navTo('history'); setSelectedHistoryTicket(null); }} logo={logo} onArchive={null} onRevertHistory={handleRevertHistory} />}
-                            </div>
-                        </main>
-                    </div>
-                );
-            };
-
-            var root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(<App />);
-            
-        } catch (err) {
-            document.getElementById('root').innerHTML = '<div style="padding:40px;color:#ef4444;font-family:sans-serif;"><h3>Falha Fatal de Inicialização</h3><pre>' + err.message + '</pre></div>';
-        }
-    </script>
-</body>
-</html>
