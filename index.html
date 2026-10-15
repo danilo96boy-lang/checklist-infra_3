@@ -216,6 +216,12 @@
                 Edit: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             };
 
+            // Função centralizada que monta o conteúdo do QR Code apenas com NOME e SETOR
+            var buildDesktopQRPayload = function(item) {
+                if (!item) return 'COBRECOM TI';
+                return "NOME: " + (item.nome || '-') + " | SETOR: " + (item.setor || '-');
+            };
+
             // Gerador de DataURL para a prévia na tela
             var generateQRDataURL = function(text) {
                 try {
@@ -266,7 +272,7 @@
                     var ativo = (item.ativo || 'S/ ATIVO').substring(0, 12);
                     var nome = (item.nome || '-').substring(0, 14);
                     var setor = (item.setor || '-').substring(0, 14);
-                    var qrPayload = "ATIVO:" + (item.ativo || '') + "|NOME:" + (item.nome || '') + "|SETOR:" + (item.setor || '');
+                    var qrPayload = buildDesktopQRPayload(item);
 
                     zpl += "^FO" + x + "," + y + "^A0N,16,16^FB240,1,0,C^FDCOBRECOM TI^FS\n";
                     zpl += "^FO" + (x + 10) + "," + (y + 19) + "^GB220,2,2^FS\n";
@@ -302,7 +308,7 @@
                     if (!item) {
                         return '<div class="zd-box"></div>';
                     }
-                    var qrPayload = "ATIVO:" + (item.ativo || '') + "|NOME:" + (item.nome || '') + "|SETOR:" + (item.setor || '');
+                    var qrPayload = buildDesktopQRPayload(item);
                     var svgQr = generateQRSVG(qrPayload);
 
                     return (
@@ -720,13 +726,13 @@
 
                 // VALORES PREDEFINIDOS CONFORME SOLICITADO:
                 // Medida: 3.0 x 2.0 cm (Régua) | Posição Topo (mm): 0 | Margem Esq (mm): 4
-                var heightState = useState(localStorage.getItem('zd_label_height_v7') || '2.0');
+                var heightState = useState(localStorage.getItem('zd_label_height_v8') || '2.0');
                 var labelHeight = heightState[0], setLabelHeight = heightState[1];
 
-                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v7') || '0');
+                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v8') || '0');
                 var offsetTop = topOffsetState[0], setOffsetTop = topOffsetState[1];
 
-                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v7') || '4');
+                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v8') || '4');
                 var offsetLeft = leftOffsetState[0], setOffsetLeft = leftOffsetState[1];
 
                 var queueState = useState([]);
@@ -740,17 +746,17 @@
 
                 var handleHeightChange = function(val) {
                     setLabelHeight(val);
-                    localStorage.setItem('zd_label_height_v7', val);
+                    localStorage.setItem('zd_label_height_v8', val);
                 };
 
                 var handleTopOffsetChange = function(val) {
                     setOffsetTop(val);
-                    localStorage.setItem('zd_offset_top_v7', val);
+                    localStorage.setItem('zd_offset_top_v8', val);
                 };
 
                 var handleLeftOffsetChange = function(val) {
                     setOffsetLeft(val);
-                    localStorage.setItem('zd_offset_left_v7', val);
+                    localStorage.setItem('zd_offset_left_v8', val);
                 };
 
                 var formatMac = function(val) {
@@ -840,7 +846,7 @@
                     ativo: 'DT-0042'
                 });
 
-                var previewQrUrl = generateQRDataURL("ATIVO:" + (activePreviewData.ativo || '') + "|NOME:" + (activePreviewData.nome || '') + "|SETOR:" + (activePreviewData.setor || ''));
+                var previewQrUrl = generateQRDataURL(buildDesktopQRPayload(activePreviewData));
 
                 return (
                     <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-10 fade-in overflow-auto">
@@ -1013,7 +1019,7 @@
                                                     );
                                                 }
                                                 var slotQr = printQueue.length > 0 
-                                                    ? generateQRDataURL("ATIVO:" + (slotItem.ativo || '') + "|NOME:" + (slotItem.nome || '') + "|SETOR:" + (slotItem.setor || ''))
+                                                    ? generateQRDataURL(buildDesktopQRPayload(slotItem))
                                                     : previewQrUrl;
 
                                                 return (
@@ -1108,7 +1114,7 @@
                                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                             {filtered.map(function(item) {
                                                 var isQueued = printQueue.some(function(q) { return q.id === item.id; });
-                                                var thumbQr = generateQRDataURL("ATIVO:" + (item.ativo || '') + "|NOME:" + (item.nome || '') + "|SETOR:" + (item.setor || ''));
+                                                var thumbQr = generateQRDataURL(buildDesktopQRPayload(item));
                                                 return (
                                                     <tr 
                                                         key={item.id} 
