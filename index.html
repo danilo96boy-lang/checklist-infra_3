@@ -252,8 +252,8 @@
                 }
 
                 var dpmm = 8; // 203 dpi = 8 dots por mm
-                var shiftY = Math.round(parseFloat(offsetTopMm || '0') * dpmm);
-                var shiftX = Math.round(parseFloat(offsetLeftMm || '0') * dpmm);
+                var shiftY = Math.round(parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0') * dpmm);
+                var shiftX = Math.round(parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '4') * dpmm);
                 var colX = [16 + shiftX, 280 + shiftX, 544 + shiftX];
 
                 var zpl = "^XA\n^CI28\n^PW800\n^LL160\n^LH0,0\n";
@@ -281,12 +281,11 @@
             };
 
             // Motor de Impressão Vetorial Flexbox de 3 Colunas
-            // AGORA USA `margin-top` e `margin-left` (que aceitam valores NEGATIVOS e POSITIVOS)
-            // para subir o bloco inteiro para o topo da etiqueta!
+            // Padrão predefinido: Medida 3.0 x 2.0 cm | Posição Topo: 0 mm | Margem Esq: 4 mm
             var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, offsetLeftMm) {
                 var heightMm = Math.round(parseFloat(labelHeightCm || '2.0') * 10);
-                var topMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '-10');
-                var leftShiftMm = parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '2.0');
+                var topMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0');
+                var leftShiftMm = parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '4');
 
                 var rowItems = [];
                 if (itemsArray.length === 1) {
@@ -719,13 +718,15 @@
                 var searchState = useState('');
                 var search = searchState[0], setSearch = searchState[1];
 
-                var heightState = useState(localStorage.getItem('zd_label_height_v6') || '2.0');
+                // VALORES PREDEFINIDOS CONFORME SOLICITADO:
+                // Medida: 3.0 x 2.0 cm (Régua) | Posição Topo (mm): 0 | Margem Esq (mm): 4
+                var heightState = useState(localStorage.getItem('zd_label_height_v7') || '2.0');
                 var labelHeight = heightState[0], setLabelHeight = heightState[1];
 
-                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v6') || '-10');
+                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v7') || '0');
                 var offsetTop = topOffsetState[0], setOffsetTop = topOffsetState[1];
 
-                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v6') || '2.0');
+                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v7') || '4');
                 var offsetLeft = leftOffsetState[0], setOffsetLeft = leftOffsetState[1];
 
                 var queueState = useState([]);
@@ -739,17 +740,17 @@
 
                 var handleHeightChange = function(val) {
                     setLabelHeight(val);
-                    localStorage.setItem('zd_label_height_v6', val);
+                    localStorage.setItem('zd_label_height_v7', val);
                 };
 
                 var handleTopOffsetChange = function(val) {
                     setOffsetTop(val);
-                    localStorage.setItem('zd_offset_top_v6', val);
+                    localStorage.setItem('zd_offset_top_v7', val);
                 };
 
                 var handleLeftOffsetChange = function(val) {
                     setOffsetLeft(val);
-                    localStorage.setItem('zd_offset_left_v6', val);
+                    localStorage.setItem('zd_offset_left_v7', val);
                 };
 
                 var formatMac = function(val) {
@@ -878,7 +879,7 @@
                                         />
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Margem esquerda do liner (padrão 2mm pela régua)">Margem Esq (mm):</span>
+                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Margem esquerda do liner (padrão 4mm)">Margem Esq (mm):</span>
                                         <input 
                                             type="number" 
                                             step="0.5"
