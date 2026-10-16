@@ -270,17 +270,17 @@
                     var x = Math.max(0, colX[idx]);
                     var y = Math.max(0, 8 + shiftY);
 
-                    var ativo = (item.ativo || 'S/ ATIVO').substring(0, 12);
-                    var nome = (item.nome || '-').substring(0, 14);
-                    var setor = (item.setor || '-').substring(0, 14);
+                    var ativo = (item.ativo || 'S/ ATIVO').substring(0, 14);
+                    var nome = (item.nome || '-').substring(0, 32); // Permite até 32 caracteres em 2 linhas
+                    var setor = (item.setor || '-').substring(0, 18);
                     var qrPayload = buildDesktopQRPayload(item);
 
                     zpl += "^FO" + x + "," + y + "^A0N,16,16^FB240,1,0,C^FDCOBRECOM TI^FS\n";
                     zpl += "^FO" + (x + 10) + "," + (y + 19) + "^GB220,2,2^FS\n";
                     zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,3^FDLA," + qrPayload + "^FS\n";
-                    zpl += "^FO" + (x + 98) + "," + (y + 30) + "^A0N,20,20^FD" + ativo + "^FS\n";
-                    zpl += "^FO" + (x + 98) + "," + (y + 56) + "^A0N,16,16^FD" + nome + "^FS\n";
-                    zpl += "^FO" + (x + 98) + "," + (y + 78) + "^A0N,15,15^FD" + setor + "^FS\n";
+                    zpl += "^FO" + (x + 98) + "," + (y + 26) + "^A0N,19,19^FD" + ativo + "^FS\n";
+                    zpl += "^FO" + (x + 98) + "," + (y + 48) + "^A0N,14,14^FB142,2,0,L^FD" + nome + "^FS\n";
+                    zpl += "^FO" + (x + 98) + "," + (y + 80) + "^A0N,14,14^FB142,1,0,L^FD" + setor + "^FS\n";
                 });
 
                 zpl += "^XZ";
@@ -413,30 +413,33 @@
                             display: flex !important;
                             flex-direction: column !important;
                             justify-content: center !important;
-                            gap: 0.4mm !important;
+                            gap: 0.25mm !important;
                         }
                         .zd-t-ativo {
-                            font-size: 6.8pt !important;
+                            font-size: 6.5pt !important;
                             font-weight: 900 !important;
                             font-family: 'Courier New', monospace !important;
                             line-height: 1 !important;
                             white-space: nowrap !important;
                             overflow: hidden !important;
-                            text-overflow: ellipsis !important;
                         }
                         .zd-t-nome {
-                            font-size: 5.2pt !important;
+                            font-size: 4.7pt !important;
                             font-weight: 800 !important;
-                            line-height: 1.1 !important;
-                            white-space: nowrap !important;
+                            line-height: 1.05 !important;
+                            white-space: normal !important;
+                            word-break: break-word !important;
                             overflow: hidden !important;
-                            text-overflow: ellipsis !important;
+                            display: -webkit-box !important;
+                            -webkit-line-clamp: 2 !important;
+                            -webkit-box-orient: vertical !important;
+                            max-height: 3.4mm !important;
                             text-transform: uppercase !important;
                         }
                         .zd-t-setor {
-                            font-size: 4.8pt !important;
-                            font-weight: 600 !important;
-                            line-height: 1.1 !important;
+                            font-size: 4.5pt !important;
+                            font-weight: 700 !important;
+                            line-height: 1 !important;
                             white-space: nowrap !important;
                             overflow: hidden !important;
                             text-overflow: ellipsis !important;
@@ -1194,21 +1197,21 @@
                                                     ? generateQRDataURL(buildDesktopQRPayload(slotItem))
                                                     : previewQrUrl;
 
-                                                return (
-                                                    <div key={idx} className="bg-white text-black rounded-md shadow-sm p-1.5 flex flex-col justify-between overflow-hidden">
-                                                        <div className="text-[6.5px] font-black text-center border-b border-black pb-0.5 mb-1 tracking-wider leading-none">
-                                                            COBRECOM TI
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5">
-                                                            <img src={slotQr} alt="QR" className="w-8 h-8 object-contain shrink-0" />
-                                                            <div className="min-w-0 flex-1 leading-tight space-y-0.5">
-                                                                <div className="text-[8.5px] font-mono font-black truncate">{slotItem.ativo || 'S/ ATIVO'}</div>
-                                                                <div className="text-[7px] font-bold truncate uppercase">{slotItem.nome || '-'}</div>
-                                                                <div className="text-[6.5px] truncate uppercase text-slate-700">{slotItem.setor || '-'}</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
+                                               return (
+                                        <div key={idx} className="bg-white text-black rounded-md shadow-sm p-1.5 flex flex-col justify-between overflow-hidden">
+                                            <div className="text-[6.5px] font-black text-center border-b border-black pb-0.5 mb-1 tracking-wider leading-none">
+                                                COBRECOM TI
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <img src={slotQr} alt="QR" className="w-8 h-8 object-contain shrink-0" />
+                                                <div className="min-w-0 flex-1 leading-tight space-y-0.5">
+                                                    <div className="text-[8.5px] font-mono font-black truncate">{slotItem.ativo || 'S/ ATIVO'}</div>
+                                                    <div className="text-[6.5px] font-bold uppercase break-words leading-[1.1] line-clamp-2">{slotItem.nome || '-'}</div>
+                                                    <div className="text-[6px] truncate uppercase text-slate-700">{slotItem.setor || '-'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
                                             })}
                                         </div>
                                     </div>
