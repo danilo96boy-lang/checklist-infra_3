@@ -218,9 +218,12 @@
             };
 
             // Função centralizada que monta o conteúdo do QR Code apenas com NOME e SETOR
-            var buildDesktopQRPayload = function(item) {
+           var buildDesktopQRPayload = function(item) {
                 if (!item) return 'COBRECOM TI';
-                return "NOME: " + (item.nome || '-') + " | SETOR: " + (item.setor || '-');
+                var ativo = item.ativo || 'S/ATIVO';
+                var nome = item.nome || '-';
+                var setor = item.setor || '-';
+                return "ATIVO: " + ativo + " | NOME: " + nome + " | SETOR: " + setor;
             };
 
             // Gerador de DataURL para a prévia na tela
