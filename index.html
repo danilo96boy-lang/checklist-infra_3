@@ -217,8 +217,8 @@
                 Download: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             };
 
-            // Função robusta que monta o conteúdo estruturado do QR Code com Ativo, Nome e Setor
-            var buildDesktopQRPayload = function(item) {
+            // Função centralizada que monta o conteúdo do QR Code apenas com NOME e SETOR
+           var buildDesktopQRPayload = function(item) {
                 if (!item) return 'COBRECOM TI';
                 var ativo = item.ativo || 'S/ATIVO';
                 var nome = item.nome || '-';
@@ -266,7 +266,7 @@
                 var shiftX = Math.round(parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '4') * dpmm);
                 var colX = [16 + shiftX, 280 + shiftX, 544 + shiftX];
 
-                var zpl = "^XA\n^PW800\n^LL160\n^LH0,0\n";
+                var zpl = "^XA\n^CI28\n^PW800\n^LL160\n^LH0,0\n";
 
                 rowItems.forEach(function(item, idx) {
                     if (!item) return;
@@ -276,14 +276,11 @@
                     var ativo = (item.ativo || 'S/ ATIVO').substring(0, 14);
                     var nome = (item.nome || '-').substring(0, 32);
                     var setor = (item.setor || '-').substring(0, 18);
-                    
-                    // Payload limpo e estruturado para o QR Code
-                    var qrPayload = "ATIVO:" + ativo + " | NOME:" + nome + " | SETOR:" + setor;
+                    var qrPayload = buildDesktopQRPayload(item);
 
                     zpl += "^FO" + x + "," + y + "^A0N,16,16^FB240,1,0,C^FDCOBRECOM TI^FS\n";
                     zpl += "^FO" + (x + 10) + "," + (y + 19) + "^GB220,2,2^FS\n";
-                    // Comando correto para o QR Code imprimir dados legíveis
-                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQ,2,2^FDQA," + qrPayload + "^FS\n";
+                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,3^FDLA," + qrPayload + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 25) + "^A0N,18,18^FD" + ativo + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 44) + "^A0N,13,13^FB142,2,0,L^FD" + nome + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 78) + "^A0N,13,13^FB142,1,0,L^FD" + setor + "^FS\n";
@@ -294,6 +291,7 @@
             };
 
             // Motor de Impressão Vetorial Flexbox de 3 Colunas
+            // Padrão predefinido: Medida 3.0 x 2.0 cm | Posição Topo: 0 mm | Margem Esq: 4 mm
             var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, offsetLeftMm) {
                 var heightMm = Math.round(parseFloat(labelHeightCm || '2.0') * 10);
                 var topMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0');
@@ -721,6 +719,741 @@
                 );
             };
 
+            // COMPONENTE DE CONTROLE DE DESKTOPS + PASTAS POR SETOR + EXPORTAÇÃO EXCEL + IMPRESSÃO ZEBRA ZD220
+            var DesktopControlView = function(props) {
+                var desktops = props.desktops || [];
+                var currentUser = props.currentUser;
+
+                var formState = useState({ id: null, nome: '', setor: '', mac: '', ativo: '' });
+                var form = formState[0], setForm = formState[1];
+
+                var searchState = useState('');
+                var search = searchState[0], setSearch = searchState[1];
+
+                // VALORES PREDEFINIDOS CONFORME SOLICITADO:
+                // Medida: 3.0 x 2.0 cm (Régua) | Posição Topo (mm): 0 | Margem Esq (mm): 4
+                var heightState = useState(localStorage.getItem('zd_label_height_v8') || '2.0');
+                var labelHeight = heightState[0], setLabelHeight = heightState[1];
+
+                var topOffsetState = useState(localStorage.getItem('zd_offset_top_v8') || '0');
+                var offsetTop = topOffsetState[0], setOffsetTop = topOffsetState[1];
+
+                var leftOffsetState = useState(localStorage.getItem('zd_offset_left_v8') || '4');
+                var offsetLeft = leftOffsetState[0], setOffsetLeft = leftOffsetState[1];
+
+                var queueState = useState([]);
+                var printQueue = queueState[0], setPrintQueue = queueState[1];
+
+                var previewItemState = useState(null);
+                var previewItem = previewItemState[0], setPreviewItem = previewItemState[1];
+
+                var zplModalState = useState(null);
+                var zplModalCode = zplModalState[0], setZplModalCode = zplModalState[1];
+
+                // Controle de Visualização: 'folders' (Pastas por Setor) ou 'list' (Lista Geral)
+                var viewModeState = useState('folders');
+                var viewMode = viewModeState[0], setViewMode = viewModeState[1];
+
+                // Estado das pastas abertas por Setor
+                var openSectorFoldersState = useState({});
+                var openSectorFolders = openSectorFoldersState[0], setOpenSectorFolders = openSectorFoldersState[1];
+
+                var handleHeightChange = function(val) {
+                    setLabelHeight(val);
+                    localStorage.setItem('zd_label_height_v8', val);
+                };
+
+                var handleTopOffsetChange = function(val) {
+                    setOffsetTop(val);
+                    localStorage.setItem('zd_offset_top_v8', val);
+                };
+
+                var handleLeftOffsetChange = function(val) {
+                    setOffsetLeft(val);
+                    localStorage.setItem('zd_offset_left_v8', val);
+                };
+
+                var formatMac = function(val) {
+                    var clean = val.replace(/[^a-fA-F0-9]/g, '').toUpperCase().slice(0, 12);
+                    var parts = clean.match(/.{1,2}/g) || [];
+                    return parts.join(':');
+                };
+
+                // Normaliza o nome do Setor para agrupar corretamente (ex: "T.I", "T.I." -> "TI")
+                var normalizeSectorName = function(rawSector) {
+                    var s = (rawSector || '').trim().toUpperCase();
+                    if (!s) return 'SEM SETOR';
+                    var compact = s.replace(/[\.\-\s]/g, '');
+                    if (compact === 'TI' || compact === 'TECNOLOGIADAINFORMACAO' || compact === 'INFRATI') return 'TI';
+                    if (compact === 'RH' || compact === 'RECURSOSHUMANOS') return 'RH';
+                    return s;
+                };
+
+                var triggerPrint = function(items) {
+                    printZebraZD220Labels(items, labelHeight, offsetTop, offsetLeft);
+                };
+
+                // Exportação para Excel (CSV compatível com Excel PT-BR com BOM UTF-8 e separador ';')
+                var handleExportExcel = function(itemsToExport, customName) {
+                    if (!itemsToExport || itemsToExport.length === 0) {
+                        alert("Não há registros para exportar.");
+                        return;
+                    }
+
+                    var headers = ["ATIVO", "NOME / HOSTNAME", "SETOR", "ENDERECO MAC", "ATUALIZADO POR", "DATA ATUALIZACAO"];
+                    var rows = itemsToExport.map(function(item) {
+                        var dateFormatted = item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('pt-BR') : (item.createdAt ? new Date(item.createdAt).toLocaleDateString('pt-BR') : '-');
+                        var cols = [
+                            item.ativo || '',
+                            item.nome || '',
+                            normalizeSectorName(item.setor),
+                            item.mac || '',
+                            item.updatedBy || 'TI',
+                            dateFormatted
+                        ];
+                        return cols.map(function(val) {
+                            var cleanVal = String(val).replace(/"/g, '""');
+                            return '"' + cleanVal + '"';
+                        }).join(';');
+                    });
+
+                    var csvContent = "\uFEFF" + headers.join(';') + "\r\n" + rows.join("\r\n");
+                    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    var url = URL.createObjectURL(blob);
+                    var link = document.createElement('a');
+                    var dateSlug = new Date().toISOString().split('T')[0];
+                    var fileSlug = (customName || 'GERAL').replace(/[^a-zA-Z0-9_-]/g, '_').toUpperCase();
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'CONTROLE_DESKTOPS_' + fileSlug + '_' + dateSlug + '.csv');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                };
+
+                var handleSave = function(shouldPrintAfter) {
+                    if (!form.nome.trim() && !form.ativo.trim()) {
+                        alert("Preencha pelo menos o Nome ou a identificação do Ativo.");
+                        return;
+                    }
+
+                    var normalizedSetor = normalizeSectorName(form.setor);
+
+                    var payload = {
+                        nome: (form.nome || '').trim().toUpperCase(),
+                        setor: normalizedSetor === 'SEM SETOR' ? '' : normalizedSetor,
+                        mac: (form.mac || '').trim().toUpperCase(),
+                        ativo: (form.ativo || '').trim().toUpperCase(),
+                        updatedAt: new Date().toISOString(),
+                        updatedBy: currentUser ? currentUser.name : 'TI'
+                    };
+
+                    var promise;
+                    if (form.id) {
+                        promise = db.collection('desktops').doc(form.id).update(payload);
+                    } else {
+                        payload.createdAt = new Date().toISOString();
+                        promise = db.collection('desktops').add(payload);
+                    }
+
+                    promise.then(function() {
+                        // Abre automaticamente a pasta do setor recém-cadastrado
+                        setOpenSectorFolders(function(prev) {
+                            return Object.assign({}, prev, { [normalizedSetor]: true });
+                        });
+                        if (shouldPrintAfter) {
+                            triggerPrint([payload]);
+                        }
+                        setForm({ id: null, nome: '', setor: '', mac: '', ativo: '' });
+                    }).catch(function(err) {
+                        alert("Erro ao salvar cadastro: " + err.message);
+                    });
+                };
+
+                var handleEdit = function(item) {
+                    setForm({
+                        id: item.id,
+                        nome: item.nome || '',
+                        setor: item.setor || '',
+                        mac: item.mac || '',
+                        ativo: item.ativo || ''
+                    });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                var handleDelete = function(id, nome) {
+                    if (confirm("Deseja remover o desktop " + (nome || '') + " do controle?")) {
+                        db.collection('desktops').doc(id).delete();
+                    }
+                };
+
+                var toggleQueueItem = function(item) {
+                    var exists = printQueue.some(function(q) { return q.id === item.id; });
+                    if (exists) {
+                        setPrintQueue(printQueue.filter(function(q) { return q.id !== item.id; }));
+                    } else {
+                        if (printQueue.length >= 3) {
+                            alert("A fila da carreira comporta 3 etiquetas. Imprima ou limpe a fila atual.");
+                            return;
+                        }
+                        setPrintQueue(printQueue.concat([item]));
+                    }
+                };
+
+                var toggleSectorFolder = function(sectorKey) {
+                    setOpenSectorFolders(function(prev) {
+                        return Object.assign({}, prev, { [sectorKey]: !prev[sectorKey] });
+                    });
+                };
+
+                var filtered = desktops.filter(function(d) {
+                    var q = search.toLowerCase();
+                    var secNorm = normalizeSectorName(d.setor).toLowerCase();
+                    return (d.nome || '').toLowerCase().indexOf(q) !== -1 ||
+                           (d.setor || '').toLowerCase().indexOf(q) !== -1 ||
+                           secNorm.indexOf(q) !== -1 ||
+                           (d.mac || '').toLowerCase().indexOf(q) !== -1 ||
+                           (d.ativo || '').toLowerCase().indexOf(q) !== -1;
+                });
+
+                // Agrupa os desktops filtrados por Pasta de Setor
+                var sectorGroupsMap = {};
+                filtered.forEach(function(item) {
+                    var secKey = normalizeSectorName(item.setor);
+                    if (!sectorGroupsMap[secKey]) sectorGroupsMap[secKey] = [];
+                    sectorGroupsMap[secKey].push(item);
+                });
+
+                var sortedSectors = Object.keys(sectorGroupsMap).sort(function(a, b) {
+                    if (a === 'SEM SETOR') return 1;
+                    if (b === 'SEM SETOR') return -1;
+                    return a.localeCompare(b);
+                });
+
+                // Lista de setores únicos existentes para sugestão rápida no preenchimento
+                var existingSectorsList = [];
+                desktops.forEach(function(d) {
+                    var s = normalizeSectorName(d.setor);
+                    if (s !== 'SEM SETOR' && existingSectorsList.indexOf(s) === -1) {
+                        existingSectorsList.push(s);
+                    }
+                });
+                existingSectorsList.sort();
+
+                var handleExpandCollapseAll = function(expand) {
+                    var nextMap = {};
+                    sortedSectors.forEach(function(sec) { nextMap[sec] = expand; });
+                    setOpenSectorFolders(nextMap);
+                };
+
+                var activePreviewData = previewItem || (form.nome || form.ativo || form.setor ? form : {
+                    nome: 'DESKTOP-01',
+                    setor: 'ENGENHARIA',
+                    ativo: 'DT-0042'
+                });
+
+                var previewQrUrl = generateQRDataURL(buildDesktopQRPayload(activePreviewData));
+
+                // Renderizador reutilizável de linhas da tabela de desktops
+                var renderDesktopRow = function(item) {
+                    var isQueued = printQueue.some(function(q) { return q.id === item.id; });
+                    var thumbQr = generateQRDataURL(buildDesktopQRPayload(item));
+                    var displaySector = normalizeSectorName(item.setor);
+                    return (
+                        <tr 
+                            key={item.id} 
+                            onMouseEnter={function() { setPreviewItem(item); }}
+                            onMouseLeave={function() { setPreviewItem(null); }}
+                            className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                        >
+                            <td className="px-4 py-3">
+                                <div className="flex items-center gap-3">
+                                    <img src={thumbQr} alt="QR" className="w-8 h-8 rounded bg-white p-0.5 border border-slate-200 shrink-0" />
+                                    <span className="font-mono font-bold text-brand-600 dark:text-brand-400 uppercase">
+                                        {item.ativo || 'S/ ATIVO'}
+                                    </span>
+                                </div>
+                            </td>
+                            <td className="px-4 py-3 font-semibold text-slate-800 dark:text-white uppercase">{item.nome || '-'}</td>
+                            <td className="px-4 py-3">
+                                <Badge color="blue">{displaySector}</Badge>
+                            </td>
+                            <td className="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">{item.mac || '-'}</td>
+                            <td className="px-4 py-3 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={function() { triggerPrint([item]); }}
+                                        className="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+                                        title="Imprimir 3 etiquetas desta máquina na ZD220"
+                                    >
+                                        {Icons.Printer} Imprimir
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={function() { toggleQueueItem(item); }}
+                                        className={"px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all " + (isQueued ? "bg-amber-500/20 border-amber-500 text-amber-400" : "border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white")}
+                                        title="Adicionar à fila para imprimir 3 computadores diferentes na mesma carreira"
+                                    >
+                                        {isQueued ? '✓ Na Fila' : '+ Fila'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={function() { handleEdit(item); }}
+                                        className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-brand-500 hover:border-brand-500 transition-colors"
+                                        title="Editar cadastro"
+                                    >
+                                        {Icons.Edit}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={function() { handleDelete(item.id, item.nome || item.ativo); }}
+                                        className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:border-red-500 transition-colors"
+                                        title="Excluir cadastro"
+                                    >
+                                        {Icons.Trash}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    );
+                };
+
+                return (
+                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-10 fade-in overflow-auto">
+                        <div className="max-w-6xl mx-auto w-full space-y-6 pb-12">
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase">
+                                        {Icons.Monitor} Controle de Desktop's
+                                    </h2>
+                                    <p className="text-slate-500 text-sm">Organização por pastas de setor, exportação Excel e impressão Zebra ZD220.</p>
+                                </div>
+
+                                {/* BARRA DE CALIBRAÇÃO FINA DA ETIQUETA */}
+                                <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-[10px] font-bold uppercase text-slate-400">Medida:</span>
+                                        <select 
+                                            value={labelHeight} 
+                                            onChange={function(e) { handleHeightChange(e.target.value); }}
+                                            className="bg-slate-100 dark:bg-slate-800 text-xs font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none"
+                                        >
+                                            <option value="2.0">3.0 x 2.0 cm (Régua)</option>
+                                            <option value="1.5">3.0 x 1.5 cm</option>
+                                            <option value="2.5">3.0 x 2.5 cm</option>
+                                            <option value="3.0">3.0 x 3.0 cm</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Aceita negativos (ex: -10 para subir) e positivos (para descer)">Posição Topo (mm):</span>
+                                        <input 
+                                            type="number" 
+                                            step="0.5"
+                                            value={offsetTop} 
+                                            onChange={function(e) { handleTopOffsetChange(e.target.value); }}
+                                            className="w-14 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-[10px] font-bold uppercase text-slate-400" title="Margem esquerda do liner (padrão 4mm)">Margem Esq (mm):</span>
+                                        <input 
+                                            type="number" 
+                                            step="0.5"
+                                            value={offsetLeft} 
+                                            onChange={function(e) { handleLeftOffsetChange(e.target.value); }}
+                                            className="w-14 bg-slate-100 dark:bg-slate-800 text-xs font-mono font-bold px-2 py-1 rounded border border-slate-200 dark:border-slate-700 outline-none text-center"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                                {/* FORMULÁRIO DE CADASTRO / EDIÇÃO */}
+                                <Card className="lg:col-span-7">
+                                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+                                        <h3 className="font-bold text-sm uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                                            {form.id ? 'Editar Cadastro de Desktop' : 'Novo Cadastro de Desktop'}
+                                        </h3>
+                                        {form.id && (
+                                            <button 
+                                                type="button" 
+                                                onClick={function() { setForm({ id: null, nome: '', setor: '', mac: '', ativo: '' }); }}
+                                                className="text-xs text-brand-500 hover:underline font-semibold"
+                                            >
+                                                Cancelar Edição
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <form className="space-y-4" onSubmit={function(e){ e.preventDefault(); handleSave(false); }}>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Ativo / Identificador</label>
+                                                <Input 
+                                                    placeholder="EX: DT-0042" 
+                                                    value={form.ativo}
+                                                    onChange={function(e) { setForm(Object.assign({}, form, { ativo: e.target.value.toUpperCase() })); }}
+                                                    className="uppercase font-mono font-bold" 
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Nome (Usuário / Hostname)</label>
+                                                <Input 
+                                                    placeholder="EX: DESKTOP-01" 
+                                                    value={form.nome}
+                                                    onChange={function(e) { setForm(Object.assign({}, form, { nome: e.target.value.toUpperCase() })); }}
+                                                    className="uppercase" 
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Setor (Define a Pasta)</label>
+                                                <Input 
+                                                    list="sector-suggestions"
+                                                    placeholder="EX: TI, ENGENHARIA, RH..." 
+                                                    value={form.setor}
+                                                    onChange={function(e) { setForm(Object.assign({}, form, { setor: e.target.value.toUpperCase() })); }}
+                                                    className="uppercase" 
+                                                />
+                                                <datalist id="sector-suggestions">
+                                                    {existingSectorsList.map(function(sec) {
+                                                        return <option key={sec} value={sec} />;
+                                                    })}
+                                                </datalist>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Endereço MAC (Apenas Controle Interno)</label>
+                                                <Input 
+                                                    placeholder="EX: 00:1B:44:11:3A:B7" 
+                                                    value={form.mac}
+                                                    onChange={function(e) { setForm(Object.assign({}, form, { mac: formatMac(e.target.value) })); }}
+                                                    className="uppercase font-mono" 
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-3 flex flex-wrap items-center gap-3 border-t border-slate-100 dark:border-slate-800">
+                                            <Button type="submit" className="text-xs flex-1 sm:flex-none">
+                                                {Icons.Save} {form.id ? 'Atualizar Cadastro' : 'Salvar Cadastro'}
+                                            </Button>
+                                            <Button 
+                                                type="button" 
+                                                variant="success" 
+                                                onClick={function() { handleSave(true); }}
+                                                className="text-xs flex-1 sm:flex-none"
+                                            >
+                                                {Icons.Printer} {form.id ? 'Atualizar & Imprimir (ZD220)' : 'Salvar & Imprimir (ZD220)'}
+                                            </Button>
+                                            {(form.nome || form.ativo) && (
+                                                <Button 
+                                                    type="button" 
+                                                    variant="secondary" 
+                                                    onClick={function() { triggerPrint([form]); }}
+                                                    className="text-xs w-full sm:w-auto"
+                                                    title="Imprimir sem salvar novamente"
+                                                >
+                                                    {Icons.QrCode} Testar Impressão
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </form>
+                                </Card>
+
+                                {/* PREVIEW DA CARREIRA DE 3 ETIQUETAS CONFORME PRIMEIRO PRINT */}
+                                <Card className="lg:col-span-5 bg-slate-50/60 dark:bg-slate-900/90">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                            {Icons.QrCode} Prévia da Bobina ZD220 (10cm)
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <button 
+                                                type="button"
+                                                onClick={function() {
+                                                    var targetItems = printQueue.length > 0 ? printQueue : [activePreviewData];
+                                                    setZplModalCode(generateZPLCode(targetItems, offsetTop, offsetLeft));
+                                                }}
+                                                className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white border border-slate-700"
+                                                title="Ver código ZPL nativo para Zebra"
+                                            >
+                                                ZPL
+                                            </button>
+                                            <Badge color="blue">3x 3.0x{labelHeight}cm</Badge>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-3 bg-slate-950 rounded-xl border border-dashed border-slate-800 overflow-x-auto">
+                                        <div className="grid grid-cols-3 gap-2 min-w-[340px]">
+                                            {[0, 1, 2].map(function(idx) {
+                                                var slotItem = printQueue.length > 0 ? printQueue[idx] : activePreviewData;
+                                                if (!slotItem) {
+                                                    return (
+                                                        <div key={idx} className="bg-slate-900/40 border border-dashed border-slate-700 rounded p-2 h-16 flex items-center justify-center text-[10px] text-slate-400">
+                                                            Etiqueta {idx + 1} Vazia
+                                                        </div>
+                                                    );
+                                                }
+                                                var slotQr = printQueue.length > 0 
+                                                    ? generateQRDataURL(buildDesktopQRPayload(slotItem))
+                                                    : previewQrUrl;
+
+                                               return (
+                                        <div key={idx} className="bg-white text-black rounded-md shadow-sm p-1.5 flex flex-col justify-between overflow-hidden">
+                                            <div className="text-[6.5px] font-black text-center border-b border-black pb-0.5 mb-1 tracking-wider leading-none">
+                                                COBRECOM TI
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <img src={slotQr} alt="QR" className="w-8 h-8 object-contain shrink-0" />
+                                                <div className="min-w-0 flex-1 leading-tight space-y-0.5">
+                                                                <div className="text-[8.5px] font-mono font-black truncate">{slotItem.ativo || 'S/ ATIVO'}</div>
+                                                                <div className="text-[6px] font-bold uppercase break-all leading-[1.05] line-clamp-2">{slotItem.nome || '-'}</div>
+                                                                <div className="text-[6px] truncate uppercase text-slate-700">{slotItem.setor || '-'}</div>
+                                                            </div>
+                                            </div>
+                                        </div>
+                                    );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {printQueue.length > 0 && (
+                                        <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                                            <span className="text-xs font-semibold text-brand-500">
+                                                Fila personalizada: {printQueue.length}/3 selecionadas
+                                            </span>
+                                            <div className="flex gap-2">
+                                                <Button variant="ghost" className="text-xs py-1 px-2" onClick={function() { setPrintQueue([]); }}>
+                                                    Limpar
+                                                </Button>
+                                                <Button variant="primary" className="text-xs py-1.5 px-3" onClick={function() { triggerPrint(printQueue); }}>
+                                                    {Icons.Printer} Imprimir Fila ({printQueue.length})
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </Card>
+                            </div>
+
+                            {/* MODAL ZPL NATIVO CASO QUEIRA ENVIAR VIA ZEBRA UTILITIES / RAW */}
+                            {zplModalCode && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
+                                    <Card className="w-full max-w-lg bg-slate-900 border-slate-700" noPadding>
+                                        <div className="p-4 border-b border-slate-800 flex justify-between items-center">
+                                            <h3 className="font-bold text-white text-sm">Código ZPL Nativo (ZD220 - 203dpi)</h3>
+                                            <button onClick={function() { setZplModalCode(null); }} className="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
+                                        </div>
+                                        <div className="p-4 space-y-3">
+                                            <textarea readOnly value={zplModalCode} className="w-full h-48 p-3 bg-slate-950 text-emerald-400 font-mono text-xs rounded-lg border border-slate-800 outline-none" />
+                                            <div className="flex justify-end gap-2">
+                                                <Button variant="secondary" className="text-xs" onClick={function() { navigator.clipboard.writeText(zplModalCode); alert("Código ZPL copiado!"); }}>
+                                                    {Icons.Copy} Copiar ZPL
+                                                </Button>
+                                                <Button className="text-xs" onClick={function() { setZplModalCode(null); }}>Fechar</Button>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </div>
+                            )}
+
+                            {/* BARRA DE CONTROLE DE PASTAS, BUSCA E EXPORTAÇÃO EXCEL */}
+                            <Card noPadding className="overflow-hidden">
+                                <div className="p-4 md:px-6 border-b border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/30">
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <div>
+                                            <h3 className="font-bold text-slate-800 dark:text-white text-sm uppercase tracking-wider flex items-center gap-2">
+                                                {Icons.Folder} Pastas por Setor ({sortedSectors.length} Setores • {filtered.length} Máquinas)
+                                            </h3>
+                                            <p className="text-xs text-slate-500">Equipamentos segregados automaticamente pelo setor vinculado.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        {/* Alternador Pastas vs Lista */}
+                                        <div className="flex items-center bg-slate-200/70 dark:bg-slate-800 p-1 rounded-lg border border-slate-300/60 dark:border-slate-700">
+                                            <button
+                                                type="button"
+                                                onClick={function() { setViewMode('folders'); }}
+                                                className={"px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all " + (viewMode === 'folders' ? "bg-brand-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white")}
+                                            >
+                                                {Icons.Folder} Pastas
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={function() { setViewMode('list'); }}
+                                                className={"px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all " + (viewMode === 'list' ? "bg-brand-600 text-white shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white")}
+                                            >
+                                                {Icons.List} Lista Geral
+                                            </button>
+                                        </div>
+
+                                        {viewMode === 'folders' && sortedSectors.length > 0 && (
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={function() { handleExpandCollapseAll(true); }}
+                                                    className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:border-brand-500 transition-colors"
+                                                >
+                                                    Abrir Todas
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={function() { handleExpandCollapseAll(false); }}
+                                                    className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:border-brand-500 transition-colors"
+                                                >
+                                                    Fechar Todas
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Botão Exportar para Excel (Todos os filtrados) */}
+                                        <Button 
+                                            type="button" 
+                                            variant="success" 
+                                            onClick={function() { handleExportExcel(filtered, search ? 'FILTRADO' : 'TODOS_SETORES'); }}
+                                            className="text-xs py-2 px-3"
+                                            title="Exportar planilha Excel (.csv) com os registros listados"
+                                        >
+                                            {Icons.Download} Exportar Excel ({filtered.length})
+                                        </Button>
+
+                                        <div className="relative w-full sm:w-64">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">{Icons.Search}</div>
+                                            <Input 
+                                                placeholder="Buscar Setor, Nome, Ativo..." 
+                                                value={search} 
+                                                onChange={function(e) { setSearch(e.target.value); }} 
+                                                className="pl-10" 
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* MODO PASTAS SEGREGADAS POR SETOR */}
+                                {viewMode === 'folders' ? (
+                                    <div className="p-4 md:p-6 space-y-3 bg-slate-100/50 dark:bg-slate-950/40">
+                                        {sortedSectors.length === 0 ? (
+                                            <div className="text-center py-10 text-slate-400">
+                                                Nenhum desktop encontrado. Cadastre um equipamento acima informando o Setor (ex: TI) para criar a pasta automaticamente.
+                                            </div>
+                                        ) : (
+                                            sortedSectors.map(function(sectorName) {
+                                                var sectorItems = sectorGroupsMap[sectorName] || [];
+                                                // Se o usuário estiver pesquisando algo no campo de busca, abre a pasta automaticamente
+                                                var isOpen = search.trim() !== '' ? true : !!openSectorFolders[sectorName];
+
+                                                return (
+                                                    <div key={sectorName} className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden shadow-sm transition-all">
+                                                        {/* CABEÇALHO DA PASTA DO SETOR */}
+                                                        <div 
+                                                            onClick={function() { toggleSectorFolder(sectorName); }}
+                                                            className={"px-4 py-3.5 flex flex-wrap items-center justify-between gap-3 cursor-pointer select-none transition-colors " + (isOpen ? "bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800" : "hover:bg-slate-50 dark:hover:bg-slate-800/40")}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={"p-2 rounded-lg transition-colors " + (isOpen ? "bg-amber-500/20 text-amber-400" : "bg-brand-500/10 text-brand-500")}>
+                                                                    {Icons.Folder}
+                                                                </div>
+                                                                <div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-bold text-sm text-slate-800 dark:text-white uppercase tracking-wide">
+                                                                            PASTA: SETOR {sectorName}
+                                                                        </span>
+                                                                        <Badge color={isOpen ? "amber" : "blue"}>
+                                                                            {sectorItems.length} {sectorItems.length === 1 ? 'Desktop' : 'Desktops'}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    <p className="text-[11px] text-slate-400">
+                                                                        Clique para {isOpen ? 'recolher' : 'abrir e visualizar'} os equipamentos vinculados ao setor {sectorName}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2" onClick={function(e) { e.stopPropagation(); }}>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={function() {
+                                                                        setForm(Object.assign({}, form, { setor: sectorName === 'SEM SETOR' ? '' : sectorName }));
+                                                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                                    }}
+                                                                    className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-brand-500 text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1 transition-colors"
+                                                                    title={"Cadastrar novo desktop direto no setor " + sectorName}
+                                                                >
+                                                                    {Icons.Plus} Novo neste Setor
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={function() { handleExportExcel(sectorItems, 'SETOR_' + sectorName); }}
+                                                                    className="px-2.5 py-1.5 rounded-lg bg-emerald-600/15 hover:bg-emerald-600 text-emerald-500 hover:text-white border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1.5 transition-all"
+                                                                    title={"Exportar planilha Excel apenas do setor " + sectorName}
+                                                                >
+                                                                    {Icons.Download} Excel Setor
+                                                                </button>
+                                                                <div 
+                                                                    onClick={function() { toggleSectorFolder(sectorName); }}
+                                                                    className={"p-1.5 text-slate-400 transition-transform duration-200 " + (isOpen ? "rotate-180 text-white" : "")}
+                                                                >
+                                                                    {Icons.ChevronDown}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* TABELA INTERNA DA PASTA DO SETOR */}
+                                                        {isOpen && (
+                                                            <div className="overflow-x-auto fade-in">
+                                                                <table className="w-full text-sm text-left min-w-[750px]">
+                                                                    <thead className="bg-slate-50/70 dark:bg-slate-900 text-[10px] font-bold text-slate-400 uppercase border-b border-slate-100 dark:border-slate-800">
+                                                                        <tr>
+                                                                            <th className="px-4 py-2.5">QR / Ativo</th>
+                                                                            <th className="px-4 py-2.5">Nome / Usuário</th>
+                                                                            <th className="px-4 py-2.5">Setor</th>
+                                                                            <th className="px-4 py-2.5">Endereço MAC</th>
+                                                                            <th className="px-4 py-2.5 text-right">Ações / Impressão ZD220</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70">
+                                                                        {sectorItems.map(renderDesktopRow)}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                ) : (
+                                    /* MODO LISTA GERAL */
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm text-left min-w-[750px]">
+                                            <thead className="bg-slate-50 dark:bg-slate-800/70 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800">
+                                                <tr>
+                                                    <th className="px-4 py-3">QR / Ativo</th>
+                                                    <th className="px-4 py-3">Nome / Usuário</th>
+                                                    <th className="px-4 py-3">Setor</th>
+                                                    <th className="px-4 py-3">Endereço MAC</th>
+                                                    <th className="px-4 py-3 text-right">Ações / Impressão ZD220</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                {filtered.map(renderDesktopRow)}
+                                                {filtered.length === 0 && (
+                                                    <tr>
+                                                        <td colSpan="5" className="text-center py-10 text-slate-400">
+                                                            Nenhum desktop encontrado. Cadastre um equipamento acima para gerar etiquetas.
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </Card>
+                        </div>
+                    </div>
+                );
+            };
+
             var TaskItem = function(props) {
                 var task = props.task;
                 var onToggle = props.onToggle;
@@ -1040,7 +1773,7 @@
                         var group = items[k];
                         var tasksText = (group.tasks || []).map(function(t) {
                             var whoDidIt = (t.checked && t.checkedBy) ? " (Feito por: " + t.checkedBy.split(' ')[0] + ")" : "";
-                            var obsText = (t.obs && t.obs.trim() !== '') ? "\n    -> OBS: " + t.obs : "";
+                            var obsText = (t.obs && t.obs.trim() !== '') ? "\n        -> OBS: " + t.obs : "";
                             return "   " + (t.checked ? "[X]" : "[ ]") + " " + t.label + whoDidIt + obsText;
                         }).join("\n");
                         return "• " + group.title + "\n" + tasksText;
