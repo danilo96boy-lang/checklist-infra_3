@@ -239,14 +239,15 @@
                 }
             };
 
-            // Gerador de SVG Puro para o QR Code (Vetorial: Nunca encolhe nem borra na impressão)
+          // Gerador de SVG Puro corrigido e compatível com leitores de celular
             var generateQRSVG = function(text) {
                 try {
                     if (typeof qrcode === 'undefined') return '';
-                    var qr = qrcode(0, 'L');
+                    var qr = qrcode(0, 'M');
                     qr.addData(text || 'COBRECOM');
                     qr.make();
-                    return qr.createSvgTag({ cellSize: 2, margin: 0, scalable: true });
+                    // Usando typeNumber 0 e cellWidth para forçar uma estrutura limpa e sem distorção
+                    return qr.createSvgTag(3, 0);
                 } catch (e) {
                     return '';
                 }
@@ -410,6 +411,7 @@
                             width: 10.5mm !important;
                             height: 10.5mm !important;
                             display: block !important;
+                            shape-rendering: crispEdges !important;
                         }
                         .zd-texts {
                             flex: 1 !important;
