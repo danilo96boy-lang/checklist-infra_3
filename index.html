@@ -25,23 +25,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <script>
+        // Limpa qualquer Service Worker antigo que esteja travando o cache
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const manifest = {
-                    name: "Infra Hub Cobrecom",
-                    short_name: "Infra Hub",
-                    start_url: location.href,
-                    display: "standalone",
-                    background_color: "#020617",
-                    theme_color: "#020617",
-                    icons: [
-                        { src: "https://via.placeholder.com/192/2563eb/ffffff?text=IH", sizes: "192x192", type: "image/png" },
-                        { src: "https://via.placeholder.com/512/2563eb/ffffff?text=IH", sizes: "512x512", type: "image/png" }
-                    ]
-                };
-                const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-                const manifestUrl = URL.createObjectURL(manifestBlob);
-                document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestUrl}">`);
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
             });
         }
     </script>
@@ -127,6 +116,42 @@
 
     <script type="text/babel">
         try {
+            // INTERCEPTADOR DE LEITURA DE QR CODE:
+            // Se abrir o link do QR Code pelo celular, mostra um cartão limpo na tela com os 3 campos!
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('qr_ativo')) {
+                var qAtivo = urlParams.get('qr_ativo') || '-';
+                var qNome = urlParams.get('qr_nome') || '-';
+                var qSetor = urlParams.get('qr_setor') || '-';
+                document.getElementById('root').innerHTML = `
+                    <div style="min-height:100vh;background:#020617;color:#f8fafc;display:flex;align-items:center;justify-content:center;padding:20px;font-family:'Inter',sans-serif;">
+                        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:28px;width:100%;max-width:360px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                            <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e293b;padding-bottom:16px;margin-bottom:20px;">
+                                <div style="background:#2563eb;color:white;font-weight:900;padding:8px 10px;border-radius:8px;font-size:14px;">TI</div>
+                                <div>
+                                    <div style="font-weight:800;font-size:16px;letter-spacing:0.5px;">COBRECOM TI</div>
+                                    <div style="font-size:11px;color:#64748b;">FICHA DE PATRIMÔNIO / ATIVO</div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Ativo / Patrimônio</div>
+                                <div style="font-size:22px;font-weight:900;color:#38bdf8;font-family:'JetBrains Mono',monospace;margin-top:2px;">${qAtivo}</div>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Nome / Hostname</div>
+                                <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-top:2px;">${qNome}</div>
+                            </div>
+                            <div style="margin-bottom:24px;">
+                                <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Setor</div>
+                                <div style="display:inline-block;background:#1e3a8a;color:#93c5fd;font-weight:700;font-size:12px;padding:4px 10px;border-radius:6px;margin-top:4px;">${qSetor}</div>
+                            </div>
+                            <a href="${window.location.pathname}" style="display:block;text-align:center;background:#1e293b;color:#cbd5e1;text-decoration:none;padding:12px;border-radius:10px;font-size:12px;font-weight:600;">Abrir Painel Infra Hub</a>
+                        </div>
+                    </div>
+                `;
+                throw new Error("Modo Leitura QR Ativo");
+            }
+
             var APP_CONFIG = { ESTOQUE_URL: "http://192.168.1.176:6900/" };
 
             var firebaseConfig = {
@@ -203,13 +228,16 @@
                 Download: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             };
 
-            // Payload otimizado (baixa densidade, matriz 21x21 módulos) para leitura instantânea em etiqueta 3x2cm
+            // Usa o protocolo MECARD: é super compacto (poucos pontos na etiqueta térmica)
+            // e faz a câmera nativa do iPhone e Android abrir na hora um cartão na tela mostrando ATIVO, NOME e SETOR!
             var buildDesktopQRPayload = function(item) {
-                if (!item) return 'S/ATIVO';
-                return (item.ativo || item.nome || 'S/ATIVO').toString().trim().toUpperCase();
+                if (!item) return 'MECARD:N:S/ATIVO;ORG:COBRECOM;;';
+                var ativo = (item.ativo || 'S/ATIVO').toString().trim().toUpperCase().replace(/[;:]/g, '');
+                var nome = (item.nome || '-').toString().trim().toUpperCase().replace(/[;:]/g, '');
+                var setor = (item.setor || '-').toString().trim().toUpperCase().replace(/[;:]/g, '');
+                return "MECARD:N:" + ativo + " - " + nome + ";ORG:SETOR " + setor + ";NOTE:ATIVO " + ativo + ";;";
             };
 
-            // Gerador de DataURL com alta resolução (cellSize: 8) e margem de segurança (Quiet Zone = 2)
             var generateQRDataURL = function(text) {
                 try {
                     if (typeof qrcode === 'undefined') return '';
@@ -222,7 +250,6 @@
                 }
             };
 
-            // Gerador para impressão térmica Zebra ZD220
             var generateQRSVG = function(text) {
                 try {
                     if (typeof qrcode === 'undefined') return '';
@@ -263,7 +290,7 @@
 
                     zpl += "^FO" + x + "," + y + "^A0N,16,16^FB240,1,0,C^FDCOBRECOM TI^FS\n";
                     zpl += "^FO" + (x + 10) + "," + (y + 19) + "^GB220,2,2^FS\n";
-                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,4^FDLA," + qrPayload + "^FS\n";
+                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,3^FDLA," + qrPayload + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 25) + "^A0N,18,18^FD" + ativo + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 44) + "^A0N,13,13^FB142,2,0,L^FD" + nome + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 78) + "^A0N,13,13^FB142,1,0,L^FD" + setor + "^FS\n";
@@ -3508,7 +3535,9 @@
             root.render(<App />);
             
         } catch (err) {
-            document.getElementById('root').innerHTML = '<div style="padding:40px;color:#ef4444;font-family:sans-serif;"><h3>Falha Fatal de Inicialização</h3><pre>' + err.message + '</pre></div>';
+            if (err.message !== "Modo Leitura QR Ativo") {
+                document.getElementById('root').innerHTML = '<div style="padding:40px;color:#ef4444;font-family:sans-serif;"><h3>Falha Fatal de Inicialização</h3><pre>' + err.message + '</pre></div>';
+            }
         }
     </script>
 </body>
