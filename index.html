@@ -240,19 +240,19 @@
             };
 
           // Gerador de SVG Puro corrigido e compatível com leitores de celular
-            var generateQRSVG = function(text) {
+         var generateQRSVG = function(text) {
                 try {
                     if (typeof qrcode === 'undefined') return '';
                     var qr = qrcode(0, 'M');
                     qr.addData(text || 'COBRECOM');
                     qr.make();
-                    // Usando typeNumber 0 e cellWidth para forçar uma estrutura limpa e sem distorção
-                    return qr.createSvgTag(3, 0);
+                    // Retorna uma tag <img> padrão com DataURL em base64 (muito mais estável para impressão)
+                    return '<img src="' + qr.createDataURL(4, 0) + '" style="width:10.5mm !important; height:10.5mm !important; display:block !important;" />';
                 } catch (e) {
                     return '';
                 }
             };
-
+			
             // Gerador de código ZPL Nativo para Zebra ZD220 (203 DPI = 8 dots/mm)
             var generateZPLCode = function(itemsArray, offsetTopMm, offsetLeftMm) {
                 var rowItems = [];
@@ -407,11 +407,11 @@
                             align-items: center !important;
                             justify-content: center !important;
                         }
-                        .zd-qr svg {
+                       .zd-qr img {
                             width: 10.5mm !important;
                             height: 10.5mm !important;
                             display: block !important;
-                            shape-rendering: crispEdges !important;
+                            image-rendering: pixelated !important;
                         }
                         .zd-texts {
                             flex: 1 !important;
