@@ -217,8 +217,8 @@
                 Download: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             };
 
-            // Função centralizada atualizada para conter ativo, nome e setor no QR Code (wrcod)
-            var buildDesktopQRPayload = function(item) {
+            // Função centralizada que monta o conteúdo do QR Code apenas com NOME e SETOR
+           var buildDesktopQRPayload = function(item) {
                 if (!item) return 'COBRECOM TI';
                 var ativo = item.ativo || 'S/ATIVO';
                 var nome = item.nome || '-';
@@ -291,6 +291,7 @@
             };
 
             // Motor de Impressão Vetorial Flexbox de 3 Colunas
+            // Padrão predefinido: Medida 3.0 x 2.0 cm | Posição Topo: 0 mm | Margem Esq: 4 mm
             var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, offsetLeftMm) {
                 var heightMm = Math.round(parseFloat(labelHeightCm || '2.0') * 10);
                 var topMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0');
@@ -1029,7 +1030,7 @@
                                     <p className="text-slate-500 text-sm">Organização por pastas de setor, exportação Excel e impressão Zebra ZD220.</p>
                                 </div>
 
-                                <!-- BARRA DE CALIBRAÇÃO FINA DA ETIQUETA -->
+                                {/* BARRA DE CALIBRAÇÃO FINA DA ETIQUETA */}
                                 <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                                     <div className="flex items-center gap-1.5">
                                         <span className="text-[10px] font-bold uppercase text-slate-400">Medida:</span>
@@ -1199,20 +1200,20 @@
                                                     : previewQrUrl;
 
                                                return (
-                                                <div key={idx} className="bg-white text-black rounded-md shadow-sm p-1.5 flex flex-col justify-between overflow-hidden">
-                                                    <div className="text-[6.5px] font-black text-center border-b border-black pb-0.5 mb-1 tracking-wider leading-none">
-                                                        COBRECOM TI
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <img src={slotQr} alt="QR" className="w-8 h-8 object-contain shrink-0" />
-                                                        <div className="min-w-0 flex-1 leading-tight space-y-0.5">
-                                                                    <div className="text-[8.5px] font-mono font-black truncate">{slotItem.ativo || 'S/ ATIVO'}</div>
-                                                                    <div className="text-[6px] font-bold uppercase break-all leading-[1.05] line-clamp-2">{slotItem.nome || '-'}</div>
-                                                                    <div className="text-[6px] truncate uppercase text-slate-700">{slotItem.setor || '-'}</div>
-                                                                </div>
-                                                    </div>
-                                                </div>
-                                            );
+                                        <div key={idx} className="bg-white text-black rounded-md shadow-sm p-1.5 flex flex-col justify-between overflow-hidden">
+                                            <div className="text-[6.5px] font-black text-center border-b border-black pb-0.5 mb-1 tracking-wider leading-none">
+                                                COBRECOM TI
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <img src={slotQr} alt="QR" className="w-8 h-8 object-contain shrink-0" />
+                                                <div className="min-w-0 flex-1 leading-tight space-y-0.5">
+                                                                <div className="text-[8.5px] font-mono font-black truncate">{slotItem.ativo || 'S/ ATIVO'}</div>
+                                                                <div className="text-[6px] font-bold uppercase break-all leading-[1.05] line-clamp-2">{slotItem.nome || '-'}</div>
+                                                                <div className="text-[6px] truncate uppercase text-slate-700">{slotItem.setor || '-'}</div>
+                                                            </div>
+                                            </div>
+                                        </div>
+                                    );
                                             })}
                                         </div>
                                     </div>
@@ -1773,7 +1774,7 @@
                         var tasksText = (group.tasks || []).map(function(t) {
                             var whoDidIt = (t.checked && t.checkedBy) ? " (Feito por: " + t.checkedBy.split(' ')[0] + ")" : "";
                             var obsText = (t.obs && t.obs.trim() !== '') ? "\n        -> OBS: " + t.obs : "";
-                            return "    " + (t.checked ? "[X]" : "[ ]") + " " + t.label + whoDidIt + obsText;
+                            return "   " + (t.checked ? "[X]" : "[ ]") + " " + t.label + whoDidIt + obsText;
                         }).join("\n");
                         return "• " + group.title + "\n" + tasksText;
                     }).join("\n\n");
@@ -3216,8 +3217,7 @@
                     var gKey = map[colKey];
                     if (gKey) {
                         var newTitulos = Object.assign({}, globalTitulos, { [gKey]: newVal.toUpperCase() });
-                        db.collection('settings').doc('titulos').
-						set(newTitulos);
+                        db.collection('settings').doc('titulos').set(newTitulos);
                     }
                 };
                 
