@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Comportamento de App Nativa no Mobile -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#020617">
@@ -19,9 +19,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
-    <!-- Biblioteca Chart.js para o Dashboard Analítico -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Biblioteca QRCode para geração instantânea -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -44,15 +42,6 @@
                 const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
                 const manifestUrl = URL.createObjectURL(manifestBlob);
                 document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestUrl}">`);
-
-                const swCode = `
-                    self.addEventListener('install', e => self.skipWaiting());
-                    self.addEventListener('activate', e => self.clients.claim());
-                    self.addEventListener('fetch', e => {});
-                `;
-                const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                const swUrl = URL.createObjectURL(swBlob);
-                navigator.serviceWorker.register(swUrl).catch(console.error);
             });
         }
     </script>
@@ -95,7 +84,6 @@
                 padding: 0 !important;
             }
             
-            /* Modo normal: Relatório Técnico A4 */
             body:not(.printing-zebra) #root * { visibility: hidden; }
             body:not(.printing-zebra) #receipt-area, 
             body:not(.printing-zebra) #receipt-area * { visibility: visible !important; }
@@ -110,7 +98,6 @@
                 display: block !important; 
             }
 
-            /* Modo Etiqueta Térmica Zebra ZD220 */
             body.printing-zebra #root { display: none !important; }
             body.printing-zebra #zebra-print-root { 
                 display: block !important; 
@@ -128,7 +115,6 @@
     <style id="dynamic-print-page-style"></style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300 overscroll-none">
-    <!-- Camada exclusiva para impressão térmica na ZD220 -->
     <div id="zebra-print-root"></div>
 
     <div id="root">
@@ -217,42 +203,38 @@
                 Download: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             };
 
-            // Função centralizada que monta o conteúdo do QR Code com ATIVO, NOME e SETOR
+            // Payload otimizado (baixa densidade, matriz 21x21 módulos) para leitura instantânea em etiqueta 3x2cm
             var buildDesktopQRPayload = function(item) {
-                if (!item) return 'ATIVO: S/ATIVO\nNOME: -\nSETOR: -';
-                var ativo = (item.ativo || 'S/ATIVO').toString().trim().toUpperCase();
-                var nome = (item.nome || '-').toString().trim().toUpperCase();
-                var setor = (item.setor || '-').toString().trim().toUpperCase();
-                return "ATIVO: " + ativo + "\nNOME: " + nome + "\nSETOR: " + setor;
+                if (!item) return 'S/ATIVO';
+                return (item.ativo || item.nome || 'S/ATIVO').toString().trim().toUpperCase();
             };
 
-            // Gerador de DataURL para a prévia na tela
+            // Gerador de DataURL com alta resolução (cellSize: 8) e margem de segurança (Quiet Zone = 2)
             var generateQRDataURL = function(text) {
                 try {
                     if (typeof qrcode === 'undefined') return '';
                     var qr = qrcode(0, 'L');
                     qr.addData(text || 'COBRECOM');
                     qr.make();
-                    return qr.createDataURL(4, 0);
+                    return qr.createDataURL(8, 2);
                 } catch (e) {
                     return '';
                 }
             };
 
-          // Gerador de SVG Puro corrigido e compatível com leitores de celular
-         var generateQRSVG = function(text) {
+            // Gerador para impressão térmica Zebra ZD220
+            var generateQRSVG = function(text) {
                 try {
                     if (typeof qrcode === 'undefined') return '';
-                    var qr = qrcode(0, 'M');
+                    var qr = qrcode(0, 'L');
                     qr.addData(text || 'COBRECOM');
                     qr.make();
-                    // Retorna uma tag <img> padrão com DataURL em base64 (muito mais estável para impressão)
-                    return '<img src="' + qr.createDataURL(4, 0) + '" style="width:10.5mm !important; height:10.5mm !important; display:block !important;" />';
+                    return '<img src="' + qr.createDataURL(8, 2) + '" style="width:11mm !important; height:11mm !important; display:block !important; image-rendering:pixelated !important;" />';
                 } catch (e) {
                     return '';
                 }
             };
-			
+
             // Gerador de código ZPL Nativo para Zebra ZD220 (203 DPI = 8 dots/mm)
             var generateZPLCode = function(itemsArray, offsetTopMm, offsetLeftMm) {
                 var rowItems = [];
@@ -262,7 +244,7 @@
                     rowItems = [itemsArray[0] || null, itemsArray[1] || null, itemsArray[2] || null];
                 }
 
-                var dpmm = 8; // 203 dpi = 8 dots por mm
+                var dpmm = 8;
                 var shiftY = Math.round(parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0') * dpmm);
                 var shiftX = Math.round(parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '4') * dpmm);
                 var colX = [16 + shiftX, 280 + shiftX, 544 + shiftX];
@@ -277,12 +259,11 @@
                     var ativo = (item.ativo || 'S/ ATIVO').substring(0, 14);
                     var nome = (item.nome || '-').substring(0, 32);
                     var setor = (item.setor || '-').substring(0, 18);
-                    // Converte quebras de linha para hexadecimal ZPL (\0D\0A) com ^FH\
-                    var qrPayload = buildDesktopQRPayload(item).replace(/\n/g, '\\0D\\0A');
+                    var qrPayload = buildDesktopQRPayload(item);
 
                     zpl += "^FO" + x + "," + y + "^A0N,16,16^FB240,1,0,C^FDCOBRECOM TI^FS\n";
                     zpl += "^FO" + (x + 10) + "," + (y + 19) + "^GB220,2,2^FS\n";
-                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,3^FH\\^FDLA," + qrPayload + "^FS\n";
+                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,4^FDLA," + qrPayload + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 25) + "^A0N,18,18^FD" + ativo + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 44) + "^A0N,13,13^FB142,2,0,L^FD" + nome + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 78) + "^A0N,13,13^FB142,1,0,L^FD" + setor + "^FS\n";
@@ -292,8 +273,6 @@
                 return zpl;
             };
 
-            // Motor de Impressão Vetorial Flexbox de 3 Colunas
-            // Padrão predefinido: Medida 3.0 x 2.0 cm | Posição Topo: 0 mm | Margem Esq: 4 mm
             var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, offsetLeftMm) {
                 var heightMm = Math.round(parseFloat(labelHeightCm || '2.0') * 10);
                 var topMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0');
@@ -400,16 +379,16 @@
                             gap: 1.2mm !important;
                         }
                         .zd-qr {
-                            width: 10.5mm !important;
-                            height: 10.5mm !important;
-                            flex: 0 0 10.5mm !important;
+                            width: 11mm !important;
+                            height: 11mm !important;
+                            flex: 0 0 11mm !important;
                             display: flex !important;
                             align-items: center !important;
                             justify-content: center !important;
                         }
-                       .zd-qr img {
-                            width: 10.5mm !important;
-                            height: 10.5mm !important;
+                        .zd-qr img {
+                            width: 11mm !important;
+                            height: 11mm !important;
                             display: block !important;
                             image-rendering: pixelated !important;
                         }
@@ -722,7 +701,6 @@
                 );
             };
 
-            // COMPONENTE DE CONTROLE DE DESKTOPS + PASTAS POR SETOR + EXPORTAÇÃO EXCEL + IMPRESSÃO ZEBRA ZD220
             var DesktopControlView = function(props) {
                 var desktops = props.desktops || [];
                 var currentUser = props.currentUser;
@@ -733,8 +711,6 @@
                 var searchState = useState('');
                 var search = searchState[0], setSearch = searchState[1];
 
-                // VALORES PREDEFINIDOS CONFORME SOLICITADO:
-                // Medida: 3.0 x 2.0 cm (Régua) | Posição Topo (mm): 0 | Margem Esq (mm): 4
                 var heightState = useState(localStorage.getItem('zd_label_height_v8') || '2.0');
                 var labelHeight = heightState[0], setLabelHeight = heightState[1];
 
@@ -753,11 +729,9 @@
                 var zplModalState = useState(null);
                 var zplModalCode = zplModalState[0], setZplModalCode = zplModalState[1];
 
-                // Controle de Visualização: 'folders' (Pastas por Setor) ou 'list' (Lista Geral)
                 var viewModeState = useState('folders');
                 var viewMode = viewModeState[0], setViewMode = viewModeState[1];
 
-                // Estado das pastas abertas por Setor
                 var openSectorFoldersState = useState({});
                 var openSectorFolders = openSectorFoldersState[0], setOpenSectorFolders = openSectorFoldersState[1];
 
@@ -782,7 +756,6 @@
                     return parts.join(':');
                 };
 
-                // Normaliza o nome do Setor para agrupar corretamente (ex: "T.I", "T.I." -> "TI")
                 var normalizeSectorName = function(rawSector) {
                     var s = (rawSector || '').trim().toUpperCase();
                     if (!s) return 'SEM SETOR';
@@ -796,7 +769,6 @@
                     printZebraZD220Labels(items, labelHeight, offsetTop, offsetLeft);
                 };
 
-                // Exportação para Excel (CSV compatível com Excel PT-BR com BOM UTF-8 e separador ';')
                 var handleExportExcel = function(itemsToExport, customName) {
                     if (!itemsToExport || itemsToExport.length === 0) {
                         alert("Não há registros para exportar.");
@@ -860,7 +832,6 @@
                     }
 
                     promise.then(function() {
-                        // Abre automaticamente a pasta do setor recém-cadastrado
                         setOpenSectorFolders(function(prev) {
                             return Object.assign({}, prev, { [normalizedSetor]: true });
                         });
@@ -919,7 +890,6 @@
                            (d.ativo || '').toLowerCase().indexOf(q) !== -1;
                 });
 
-                // Agrupa os desktops filtrados por Pasta de Setor
                 var sectorGroupsMap = {};
                 filtered.forEach(function(item) {
                     var secKey = normalizeSectorName(item.setor);
@@ -933,7 +903,6 @@
                     return a.localeCompare(b);
                 });
 
-                // Lista de setores únicos existentes para sugestão rápida no preenchimento
                 var existingSectorsList = [];
                 desktops.forEach(function(d) {
                     var s = normalizeSectorName(d.setor);
@@ -957,7 +926,6 @@
 
                 var previewQrUrl = generateQRDataURL(buildDesktopQRPayload(activePreviewData));
 
-                // Renderizador reutilizável de linhas da tabela de desktops
                 var renderDesktopRow = function(item) {
                     var isQueued = printQueue.some(function(q) { return q.id === item.id; });
                     var thumbQr = generateQRDataURL(buildDesktopQRPayload(item));
@@ -1033,7 +1001,6 @@
                                     <p className="text-slate-500 text-sm">Organização por pastas de setor, exportação Excel e impressão Zebra ZD220.</p>
                                 </div>
 
-                                {/* BARRA DE CALIBRAÇÃO FINA DA ETIQUETA */}
                                 <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                                     <div className="flex items-center gap-1.5">
                                         <span className="text-[10px] font-bold uppercase text-slate-400">Medida:</span>
@@ -1072,7 +1039,6 @@
                             </div>
 
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                                {/* FORMULÁRIO DE CADASTRO / EDIÇÃO */}
                                 <Card className="lg:col-span-7">
                                     <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
                                         <h3 className="font-bold text-sm uppercase tracking-wider text-slate-700 dark:text-slate-200">
@@ -1165,7 +1131,6 @@
                                     </form>
                                 </Card>
 
-                                {/* PREVIEW DA CARREIRA DE 3 ETIQUETAS CONFORME PRIMEIRO PRINT */}
                                 <Card className="lg:col-span-5 bg-slate-50/60 dark:bg-slate-900/90">
                                     <div className="flex items-center justify-between mb-3">
                                         <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
@@ -1239,7 +1204,6 @@
                                 </Card>
                             </div>
 
-                            {/* MODAL ZPL NATIVO CASO QUEIRA ENVIAR VIA ZEBRA UTILITIES / RAW */}
                             {zplModalCode && (
                                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
                                     <Card className="w-full max-w-lg bg-slate-900 border-slate-700" noPadding>
@@ -1260,7 +1224,6 @@
                                 </div>
                             )}
 
-                            {/* BARRA DE CONTROLE DE PASTAS, BUSCA E EXPORTAÇÃO EXCEL */}
                             <Card noPadding className="overflow-hidden">
                                 <div className="p-4 md:px-6 border-b border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/30">
                                     <div className="flex flex-wrap items-center gap-3">
@@ -1273,7 +1236,6 @@
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-2">
-                                        {/* Alternador Pastas vs Lista */}
                                         <div className="flex items-center bg-slate-200/70 dark:bg-slate-800 p-1 rounded-lg border border-slate-300/60 dark:border-slate-700">
                                             <button
                                                 type="button"
@@ -1310,7 +1272,6 @@
                                             </div>
                                         )}
 
-                                        {/* Botão Exportar para Excel (Todos os filtrados) */}
                                         <Button 
                                             type="button" 
                                             variant="success" 
@@ -1333,7 +1294,6 @@
                                     </div>
                                 </div>
 
-                                {/* MODO PASTAS SEGREGADAS POR SETOR */}
                                 {viewMode === 'folders' ? (
                                     <div className="p-4 md:p-6 space-y-3 bg-slate-100/50 dark:bg-slate-950/40">
                                         {sortedSectors.length === 0 ? (
@@ -1343,12 +1303,10 @@
                                         ) : (
                                             sortedSectors.map(function(sectorName) {
                                                 var sectorItems = sectorGroupsMap[sectorName] || [];
-                                                // Se o usuário estiver pesquisando algo no campo de busca, abre a pasta automaticamente
                                                 var isOpen = search.trim() !== '' ? true : !!openSectorFolders[sectorName];
 
                                                 return (
                                                     <div key={sectorName} className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden shadow-sm transition-all">
-                                                        {/* CABEÇALHO DA PASTA DO SETOR */}
                                                         <div 
                                                             onClick={function() { toggleSectorFolder(sectorName); }}
                                                             className={"px-4 py-3.5 flex flex-wrap items-center justify-between gap-3 cursor-pointer select-none transition-colors " + (isOpen ? "bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800" : "hover:bg-slate-50 dark:hover:bg-slate-800/40")}
@@ -1401,7 +1359,6 @@
                                                             </div>
                                                         </div>
 
-                                                        {/* TABELA INTERNA DA PASTA DO SETOR */}
                                                         {isOpen && (
                                                             <div className="overflow-x-auto fade-in">
                                                                 <table className="w-full text-sm text-left min-w-[750px]">
@@ -1426,7 +1383,6 @@
                                         )}
                                     </div>
                                 ) : (
-                                    /* MODO LISTA GERAL */
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-sm text-left min-w-[750px]">
                                             <thead className="bg-slate-50 dark:bg-slate-800/70 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800">
@@ -1777,7 +1733,7 @@
                         var tasksText = (group.tasks || []).map(function(t) {
                             var whoDidIt = (t.checked && t.checkedBy) ? " (Feito por: " + t.checkedBy.split(' ')[0] + ")" : "";
                             var obsText = (t.obs && t.obs.trim() !== '') ? "\n        -> OBS: " + t.obs : "";
-                            return "   " + (t.checked ? "[X]" : "[ ]") + " " + t.label + whoDidIt + obsText;
+                            return "    " + (t.checked ? "[X]" : "[ ]") + " " + t.label + whoDidIt + obsText;
                         }).join("\n");
                         return "• " + group.title + "\n" + tasksText;
                     }).join("\n\n");
@@ -2812,7 +2768,6 @@
                                         </div>
                                     </form>
                                 </div>
-                                
                             </div>
                         </Card>
                     </div>
