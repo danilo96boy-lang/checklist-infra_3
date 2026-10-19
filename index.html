@@ -218,10 +218,12 @@
             };
 
             // Função centralizada que monta o conteúdo do QR Code com ATIVO, NOME e SETOR
-          var buildDesktopQRPayload = function(item) {
-    if (!item) return 'S/ATIVO';
-    return (item.ativo || 'S/ATIVO').toString().trim().toUpperCase();
-};
+            var buildDesktopQRPayload = function(item) {
+                if (!item) return 'ATIVO: S/ATIVO\nNOME: -\nSETOR: -';
+                var ativo = (item.ativo || 'S/ATIVO').toString().trim().toUpperCase();
+                var nome = (item.nome || '-').toString().trim().toUpperCase();
+                var setor = (item.setor || '-').toString().trim().toUpperCase();
+                return "ATIVO: " + ativo + "\nNOME: " + nome + "\nSETOR: " + setor;
             };
 
             // Gerador de DataURL para a prévia na tela
@@ -241,12 +243,11 @@
          var generateQRSVG = function(text) {
                 try {
                     if (typeof qrcode === 'undefined') return '';
-                    // Usando nível de correção 'H' (High) para máxima tolerância de leitura e densidade
-                    var qr = qrcode(0, 'H');
+                    var qr = qrcode(0, 'M');
                     qr.addData(text || 'COBRECOM');
                     qr.make();
-                    // Cria o SVG puro configurando a célula com tamanho ideal para leitor de celular
-                    return qr.createSvgTag({ cellSize: 3, margin: 0, scalable: true });
+                    // Retorna uma tag <img> padrão com DataURL em base64 (muito mais estável para impressão)
+                    return '<img src="' + qr.createDataURL(4, 0) + '" style="width:10.5mm !important; height:10.5mm !important; display:block !important;" />';
                 } catch (e) {
                     return '';
                 }
