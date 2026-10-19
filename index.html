@@ -3329,21 +3329,31 @@ var AnalyticsView = function(props) {
                     }
                 };
 
-                var handleAddLink = function(folderId) {
+             var handleAddLink = function(folderId) {
                     var label = prompt("NOME DO ACESSO (EX: PFSENSE MATRIZ):");
                     if (!label || !label.trim()) return;
                     var url = prompt("ENDEREÇO IP OU URL (EX: 192.168.1.1):");
                     if (!url || !url.trim()) return;
 
+                    var newLink = { 
+                        id: 'l_' + Date.now(), 
+                        label: label.trim().toUpperCase(), 
+                        url: url.trim() 
+                    };
+
                     var updated = customFolders.map(function(f) {
                         if (f.id === folderId) {
-                            var existing = f.links || [];
-                            var newLink = { id: 'l_' + Date.now(), label: label.trim().toUpperCase(), url: url.trim() };
+                            var existing = Array.isArray(f.links) ? [].concat(f.links) : [];
                             return Object.assign({}, f, { links: existing.concat([newLink]) });
                         }
                         return f;
                     });
-                    db.collection('settings').doc('sidebar_modules').set({ folders: updated });
+
+                    setCustomFolders(updated);
+                    db.collection('settings').doc('sidebar_modules').set({ folders: updated })
+                        .catch(function(err) {
+                            alert("Erro ao salvar link: " + err.message);
+                        });
                 };
 
                 var handleDeleteLink = function(e, folderId, linkId) {
