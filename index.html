@@ -217,13 +217,13 @@
                 Download: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             };
 
-            // Função centralizada que monta o conteúdo do QR Code apenas com NOME e SETOR
-           var buildDesktopQRPayload = function(item) {
-                if (!item) return 'COBRECOM TI';
-                var ativo = item.ativo || 'S/ATIVO';
-                var nome = item.nome || '-';
-                var setor = item.setor || '-';
-                return "ATIVO: " + ativo + " | NOME: " + nome + " | SETOR: " + setor;
+            // Função centralizada que monta o conteúdo do QR Code com ATIVO, NOME e SETOR
+            var buildDesktopQRPayload = function(item) {
+                if (!item) return 'ATIVO: S/ATIVO\nNOME: -\nSETOR: -';
+                var ativo = (item.ativo || 'S/ATIVO').toString().trim().toUpperCase();
+                var nome = (item.nome || '-').toString().trim().toUpperCase();
+                var setor = (item.setor || '-').toString().trim().toUpperCase();
+                return "ATIVO: " + ativo + "\nNOME: " + nome + "\nSETOR: " + setor;
             };
 
             // Gerador de DataURL para a prévia na tela
@@ -276,11 +276,12 @@
                     var ativo = (item.ativo || 'S/ ATIVO').substring(0, 14);
                     var nome = (item.nome || '-').substring(0, 32);
                     var setor = (item.setor || '-').substring(0, 18);
-                    var qrPayload = buildDesktopQRPayload(item);
+                    // Converte quebras de linha para hexadecimal ZPL (\0D\0A) com ^FH\
+                    var qrPayload = buildDesktopQRPayload(item).replace(/\n/g, '\\0D\\0A');
 
                     zpl += "^FO" + x + "," + y + "^A0N,16,16^FB240,1,0,C^FDCOBRECOM TI^FS\n";
                     zpl += "^FO" + (x + 10) + "," + (y + 19) + "^GB220,2,2^FS\n";
-                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,3^FDLA," + qrPayload + "^FS\n";
+                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,3^FH\\^FDLA," + qrPayload + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 25) + "^A0N,18,18^FD" + ativo + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 44) + "^A0N,13,13^FB142,2,0,L^FD" + nome + "^FS\n";
                     zpl += "^FO" + (x + 98) + "," + (y + 78) + "^A0N,13,13^FB142,1,0,L^FD" + setor + "^FS\n";
@@ -1199,21 +1200,21 @@
                                                     ? generateQRDataURL(buildDesktopQRPayload(slotItem))
                                                     : previewQrUrl;
 
-                                               return (
-                                        <div key={idx} className="bg-white text-black rounded-md shadow-sm p-1.5 flex flex-col justify-between overflow-hidden">
-                                            <div className="text-[6.5px] font-black text-center border-b border-black pb-0.5 mb-1 tracking-wider leading-none">
-                                                COBRECOM TI
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <img src={slotQr} alt="QR" className="w-8 h-8 object-contain shrink-0" />
-                                                <div className="min-w-0 flex-1 leading-tight space-y-0.5">
+                                                return (
+                                                    <div key={idx} className="bg-white text-black rounded-md shadow-sm p-1.5 flex flex-col justify-between overflow-hidden">
+                                                        <div className="text-[6.5px] font-black text-center border-b border-black pb-0.5 mb-1 tracking-wider leading-none">
+                                                            COBRECOM TI
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <img src={slotQr} alt="QR" className="w-8 h-8 object-contain shrink-0" />
+                                                            <div className="min-w-0 flex-1 leading-tight space-y-0.5">
                                                                 <div className="text-[8.5px] font-mono font-black truncate">{slotItem.ativo || 'S/ ATIVO'}</div>
                                                                 <div className="text-[6px] font-bold uppercase break-all leading-[1.05] line-clamp-2">{slotItem.nome || '-'}</div>
                                                                 <div className="text-[6px] truncate uppercase text-slate-700">{slotItem.setor || '-'}</div>
                                                             </div>
-                                            </div>
-                                        </div>
-                                    );
+                                                        </div>
+                                                    </div>
+                                                );
                                             })}
                                         </div>
                                     </div>
@@ -1784,7 +1785,7 @@
                     var subject = "[" + statusGlobal + "] Relatório Técnico #" + ticket.visualId + " - " + identificador;
                     var body = 
                         "========================================\n" +
-                        "            RELATÓRIO TÉCNICO - INFRA HUB\n" +
+                        "             RELATÓRIO TÉCNICO - INFRA HUB\n" +
                         "========================================\n\n" +
                         "ID DO REGISTRO: #" + ticket.visualId + "\n" +
                         "DATA: " + new Date(ticket.createdAt || ticket.date || Date.now()).toLocaleDateString() + "\n" +
