@@ -1927,62 +1927,210 @@
                 );
             };
 
-            var AnalyticsView = function(props) {
+var AnalyticsView = function(props) {
                 var history = props.history || [];
+                var activeTickets = props.activeTickets || [];
+                var kanbanTasks = props.kanbanTasks || [];
+                var desktops = props.desktops || [];
+
+                var periodState = useState('all'); // '7d', '30d', 'month', 'all'
+                var period = periodState[0], setPeriod = periodState[1];
+
                 var chartTypeRef = useRef(null);
                 var chartTechRef = useRef(null);
+                var chartTrendRef = useRef(null);
+                var chartSectorRef = useRef(null);
+
                 var canvasType = useRef(null);
                 var canvasTech = useRef(null);
+                var canvasTrend = useRef(null);
+                var canvasSector = useRef(null);
+
+                // Filtrar histórico por período selecionado
+                var now = new Date();
+                var filteredHistory = history.filter(function(h) {
+                    if (period === 'all') return true;
+                    var hDate = new Date(h.date || Date.now());
+                    var diffDays = (now - hDate) / (1000 * 60 * 60 * 24);
+                    if (period === '7d') return diffDays <= 7;
+                    if (period === '30d') return diffDays <= 30;
+                    if (period === 'month') {
+                        return hDate.getMonth() === now.getMonth() && hDate.getFullYear() === now.getFullYear();
+                    }
+                    return true;
+                });
 
                 useEffect(function() {
-                    if (history.length === 0) return;
+                    var isDark = document.documentElement.classList.contains('dark');
+                    var textColor = isDark ? '#94a3b8' : '#64748b';
+                    var gridColor = isDark ? 'rgba(148, 163, 184, 0.08)' : 'rgba(100, 116, 139, 0.1)';
 
+                    // 1. Dados: Categorias e Técnicos
                     var typeCounts = { formatacao: 0, diario: 0, rack: 0, zebra: 0 };
                     var techCounts = {};
+                    var trendMap = {};
 
-                    history.forEach(function(h) {
-                        if(typeCounts[h.type] !== undefined) typeCounts[h.type]++;
-                        var tech = h.tecnico || 'N/A';
-                        techCounts[tech] = (techCounts[tech] || 0) + 1;
+                    var daysToTrack = period === '7d' ? 7 : 14;
+                    for (var i = daysToTrack - 1; i >= 0; i--) {
+                        var d = new Date();
+                        d.setDate(d.getDate() - i);
+                        var dayStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                        trendMap[dayStr] = 0;
+                    }
+
+                    filteredHistory.forEach(function(h) {
+                        if (typeCounts[h.type] !== undefined) typeCounts[h.type]++;
+                        
+                        // Se for check diário, contabiliza também quem marcou os itens internos
+                        if (h.type === 'diario' && h.data && h.data.items) {
+                            var countedInDaily = {};
+                            Object.keys(h.data.items).forEach(function(k) {
+                                var tasks = h.data.items[k].tasks || [];
+                                tasks.forEach(function(t) {
+                                    if (t.checked && t.checkedBy) {
+                                        var shortName = t.checkedBy.trim().toUpperCase();
+                                        countedInDaily[shortName] = true;
+                                    }
+                                });
+                            });
+                            var participants = Object.keys(countedInDaily);
+                            if (participants.length > 0) {
+                                participants.forEach(function(p) { techCounts[p] = (techCounts[p] || 0) + 1; });
+                            } else {
+                                techCounts['EQUIPE TI'] = (techCounts['EQUIPE TI'] || 0) + 1;
+                            }
+                        } else {
+                            var tech = (h.tecnico || 'N/A').trim().toUpperCase();
+                            techCounts[tech] = (techCounts[tech] || 0) + 1;
+                        }
+
+                        var hDate = new Date(h.date || Date.now());
+                        var hDayStr = hDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                        if (trendMap[hDayStr] !== undefined) {
+                            trendMap[hDayStr]++;
+                        }
                     });
 
+                    // Gráfico 1: Categorias (Doughnut)
                     if (chartTypeRef.current) chartTypeRef.current.destroy();
-                    if (canvasType.current) {
+                    if (canvasType.current && filteredHistory.length > 0) {
                         chartTypeRef.current = new Chart(canvasType.current, {
                             type: 'doughnut',
                             data: {
-                                labels: ['Formatação', 'Diário', 'Rack/Switch', 'Zebra'],
+                                labels: ['Formatação PC', 'Check Diário', 'Rack / Switch', 'Manut. Zebra'],
                                 datasets: [{
                                     data: [typeCounts.formatacao, typeCounts.diario, typeCounts.rack, typeCounts.zebra],
                                     backgroundColor: ['#3b82f6', '#10b981', '#6366f1', '#f59e0b'],
-                                    borderWidth: 0
+                                    borderWidth: 0,
+                                    hoverOffset: 6
                                 }]
                             },
-                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels:{color:'#94a3b8'} } } }
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '72%',
+                                plugins: {
+                                    legend: { position: 'bottom', labels: { color: textColor, padding: 16, font: { family: 'Inter', size: 11, weight: '600' } } }
+                                }
+                            }
                         });
                     }
 
+                    // Gráfico 2: Produtividade por Técnico (Barras)
                     if (chartTechRef.current) chartTechRef.current.destroy();
-                    if (canvasTech.current) {
+                    if (canvasTech.current && filteredHistory.length > 0) {
+                        var sortedTechs = Object.keys(techCounts).sort(function(a, b) { return techCounts[b] - techCounts[a]; });
                         chartTechRef.current = new Chart(canvasTech.current, {
                             type: 'bar',
                             data: {
-                                labels: Object.keys(techCounts),
+                                labels: sortedTechs,
                                 datasets: [{
-                                    label: 'Tarefas Concluídas',
-                                    data: Object.values(techCounts),
-                                    backgroundColor: '#3b82f6',
-                                    borderRadius: 4
+                                    label: 'Participações / Concluídos',
+                                    data: sortedTechs.map(function(k) { return techCounts[k]; }),
+                                    backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#ec4899'],
+                                    borderRadius: 6,
+                                    maxBarThickness: 42
                                 }]
                             },
-                            options: { 
-                                responsive: true, 
-                                maintainAspectRatio: false, 
-                                scales: { 
-                                    y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
-                                    x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
-                                }, 
-                                plugins: { legend: { display: false } } 
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: { beginAtZero: true, ticks: { color: textColor, stepSize: 1 }, grid: { color: gridColor } },
+                                    x: { ticks: { color: textColor, font: { weight: 'bold', size: 10 } }, grid: { display: false } }
+                                },
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
+
+                    // Gráfico 3: Curva de Execução (Linha)
+                    if (chartTrendRef.current) chartTrendRef.current.destroy();
+                    if (canvasTrend.current && filteredHistory.length > 0) {
+                        var ctx = canvasTrend.current.getContext('2d');
+                        var grad = ctx.createLinearGradient(0, 0, 0, 260);
+                        grad.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
+                        grad.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+                        chartTrendRef.current = new Chart(canvasTrend.current, {
+                            type: 'line',
+                            data: {
+                                labels: Object.keys(trendMap),
+                                datasets: [{
+                                    label: 'Checklists Finalizados',
+                                    data: Object.values(trendMap),
+                                    borderColor: '#3b82f6',
+                                    backgroundColor: grad,
+                                    borderWidth: 2.5,
+                                    pointBackgroundColor: '#3b82f6',
+                                    pointRadius: 4,
+                                    fill: true,
+                                    tension: 0.35
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: { beginAtZero: true, ticks: { color: textColor, stepSize: 1 }, grid: { color: gridColor } },
+                                    x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }
+                                },
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
+
+                    // Gráfico 4: Desktops por Setor (Top 6 Setores)
+                    if (chartSectorRef.current) chartSectorRef.current.destroy();
+                    if (canvasSector.current && desktops.length > 0) {
+                        var secMap = {};
+                        desktops.forEach(function(d) {
+                            var s = (d.setor || 'SEM SETOR').trim().toUpperCase();
+                            secMap[s] = (secMap[s] || 0) + 1;
+                        });
+                        var topSectors = Object.keys(secMap).sort(function(a, b) { return secMap[b] - secMap[a]; }).slice(0, 6);
+
+                        chartSectorRef.current = new Chart(canvasSector.current, {
+                            type: 'bar',
+                            data: {
+                                labels: topSectors,
+                                datasets: [{
+                                    label: 'Máquinas Catalogadas',
+                                    data: topSectors.map(function(s) { return secMap[s]; }),
+                                    backgroundColor: '#10b981',
+                                    borderRadius: 6,
+                                    maxBarThickness: 32
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: { beginAtZero: true, ticks: { color: textColor, stepSize: 1 }, grid: { color: gridColor } },
+                                    y: { ticks: { color: textColor, font: { weight: 'bold', size: 10 } }, grid: { display: false } }
+                                },
+                                plugins: { legend: { display: false } }
                             }
                         });
                     }
@@ -1990,32 +2138,130 @@
                     return function() {
                         if (chartTypeRef.current) chartTypeRef.current.destroy();
                         if (chartTechRef.current) chartTechRef.current.destroy();
+                        if (chartTrendRef.current) chartTrendRef.current.destroy();
+                        if (chartSectorRef.current) chartSectorRef.current.destroy();
                     };
-                }, [history]);
+                }, [filteredHistory, desktops, period]);
+
+                // Cálculos de KPIs
+                var todayStr = new Date().toLocaleDateString('pt-BR');
+                var todayOps = history.filter(function(h) {
+                    return new Date(h.date || Date.now()).toLocaleDateString('pt-BR') === todayStr;
+                }).length;
+
+                var activeKanban = kanbanTasks.filter(function(t) { return !t.archived && t.status !== 'concluido'; }).length;
+                var impedimentosKanban = kanbanTasks.filter(function(t) { return !t.archived && t.status === 'impedimentos'; }).length;
 
                 return (
-                    <div className="p-6 md:p-10 h-full flex flex-col fade-in overflow-auto">
-                        <div className="mb-6 flex items-center gap-3">
-                            <div className="p-3 bg-brand-600 rounded-lg text-white shadow-lg">{Icons.BarChart}</div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard Analítico</h2>
-                                <p className="text-slate-500 text-sm">Métricas de produtividade e operações concluídas (baseado no Histórico).</p>
+                    <div className="p-4 md:p-10 h-full flex flex-col fade-in overflow-auto">
+                        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-brand-600 rounded-xl text-white shadow-lg shadow-brand-500/20">{Icons.BarChart}</div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard Analítico</h2>
+                                    <p className="text-slate-500 text-sm">Indicadores consolidados de Checklists, Kanban e Parque de Máquinas.</p>
+                                </div>
+                            </div>
+
+                            {/* Filtro de Período */}
+                            <div className="flex items-center bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 self-start sm:self-auto">
+                                {[
+                                    { id: '7d', label: '7 Dias' },
+                                    { id: '30d', label: '30 Dias' },
+                                    { id: 'month', label: 'Este Mês' },
+                                    { id: 'all', label: 'Tudo' }
+                                ].map(function(btn) {
+                                    return (
+                                        <button
+                                            key={btn.id}
+                                            onClick={function() { setPeriod(btn.id); }}
+                                            className={"px-3 py-1.5 rounded-lg text-xs font-bold transition-all " + (period === btn.id ? "bg-brand-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800 dark:hover:text-white")}
+                                        >
+                                            {btn.label}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
-                        {history.length === 0 ? (
+
+                        {/* Linha de KPIs (4 Cards) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <Card className="p-5 border-l-4 border-l-brand-500">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Checklists Concluídos</p>
+                                        <h3 className="text-3xl font-black text-slate-800 dark:text-white mt-1">{filteredHistory.length}</h3>
+                                    </div>
+                                    <div className="p-2.5 rounded-lg bg-brand-50 dark:bg-brand-900/20 text-brand-500">{Icons.Check}</div>
+                                </div>
+                                <p className="text-xs text-slate-400 mt-3">{todayOps} finalizado(s) hoje • {activeTickets.length} em aberto</p>
+                            </Card>
+
+                            <Card className="p-5 border-l-4 border-l-emerald-500">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Parque Catalogado</p>
+                                        <h3 className="text-3xl font-black text-slate-800 dark:text-white mt-1">{desktops.length}</h3>
+                                    </div>
+                                    <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500">{Icons.Monitor}</div>
+                                </div>
+                                <p className="text-xs text-slate-400 mt-3">Desktops com QR Code / MAC</p>
+                            </Card>
+
+                            <Card className="p-5 border-l-4 border-l-indigo-500">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Pendências Kanban</p>
+                                        <h3 className="text-3xl font-black text-slate-800 dark:text-white mt-1">{activeKanban}</h3>
+                                    </div>
+                                    <div className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500">{Icons.Kanban}</div>
+                                </div>
+                                <p className="text-xs text-slate-400 mt-3">
+                                    {impedimentosKanban > 0 ? <span className="text-red-400 font-bold">{impedimentosKanban} com impedimento!</span> : 'Nenhum impedimento ativo'}
+                                </p>
+                            </Card>
+
+                            <Card className="p-5 border-l-4 border-l-amber-500">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">Formatações no Período</p>
+                                        <h3 className="text-3xl font-black text-slate-800 dark:text-white mt-1">
+                                            {filteredHistory.filter(function(h) { return h.type === 'formatacao'; }).length}
+                                        </h3>
+                                    </div>
+                                    <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-500">{Icons.Server}</div>
+                                </div>
+                                <p className="text-xs text-slate-400 mt-3">Máquinas entregues padronizadas</p>
+                            </Card>
+                        </div>
+
+                        {filteredHistory.length === 0 && desktops.length === 0 ? (
                             <div className="text-center p-16 border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-xl">
-                                <p className="text-slate-500">Sem dados suficientes para gerar gráficos.</p>
-                                <p className="text-xs text-slate-400 mt-1">Conclua checklists para visualizar os resultados.</p>
+                                <p className="text-slate-500 font-medium">Sem registros no período selecionado.</p>
+                                <p className="text-xs text-slate-400 mt-1">Altere o filtro no topo ou conclua checklists para alimentar os gráficos.</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <Card className="flex flex-col h-[400px]">
-                                    <h3 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-6 uppercase tracking-wider">Checklists por Categoria</h3>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
+                                <Card className="flex flex-col h-[340px]">
+                                    <h3 className="font-bold text-xs text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-wider">Ritmo de Operações Concluídas</h3>
+                                    <div className="flex-1 relative w-full h-full"><canvas ref={canvasTrend}></canvas></div>
+                                </Card>
+
+                                <Card className="flex flex-col h-[340px]">
+                                    <h3 className="font-bold text-xs text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-wider">Distribuição por Tipo de Rotina</h3>
                                     <div className="flex-1 relative w-full h-full"><canvas ref={canvasType}></canvas></div>
                                 </Card>
-                                <Card className="flex flex-col h-[400px]">
-                                    <h3 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-6 uppercase tracking-wider">Produtividade por Técnico</h3>
+
+                                <Card className="flex flex-col h-[340px]">
+                                    <h3 className="font-bold text-xs text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-wider">Participação por Técnico (Inclui Check Diário)</h3>
                                     <div className="flex-1 relative w-full h-full"><canvas ref={canvasTech}></canvas></div>
+                                </Card>
+
+                                <Card className="flex flex-col h-[340px]">
+                                    <h3 className="font-bold text-xs text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-wider">Top 6 Setores com Mais Desktops</h3>
+                                    <div className="flex-1 relative w-full h-full">
+                                        {desktops.length > 0 ? <canvas ref={canvasSector}></canvas> : <div className="h-full flex items-center justify-center text-xs text-slate-500">Nenhum desktop cadastrado</div>}
+                                    </div>
                                 </Card>
                             </div>
                         )}
@@ -3500,7 +3746,7 @@
                             <div className="flex-1 overflow-auto relative">
                                 {showConfig && <ConfigModal onClose={function() { setShowConfig(false); }} users={users} currentUser={currentUser} globalTitulos={globalTitulos} />}
                                 {view === 'dashboard' && <Dashboard activeTickets={activeTickets} onOpenTicket={function(id) { setCurrentTicketId(id); navTo('checklist'); }} onDeleteTicket={handleDeleteActive} historyCount={history.length} />}
-                                {view === 'analytics' && <AnalyticsView history={history} />}
+                                {view === 'analytics' && <AnalyticsView history={history} activeTickets={activeTickets} kanbanTasks={kanbanTasks} desktops={desktops} />}
                                 {view === 'kanban' && <KanbanView tasks={kanbanTasks} users={users} currentUser={currentUser} onSaveTask={handleSaveKanbanTask} onDeleteTask={handleDeleteKanbanTask} onMoveTask={handleMoveKanbanTask} onReorderTask={handleReorderKanbanTask} onUpdateTask={handleUpdateKanbanTask} />}
                                 {view === 'sistema176' && (
                                     <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col">
