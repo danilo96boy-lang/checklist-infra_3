@@ -3189,17 +3189,17 @@ var FaturasTIView = function() {
                 });
 
                 var [meses, setMeses] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_meses_v5');
+                    var saved = localStorage.getItem('faturas_ti_meses_v6');
                     return saved ? JSON.parse(saved) : ['OUTUBRO', 'NOVEMBRO'];
                 });
                 
                 var [abaAtiva, setAbaAtiva] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_aba_v5');
+                    var saved = localStorage.getItem('faturas_ti_aba_v6');
                     return saved ? saved : 'OUTUBRO';
                 });
                 
                 var [faturas, setFaturas] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_faturas_v5');
+                    var saved = localStorage.getItem('faturas_ti_faturas_v6');
                     return saved ? JSON.parse(saved) : faturasIniciais;
                 });
 
@@ -3207,9 +3207,9 @@ var FaturasTIView = function() {
                 var [filtroFornecedor, setFiltroFornecedor] = useState('');
                 var [modoVisualizacao, setModoVisualizacao] = useState('tabela'); // 'tabela' ou 'foco'
 
-                useEffect(function() { localStorage.setItem('faturas_ti_meses_v5', JSON.stringify(meses)); }, [meses]);
-                useEffect(function() { localStorage.setItem('faturas_ti_aba_v5', abaAtiva); }, [abaAtiva]);
-                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v5', JSON.stringify(faturas)); }, [faturas]);
+                useEffect(function() { localStorage.setItem('faturas_ti_meses_v6', JSON.stringify(meses)); }, [meses]);
+                useEffect(function() { localStorage.setItem('faturas_ti_aba_v6', abaAtiva); }, [abaAtiva]);
+                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v6', JSON.stringify(faturas)); }, [faturas]);
 
                 var faturasDaAba = faturas.filter(function(f) {
                     if (f.mes !== abaAtiva) return false;
@@ -3232,22 +3232,23 @@ var FaturasTIView = function() {
                     return matchVenc && matchForn;
                 });
 
+                // Colunas otimizadas para compactar melhor a tabela e evitar overflow horizontal desnecessário
                 var colunas = [
-                    { key: 'diaVencimento', label: 'VENC.', width: 'w-20' },
-                    { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-72' },
-                    { key: 'codigoSv', label: 'CÓDIGO SV', width: 'w-32' },
-                    { key: 'dataVencimento', label: 'VENCIMENTO', width: 'w-28' },
-                    { key: 'scPagfor', label: 'SC PAGFOR', width: 'w-28' },
-                    { key: 'scTotvs', label: 'SC TOTVS', width: 'w-28' },
-                    { key: 'pedido', label: 'PEDIDO', width: 'w-24' },
-                    { key: 'nf', label: 'NF', width: 'w-28' },
-                    { key: 'fornecedor', label: 'FORNECEDOR', width: 'w-40' },
-                    { key: 'codForn', label: 'CÓD FORN', width: 'w-24' },
-                    { key: 'dataEnvio', label: 'DATA DE ENVIO', width: 'w-28' },
-                    { key: 'salvaPasta', label: 'SALVA NA PASTA', width: 'w-28' },
-                    { key: 'tipoEmail', label: 'E-MAIL', width: 'w-24' },
-                    { key: 'repReceb', label: 'REP. RECEB', width: 'w-28' },
-                    { key: 'obsStatus', label: 'STATUS / OBS', width: 'w-48' }
+                    { key: 'diaVencimento', label: 'VENC.', width: 'w-16' },
+                    { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-64' },
+                    { key: 'codigoSv', label: 'CÓD. SV', width: 'w-24' },
+                    { key: 'dataVencimento', label: 'DT. VENC.', width: 'w-24' },
+                    { key: 'scPagfor', label: 'SC PAGFOR', width: 'w-24' },
+                    { key: 'scTotvs', label: 'SC TOTVS', width: 'w-24' },
+                    { key: 'pedido', label: 'PEDIDO', width: 'w-20' },
+                    { key: 'nf', label: 'NF', width: 'w-24' },
+                    { key: 'fornecedor', label: 'FORNECEDOR', width: 'w-32' },
+                    { key: 'codForn', label: 'CÓD. FORN', width: 'w-20' },
+                    { key: 'dataEnvio', label: 'DT. ENVIO', width: 'w-24' },
+                    { key: 'salvaPasta', label: 'PASTA', width: 'w-20' },
+                    { key: 'tipoEmail', label: 'E-MAIL', width: 'w-20' },
+                    { key: 'repReceb', label: 'REP.', width: 'w-24' },
+                    { key: 'obsStatus', label: 'STATUS / OBS', width: 'w-40' }
                 ];
 
                 var handleAddLinha = function() {
@@ -3346,13 +3347,13 @@ var FaturasTIView = function() {
                                     <div className="flex items-center bg-slate-900 p-1 rounded-lg border border-slate-800">
                                         <button 
                                             onClick={function() { setModoVisualizacao('tabela'); }}
-                                            className={"px-3 py-1.5 rounded text-xs font-bold transition-all " + (modoVisualizacao === 'tabela' ? 'bg-brand-600 text-white' : 'text-slate-400 hover:text-white')}
+                                            className={"px-3 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1.5 " + (modoVisualizacao === 'tabela' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-400 hover:text-white')}
                                         >
                                             📊 Tabela
                                         </button>
                                         <button 
                                             onClick={function() { setModoVisualizacao('foco'); }}
-                                            className={"px-3 py-1.5 rounded text-xs font-bold transition-all " + (modoVisualizacao === 'foco' ? 'bg-brand-600 text-white' : 'text-slate-400 hover:text-white')}
+                                            className={"px-3 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1.5 " + (modoVisualizacao === 'foco' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-400 hover:text-white')}
                                         >
                                             ⚡ Modo Foco (Cards)
                                         </button>
@@ -3408,25 +3409,25 @@ var FaturasTIView = function() {
                                 </button>
                             </div>
 
-                            {/* Conteúdo: Tabela ou Modo Foco em Cards */}
+                            {/* Conteúdo: Tabela Otimizada ou Modo Foco em Cards */}
                             {modoVisualizacao === 'tabela' ? (
                                 <div className="flex-1 overflow-auto bg-slate-900 rounded-xl shadow-lg border border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full">
-                                    <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '2200px' }}>
+                                    <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '1750px' }}>
                                         <thead className="sticky top-0 z-20">
                                             <tr>
-                                                <th colSpan={colunas.length + 1} className="bg-slate-900/95 backdrop-blur font-black text-base md:text-lg py-3 border-b border-slate-800 uppercase tracking-widest text-slate-100 shadow-sm">
+                                                <th colSpan={colunas.length + 1} className="bg-slate-900/95 backdrop-blur font-black text-sm md:text-base py-2.5 border-b border-slate-800 uppercase tracking-widest text-slate-100 shadow-sm">
                                                     FATURAS E CONTAS DE {abaAtiva}
                                                 </th>
                                             </tr>
                                             <tr>
                                                 {colunas.map(function(col) {
                                                     return (
-                                                        <th key={col.key} className={"bg-slate-950 text-slate-300 text-[11px] font-extrabold uppercase py-2.5 px-2 border-b border-r border-slate-800 tracking-wider " + col.width}>
+                                                        <th key={col.key} className={"bg-slate-950 text-slate-300 text-[10px] font-extrabold uppercase py-2 px-1.5 border-b border-r border-slate-800 tracking-wider " + col.width}>
                                                             {col.label}
                                                         </th>
                                                     );
                                                 })}
-                                                <th className="bg-slate-950 text-slate-300 text-[11px] font-extrabold uppercase py-2.5 px-2 border-b border-slate-800 w-12 tracking-wider">
+                                                <th className="bg-slate-950 text-slate-300 text-[10px] font-extrabold uppercase py-2 px-1 border-b border-slate-800 w-12 tracking-wider">
                                                     AÇÃO
                                                 </th>
                                             </tr>
@@ -3456,16 +3457,16 @@ var FaturasTIView = function() {
                                                             if (col.key === 'obsStatus') {
                                                                 return (
                                                                     <td key={col.key} className="p-1 border-r border-slate-800/50">
-                                                                        <div className="flex items-center justify-center gap-1.5 px-1">
+                                                                        <div className="flex items-center justify-center gap-1 px-0.5">
                                                                             <input 
                                                                                 type="text" 
                                                                                 value={fat[col.key] || ''} 
                                                                                 onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
-                                                                                className="w-full h-8 px-2 bg-slate-950/60 border border-slate-800 rounded text-slate-200 outline-none uppercase text-center text-xs font-semibold focus:border-brand-500 transition-colors"
+                                                                                className="w-full h-7 px-1.5 bg-slate-950/60 border border-slate-800 rounded text-slate-200 outline-none uppercase text-center text-[11px] font-semibold focus:border-brand-500 transition-colors"
                                                                                 placeholder="STATUS..."
                                                                             />
                                                                             {fat[col.key] && (
-                                                                                <span className={"text-[9px] font-extrabold uppercase px-1.5 py-1 rounded border whitespace-nowrap " + badgeClass}>
+                                                                                <span className={"text-[8px] font-extrabold uppercase px-1 py-0.5 rounded border whitespace-nowrap " + badgeClass}>
                                                                                     {isFinalizado ? 'OK' : isAguardando ? 'PEND.' : 'OUT'}
                                                                                 </span>
                                                                             )}
@@ -3479,13 +3480,13 @@ var FaturasTIView = function() {
                                                                         type="text" 
                                                                         value={fat[col.key] || ''} 
                                                                         onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
-                                                                        className="w-full h-8 px-2 bg-transparent border border-transparent hover:border-slate-700 focus:border-brand-500 rounded text-slate-300 outline-none uppercase text-center text-xs transition-all placeholder-slate-600" 
+                                                                        className="w-full h-7 px-1.5 bg-transparent border border-transparent hover:border-slate-700 focus:border-brand-500 rounded text-slate-300 outline-none uppercase text-center text-[11px] transition-all placeholder-slate-600" 
                                                                     />
                                                                 </td>
                                                             );
                                                         })}
                                                         <td className="p-1 text-center">
-                                                            <button onClick={function(){ handleRemoverLinha(fat.id); }} className="p-1.5 rounded text-slate-500 hover:text-red-400 hover:bg-red-950/30 transition-colors" title="Remover Linha">
+                                                            <button onClick={function(){ handleRemoverLinha(fat.id); }} className="p-1 rounded text-slate-500 hover:text-red-400 hover:bg-red-950/30 transition-colors" title="Remover Linha">
                                                                 {Icons.Trash}
                                                             </button>
                                                         </td>
