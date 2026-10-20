@@ -3098,488 +3098,518 @@ var AnalyticsView = function(props) {
             };
 
 var FaturasTIView = function() {
-                var templateBase = [
-                    { diaVencimento: '03', descricaoConta: 'PLANOS E REPAROS DE APARELHOS', codigoSv: 'SV05000309', fornecedor: 'CLARO', codForn: 'V0080J' },
-                    { diaVencimento: '05', descricaoConta: 'GBS ASSESSORIA E SERVICOS', codigoSv: 'SV05000312', fornecedor: 'GBS', codForn: '' },
-                    { diaVencimento: '06', descricaoConta: 'POWER BI', codigoSv: 'SV05000311', fornecedor: 'SND', codForn: 'VOOYCP' },
-                    { diaVencimento: '10', descricaoConta: 'INTERNET 100 MB ITU', codigoSv: 'SV05000033', fornecedor: 'SW TELECOM', codForn: 'V00ALH' },
-                    { diaVencimento: '10', descricaoConta: 'INTERNET EXTREMA MG', codigoSv: 'SV05000033', fornecedor: 'ZAAZ', codForn: '' },
-                    { diaVencimento: '10', descricaoConta: 'LOCAÇÃO DE EQUIPAMENTOS DE IMPRESSÃO/CÓPIA', codigoSv: 'SV01000003', fornecedor: 'DELTA TONERS', codForn: '' },
-                    { diaVencimento: '10', descricaoConta: 'OPTI SOLUCOES EM IMPRESSAO EXTREMA', codigoSv: 'SV01000003', fornecedor: 'OPTI', codForn: '' },
-                    { diaVencimento: '10', descricaoConta: 'STYLUS', codigoSv: 'SV01000003', fornecedor: 'STYLUS', codForn: '' },
-                    { diaVencimento: '10', descricaoConta: 'INTERNET 3 LAGOAS 100MBPS', codigoSv: 'SV05000033', fornecedor: 'EMBRATEL', codForn: 'V0080J' },
-                    { diaVencimento: '12', descricaoConta: 'DIALOG', codigoSv: '', fornecedor: 'DIALOG', codForn: '' },
-                    { diaVencimento: '13', descricaoConta: 'QIVE 13', codigoSv: '', fornecedor: 'ARQUIVEI', codForn: '' },
-                    { diaVencimento: '14', descricaoConta: 'CONTRATO DE MANUTENCAO TOTVS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
-                    { diaVencimento: '15', descricaoConta: 'TELEFONIA (0800)', codigoSv: 'SV04007469', fornecedor: 'EMBRATEL', codForn: '' },
-                    { diaVencimento: '15', descricaoConta: 'INTERNET 20MBPS + TELEFONIA ITU', codigoSv: 'SV05000033', fornecedor: 'EMBRATEL', codForn: '' },
-                    { diaVencimento: '15', descricaoConta: 'PLANOS E REPAROS DE APARELHOS 1 ITU', codigoSv: 'SV04007469', fornecedor: 'CLARO', codForn: '' },
-                    { diaVencimento: '15', descricaoConta: 'PLANOS E REPAROS DE APARELHOS 2 ITU', codigoSv: 'SV04007469', fornecedor: 'CLARO', codForn: '' },
-                    { diaVencimento: '17', descricaoConta: 'VIVO MOVEL (CHIPS NOVOS)', codigoSv: 'SV04007469', fornecedor: 'VIVO', codForn: '' },
-                    { diaVencimento: '17', descricaoConta: 'VIVO TL', codigoSv: 'SV04007469', fornecedor: 'VIVO', codForn: '' },
-                    { diaVencimento: '20', descricaoConta: 'JOY INTERNET FIBRA 500MBPS', codigoSv: 'SV05000033', fornecedor: 'JOY INTERNET', codForn: '' },
-                    { diaVencimento: '20', descricaoConta: 'INTERNET 3 LAGOAS 200MBPS', codigoSv: 'SV05000033', fornecedor: 'TELLIUS', codForn: '' },
-                    { diaVencimento: '20', descricaoConta: 'HOSPEDAGEM DE E-MAILS', codigoSv: '', fornecedor: 'SKYMAIL', codForn: 'VOOFK5' },
-                    { diaVencimento: '20', descricaoConta: 'PABX ITU, TL', codigoSv: 'SV05000313', fornecedor: 'TALKON', codForn: 'V00A0X' },
-                    { diaVencimento: '20', descricaoConta: 'CERTIFICADO DIGITAL TOTVS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
-                    { diaVencimento: '20', descricaoConta: 'INTERNET DTC TELECOM EXTREMA', codigoSv: 'SV05000033', fornecedor: 'DTC TELECOM', codForn: '' },
-                    { diaVencimento: '22', descricaoConta: 'CHIPS E MODEMS 4G ITU', codigoSv: 'SV04007469', fornecedor: 'CLARO', codForn: '' },
-                    { diaVencimento: '24', descricaoConta: 'TELEFONIA FIXA TRES LAGOAS', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
-                    { diaVencimento: '25', descricaoConta: 'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS "I"', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
-                    { diaVencimento: '25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF ITU', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
-                    { diaVencimento: '25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF GERENCIA REDE ITU', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
-                    { diaVencimento: '25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF TRES LAGOAS', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
-                    { diaVencimento: '25', descricaoConta: 'EMBRATEL REDE TL 25', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
-                    { diaVencimento: '30', descricaoConta: 'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
-                    { diaVencimento: '30', descricaoConta: 'CONTRATO INTELIGENCIA TRIBUTARIA TOTVS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
-                    { diaVencimento: '30', descricaoConta: 'HORAS EXTRAS GBS ASSESSORIA E SERVICOS', codigoSv: 'SV05000312', fornecedor: 'GBS', codForn: '' }
-                ];
+    var templateBase = [
+        { diaVencimento: '03', descricaoConta: 'PLANOS E REPAROS DE APARELHOS', codigoSv: 'SV05000309', fornecedor: 'CLARO', codForn: 'V0080J' },
+        { diaVencimento: '05', descricaoConta: 'GBS ASSESSORIA E SERVICOS', codigoSv: 'SV05000312', fornecedor: 'GBS', codForn: '' },
+        { diaVencimento: '06', descricaoConta: 'POWER BI', codigoSv: 'SV05000311', fornecedor: 'SND', codForn: 'VOOYCP' },
+        { diaVencimento: '10', descricaoConta: 'INTERNET 100 MB ITU', codigoSv: 'SV05000033', fornecedor: 'SW TELECOM', codForn: 'V00ALH' },
+        { diaVencimento: '10', descricaoConta: 'INTERNET EXTREMA MG', codigoSv: 'SV05000033', fornecedor: 'ZAAZ', codForn: '' },
+        { diaVencimento: '10', descricaoConta: 'LOCAÇÃO DE EQUIPAMENTOS DE IMPRESSÃO/CÓPIA', codigoSv: 'SV01000003', fornecedor: 'DELTA TONERS', codForn: '' },
+        { diaVencimento: '10', descricaoConta: 'OPTI SOLUCOES EM IMPRESSAO EXTREMA', codigoSv: 'SV01000003', fornecedor: 'OPTI', codForn: '' },
+        { diaVencimento: '10', descricaoConta: 'STYLUS', codigoSv: 'SV01000003', fornecedor: 'STYLUS', codForn: '' },
+        { diaVencimento: '10', descricaoConta: 'INTERNET 3 LAGOAS 100MBPS', codigoSv: 'SV05000033', fornecedor: 'EMBRATEL', codForn: 'V0080J' },
+        { diaVencimento: '12', descricaoConta: 'DIALOG', codigoSv: '', fornecedor: 'DIALOG', codForn: '' },
+        { diaVencimento: '13', descricaoConta: 'QIVE 13', codigoSv: '', fornecedor: 'ARQUIVEI', codForn: '' },
+        { diaVencimento: '14', descricaoConta: 'CONTRATO DE MANUTENCAO TOTVS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+        { diaVencimento: '15', descricaoConta: 'TELEFONIA (0800)', codigoSv: 'SV04007469', fornecedor: 'EMBRATEL', codForn: '' },
+        { diaVencimento: '15', descricaoConta: 'INTERNET 20MBPS + TELEFONIA ITU', codigoSv: 'SV05000033', fornecedor: 'EMBRATEL', codForn: '' },
+        { diaVencimento: '15', descricaoConta: 'PLANOS E REPAROS DE APARELHOS 1 ITU', codigoSv: 'SV04007469', fornecedor: 'CLARO', codForn: '' },
+        { diaVencimento: '15', descricaoConta: 'PLANOS E REPAROS DE APARELHOS 2 ITU', codigoSv: 'SV04007469', fornecedor: 'CLARO', codForn: '' },
+        { diaVencimento: '17', descricaoConta: 'VIVO MOVEL (CHIPS NOVOS)', codigoSv: 'SV04007469', fornecedor: 'VIVO', codForn: '' },
+        { diaVencimento: '17', descricaoConta: 'VIVO TL', codigoSv: 'SV04007469', fornecedor: 'VIVO', codForn: '' },
+        { diaVencimento: '20', descricaoConta: 'JOY INTERNET FIBRA 500MBPS', codigoSv: 'SV05000033', fornecedor: 'JOY INTERNET', codForn: '' },
+        { diaVencimento: '20', descricaoConta: 'INTERNET 3 LAGOAS 200MBPS', codigoSv: 'SV05000033', fornecedor: 'TELLIUS', codForn: '' },
+        { diaVencimento: '20', descricaoConta: 'HOSPEDAGEM DE E-MAILS', codigoSv: '', fornecedor: 'SKYMAIL', codForn: 'VOOFK5' },
+        { diaVencimento: '20', descricaoConta: 'PABX ITU, TL', codigoSv: 'SV05000313', fornecedor: 'TALKON', codForn: 'V00A0X' },
+        { diaVencimento: '20', descricaoConta: 'CERTIFICADO DIGITAL TOTVS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+        { diaVencimento: '20', descricaoConta: 'INTERNET DTC TELECOM EXTREMA', codigoSv: 'SV05000033', fornecedor: 'DTC TELECOM', codForn: '' },
+        { diaVencimento: '22', descricaoConta: 'CHIPS E MODEMS 4G ITU', codigoSv: 'SV04007469', fornecedor: 'CLARO', codForn: '' },
+        { diaVencimento: '24', descricaoConta: 'TELEFONIA FIXA TRES LAGOAS', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+        { diaVencimento: '25', descricaoConta: 'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS "I"', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+        { diaVencimento: '25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF ITU', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+        { diaVencimento: '25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF GERENCIA REDE ITU', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+        { diaVencimento: '25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF TRES LAGOAS', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+        { diaVencimento: '25', descricaoConta: 'EMBRATEL REDE TL 25', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+        { diaVencimento: '30', descricaoConta: 'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+        { diaVencimento: '30', descricaoConta: 'CONTRATO INTELIGENCIA TRIBUTARIA TOTVS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+        { diaVencimento: '30', descricaoConta: 'HORAS EXTRAS GBS ASSESSORIA E SERVICOS', codigoSv: 'SV05000312', fornecedor: 'GBS', codForn: '' }
+    ];
 
-                var overridesOutubro = {
-                    'PLANOS E REPAROS DE APARELHOS': { repReceb: 'DANILO', obsStatus: 'FINALIZADO' },
-                    'GBS ASSESSORIA E SERVICOS': { dataVencimento: '05/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052675', nf: '2', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
-                    'POWER BI': { dataVencimento: '06/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051732', nf: '04177646', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
-                    'INTERNET 100 MB ITU': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052673', nf: '7148', dataEnvio: '08/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
-                    'INTERNET EXTREMA MG': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044855', nf: '500974', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
-                    'LOCAÇÃO DE EQUIPAMENTOS DE IMPRESSÃO/CÓPIA': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
-                    'OPTI SOLUCOES EM IMPRESSAO EXTREMA': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046607', nf: '119', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
-                    'STYLUS': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052655', nf: '61', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
-                    'INTERNET 3 LAGOAS 100MBPS': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052674', nf: '000555642', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
-                    'DIALOG': { dataVencimento: '19/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044926', nf: '00010609', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
-                    'QIVE 13': { dataVencimento: '13/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052730', nf: '112741', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
-                    'CONTRATO DE MANUTENCAO TOTVS': { dataVencimento: '14/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051773', nf: '04593732', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
-                    'TELEFONIA (0800)': { dataVencimento: '15/10/2026', scPagfor: 'SC-2026-6215', scTotvs: '173086', pedido: '53236', nf: '017404097', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
-                    'INTERNET 20MBPS + TELEFONIA ITU': { dataVencimento: '15/10/2026', scPagfor: 'SC-2026-6222', scTotvs: '173084', nf: '017388515', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
-                    'PLANOS E REPAROS DE APARELHOS 1 ITU': { dataVencimento: '15/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', nf: '44671628', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
-                    'PLANOS E REPAROS DE APARELHOS 2 ITU': { dataVencimento: '15/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', nf: '37140474', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
-                    'VIVO MOVEL (CHIPS NOVOS)': { dataVencimento: '17/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052676', nf: '5231211', dataEnvio: '08/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
-                    'VIVO TL': { dataVencimento: '17/10/2026', scPagfor: 'SC-2026-6318', scTotvs: 'CONTRATO', pedido: '053218', nf: '204457', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
-                    'JOY INTERNET FIBRA 500MBPS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044548', nf: '233', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
-                    'INTERNET 3 LAGOAS 200MBPS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046607', nf: '12129', dataEnvio: '14/10/26', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
-                    'HOSPEDAGEM DE E-MAILS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', nf: '00488301', dataEnvio: '23/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: '-', obsStatus: 'FINALIZADO' },
-                    'PABX ITU, TL': { dataVencimento: '20/10/2026', scPagfor: 'SC-2026-4675', scTotvs: '172140', pedido: '051876', nf: '6096', dataEnvio: '18/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
-                    'CERTIFICADO DIGITAL TOTVS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046634', nf: '04597593', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
-                    'INTERNET DTC TELECOM EXTREMA': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046620', nf: '16404', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
-                    'CHIPS E MODEMS 4G ITU': { dataVencimento: '22/10/2026', scPagfor: 'SC-2026-6221', scTotvs: '173085', nf: '38675678', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'AG. REGULARIZAÇÃO' },
-                    'TELEFONIA FIXA TRES LAGOAS': { dataVencimento: '24/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '053190', nf: '000557939', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
-                    'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS "I"': { dataVencimento: '26/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051776', nf: '04582139', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
-                    'MPLS ITU+TRÊS LAGOAS NF ITU': { dataVencimento: '25/10/2026', scPagfor: 'SC-2026-6399', nf: '017413865', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'AG. AP. SC' },
-                    'MPLS ITU+TRÊS LAGOAS NF GERENCIA REDE ITU': {},
-                    'MPLS ITU+TRÊS LAGOAS NF TRES LAGOAS': { dataVencimento: '25/10/2026', scPagfor: 'SC-2026-6401', nf: '000556619', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'AG. AP. SC' },
-                    'EMBRATEL REDE TL 25': {},
-                    'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS': { dataVencimento: '30/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051233', nf: '04566265', dataEnvio: '08/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CARLOS', obsStatus: 'FINALIZADO' },
-                    'CONTRATO INTELIGENCIA TRIBUTARIA TOTVS': { dataVencimento: '30/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051775', nf: '04582378', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
-                    'HORAS EXTRAS GBS ASSESSORIA E SERVICOS': {}
+    var overridesOutubro = {
+        'PLANOS E REPAROS DE APARELHOS': { repReceb: 'DANILO', obsStatus: 'FINALIZADO' },
+        'GBS ASSESSORIA E SERVICOS': { dataVencimento: '05/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052675', nf: '2', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+        'POWER BI': { dataVencimento: '06/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051732', nf: '04177646', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
+        'INTERNET 100 MB ITU': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052673', nf: '7148', dataEnvio: '08/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
+        'INTERNET EXTREMA MG': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044855', nf: '500974', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
+        'LOCAÇÃO DE EQUIPAMENTOS DE IMPRESSÃO/CÓPIA': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+        'OPTI SOLUCOES EM IMPRESSAO EXTREMA': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046607', nf: '119', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
+        'STYLUS': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052655', nf: '61', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+        'INTERNET 3 LAGOAS 100MBPS': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052674', nf: '000555642', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
+        'DIALOG': { dataVencimento: '19/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044926', nf: '00010609', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+        'QIVE 13': { dataVencimento: '13/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052730', nf: '112741', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+        'CONTRATO DE MANUTENCAO TOTVS': { dataVencimento: '14/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051773', nf: '04593732', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
+        'TELEFONIA (0800)': { dataVencimento: '15/10/2026', scPagfor: 'SC-2026-6215', scTotvs: '173086', pedido: '53236', nf: '017404097', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+        'INTERNET 20MBPS + TELEFONIA ITU': { dataVencimento: '15/10/2026', scPagfor: 'SC-2026-6222', scTotvs: '173084', nf: '017388515', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+        'PLANOS E REPAROS DE APARELHOS 1 ITU': { dataVencimento: '15/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', nf: '44671628', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+        'PLANOS E REPAROS DE APARELHOS 2 ITU': { dataVencimento: '15/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', nf: '37140474', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+        'VIVO MOVEL (CHIPS NOVOS)': { dataVencimento: '17/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052676', nf: '5231211', dataEnvio: '08/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
+        'VIVO TL': { dataVencimento: '17/10/2026', scPagfor: 'SC-2026-6318', scTotvs: 'CONTRATO', pedido: '053218', nf: '204457', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+        'JOY INTERNET FIBRA 500MBPS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044548', nf: '233', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+        'INTERNET 3 LAGOAS 200MBPS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046607', nf: '12129', dataEnvio: '14/10/26', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+        'HOSPEDAGEM DE E-MAILS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', nf: '00488301', dataEnvio: '23/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: '-', obsStatus: 'FINALIZADO' },
+        'PABX ITU, TL': { dataVencimento: '20/10/2026', scPagfor: 'SC-2026-4675', scTotvs: '172140', pedido: '051876', nf: '6096', dataEnvio: '18/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+        'CERTIFICADO DIGITAL TOTVS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046634', nf: '04597593', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
+        'INTERNET DTC TELECOM EXTREMA': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046620', nf: '16404', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+        'CHIPS E MODEMS 4G ITU': { dataVencimento: '22/10/2026', scPagfor: 'SC-2026-6221', scTotvs: '173085', nf: '38675678', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'AG. REGULARIZAÇÃO' },
+        'TELEFONIA FIXA TRES LAGOAS': { dataVencimento: '24/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '053190', nf: '000557939', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
+        'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS "I"': { dataVencimento: '26/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051776', nf: '04582139', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
+        'MPLS ITU+TRÊS LAGOAS NF ITU': { dataVencimento: '25/10/2026', scPagfor: 'SC-2026-6399', nf: '017413865', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'AG. AP. SC' },
+        'MPLS ITU+TRÊS LAGOAS NF GERENCIA REDE ITU': {},
+        'MPLS ITU+TRÊS LAGOAS NF TRES LAGOAS': { dataVencimento: '25/10/2026', scPagfor: 'SC-2026-6401', nf: '000556619', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'AG. AP. SC' },
+        'EMBRATEL REDE TL 25': {},
+        'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS': { dataVencimento: '30/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051233', nf: '04566265', dataEnvio: '08/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CARLOS', obsStatus: 'FINALIZADO' },
+        'CONTRATO INTELIGENCIA TRIBUTARIA TOTVS': { dataVencimento: '30/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051775', nf: '04582378', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
+        'HORAS EXTRAS GBS ASSESSORIA E SERVICOS': {}
+    };
+
+    var faturasIniciais = [];
+    templateBase.forEach(function(tb, i) {
+        var out = overridesOutubro[tb.descricaoConta] || {};
+        faturasIniciais.push({
+            id: 'out_' + i, mes: 'OUTUBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
+            dataVencimento: out.dataVencimento || '', scPagfor: out.scPagfor || '', scTotvs: out.scTotvs || '', pedido: out.pedido || '', nf: out.nf || '',
+            dataEnvio: out.dataEnvio || '', salvaPasta: out.salvaPasta || '', tipoEmail: out.tipoEmail || '', repReceb: out.repReceb || '', obsStatus: out.obsStatus || ''
+        });
+    });
+    templateBase.forEach(function(tb, i) {
+        faturasIniciais.push({
+            id: 'nov_' + i, mes: 'NOVEMBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
+            dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
+        });
+    });
+
+    var [meses, setMeses] = useState(function() {
+        var saved = localStorage.getItem('faturas_ti_meses_v10');
+        return saved ? JSON.parse(saved) : ['OUTUBRO', 'NOVEMBRO'];
+    });
+    
+    var [abaAtiva, setAbaAtiva] = useState(function() {
+        var saved = localStorage.getItem('faturas_ti_aba_v10');
+        return saved ? saved : 'OUTUBRO';
+    });
+    
+    var [faturas, setFaturas] = useState(function() {
+        var saved = localStorage.getItem('faturas_ti_faturas_v10');
+        return saved ? JSON.parse(saved) : faturasIniciais;
+    });
+
+    var [filtroVencimento, setFiltroVencimento] = useState('');
+    var [filtroFornecedor, setFiltroFornecedor] = useState('');
+    var [modoVisualizacao, setModoVisualizacao] = useState('tabela');
+
+    useEffect(function() { localStorage.setItem('faturas_ti_meses_v10', JSON.stringify(meses)); }, [meses]);
+    useEffect(function() { localStorage.setItem('faturas_ti_aba_v10', abaAtiva); }, [abaAtiva]);
+    useEffect(function() { localStorage.setItem('faturas_ti_faturas_v10', JSON.stringify(faturas)); }, [faturas]);
+
+    // Filtragem geral de faturas da aba ativa
+    var faturasDaAba = faturas.filter(function(f) {
+        if (abaAtiva === 'ARQUIVADOS') {
+            var isFin = (f.obsStatus || '').toUpperCase().indexOf('FINALIZADO') !== -1;
+            if (!isFin) return false;
+        } else {
+            if (f.mes !== abaAtiva) return false;
+            var isFin = (f.obsStatus || '').toUpperCase().indexOf('FINALIZADO') !== -1;
+            if (isFin) return false; // Faturas finalizadas saem da aba ativa do mês e vão para Arquivados
+        }
+        
+        var matchVenc = true;
+        if (filtroVencimento.trim() !== '') {
+            var termoVenc = filtroVencimento.trim().toUpperCase();
+            var diaV = (f.diaVencimento || '').toUpperCase();
+            var dataV = (f.dataVencimento || '').toUpperCase();
+            if (/^\d+$/.test(termoVenc)) {
+                var padDia = termoVenc.length === 1 ? '0' + termoVenc : termoVenc;
+                matchVenc = (diaV === termoVenc || diaV === padDia || dataV.indexOf('/' + padDia + '/') === 0 || dataV.indexOf(padDia + '/') === 0);
+            } else {
+                matchVenc = diaV.indexOf(termoVenc) !== -1 || dataV.indexOf(termoVenc) !== -1;
+            }
+        }
+
+        var matchForn = true;
+        if (filtroFornecedor.trim() !== '') {
+            var termoForn = filtroFornecedor.trim().toUpperCase();
+            var forn = (f.fornecedor || '').toUpperCase();
+            matchForn = forn.indexOf(termoForn) !== -1;
+        }
+
+        return matchVenc && matchForn;
+    });
+
+    var colunas = [
+        { key: 'diaVencimento', label: 'VENC.', width: 'w-14' },
+        { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-64' },
+        { key: 'codigoSv', label: 'CÓD. SV', width: 'w-24' },
+        { key: 'dataVencimento', label: 'DT. VENC.', width: 'w-24' },
+        { key: 'scPagfor', label: 'SC PAGFOR', width: 'w-24' },
+        { key: 'scTotvs', label: 'SC TOTVS', width: 'w-24' },
+        { key: 'pedido', label: 'PEDIDO', width: 'w-20' },
+        { key: 'nf', label: 'NF', width: 'w-24' },
+        { key: 'fornecedor', label: 'FORNECEDOR', width: 'w-32' },
+        { key: 'codForn', label: 'CÓD. FORN', width: 'w-20' },
+        { key: 'dataEnvio', label: 'DT. ENVIO', width: 'w-24' },
+        { key: 'salvaPasta', label: 'PASTA', width: 'w-20' },
+        { key: 'tipoEmail', label: 'E-MAIL', width: 'w-20' },
+        { key: 'repReceb', label: 'REP.', width: 'w-20' },
+        { key: 'obsStatus', label: 'STATUS / OBS', width: 'w-36' }
+    ];
+
+    var statusOptions = [
+        'FINALIZADO',
+        'AG. AP. SC',
+        'AG. REGULARIZAÇÃO',
+        'AG. NOTA FISCAL',
+        'PENDENTE',
+        'EM ANDAMENTO'
+    ];
+
+    var handleAddLinha = function() {
+        if (abaAtiva === 'ARQUIVADOS') {
+            alert("Selecione um mês específico para adicionar novas linhas.");
+            return;
+        }
+        var novaLinha = {
+            id: 'fat_' + Date.now(), mes: abaAtiva, diaVencimento: '', descricaoConta: '', codigoSv: '', dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', fornecedor: '', codForn: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
+        };
+        setFaturas(faturas.concat([novaLinha]));
+    };
+
+    var handleRemoverLinha = function(id) {
+        if(confirm("Remover esta linha?")) {
+            setFaturas(faturas.filter(function(f) { return f.id !== id; }));
+        }
+    };
+
+    var handleChange = function(id, campo, valor) {
+        setFaturas(faturas.map(function(f) {
+            if (f.id === id) {
+                var obj = Object.assign({}, f);
+                obj[campo] = valor.toUpperCase();
+                return obj;
+            }
+            return f;
+        }));
+    };
+
+    var handleAddMes = function() {
+        var novoMes = prompt("Digite o nome do novo mês (ex: DEZEMBRO):");
+        if (!novoMes || !novoMes.trim()) return;
+        novoMes = novoMes.trim().toUpperCase();
+
+        if (meses.indexOf(novoMes) !== -1) {
+            alert("Esta aba já existe!");
+            setAbaAtiva(novoMes);
+            return;
+        }
+
+        var copiar = confirm("Deseja importar a MÁSCARA BASE de contas para " + novoMes + "?");
+        var novasLinhas = [];
+
+        if (copiar) {
+            novasLinhas = templateBase.map(function(tb, index) {
+                return {
+                    id: 'fat_' + Date.now() + '_' + index,
+                    mes: novoMes,
+                    diaVencimento: tb.diaVencimento,
+                    descricaoConta: tb.descricaoConta,
+                    codigoSv: tb.codigoSv,
+                    dataVencimento: '',
+                    scPagfor: '',
+                    scTotvs: '',
+                    pedido: '',
+                    nf: '',
+                    fornecedor: tb.fornecedor,
+                    codForn: tb.codForn,
+                    dataEnvio: '',
+                    salvaPasta: '',
+                    tipoEmail: '',
+                    repReceb: '',
+                    obsStatus: ''
                 };
+            });
+        }
 
-                var faturasIniciais = [];
-                templateBase.forEach(function(tb, i) {
-                    var out = overridesOutubro[tb.descricaoConta] || {};
-                    faturasIniciais.push({
-                        id: 'out_' + i, mes: 'OUTUBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
-                        dataVencimento: out.dataVencimento || '', scPagfor: out.scPagfor || '', scTotvs: out.scTotvs || '', pedido: out.pedido || '', nf: out.nf || '',
-                        dataEnvio: out.dataEnvio || '', salvaPasta: out.salvaPasta || '', tipoEmail: out.tipoEmail || '', repReceb: out.repReceb || '', obsStatus: out.obsStatus || ''
-                    });
-                });
-                templateBase.forEach(function(tb, i) {
-                    faturasIniciais.push({
-                        id: 'nov_' + i, mes: 'NOVEMBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
-                        dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
-                    });
-                });
+        setMeses(meses.concat([novoMes]));
+        if (novasLinhas.length > 0) {
+            setFaturas(faturas.concat(novasLinhas));
+        }
+        setAbaAtiva(novoMes);
+    };
 
-                var [meses, setMeses] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_meses_v9');
-                    return saved ? JSON.parse(saved) : ['OUTUBRO', 'NOVEMBRO'];
-                });
+    var handleRemoverMes = function(mesParaRemover) {
+        if(confirm("Atenção: Isto excluirá a aba " + mesParaRemover + " e TODOS os seus registros. Deseja continuar?")) {
+            var novosMeses = meses.filter(function(m) { return m !== mesParaRemover; });
+            setMeses(novosMeses);
+            setFaturas(faturas.filter(function(f) { return f.mes !== mesParaRemover; }));
+            if (abaAtiva === mesParaRemover) {
+                setAbaAtiva(novosMeses.length > 0 ? novosMeses[0] : 'OUTUBRO');
+            }
+        }
+    };
+
+    return (
+        <div className="h-full w-full bg-slate-950 flex flex-col p-2 md:p-5 fade-in overflow-hidden min-w-0">
+            <div className="flex flex-col h-full w-full space-y-3 min-w-0 min-h-0">
                 
-                var [abaAtiva, setAbaAtiva] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_aba_v9');
-                    return saved ? saved : 'OUTUBRO';
-                });
+                {/* Cabeçalho */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 shrink-0 px-1">
+                    <div>
+                        <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2 uppercase tracking-wide">
+                            {Icons.File} Gestão de Faturas T.I
+                        </h2>
+                        <p className="text-slate-400 text-xs md:text-sm">Controle financeiro de contratos, faturas e NFs (Finalizados vão para Arquivados por mês).</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex items-center bg-slate-900 p-1 rounded-lg border border-slate-800">
+                            <button 
+                                onClick={function() { setModoVisualizacao('tabela'); }}
+                                className={"px-3 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1.5 " + (modoVisualizacao === 'tabela' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-400 hover:text-white')}
+                            >
+                                📊 Tabela
+                            </button>
+                            <button 
+                                onClick={function() { setModoVisualizacao('foco'); }}
+                                className={"px-3 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1.5 " + (modoVisualizacao === 'foco' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-400 hover:text-white')}
+                            >
+                                ⚡ Modo Foco (Cards)
+                            </button>
+                        </div>
+                        {abaAtiva !== 'ARQUIVADOS' && (
+                            <Button onClick={handleAddLinha} variant="success" className="text-xs px-4 py-2 shadow-sm whitespace-nowrap">
+                                {Icons.Plus} Adicionar Linha
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Filtros */}
+                <div className="flex flex-wrap items-center gap-3 bg-slate-900/90 p-3 rounded-xl border border-slate-800 shrink-0 mx-1">
+                    <span className="text-xs font-extrabold uppercase text-slate-400 flex items-center gap-1">
+                        {Icons.Search} Filtrar:
+                    </span>
+                    <input 
+                        type="text" 
+                        value={filtroVencimento} 
+                        onChange={function(e) { setFiltroVencimento(e.target.value); }}
+                        placeholder="Por Vencimento (ex: 10)..." 
+                        className="h-8 px-3 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 outline-none uppercase w-48 focus:border-brand-500 transition-colors"
+                    />
+                    <input 
+                        type="text" 
+                        value={filtroFornecedor} 
+                        onChange={function(e) { setFiltroFornecedor(e.target.value); }}
+                        placeholder="Por Fornecedor (ex: CLARO)..." 
+                        className="h-8 px-3 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 outline-none uppercase w-48 focus:border-brand-500 transition-colors"
+                    />
+                    {(filtroVencimento || filtroFornecedor) && (
+                        <button 
+                            onClick={function() { setFiltroVencimento(''); setFiltroFornecedor(''); }}
+                            className="text-xs text-brand-400 hover:text-brand-300 font-bold underline ml-2"
+                        >
+                            Limpar Filtros
+                        </button>
+                    )}
+                </div>
                 
-                var [faturas, setFaturas] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_faturas_v9');
-                    return saved ? JSON.parse(saved) : faturasIniciais;
-                });
-
-                var [filtroVencimento, setFiltroVencimento] = useState('');
-                var [filtroFornecedor, setFiltroFornecedor] = useState('');
-                var [modoVisualizacao, setModoVisualizacao] = useState('tabela'); // 'tabela' ou 'foco'
-
-                useEffect(function() { localStorage.setItem('faturas_ti_meses_v9', JSON.stringify(meses)); }, [meses]);
-                useEffect(function() { localStorage.setItem('faturas_ti_aba_v9', abaAtiva); }, [abaAtiva]);
-                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v9', JSON.stringify(faturas)); }, [faturas]);
-
-                var faturasDaAba = faturas.filter(function(f) {
-                    if (f.mes !== abaAtiva) return false;
+                {/* Abas e Aba de Arquivados */}
+                <div className="flex items-center gap-2 border-b border-slate-800 overflow-x-auto pb-px custom-scrollbar shrink-0 w-full px-1">
+                    {meses.map(function(m) {
+                        var isActive = abaAtiva === m;
+                        return (
+                            <div key={m} className={"flex items-center gap-2 px-4 py-2 font-bold text-xs md:text-sm cursor-pointer whitespace-nowrap transition-all border-b-2 " + (isActive ? "border-brand-500 text-brand-400 bg-brand-900/20 rounded-t-lg" : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/50 rounded-t-lg")}>
+                                <span onClick={function() { setAbaAtiva(m); }}>{m}</span>
+                                {isActive && <button onClick={function(e) { e.stopPropagation(); handleRemoverMes(m); }} className="text-slate-400 hover:text-red-400 ml-1 text-sm font-black" title="Excluir Mês">&times;</button>}
+                            </div>
+                        );
+                    })}
+                    <button onClick={handleAddMes} className="px-3 py-2 text-xs font-bold text-slate-400 hover:text-brand-400 flex items-center gap-1 shrink-0">
+                        {Icons.Plus} NOVO MÊS
+                    </button>
                     
-                    var matchVenc = true;
-                    if (filtroVencimento.trim() !== '') {
-                        var termoVenc = filtroVencimento.trim().toUpperCase();
-                        var diaV = (f.diaVencimento || '').toUpperCase();
-                        var dataV = (f.dataVencimento || '').toUpperCase();
-                        
-                        // Busca exata ou parcial inteligente (ex: "10" casa com "10" ou "10/10/2026")
-                        if (/^\d+$/.test(termoVenc)) {
-                            var padDia = termoVenc.length === 1 ? '0' + termoVenc : termoVenc;
-                            matchVenc = (diaV === termoVenc || diaV === padDia || dataV.indexOf('/' + padDia + '/') === 0 || dataV.indexOf(padDia + '/') === 0);
-                        } else {
-                            matchVenc = diaV.indexOf(termoVenc) !== -1 || dataV.indexOf(termoVenc) !== -1;
-                        }
-                    }
+                    {/* Aba especial Arquivados */}
+                    <div onClick={function() { setAbaAtiva('ARQUIVADOS'); }} className={"flex items-center gap-2 px-4 py-2 font-bold text-xs md:text-sm cursor-pointer whitespace-nowrap transition-all border-b-2 ml-auto " + (abaAtiva === 'ARQUIVADOS' ? "border-emerald-500 text-emerald-400 bg-emerald-900/20 rounded-t-lg" : "border-transparent text-emerald-500/70 hover:text-emerald-400 hover:bg-slate-900/50 rounded-t-lg")}>
+                        <span>{Icons.Archive} ARQUIVADOS (FINALIZADOS)</span>
+                    </div>
+                </div>
 
-                    var matchForn = true;
-                    if (filtroFornecedor.trim() !== '') {
-                        var termoForn = filtroFornecedor.trim().toUpperCase();
-                        var forn = (f.fornecedor || '').toUpperCase();
-                        matchForn = forn.indexOf(termoForn) !== -1;
-                    }
-
-                    return matchVenc && matchForn;
-                });
-
-                var colunas = [
-                    { key: 'diaVencimento', label: 'VENC.', width: 'w-14' },
-                    { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-64' },
-                    { key: 'codigoSv', label: 'CÓD. SV', width: 'w-24' },
-                    { key: 'dataVencimento', label: 'DT. VENC.', width: 'w-24' },
-                    { key: 'scPagfor', label: 'SC PAGFOR', width: 'w-24' },
-                    { key: 'scTotvs', label: 'SC TOTVS', width: 'w-24' },
-                    { key: 'pedido', label: 'PEDIDO', width: 'w-20' },
-                    { key: 'nf', label: 'NF', width: 'w-24' },
-                    { key: 'fornecedor', label: 'FORNECEDOR', width: 'w-32' },
-                    { key: 'codForn', label: 'CÓD. FORN', width: 'w-20' },
-                    { key: 'dataEnvio', label: 'DT. ENVIO', width: 'w-24' },
-                    { key: 'salvaPasta', label: 'PASTA', width: 'w-20' },
-                    { key: 'tipoEmail', label: 'E-MAIL', width: 'w-20' },
-                    { key: 'repReceb', label: 'REP.', width: 'w-20' },
-                    { key: 'obsStatus', label: 'STATUS / OBS', width: 'w-36' }
-                ];
-
-                var statusOptions = [
-                    'FINALIZADO',
-                    'AG. AP. SC',
-                    'AG. REGULARIZAÇÃO',
-                    'AG. NOTA FISCAL',
-                    'PENDENTE',
-                    'EM ANDAMENTO'
-                ];
-
-                var handleAddLinha = function() {
-                    var novaLinha = {
-                        id: 'fat_' + Date.now(), mes: abaAtiva, diaVencimento: '', descricaoConta: '', codigoSv: '', dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', fornecedor: '', codForn: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
-                    };
-                    setFaturas(faturas.concat([novaLinha]));
-                };
-
-                var handleRemoverLinha = function(id) {
-                    if(confirm("Remover esta linha?")) {
-                        setFaturas(faturas.filter(function(f) { return f.id !== id; }));
-                    }
-                };
-
-                var handleChange = function(id, campo, valor) {
-                    setFaturas(faturas.map(function(f) {
-                        if (f.id === id) {
-                            var obj = Object.assign({}, f);
-                            obj[campo] = valor.toUpperCase();
-                            return obj;
-                        }
-                        return f;
-                    }));
-                };
-
-                var handleAddMes = function() {
-                    var novoMes = prompt("Digite o nome do novo mês (ex: DEZEMBRO):");
-                    if (!novoMes || !novoMes.trim()) return;
-                    novoMes = novoMes.trim().toUpperCase();
-
-                    if (meses.indexOf(novoMes) !== -1) {
-                        alert("Esta aba já existe!");
-                        setAbaAtiva(novoMes);
-                        return;
-                    }
-
-                    var copiar = confirm("Deseja importar a MÁSCARA BASE de contas para " + novoMes + "?");
-                    var novasLinhas = [];
-
-                    if (copiar) {
-                        novasLinhas = templateBase.map(function(tb, index) {
-                            return {
-                                id: 'fat_' + Date.now() + '_' + index,
-                                mes: novoMes,
-                                diaVencimento: tb.diaVencimento,
-                                descricaoConta: tb.descricaoConta,
-                                codigoSv: tb.codigoSv,
-                                dataVencimento: '',
-                                scPagfor: '',
-                                scTotvs: '',
-                                pedido: '',
-                                nf: '',
-                                fornecedor: tb.fornecedor,
-                                codForn: tb.codForn,
-                                dataEnvio: '',
-                                salvaPasta: '',
-                                tipoEmail: '',
-                                repReceb: '',
-                                obsStatus: ''
-                            };
-                        });
-                    }
-
-                    setMeses(meses.concat([novoMes]));
-                    if (novasLinhas.length > 0) {
-                        setFaturas(faturas.concat(novasLinhas));
-                    }
-                    setAbaAtiva(novoMes);
-                };
-
-                var handleRemoverMes = function(mesParaRemover) {
-                    if(confirm("Atenção: Isto excluirá a aba " + mesParaRemover + " e TODOS os seus registros. Deseja continuar?")) {
-                        var novosMeses = meses.filter(function(m) { return m !== mesParaRemover; });
-                        setMeses(novosMeses);
-                        setFaturas(faturas.filter(function(f) { return f.mes !== mesParaRemover; }));
-                        if (abaAtiva === mesParaRemover) {
-                            setAbaAtiva(novosMeses.length > 0 ? novosMeses[0] : '');
-                        }
-                    }
-                };
-
-                return (
-                    <div className="h-full w-full bg-slate-950 flex flex-col p-2 md:p-5 fade-in overflow-hidden min-w-0">
-                        <div className="flex flex-col h-full w-full space-y-3 min-w-0 min-h-0">
-                            
-                            {/* Cabeçalho, Ações e Alternância de Visualização */}
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 shrink-0 px-1">
-                                <div>
-                                    <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2 uppercase tracking-wide">
-                                        {Icons.File} Gestão de Faturas T.I
-                                    </h2>
-                                    <p className="text-slate-400 text-xs md:text-sm">Controle financeiro de contratos, faturas e NFs.</p>
-                                </div>
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <div className="flex items-center bg-slate-900 p-1 rounded-lg border border-slate-800">
-                                        <button 
-                                            onClick={function() { setModoVisualizacao('tabela'); }}
-                                            className={"px-3 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1.5 " + (modoVisualizacao === 'tabela' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-400 hover:text-white')}
-                                        >
-                                            📊 Tabela
-                                        </button>
-                                        <button 
-                                            onClick={function() { setModoVisualizacao('foco'); }}
-                                            className={"px-3 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-1.5 " + (modoVisualizacao === 'foco' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-400 hover:text-white')}
-                                        >
-                                            ⚡ Modo Foco (Cards)
-                                        </button>
-                                    </div>
-                                    <Button onClick={handleAddLinha} variant="success" className="text-xs px-4 py-2 shadow-sm whitespace-nowrap">
-                                        {Icons.Plus} Adicionar Linha
-                                    </Button>
-                                </div>
-                            </div>
-
-                            {/* Barra de Filtros */}
-                            <div className="flex flex-wrap items-center gap-3 bg-slate-900/90 p-3 rounded-xl border border-slate-800 shrink-0 mx-1">
-                                <span className="text-xs font-extrabold uppercase text-slate-400 flex items-center gap-1">
-                                    {Icons.Search} Filtrar:
-                                </span>
-                                <input 
-                                    type="text" 
-                                    value={filtroVencimento} 
-                                    onChange={function(e) { setFiltroVencimento(e.target.value); }}
-                                    placeholder="Por Vencimento (ex: 10)..." 
-                                    className="h-8 px-3 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 outline-none uppercase w-48 focus:border-brand-500 transition-colors"
-                                />
-                                <input 
-                                    type="text" 
-                                    value={filtroFornecedor} 
-                                    onChange={function(e) { setFiltroFornecedor(e.target.value); }}
-                                    placeholder="Por Fornecedor (ex: CLARO)..." 
-                                    className="h-8 px-3 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 outline-none uppercase w-48 focus:border-brand-500 transition-colors"
-                                />
-                                {(filtroVencimento || filtroFornecedor) && (
-                                    <button 
-                                        onClick={function() { setFiltroVencimento(''); setFiltroFornecedor(''); }}
-                                        className="text-xs text-brand-400 hover:text-brand-300 font-bold underline ml-2"
-                                    >
-                                        Limpar Filtros
-                                    </button>
-                                )}
-                            </div>
-                            
-                            {/* Abas Superiores */}
-                            <div className="flex items-center gap-2 border-b border-slate-800 overflow-x-auto pb-px custom-scrollbar shrink-0 w-full px-1">
-                                {meses.map(function(m) {
-                                    var isActive = abaAtiva === m;
-                                    return (
-                                        <div key={m} className={"flex items-center gap-2 px-4 py-2 font-bold text-xs md:text-sm cursor-pointer whitespace-nowrap transition-all border-b-2 " + (isActive ? "border-brand-500 text-brand-400 bg-brand-900/20 rounded-t-lg" : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/50 rounded-t-lg")}>
-                                            <span onClick={function() { setAbaAtiva(m); }}>{m}</span>
-                                            {isActive && <button onClick={function(e) { e.stopPropagation(); handleRemoverMes(m); }} className="text-slate-400 hover:text-red-400 ml-1 text-sm font-black" title="Excluir Mês">&times;</button>}
-                                        </div>
-                                    );
-                                })}
-                                <button onClick={handleAddMes} className="px-3 py-2 text-xs font-bold text-slate-400 hover:text-brand-400 flex items-center gap-1 shrink-0">
-                                    {Icons.Plus} NOVO MÊS
-                                </button>
-                            </div>
-
-                            {/* Conteúdo: Tabela Otimizada ou Modo Foco em Cards (Ambos com filtro ativo) */}
-                            {modoVisualizacao === 'tabela' ? (
-                                <div className="flex-1 overflow-auto bg-slate-900 rounded-xl shadow-lg border border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full">
-                                    <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '1750px' }}>
-                                        <thead className="sticky top-0 z-20">
-                                            <tr>
-                                                <th colSpan={colunas.length + 1} className="bg-slate-900/95 backdrop-blur font-black text-sm md:text-base py-2.5 border-b border-slate-800 uppercase tracking-widest text-slate-100 shadow-sm">
-                                                    FATURAS E CONTAS DE {abaAtiva}
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                {colunas.map(function(col) {
-                                                    return (
-                                                        <th key={col.key} className={"bg-slate-950 text-slate-300 text-[10px] font-extrabold uppercase py-2 px-1.5 border-b border-r border-slate-800 tracking-wider " + col.width}>
-                                                            {col.label}
-                                                        </th>
-                                                    );
-                                                })}
-                                                <th className="bg-slate-950 text-slate-300 text-[10px] font-extrabold uppercase py-2 px-1 border-b border-slate-800 w-12 tracking-wider">
-                                                    AÇÃO
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-800/60 bg-slate-900">
-                                            {faturasDaAba.length === 0 && (
-                                                <tr>
-                                                    <td colSpan={colunas.length + 1} className="text-center py-12 text-slate-500 text-sm font-medium">
-                                                        Nenhuma fatura encontrada com os filtros atuais.
-                                                    </td>
-                                                </tr>
-                                            )}
-                                            {faturasDaAba.map(function(fat, idx) {
-                                                var obs = (fat.obsStatus || '').toUpperCase();
-                                                var isFinalizado = obs.indexOf('FINALIZADO') !== -1;
-                                                var isAguardando = obs.indexOf('AG.') !== -1;
-
-                                                var rowHover = idx % 2 === 0 ? 'bg-slate-900/60 hover:bg-slate-800/40' : 'bg-slate-900/90 hover:bg-slate-800/40';
-
-                                                return (
-                                                    <tr key={fat.id} className={"transition-colors " + rowHover}>
-                                                        {colunas.map(function(col) {
-                                                            if (col.key === 'obsStatus') {
-                                                                return (
-                                                                    <td key={col.key} className="p-1 border-r border-slate-800/50">
-                                                                        <select 
-                                                                            value={fat[col.key] || ''} 
-                                                                            onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
-                                                                            className={"w-full h-7 px-1 bg-slate-950 border rounded text-[10px] font-bold outline-none uppercase text-center transition-colors " + 
-                                                                                (isFinalizado ? 'text-emerald-400 border-emerald-800/60 bg-emerald-950/30' : 
-                                                                                 isAguardando ? 'text-red-400 border-red-800/60 bg-red-950/30' : 
-                                                                                 'text-slate-300 border-slate-800')}
-                                                                        >
-                                                                            <option value="">-- SELECIONAR --</option>
-                                                                            {statusOptions.map(function(st) {
-                                                                                return <option key={st} value={st}>{st}</option>;
-                                                                            })}
-                                                                        </select>
-                                                                    </td>
-                                                                );
-                                                            }
-                                                            return (
-                                                                <td key={col.key} className="p-1 border-r border-slate-800/50">
-                                                                    <input 
-                                                                        type="text" 
-                                                                        value={fat[col.key] || ''} 
-                                                                        onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
-                                                                        className="w-full h-7 px-1.5 bg-transparent border border-transparent hover:border-slate-700 focus:border-brand-500 rounded text-slate-300 outline-none uppercase text-center text-[11px] transition-all placeholder-slate-600" 
-                                                                    />
-                                                                </td>
-                                                            );
-                                                        })}
-                                                        <td className="p-1 text-center">
-                                                            <button onClick={function(){ handleRemoverLinha(fat.id); }} className="p-1 rounded text-slate-500 hover:text-red-400 hover:bg-red-950/30 transition-colors" title="Remover Linha">
-                                                                {Icons.Trash}
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <div className="flex-1 overflow-auto bg-slate-900/50 rounded-xl p-4 border border-slate-800 custom-scrollbar grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {faturasDaAba.length === 0 && (
-                                        <div className="col-span-full text-center py-12 text-slate-500 text-sm">
-                                            Nenhuma fatura encontrada com os filtros atuais.
-                                        </div>
-                                    )}
-                                    {faturasDaAba.map(function(fat) {
-                                        var obs = (fat.obsStatus || '').toUpperCase();
-                                        var isFinalizado = obs.indexOf('FINALIZADO') !== -1;
-                                        var isAguardando = obs.indexOf('AG.') !== -1;
-                                        var cardBorder = isFinalizado ? 'border-emerald-500/50 bg-emerald-950/10' : isAguardando ? 'border-red-500/50 bg-red-950/10' : 'border-slate-800 bg-slate-900';
-
+                {/* Conteúdo / Listagem */}
+                {modoVisualizacao === 'tabela' ? (
+                    <div className="flex-1 overflow-auto bg-slate-900 rounded-xl shadow-lg border border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full">
+                        <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '1750px' }}>
+                            <thead className="sticky top-0 z-20">
+                                <tr>
+                                    <th colSpan={colunas.length + 1} className="bg-slate-900/95 backdrop-blur font-black text-sm md:text-base py-2.5 border-b border-slate-800 uppercase tracking-widest text-slate-100 shadow-sm">
+                                        {abaAtiva === 'ARQUIVADOS' ? 'HISTÓRICO DE FATURAS FINALIZADAS (SEPARADAS POR MÊS)' : 'FATURAS E CONTAS DE ' + abaAtiva}
+                                    </th>
+                                </tr>
+                                <tr>
+                                    {colunas.map(function(col) {
                                         return (
-                                            <div key={fat.id} className={"rounded-xl p-4 border shadow-md flex flex-col justify-between gap-3 " + cardBorder}>
-                                                <div className="flex justify-between items-start gap-2">
-                                                    <div>
-                                                        <span className="text-[10px] font-extrabold uppercase bg-brand-900/40 text-brand-400 px-2 py-0.5 rounded">
-                                                            Venc: Dia {fat.diaVencimento || '--'}
-                                                        </span>
-                                                        <h4 className="text-sm font-bold text-white uppercase mt-1.5">{fat.descricaoConta || 'SEM DESCRIÇÃO'}</h4>
-                                                    </div>
-                                                    <button onClick={function(){ handleRemoverLinha(fat.id); }} className="text-slate-500 hover:text-red-400 p-1" title="Excluir">
-                                                        {Icons.Trash}
-                                                    </button>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-2 text-xs">
-                                                    <div className="bg-slate-950/60 p-2 rounded border border-slate-800">
-                                                        <span className="block text-[9px] text-slate-500 font-bold uppercase">Fornecedor</span>
-                                                        <input type="text" value={fat.fornecedor || ''} onChange={function(e){ handleChange(fat.id, 'fornecedor', e.target.value); }} className="bg-transparent text-slate-200 font-bold outline-none uppercase w-full mt-0.5" placeholder="-" />
-                                                    </div>
-                                                    <div className="bg-slate-950/60 p-2 rounded border border-slate-800">
-                                                        <span className="block text-[9px] text-slate-500 font-bold uppercase">Nota Fiscal (NF)</span>
-                                                        <input type="text" value={fat.nf || ''} onChange={function(e){ handleChange(fat.id, 'nf', e.target.value); }} className="bg-transparent text-slate-200 font-bold outline-none uppercase w-full mt-0.5" placeholder="-" />
-                                                    </div>
-                                                    <div className="bg-slate-950/60 p-2 rounded border border-slate-800">
-                                                        <span className="block text-[9px] text-slate-500 font-bold uppercase">Data Venc. / Envio</span>
-                                                        <div className="flex gap-1">
-                                                            <input type="text" value={fat.dataVencimento || ''} onChange={function(e){ handleChange(fat.id, 'dataVencimento', e.target.value); }} className="bg-transparent text-slate-300 outline-none uppercase w-1/2 mt-0.5 text-[11px]" placeholder="Venc." />
-                                                            <input type="text" value={fat.dataEnvio || ''} onChange={function(e){ handleChange(fat.id, 'dataEnvio', e.target.value); }} className="bg-transparent text-slate-300 outline-none uppercase w-1/2 mt-0.5 text-[11px]" placeholder="Envio" />
-                                                        </div>
-                                                    </div>
-                                                    <div className="bg-slate-950/60 p-2 rounded border border-slate-800">
-                                                        <span className="block text-[9px] text-slate-500 font-bold uppercase">SC / Pedido</span>
-                                                        <input type="text" value={fat.pedido || fat.scPagfor || ''} onChange={function(e){ handleChange(fat.id, 'pedido', e.target.value); }} className="bg-transparent text-slate-300 outline-none uppercase w-full mt-0.5 text-[11px]" placeholder="-" />
-                                                    </div>
-                                                </div>
-
-                                                <div className="bg-slate-950 p-2 rounded border border-slate-800 flex items-center justify-between gap-2">
-                                                    <span className="text-[10px] text-slate-400 font-bold uppercase">Status / Obs:</span>
-                                                    <select 
-                                                        value={fat.obsStatus || ''} 
-                                                        onChange={function(e){ handleChange(fat.id, 'obsStatus', e.target.value); }} 
-                                                        className={"bg-slate-900 border rounded px-2 py-1 text-xs font-bold uppercase outline-none flex-1 text-right " +
-                                                            (isFinalizado ? 'text-emerald-400 border-emerald-800' : 
-                                                             isAguardando ? 'text-red-400 border-red-800' : 'text-white border-slate-800')}
-                                                    >
-                                                        <option value="">-- SELECIONAR --</option>
-                                                        {statusOptions.map(function(st) {
-                                                            return <option key={st} value={st}>{st}</option>;
-                                                        })}
-                                                    </select>
-                                                </div>
-                                            </div>
+                                            <th key={col.key} className={"bg-slate-950 text-slate-300 text-[10px] font-extrabold uppercase py-2 px-1.5 border-b border-r border-slate-800 tracking-wider " + col.width}>
+                                                {col.label}
+                                            </th>
                                         );
                                     })}
-                                </div>
-                            )}
+                                    <th className="bg-slate-950 text-slate-300 text-[10px] font-extrabold uppercase py-2 px-1 border-b border-slate-800 w-12 tracking-wider">
+                                        AÇÃO
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/60 bg-slate-900">
+                                {faturasDaAba.length === 0 && (
+                                    <tr>
+                                        <td colSpan={colunas.length + 1} className="text-center py-12 text-slate-500 text-sm font-medium">
+                                            Nenhuma fatura encontrada com os filtros atuais.
+                                        </td>
+                                    </tr>
+                                )}
+                                {faturasDaAba.map(function(fat, idx) {
+                                    var obs = (fat.obsStatus || '').toUpperCase();
+                                    var isFinalizado = obs.indexOf('FINALIZADO') !== -1;
+                                    var isAguardando = obs.indexOf('AG.') !== -1;
 
-                        </div>
+                                    var rowHover = idx % 2 === 0 ? 'bg-slate-900/60 hover:bg-slate-800/40' : 'bg-slate-900/90 hover:bg-slate-800/40';
+
+                                    return (
+                                        <tr key={fat.id} className={"transition-colors " + rowHover}>
+                                            {colunas.map(function(col) {
+                                                if (col.key === 'obsStatus') {
+                                                    return (
+                                                        <td key={col.key} className="p-1 border-r border-slate-800/50">
+                                                            <select 
+                                                                value={fat[col.key] || ''} 
+                                                                onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
+                                                                className={"w-full h-7 px-1 bg-slate-950 border rounded text-[10px] font-bold outline-none uppercase text-center transition-colors " + 
+                                                                    (isFinalizado ? 'text-emerald-400 border-emerald-800/60 bg-emerald-950/30' : 
+                                                                     isAguardando ? 'text-red-400 border-red-800/60 bg-red-950/30' : 
+                                                                     'text-slate-300 border-slate-800')}
+                                                            >
+                                                                <option value="">-- SELECIONAR --</option>
+                                                                {statusOptions.map(function(st) {
+                                                                    return <option key={st} value={st}>{st}</option>;
+                                                                })}
+                                                            </select>
+                                                        </td>
+                                                    );
+                                                }
+                                                // Se estiver na aba de Arquivados, mostra o mês na coluna de vencimento ou deixa editável normalmente
+                                                return (
+                                                    <td key={col.key} className="p-1 border-r border-slate-800/50">
+                                                        <div className="relative">
+                                                            {abaAtiva === 'ARQUIVADOS' && col.key === 'descricaoConta' && (
+                                                                <span className="block text-[8px] text-emerald-400 font-bold uppercase">[{fat.mes}]</span>
+                                                            )}
+                                                            <input 
+                                                                type="text" 
+                                                                value={fat[col.key] || ''} 
+                                                                onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
+                                                                className="w-full h-7 px-1.5 bg-transparent border border-transparent hover:border-slate-700 focus:border-brand-500 rounded text-slate-300 outline-none uppercase text-center text-[11px] transition-all placeholder-slate-600" 
+                                                            />
+                                                        </div>
+                                                    </td>
+                                                );
+                                            })}
+                                            <td className="p-1 text-center">
+                                                <button onClick={function(){ handleRemoverLinha(fat.id); }} className="p-1 rounded text-slate-500 hover:text-red-400 hover:bg-red-950/30 transition-colors" title="Remover Linha">
+                                                    {Icons.Trash}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
-                );
-            };
+                ) : (
+                    <div className="flex-1 overflow-auto bg-slate-900/50 rounded-xl p-4 border border-slate-800 custom-scrollbar grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {faturasDaAba.length === 0 && (
+                            <div className="col-span-full text-center py-12 text-slate-500 text-sm">
+                                Nenhuma fatura encontrada com os filtros atuais.
+                            </div>
+                        )}
+                        {faturasDaAba.map(function(fat) {
+                            var obs = (fat.obsStatus || '').toUpperCase();
+                            var isFinalizado = obs.indexOf('FINALIZADO') !== -1;
+                            var isAguardando = obs.indexOf('AG.') !== -1;
+                            var cardBorder = isFinalizado ? 'border-emerald-500/50 bg-emerald-950/10' : isAguardando ? 'border-red-500/50 bg-red-950/10' : 'border-slate-800 bg-slate-900';
+
+                            return (
+                                <div key={fat.id} className={"rounded-xl p-4 border shadow-md flex flex-col justify-between gap-3 " + cardBorder}>
+                                    <div className="flex justify-between items-start gap-2">
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-extrabold uppercase bg-brand-900/40 text-brand-400 px-2 py-0.5 rounded">
+                                                    Venc: Dia {fat.diaVencimento || '--'}
+                                                </span>
+                                                {abaAtiva === 'ARQUIVADOS' && (
+                                                    <span className="text-[10px] font-extrabold uppercase bg-emerald-900/40 text-emerald-400 px-2 py-0.5 rounded">
+                                                        Mês: {fat.mes}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <h4 className="text-sm font-bold text-white uppercase mt-1.5">{fat.descricaoConta || 'SEM DESCRIÇÃO'}</h4>
+                                        </div>
+                                        <button onClick={function(){ handleRemoverLinha(fat.id); }} className="text-slate-500 hover:text-red-400 p-1" title="Excluir">
+                                            {Icons.Trash}
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div className="bg-slate-950/60 p-2 rounded border border-slate-800">
+                                            <span className="block text-[9px] text-slate-500 font-bold uppercase">Fornecedor</span>
+                                            <input type="text" value={fat.fornecedor || ''} onChange={function(e){ handleChange(fat.id, 'fornecedor', e.target.value); }} className="bg-transparent text-slate-200 font-bold outline-none uppercase w-full mt-0.5" placeholder="-" />
+                                        </div>
+                                        <div className="bg-slate-950/60 p-2 rounded border border-slate-800">
+                                            <span className="block text-[9px] text-slate-500 font-bold uppercase">Nota Fiscal (NF)</span>
+                                            <input type="text" value={fat.nf || ''} onChange={function(e){ handleChange(fat.id, 'nf', e.target.value); }} className="bg-transparent text-slate-200 font-bold outline-none uppercase w-full mt-0.5" placeholder="-" />
+                                        </div>
+                                        <div className="bg-slate-950/60 p-2 rounded border border-slate-800">
+                                            <span className="block text-[9px] text-slate-500 font-bold uppercase">Data Venc. / Envio</span>
+                                            <div className="flex gap-1">
+                                                <input type="text" value={fat.dataVencimento || ''} onChange={function(e){ handleChange(fat.id, 'dataVencimento', e.target.value); }} className="bg-transparent text-slate-300 outline-none uppercase w-1/2 mt-0.5 text-[11px]" placeholder="Venc." />
+                                                <input type="text" value={fat.dataEnvio || ''} onChange={function(e){ handleChange(fat.id, 'dataEnvio', e.target.value); }} className="bg-transparent text-slate-300 outline-none uppercase w-1/2 mt-0.5 text-[11px]" placeholder="Envio" />
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-950/60 p-2 rounded border border-slate-800">
+                                            <span className="block text-[9px] text-slate-500 font-bold uppercase">SC / Pedido</span>
+                                            <input type="text" value={fat.pedido || fat.scPagfor || ''} onChange={function(e){ handleChange(fat.id, 'pedido', e.target.value); }} className="bg-transparent text-slate-300 outline-none uppercase w-full mt-0.5 text-[11px]" placeholder="-" />
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-slate-950 p-2 rounded border border-slate-800 flex items-center justify-between gap-2">
+                                        <span className="text-[10px] text-slate-400 font-bold uppercase">Status / Obs:</span>
+                                        <select 
+                                            value={fat.obsStatus || ''} 
+                                            onChange={function(e){ handleChange(fat.id, 'obsStatus', e.target.value); }} 
+                                            className={"bg-slate-900 border rounded px-2 py-1 text-xs font-bold uppercase outline-none flex-1 text-right " +
+                                                (isFinalizado ? 'text-emerald-400 border-emerald-800' : 
+                                                 isAguardando ? 'text-red-400 border-red-800' : 'text-white border-slate-800')}
+                                        >
+                                            <option value="">-- SELECIONAR --</option>
+                                            {statusOptions.map(function(st) {
+                                                return <option key={st} value={st}>{st}</option>;
+                                            })}
+                                        </select>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
+            </div>
+        </div>
+    );
+};
 			
             var App = function() {
                 var isSavingDraftRef = useRef(false);
