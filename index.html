@@ -3098,61 +3098,218 @@ var AnalyticsView = function(props) {
             };
 
 var FaturasTIView = function() {
-                var faturas = [
-                    { id: 1, mes: 'OUTUBRO', fornecedor: 'VIVO', servico: 'LINK DEDICADO FIBRA', vencimento: '10/10/2026', valor: 'R$ 1.450,00', status: 'PAGO' },
-                    { id: 2, mes: 'OUTUBRO', fornecedor: 'MICROSOFT', servico: 'OFFICE 365 CORPORATIVO', vencimento: '15/10/2026', valor: 'R$ 3.200,00', status: 'PAGO' },
-                    { id: 3, mes: 'OUTUBRO', fornecedor: 'SKYMAIL', servico: 'HOSPEDAGEM E-MAILS', vencimento: '20/10/2026', valor: 'R$ 850,00', status: 'PAGO' },
-                    { id: 4, mes: 'NOVEMBRO', fornecedor: 'VIVO', servico: 'LINK DEDICADO FIBRA', vencimento: '10/11/2026', valor: 'R$ 1.450,00', status: 'PENDENTE' },
-                    { id: 5, mes: 'NOVEMBRO', fornecedor: 'MICROSOFT', servico: 'OFFICE 365 CORPORATIVO', vencimento: '15/11/2026', valor: 'R$ 3.200,00', status: 'PENDENTE' },
-                    { id: 6, mes: 'NOVEMBRO', fornecedor: 'SKYMAIL', servico: 'HOSPEDAGEM E-MAILS', vencimento: '20/11/2026', valor: 'R$ 850,00', status: 'PENDENTE' }
-                ];
+                var [meses, setMeses] = useState(['OUTUBRO', 'NOVEMBRO']);
+                var [abaAtiva, setAbaAtiva] = useState('OUTUBRO');
+                var [faturas, setFaturas] = useState([
+                    { id: 'f1', mes: 'OUTUBRO', fornecedor: 'VIVO', servico: 'LINK DEDICADO FIBRA', vencimento: '10/10/2026', valor: 'R$ 1.450,00', status: 'PAGO' },
+                    { id: 'f2', mes: 'OUTUBRO', fornecedor: 'MICROSOFT', servico: 'OFFICE 365 CORPORATIVO', vencimento: '15/10/2026', valor: 'R$ 3.200,00', status: 'PAGO' },
+                    { id: 'f3', mes: 'OUTUBRO', fornecedor: 'SKYMAIL', servico: 'HOSPEDAGEM E-MAILS', vencimento: '20/10/2026', valor: 'R$ 850,00', status: 'PAGO' },
+                    { id: 'f4', mes: 'NOVEMBRO', fornecedor: 'VIVO', servico: 'LINK DEDICADO FIBRA', vencimento: '10/11/2026', valor: 'R$ 1.450,00', status: 'PENDENTE' },
+                    { id: 'f5', mes: 'NOVEMBRO', fornecedor: 'MICROSOFT', servico: 'OFFICE 365 CORPORATIVO', vencimento: '15/11/2026', valor: 'R$ 3.200,00', status: 'PENDENTE' },
+                    { id: 'f6', mes: 'NOVEMBRO', fornecedor: 'SKYMAIL', servico: 'HOSPEDAGEM E-MAILS', vencimento: '20/11/2026', valor: 'R$ 850,00', status: 'PENDENTE' }
+                ]);
 
-                var renderBadge = function(status) {
-                    if (status === 'PAGO') return <Badge color="green">PAGO</Badge>;
-                    if (status === 'PENDENTE') return <Badge color="amber">PENDENTE</Badge>;
-                    return <Badge color="slate">{status}</Badge>;
+                var faturasDaAba = faturas.filter(function(f) { return f.mes === abaAtiva; });
+
+                var handleAddLinha = function() {
+                    var novaLinha = {
+                        id: 'fat_' + Date.now(),
+                        mes: abaAtiva,
+                        fornecedor: '',
+                        servico: '',
+                        vencimento: '',
+                        valor: '',
+                        status: 'PENDENTE'
+                    };
+                    setFaturas(faturas.concat([novaLinha]));
                 };
+
+                var handleRemoverLinha = function(id) {
+                    if(confirm("Remover esta linha de fatura?")) {
+                        setFaturas(faturas.filter(function(f) { return f.id !== id; }));
+                    }
+                };
+
+                var handleChange = function(id, campo, valor) {
+                    setFaturas(faturas.map(function(f) {
+                        if (f.id === id) {
+                            var obj = Object.assign({}, f);
+                            obj[campo] = valor.toUpperCase();
+                            return obj;
+                        }
+                        return f;
+                    }));
+                };
+
+                var handleAddMes = function() {
+                    var novoMes = prompt("Digite o nome do novo mês (ex: DEZEMBRO):");
+                    if (!novoMes || !novoMes.trim()) return;
+                    novoMes = novoMes.trim().toUpperCase();
+
+                    if (meses.indexOf(novoMes) !== -1) {
+                        alert("Esta aba já existe!");
+                        setAbaAtiva(novoMes);
+                        return;
+                    }
+
+                    var copiar = confirm("Deseja importar automaticamente as faturas recorrentes de " + abaAtiva + " para " + novoMes + "?");
+                    var novasLinhas = [];
+
+                    if (copiar) {
+                        var linhasAtuais = faturas.filter(function(f) { return f.mes === abaAtiva; });
+                        novasLinhas = linhasAtuais.map(function(f, index) {
+                            return Object.assign({}, f, {
+                                id: 'fat_' + Date.now() + '_' + index,
+                                mes: novoMes,
+                                status: 'PENDENTE',
+                                vencimento: '' 
+                            });
+                        });
+                    }
+
+                    setMeses(meses.concat([novoMes]));
+                    if (novasLinhas.length > 0) {
+                        setFaturas(faturas.concat(novasLinhas));
+                    }
+                    setAbaAtiva(novoMes);
+                };
+
+                var handleRemoverMes = function(mesParaRemover) {
+                    if(confirm("Atenção: Isto excluirá a aba " + mesParaRemover + " e TODOS os seus registros. Deseja continuar?")) {
+                        var novosMeses = meses.filter(function(m) { return m !== mesParaRemover; });
+                        setMeses(novosMeses);
+                        setFaturas(faturas.filter(function(f) { return f.mes !== mesParaRemover; }));
+                        if (abaAtiva === mesParaRemover) {
+                            setAbaAtiva(novosMeses.length > 0 ? novosMeses[0] : '');
+                        }
+                    }
+                };
+
+                // Cálculo de totais
+                var totalPendente = 0;
+                var totalPago = 0;
+                faturasDaAba.forEach(function(f) {
+                    var num = parseFloat((f.valor || '').replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
+                    if (f.status === 'PAGO') totalPago += num;
+                    else totalPendente += num;
+                });
+                var formatMoeda = function(val) { return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); };
 
                 return (
                     <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-10 fade-in overflow-auto">
-                        <div className="max-w-6xl mx-auto w-full space-y-6 pb-12">
+                        <div className="max-w-6xl mx-auto w-full space-y-4 pb-12">
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                                 <div>
                                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase">
-                                        {Icons.File} Faturas Mensais T.I
+                                        {Icons.File} Gestão de Faturas T.I
                                     </h2>
-                                    <p className="text-slate-500 text-sm">Controle de pagamentos, licenças e serviços recorrentes de TI.</p>
+                                    <p className="text-slate-500 text-sm">Controle financeiro e estrutural de licenças e infraestrutura.</p>
                                 </div>
                             </div>
                             
-                            <Card noPadding className="overflow-hidden">
-                                <div className="p-4 md:px-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                                    <h3 className="font-bold text-slate-800 dark:text-white text-sm uppercase tracking-wider flex items-center gap-2">
-                                        {Icons.List} Espelho de Lançamentos (Outubro e Novembro)
-                                    </h3>
+                            {/* Abas Superiores (Tabs) */}
+                            <div className="flex items-center gap-2 border-b border-slate-300 dark:border-slate-800 overflow-x-auto pb-px custom-scrollbar">
+                                {meses.map(function(m) {
+                                    var isActive = abaAtiva === m;
+                                    return (
+                                        <div key={m} className={"flex items-center gap-2 px-4 py-2.5 font-bold text-sm cursor-pointer whitespace-nowrap transition-colors border-b-2 " + (isActive ? "border-brand-600 text-brand-600 dark:text-brand-400 bg-brand-50/50 dark:bg-brand-900/10" : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-t-lg")}>
+                                            <span onClick={function() { setAbaAtiva(m); }}>{m}</span>
+                                            {isActive && <button onClick={function(e) { e.stopPropagation(); handleRemoverMes(m); }} className="text-slate-400 hover:text-red-500 ml-1" title="Excluir Mês">&times;</button>}
+                                        </div>
+                                    );
+                                })}
+                                <button onClick={handleAddMes} className="px-3 py-2 text-xs font-bold text-slate-500 hover:text-brand-500 flex items-center gap-1 shrink-0">
+                                    {Icons.Plus} NOVO MÊS
+                                </button>
+                            </div>
+
+                            <Card noPadding className="overflow-hidden shadow-sm">
+                                <div className="p-4 md:px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center">
+                                    <div className="flex items-center gap-4">
+                                        <div className="text-xs font-bold text-slate-500 uppercase">
+                                            Total Pago: <span className="text-emerald-600 dark:text-emerald-400 text-sm ml-1">{formatMoeda(totalPago)}</span>
+                                        </div>
+                                        <div className="text-xs font-bold text-slate-500 uppercase border-l border-slate-300 dark:border-slate-700 pl-4">
+                                            A Pagar: <span className="text-amber-600 dark:text-amber-500 text-sm ml-1">{formatMoeda(totalPendente)}</span>
+                                        </div>
+                                    </div>
+                                    <Button onClick={handleAddLinha} variant="success" className="text-xs px-3 py-1.5 shadow-none">
+                                        {Icons.Plus} Adicionar Fatura
+                                    </Button>
                                 </div>
                                 <div className="overflow-x-auto">
-                                    <table className="w-full text-sm text-left min-w-[750px]">
+                                    <table className="w-full text-sm text-left min-w-[800px]">
                                         <thead className="bg-slate-50 dark:bg-slate-800/70 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800">
                                             <tr>
-                                                <th className="px-4 py-3">Mês Referência</th>
-                                                <th className="px-4 py-3">Fornecedor</th>
-                                                <th className="px-4 py-3">Serviço / Produto</th>
-                                                <th className="px-4 py-3">Vencimento</th>
-                                                <th className="px-4 py-3 text-right">Valor Estimado</th>
-                                                <th className="px-4 py-3 text-center">Status</th>
+                                                <th className="px-4 py-3 w-64">Fornecedor</th>
+                                                <th className="px-4 py-3 w-64">Serviço / Produto</th>
+                                                <th className="px-4 py-3 w-32">Vencimento</th>
+                                                <th className="px-4 py-3 w-40">Valor R$</th>
+                                                <th className="px-4 py-3 w-36 text-center">Status</th>
+                                                <th className="px-4 py-3 w-12 text-center"></th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                            {faturas.map(function(fat) {
+                                            {faturasDaAba.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="6" className="text-center py-10 text-slate-400 text-xs font-semibold">Nenhuma fatura lançada em {abaAtiva}.</td>
+                                                </tr>
+                                            )}
+                                            {faturasDaAba.map(function(fat) {
                                                 return (
-                                                    <tr key={fat.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                                                        <td className="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">{fat.mes}</td>
-                                                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white uppercase">{fat.fornecedor}</td>
-                                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400 uppercase">{fat.servico}</td>
-                                                        <td className="px-4 py-3 font-mono text-xs">{fat.vencimento}</td>
-                                                        <td className="px-4 py-3 font-mono font-bold text-brand-600 dark:text-brand-400 text-right">{fat.valor}</td>
-                                                        <td className="px-4 py-3 text-center">{renderBadge(fat.status)}</td>
+                                                    <tr key={fat.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
+                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50">
+                                                            <input 
+                                                                type="text" 
+                                                                value={fat.fornecedor} 
+                                                                onChange={function(e){ handleChange(fat.id, 'fornecedor', e.target.value); }} 
+                                                                placeholder="Ex: MICROSOFT"
+                                                                className="w-full bg-transparent outline-none font-bold text-slate-800 dark:text-slate-200 uppercase placeholder-slate-300 dark:placeholder-slate-700" 
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50">
+                                                            <input 
+                                                                type="text" 
+                                                                value={fat.servico} 
+                                                                onChange={function(e){ handleChange(fat.id, 'servico', e.target.value); }} 
+                                                                placeholder="Descrição do serviço"
+                                                                className="w-full bg-transparent outline-none text-slate-600 dark:text-slate-400 uppercase placeholder-slate-300 dark:placeholder-slate-700" 
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50">
+                                                            <input 
+                                                                type="text" 
+                                                                value={fat.vencimento} 
+                                                                onChange={function(e){ handleChange(fat.id, 'vencimento', e.target.value); }} 
+                                                                placeholder="DD/MM/AAAA"
+                                                                className="w-full bg-transparent outline-none font-mono text-xs text-slate-600 dark:text-slate-400 placeholder-slate-300 dark:placeholder-slate-700" 
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50">
+                                                            <input 
+                                                                type="text" 
+                                                                value={fat.valor} 
+                                                                onChange={function(e){ handleChange(fat.id, 'valor', e.target.value); }} 
+                                                                placeholder="R$ 0,00"
+                                                                className="w-full bg-transparent outline-none font-mono font-bold text-brand-600 dark:text-brand-400 placeholder-slate-300 dark:placeholder-slate-700" 
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50 text-center">
+                                                            <select 
+                                                                value={fat.status} 
+                                                                onChange={function(e){ handleChange(fat.id, 'status', e.target.value); }}
+                                                                className={"text-xs font-bold px-2 py-1 rounded outline-none cursor-pointer border border-transparent hover:border-slate-300 dark:hover:border-slate-600 " + (fat.status === 'PAGO' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400')}
+                                                            >
+                                                                <option value="PENDENTE">PENDENTE</option>
+                                                                <option value="PAGO">PAGO</option>
+                                                                <option value="CANCELADO">CANCELADO</option>
+                                                            </select>
+                                                        </td>
+                                                        <td className="px-4 py-2 text-center">
+                                                            <button onClick={function(){ handleRemoverLinha(fat.id); }} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1">
+                                                                {Icons.Trash}
+                                                            </button>
+                                                        </td>
                                                     </tr>
                                                 );
                                             })}
