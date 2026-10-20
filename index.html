@@ -3137,7 +3137,7 @@ var FaturasTIView = function() {
 
                 var overridesOutubro = {
                     'PLANOS E REPAROS DE APARELHOS': { repReceb: 'DANILO', obsStatus: 'FINALIZADO' },
-                    'GBS ASSESSORIA E SERVICOS': { dataVencimento: '05/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052675', nf: '2', lancada: '', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+                    'GBS ASSESSORIA E SERVICOS': { dataVencimento: '05/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052675', nf: '2', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
                     'POWER BI': { dataVencimento: '06/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051732', nf: '04177646', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
                     'INTERNET 100 MB ITU': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052673', nf: '7148', dataEnvio: '08/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
                     'INTERNET EXTREMA MG': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044855', nf: '500974', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
@@ -3178,63 +3178,58 @@ var FaturasTIView = function() {
                     faturasIniciais.push({
                         id: 'out_' + i, mes: 'OUTUBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
                         dataVencimento: out.dataVencimento || '', scPagfor: out.scPagfor || '', scTotvs: out.scTotvs || '', pedido: out.pedido || '', nf: out.nf || '',
-                        lancada: out.lancada || '', dataEnvio: out.dataEnvio || '', salvaPasta: out.salvaPasta || '', tipoEmail: out.tipoEmail || '', repReceb: out.repReceb || '', obsStatus: out.obsStatus || ''
+                        dataEnvio: out.dataEnvio || '', salvaPasta: out.salvaPasta || '', tipoEmail: out.tipoEmail || '', repReceb: out.repReceb || '', obsStatus: out.obsStatus || ''
                     });
                 });
                 templateBase.forEach(function(tb, i) {
                     faturasIniciais.push({
                         id: 'nov_' + i, mes: 'NOVEMBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
-                        dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', lancada: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
+                        dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
                     });
                 });
 
-                // ==========================================
-                // LÓGICA DE SALVAMENTO AUTOMÁTICO (LocalStorage)
-                // ==========================================
                 var [meses, setMeses] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_meses_v2');
+                    var saved = localStorage.getItem('faturas_ti_meses_v3');
                     return saved ? JSON.parse(saved) : ['OUTUBRO', 'NOVEMBRO'];
                 });
                 
                 var [abaAtiva, setAbaAtiva] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_aba_v2');
+                    var saved = localStorage.getItem('faturas_ti_aba_v3');
                     return saved ? saved : 'OUTUBRO';
                 });
                 
                 var [faturas, setFaturas] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_faturas_v2');
+                    var saved = localStorage.getItem('faturas_ti_faturas_v3');
                     return saved ? JSON.parse(saved) : faturasIniciais;
                 });
 
-                useEffect(function() { localStorage.setItem('faturas_ti_meses_v2', JSON.stringify(meses)); }, [meses]);
-                useEffect(function() { localStorage.setItem('faturas_ti_aba_v2', abaAtiva); }, [abaAtiva]);
-                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v2', JSON.stringify(faturas)); }, [faturas]);
-                // ==========================================
+                useEffect(function() { localStorage.setItem('faturas_ti_meses_v3', JSON.stringify(meses)); }, [meses]);
+                useEffect(function() { localStorage.setItem('faturas_ti_aba_v3', abaAtiva); }, [abaAtiva]);
+                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v3', JSON.stringify(faturas)); }, [faturas]);
 
                 var faturasDaAba = faturas.filter(function(f) { return f.mes === abaAtiva; });
 
                 var colunas = [
                     { key: 'diaVencimento', label: 'VENCIMENTO', width: 'w-24' },
-                    { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-80' },
+                    { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-72' },
                     { key: 'codigoSv', label: 'CÓDIGO SV', width: 'w-32' },
                     { key: 'dataVencimento', label: 'VENCIMENTO', width: 'w-28' },
-                    { key: 'scPagfor', label: 'SC PAGFOR', width: 'w-32' },
+                    { key: 'scPagfor', label: 'SC PAGFOR', width: 'w-28' },
                     { key: 'scTotvs', label: 'SC TOTVS', width: 'w-28' },
-                    { key: 'pedido', label: 'PEDIDO', width: 'w-28' },
-                    { key: 'nf', label: 'NF', width: 'w-32' },
+                    { key: 'pedido', label: 'PEDIDO', width: 'w-24' },
+                    { key: 'nf', label: 'NF', width: 'w-28' },
                     { key: 'fornecedor', label: 'FORNECEDOR', width: 'w-40' },
-                    { key: 'codForn', label: 'CÓD FORN', width: 'w-28' },
-                    { key: 'lancada', label: 'LANÇADA', width: 'w-24' },
-                    { key: 'dataEnvio', label: 'DATA DE ENVIO', width: 'w-32' },
-                    { key: 'salvaPasta', label: 'SALVA NA PASTA', width: 'w-32' },
+                    { key: 'codForn', label: 'CÓD FORN', width: 'w-24' },
+                    { key: 'dataEnvio', label: 'DATA DE ENVIO', width: 'w-28' },
+                    { key: 'salvaPasta', label: 'SALVA NA PASTA', width: 'w-28' },
                     { key: 'tipoEmail', label: 'E-MAIL', width: 'w-24' },
-                    { key: 'repReceb', label: 'REP. RECEB:', width: 'w-32' },
-                    { key: 'obsStatus', label: 'OBS', width: 'w-48' }
+                    { key: 'repReceb', label: 'REP. RECEB', width: 'w-28' },
+                    { key: 'obsStatus', label: 'STATUS / OBS', width: 'w-48' }
                 ];
 
                 var handleAddLinha = function() {
                     var novaLinha = {
-                        id: 'fat_' + Date.now(), mes: abaAtiva, diaVencimento: '', descricaoConta: '', codigoSv: '', dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', fornecedor: '', codForn: '', lancada: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
+                        id: 'fat_' + Date.now(), mes: abaAtiva, diaVencimento: '', descricaoConta: '', codigoSv: '', dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', fornecedor: '', codForn: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
                     };
                     setFaturas(faturas.concat([novaLinha]));
                 };
@@ -3267,7 +3262,7 @@ var FaturasTIView = function() {
                         return;
                     }
 
-                    var copiar = confirm("Deseja importar a MÁSCARA BASE de contas para " + novoMes + "?\n\nIsso criará a estrutura preenchida de Vencimentos, Descrições, Cód SV e Fornecedores padrão.");
+                    var copiar = confirm("Deseja importar a MÁSCARA BASE de contas para " + novoMes + "?");
                     var novasLinhas = [];
 
                     if (copiar) {
@@ -3285,7 +3280,6 @@ var FaturasTIView = function() {
                                 nf: '',
                                 fornecedor: tb.fornecedor,
                                 codForn: tb.codForn,
-                                lancada: '',
                                 dataEnvio: '',
                                 salvaPasta: '',
                                 tipoEmail: '',
@@ -3314,93 +3308,115 @@ var FaturasTIView = function() {
                 };
 
                 return (
-                    // Alterado flex, w-full e inserido min-w-0 para proteger a responsividade da barra lateral
-                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-6 fade-in overflow-hidden min-w-0">
+                    <div className="h-full w-full bg-slate-950 flex flex-col p-3 md:p-6 fade-in overflow-hidden min-w-0">
                         <div className="flex flex-col h-full w-full space-y-4 min-w-0 min-h-0">
                             
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0 px-1">
                                 <div>
-                                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase">
-                                        {Icons.File} Gestão de Contas T.I
+                                    <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2 uppercase tracking-wide">
+                                        {Icons.File} Gestão de Faturas T.I
                                     </h2>
-                                    <p className="text-slate-500 text-sm">Controle de pagamentos, licenças e infraestrutura.</p>
+                                    <p className="text-slate-400 text-xs md:text-sm">Controle de faturas, contratos, NFs e status operacionais.</p>
                                 </div>
-                                <Button onClick={handleAddLinha} variant="success" className="text-xs px-4 py-2 shadow-none whitespace-nowrap">
+                                <Button onClick={handleAddLinha} variant="success" className="text-xs px-4 py-2 shadow-sm whitespace-nowrap">
                                     {Icons.Plus} Adicionar Linha Avulsa
                                 </Button>
                             </div>
                             
                             {/* Abas Superiores */}
-                            <div className="flex items-center gap-2 border-b border-slate-300 dark:border-slate-800 overflow-x-auto pb-px custom-scrollbar shrink-0 w-full">
+                            <div className="flex items-center gap-2 border-b border-slate-800 overflow-x-auto pb-px custom-scrollbar shrink-0 w-full px-1">
                                 {meses.map(function(m) {
                                     var isActive = abaAtiva === m;
                                     return (
-                                        <div key={m} className={"flex items-center gap-2 px-4 py-2.5 font-bold text-sm cursor-pointer whitespace-nowrap transition-colors border-b-2 " + (isActive ? "border-brand-600 text-brand-600 dark:text-brand-400 bg-brand-50/50 dark:bg-brand-900/10" : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-t-lg")}>
+                                        <div key={m} className={"flex items-center gap-2 px-4 py-2 font-bold text-xs md:text-sm cursor-pointer whitespace-nowrap transition-all border-b-2 " + (isActive ? "border-brand-500 text-brand-400 bg-brand-900/20 rounded-t-lg" : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/50 rounded-t-lg")}>
                                             <span onClick={function() { setAbaAtiva(m); }}>{m}</span>
-                                            {isActive && <button onClick={function(e) { e.stopPropagation(); handleRemoverMes(m); }} className="text-slate-400 hover:text-red-500 ml-1" title="Excluir Mês">&times;</button>}
+                                            {isActive && <button onClick={function(e) { e.stopPropagation(); handleRemoverMes(m); }} className="text-slate-400 hover:text-red-400 ml-1 text-sm font-black" title="Excluir Mês">&times;</button>}
                                         </div>
                                     );
                                 })}
-                                <button onClick={handleAddMes} className="px-3 py-2 text-xs font-bold text-slate-500 hover:text-brand-500 flex items-center gap-1 shrink-0">
+                                <button onClick={handleAddMes} className="px-3 py-2 text-xs font-bold text-slate-400 hover:text-brand-400 flex items-center gap-1 shrink-0">
                                     {Icons.Plus} NOVO MÊS
                                 </button>
                             </div>
 
-                            {/* Planilha com min-w-0 e min-h-0 resolvendo o erro de invadir o menu */}
-                            <div className="flex-1 overflow-auto bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full">
-                                <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '2400px' }}>
-                                    <thead className="sticky top-0 z-10">
+                            {/* Tabela com Layout Limpo e Moderno */}
+                            <div className="flex-1 overflow-auto bg-slate-900 rounded-xl shadow-md border border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full">
+                                <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '2200px' }}>
+                                    <thead className="sticky top-0 z-20">
                                         <tr>
-                                            <th colSpan={colunas.length + 1} className="bg-white dark:bg-slate-900 font-bold text-lg py-2 border-b-2 border-slate-300 dark:border-slate-700 uppercase tracking-widest text-slate-800 dark:text-slate-200">
-                                                CONTAS DE {abaAtiva}
+                                            <th colSpan={colunas.length + 1} className="bg-slate-900/95 backdrop-blur font-black text-base md:text-lg py-3 border-b border-slate-800 uppercase tracking-widest text-slate-100 shadow-sm">
+                                                FATURAS E CONTAS DE {abaAtiva}
                                             </th>
                                         </tr>
                                         <tr>
                                             {colunas.map(function(col) {
                                                 return (
-                                                    <th key={col.key} className={"bg-blue-600 text-white text-[10px] font-bold uppercase py-2 px-2 border border-blue-700 " + col.width}>
+                                                    <th key={col.key} className={"bg-slate-950 text-slate-300 text-[11px] font-extrabold uppercase py-2.5 px-2 border-b border-r border-slate-800 tracking-wider " + col.width}>
                                                         {col.label}
                                                     </th>
                                                 );
                                             })}
-                                            <th className="bg-blue-600 text-white text-[10px] font-bold uppercase py-2 px-2 border border-blue-700 w-12">
+                                            <th className="bg-slate-950 text-slate-300 text-[11px] font-extrabold uppercase py-2.5 px-2 border-b border-slate-800 w-12 tracking-wider">
                                                 AÇÃO
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="divide-y divide-slate-800/60 bg-slate-900">
                                         {faturasDaAba.length === 0 && (
                                             <tr>
-                                                <td colSpan={colunas.length + 1} className="text-center py-10 text-slate-400 text-sm font-semibold border-b border-slate-200">
-                                                    Planilha vazia. Clique em "Adicionar Linha Avulsa" ou crie um novo mês para importar a máscara.
+                                                <td colSpan={colunas.length + 1} className="text-center py-12 text-slate-500 text-sm font-medium">
+                                                    Planilha vazia. Clique em "Adicionar Linha Avulsa" ou crie um novo mês.
                                                 </td>
                                             </tr>
                                         )}
-                                        {faturasDaAba.map(function(fat) {
+                                        {faturasDaAba.map(function(fat, idx) {
                                             var obs = (fat.obsStatus || '').toUpperCase();
-                                            var isGreen = obs.indexOf('FINALIZADO') !== -1;
-                                            var isRed = obs.indexOf('AG.') !== -1;
-                                            
-                                            var rowBgClass = isGreen ? 'bg-emerald-500 border-emerald-600' : isRed ? 'bg-red-500 border-red-600' : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50';
-                                            var textClass = (isGreen || isRed) ? 'text-black placeholder-black/50 font-semibold' : 'text-slate-700 dark:text-slate-300 placeholder-slate-400 font-medium';
-                                            var cellBorderClass = (isGreen || isRed) ? 'border-black/20' : 'border-slate-200 dark:border-slate-700';
+                                            var isFinalizado = obs.indexOf('FINALIZADO') !== -1;
+                                            var isAguardando = obs.indexOf('AG.') !== -1;
+
+                                            // Cor de badge moderna para o Status
+                                            var badgeClass = 'bg-slate-800 text-slate-300 border-slate-700';
+                                            if (isFinalizado) badgeClass = 'bg-emerald-950 text-emerald-400 border-emerald-800/60';
+                                            if (isAguardando) badgeClass = 'bg-red-950 text-red-400 border-red-800/60';
+
+                                            var rowHover = idx % 2 === 0 ? 'bg-slate-900/60 hover:bg-slate-800/40' : 'bg-slate-900/90 hover:bg-slate-800/40';
 
                                             return (
-                                                <tr key={fat.id} className={"transition-colors " + rowBgClass}>
+                                                <tr key={fat.id} className={"transition-colors " + rowHover}>
                                                     {colunas.map(function(col) {
+                                                        if (col.key === 'obsStatus') {
+                                                            return (
+                                                                <td key={col.key} className="p-1 border-r border-slate-800/50">
+                                                                    <div className="flex items-center justify-center gap-1.5 px-1">
+                                                                        <input 
+                                                                            type="text" 
+                                                                            value={fat[col.key] || ''} 
+                                                                            onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
+                                                                            className="w-full h-8 px-2 bg-slate-950/60 border border-slate-800 rounded text-slate-200 outline-none uppercase text-center text-xs font-semibold focus:border-brand-500 transition-colors"
+                                                                            placeholder="STATUS..."
+                                                                        />
+                                                                        {fat[col.key] && (
+                                                                            <span className={"text-[9px] font-extrabold uppercase px-1.5 py-1 rounded border whitespace-nowrap " + badgeClass}>
+                                                                                {isFinalizado ? 'OK' : isAguardando ? 'PEND.' : 'OUT'}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                            );
+                                                        }
                                                         return (
-                                                            <td key={col.key} className={"p-0 border " + cellBorderClass}>
+                                                            <td key={col.key} className="p-1 border-r border-slate-800/50">
                                                                 <input 
                                                                     type="text" 
                                                                     value={fat[col.key] || ''} 
                                                                     onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
-                                                                    className={"w-full h-8 px-2 bg-transparent outline-none uppercase text-center text-[11px] " + textClass} 
+                                                                    className="w-full h-8 px-2 bg-transparent border border-transparent hover:border-slate-700 focus:border-brand-500 rounded text-slate-300 outline-none uppercase text-center text-xs transition-all placeholder-slate-600" 
                                                                 />
                                                             </td>
                                                         );
                                                     })}
-                                                    <td className={"p-0 border text-center " + cellBorderClass}>
-                                                        <button onClick={function(){ handleRemoverLinha(fat.id); }} className={"p-1.5 rounded transition-colors " + ((isGreen || isRed) ? "text-black/50 hover:text-black hover:bg-black/10" : "text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30")} title="Remover Linha">
+                                                    <td className="p-1 text-center">
+                                                        <button onClick={function(){ handleRemoverLinha(fat.id); }} className="p-1.5 rounded text-slate-500 hover:text-red-400 hover:bg-red-950/30 transition-colors" title="Remover Linha">
                                                             {Icons.Trash}
                                                         </button>
                                                     </td>
