@@ -3097,6 +3097,74 @@ var AnalyticsView = function(props) {
                 );
             };
 
+var FaturasTIView = function() {
+                var faturas = [
+                    { id: 1, mes: 'OUTUBRO', fornecedor: 'VIVO', servico: 'LINK DEDICADO FIBRA', vencimento: '10/10/2026', valor: 'R$ 1.450,00', status: 'PAGO' },
+                    { id: 2, mes: 'OUTUBRO', fornecedor: 'MICROSOFT', servico: 'OFFICE 365 CORPORATIVO', vencimento: '15/10/2026', valor: 'R$ 3.200,00', status: 'PAGO' },
+                    { id: 3, mes: 'OUTUBRO', fornecedor: 'SKYMAIL', servico: 'HOSPEDAGEM E-MAILS', vencimento: '20/10/2026', valor: 'R$ 850,00', status: 'PAGO' },
+                    { id: 4, mes: 'NOVEMBRO', fornecedor: 'VIVO', servico: 'LINK DEDICADO FIBRA', vencimento: '10/11/2026', valor: 'R$ 1.450,00', status: 'PENDENTE' },
+                    { id: 5, mes: 'NOVEMBRO', fornecedor: 'MICROSOFT', servico: 'OFFICE 365 CORPORATIVO', vencimento: '15/11/2026', valor: 'R$ 3.200,00', status: 'PENDENTE' },
+                    { id: 6, mes: 'NOVEMBRO', fornecedor: 'SKYMAIL', servico: 'HOSPEDAGEM E-MAILS', vencimento: '20/11/2026', valor: 'R$ 850,00', status: 'PENDENTE' }
+                ];
+
+                var renderBadge = function(status) {
+                    if (status === 'PAGO') return <Badge color="green">PAGO</Badge>;
+                    if (status === 'PENDENTE') return <Badge color="amber">PENDENTE</Badge>;
+                    return <Badge color="slate">{status}</Badge>;
+                };
+
+                return (
+                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-10 fade-in overflow-auto">
+                        <div className="max-w-6xl mx-auto w-full space-y-6 pb-12">
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase">
+                                        {Icons.File} Faturas Mensais T.I
+                                    </h2>
+                                    <p className="text-slate-500 text-sm">Controle de pagamentos, licenças e serviços recorrentes de TI.</p>
+                                </div>
+                            </div>
+                            
+                            <Card noPadding className="overflow-hidden">
+                                <div className="p-4 md:px-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                                    <h3 className="font-bold text-slate-800 dark:text-white text-sm uppercase tracking-wider flex items-center gap-2">
+                                        {Icons.List} Espelho de Lançamentos (Outubro e Novembro)
+                                    </h3>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-left min-w-[750px]">
+                                        <thead className="bg-slate-50 dark:bg-slate-800/70 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800">
+                                            <tr>
+                                                <th className="px-4 py-3">Mês Referência</th>
+                                                <th className="px-4 py-3">Fornecedor</th>
+                                                <th className="px-4 py-3">Serviço / Produto</th>
+                                                <th className="px-4 py-3">Vencimento</th>
+                                                <th className="px-4 py-3 text-right">Valor Estimado</th>
+                                                <th className="px-4 py-3 text-center">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                            {faturas.map(function(fat) {
+                                                return (
+                                                    <tr key={fat.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                                                        <td className="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">{fat.mes}</td>
+                                                        <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white uppercase">{fat.fornecedor}</td>
+                                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400 uppercase">{fat.servico}</td>
+                                                        <td className="px-4 py-3 font-mono text-xs">{fat.vencimento}</td>
+                                                        <td className="px-4 py-3 font-mono font-bold text-brand-600 dark:text-brand-400 text-right">{fat.valor}</td>
+                                                        <td className="px-4 py-3 text-center">{renderBadge(fat.status)}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+                        </div>
+                    </div>
+                );
+            };
+			
             var App = function() {
                 var isSavingDraftRef = useRef(false);
                 var draftState = useState(null);
@@ -3640,6 +3708,9 @@ var AnalyticsView = function(props) {
                                     <button onClick={function() { navTo('controleDesktops'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'controleDesktops' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.Monitor} Controle de Desktop's
                                     </button>
+									<button onClick={function() { navTo('faturasTI'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'faturasTI' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
+                                        {Icons.File} Faturas Mensais T.I
+                                    </button>
                                     <button onClick={function() { navTo('history'); }} className={"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm " + (view === 'history' ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')}>
                                         {Icons.History} Histórico
                                     </button>
@@ -3783,6 +3854,9 @@ var AnalyticsView = function(props) {
                                 )}
                                 {view === 'controleDesktops' && (
                                     <DesktopControlView desktops={desktops} currentUser={currentUser} />
+                                )}
+								{view === 'faturasTI' && (
+                                    <FaturasTIView />
                                 )}
                                 {view === 'checklist' && <ActiveChecklist ticket={currentTicketData} currentUser={currentUser} onUpdate={handleUpdateTicket} onBack={handleBackFromChecklist} onForceSave={handleForceSaveChecklist} onRequestFinish={handleRequestFinish} onGlobalTitleChange={handleGlobalTitleChange} />}
                                 {view === 'receipt' && <ReceiptView ticket={currentTicketData} onBack={function() { navTo('checklist'); }} onArchive={handleArchive} logo={logo} />}
