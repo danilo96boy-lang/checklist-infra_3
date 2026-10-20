@@ -3189,17 +3189,17 @@ var FaturasTIView = function() {
                 });
 
                 var [meses, setMeses] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_meses_v8');
+                    var saved = localStorage.getItem('faturas_ti_meses_v9');
                     return saved ? JSON.parse(saved) : ['OUTUBRO', 'NOVEMBRO'];
                 });
                 
                 var [abaAtiva, setAbaAtiva] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_aba_v8');
+                    var saved = localStorage.getItem('faturas_ti_aba_v9');
                     return saved ? saved : 'OUTUBRO';
                 });
                 
                 var [faturas, setFaturas] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_faturas_v8');
+                    var saved = localStorage.getItem('faturas_ti_faturas_v9');
                     return saved ? JSON.parse(saved) : faturasIniciais;
                 });
 
@@ -3207,9 +3207,9 @@ var FaturasTIView = function() {
                 var [filtroFornecedor, setFiltroFornecedor] = useState('');
                 var [modoVisualizacao, setModoVisualizacao] = useState('tabela'); // 'tabela' ou 'foco'
 
-                useEffect(function() { localStorage.setItem('faturas_ti_meses_v8', JSON.stringify(meses)); }, [meses]);
-                useEffect(function() { localStorage.setItem('faturas_ti_aba_v8', abaAtiva); }, [abaAtiva]);
-                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v8', JSON.stringify(faturas)); }, [faturas]);
+                useEffect(function() { localStorage.setItem('faturas_ti_meses_v9', JSON.stringify(meses)); }, [meses]);
+                useEffect(function() { localStorage.setItem('faturas_ti_aba_v9', abaAtiva); }, [abaAtiva]);
+                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v9', JSON.stringify(faturas)); }, [faturas]);
 
                 var faturasDaAba = faturas.filter(function(f) {
                     if (f.mes !== abaAtiva) return false;
@@ -3219,7 +3219,14 @@ var FaturasTIView = function() {
                         var termoVenc = filtroVencimento.trim().toUpperCase();
                         var diaV = (f.diaVencimento || '').toUpperCase();
                         var dataV = (f.dataVencimento || '').toUpperCase();
-                        matchVenc = diaV.indexOf(termoVenc) !== -1 || dataV.indexOf(termoVenc) !== -1;
+                        
+                        // Busca exata ou parcial inteligente (ex: "10" casa com "10" ou "10/10/2026")
+                        if (/^\d+$/.test(termoVenc)) {
+                            var padDia = termoVenc.length === 1 ? '0' + termoVenc : termoVenc;
+                            matchVenc = (diaV === termoVenc || diaV === padDia || dataV.indexOf('/' + padDia + '/') === 0 || dataV.indexOf(padDia + '/') === 0);
+                        } else {
+                            matchVenc = diaV.indexOf(termoVenc) !== -1 || dataV.indexOf(termoVenc) !== -1;
+                        }
                     }
 
                     var matchForn = true;
@@ -3233,7 +3240,7 @@ var FaturasTIView = function() {
                 });
 
                 var colunas = [
-                    { key: 'diaVencimento', label: 'VENC.', width: 'w-16' },
+                    { key: 'diaVencimento', label: 'VENC.', width: 'w-14' },
                     { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-64' },
                     { key: 'codigoSv', label: 'CÓD. SV', width: 'w-24' },
                     { key: 'dataVencimento', label: 'DT. VENC.', width: 'w-24' },
@@ -3246,8 +3253,8 @@ var FaturasTIView = function() {
                     { key: 'dataEnvio', label: 'DT. ENVIO', width: 'w-24' },
                     { key: 'salvaPasta', label: 'PASTA', width: 'w-20' },
                     { key: 'tipoEmail', label: 'E-MAIL', width: 'w-20' },
-                    { key: 'repReceb', label: 'REP.', width: 'w-24' },
-                    { key: 'obsStatus', label: 'STATUS / OBS', width: 'w-48' }
+                    { key: 'repReceb', label: 'REP.', width: 'w-20' },
+                    { key: 'obsStatus', label: 'STATUS / OBS', width: 'w-36' }
                 ];
 
                 var statusOptions = [
@@ -3420,7 +3427,7 @@ var FaturasTIView = function() {
                             {/* Conteúdo: Tabela Otimizada ou Modo Foco em Cards (Ambos com filtro ativo) */}
                             {modoVisualizacao === 'tabela' ? (
                                 <div className="flex-1 overflow-auto bg-slate-900 rounded-xl shadow-lg border border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full">
-                                    <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '1850px' }}>
+                                    <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '1750px' }}>
                                         <thead className="sticky top-0 z-20">
                                             <tr>
                                                 <th colSpan={colunas.length + 1} className="bg-slate-900/95 backdrop-blur font-black text-sm md:text-base py-2.5 border-b border-slate-800 uppercase tracking-widest text-slate-100 shadow-sm">
