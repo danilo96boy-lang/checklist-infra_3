@@ -3189,25 +3189,49 @@ var FaturasTIView = function() {
                 });
 
                 var [meses, setMeses] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_meses_v3');
+                    var saved = localStorage.getItem('faturas_ti_meses_v4');
                     return saved ? JSON.parse(saved) : ['OUTUBRO', 'NOVEMBRO'];
                 });
                 
                 var [abaAtiva, setAbaAtiva] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_aba_v3');
+                    var saved = localStorage.getItem('faturas_ti_aba_v4');
                     return saved ? saved : 'OUTUBRO';
                 });
                 
                 var [faturas, setFaturas] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_faturas_v3');
+                    var saved = localStorage.getItem('faturas_ti_faturas_v4');
                     return saved ? JSON.parse(saved) : faturasIniciais;
                 });
 
-                useEffect(function() { localStorage.setItem('faturas_ti_meses_v3', JSON.stringify(meses)); }, [meses]);
-                useEffect(function() { localStorage.setItem('faturas_ti_aba_v3', abaAtiva); }, [abaAtiva]);
-                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v3', JSON.stringify(faturas)); }, [faturas]);
+                // Novos estados para os filtros de Vencimento e Fornecedor
+                var [filtroVencimento, setFiltroVencimento] = useState('');
+                var [filtroFornecedor, setFiltroFornecedor] = useState('');
 
-                var faturasDaAba = faturas.filter(function(f) { return f.mes === abaAtiva; });
+                useEffect(function() { localStorage.setItem('faturas_ti_meses_v4', JSON.stringify(meses)); }, [meses]);
+                useEffect(function() { localStorage.setItem('faturas_ti_aba_v4', abaAtiva); }, [abaAtiva]);
+                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v4', JSON.stringify(faturas)); }, [faturas]);
+
+                // Filtra as faturas da aba ativa e aplica os filtros de busca
+                var faturasDaAba = faturas.filter(function(f) {
+                    if (f.mes !== abaAtiva) return false;
+                    
+                    var matchVenc = true;
+                    if (filtroVencimento.trim() !== '') {
+                        var termoVenc = filtroVencimento.trim().toUpperCase();
+                        var diaV = (f.diaVencimento || '').toUpperCase();
+                        var dataV = (f.dataVencimento || '').toUpperCase();
+                        matchVenc = diaV.indexOf(termoVenc) !== -1 || dataV.indexOf(termoVenc) !== -1;
+                    }
+
+                    var matchForn = true;
+                    if (filtroFornecedor.trim() !== '') {
+                        var termoForn = filtroFornecedor.trim().toUpperCase();
+                        var forn = (f.fornecedor || '').toUpperCase();
+                        matchForn = forn.indexOf(termoForn) !== -1;
+                    }
+
+                    return matchVenc && matchForn;
+                });
 
                 var colunas = [
                     { key: 'diaVencimento', label: 'VENCIMENTO', width: 'w-24' },
@@ -3308,19 +3332,49 @@ var FaturasTIView = function() {
                 };
 
                 return (
-                    <div className="h-full w-full bg-slate-950 flex flex-col p-3 md:p-6 fade-in overflow-hidden min-w-0">
-                        <div className="flex flex-col h-full w-full space-y-4 min-w-0 min-h-0">
+                    <div className="h-full w-full bg-slate-950 flex flex-col p-2 md:p-5 fade-in overflow-hidden min-w-0">
+                        <div className="flex flex-col h-full w-full space-y-3 min-w-0 min-h-0">
                             
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0 px-1">
+                            {/* Cabeçalho e Botão */}
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 shrink-0 px-1">
                                 <div>
                                     <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2 uppercase tracking-wide">
                                         {Icons.File} Gestão de Faturas T.I
                                     </h2>
-                                    <p className="text-slate-400 text-xs md:text-sm">Controle de faturas, contratos, NFs e status operacionais.</p>
+                                    <p className="text-slate-400 text-xs md:text-sm">Controle financeiro de contratos, faturas e NFs.</p>
                                 </div>
                                 <Button onClick={handleAddLinha} variant="success" className="text-xs px-4 py-2 shadow-sm whitespace-nowrap">
                                     {Icons.Plus} Adicionar Linha Avulsa
                                 </Button>
+                            </div>
+
+                            {/* Barra de Filtros Rápidos */}
+                            <div className="flex flex-wrap items-center gap-3 bg-slate-900/90 p-3 rounded-xl border border-slate-800 shrink-0 mx-1">
+                                <span className="text-xs font-extrabold uppercase text-slate-400 flex items-center gap-1">
+                                    {Icons.Search} Filtrar:
+                                </span>
+                                <input 
+                                    type="text" 
+                                    value={filtroVencimento} 
+                                    onChange={function(e) { setFiltroVencimento(e.target.value); }}
+                                    placeholder="Por Vencimento (ex: Dia 10)..." 
+                                    className="h-8 px-3 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 outline-none uppercase w-48 focus:border-brand-500 transition-colors"
+                                />
+                                <input 
+                                    type="text" 
+                                    value={filtroFornecedor} 
+                                    onChange={function(e) { setFiltroFornecedor(e.target.value); }}
+                                    placeholder="Por Fornecedor (ex: CLARO)..." 
+                                    className="h-8 px-3 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 outline-none uppercase w-48 focus:border-brand-500 transition-colors"
+                                />
+                                {(filtroVencimento || filtroFornecedor) && (
+                                    <button 
+                                        onClick={function() { setFiltroVencimento(''); setFiltroFornecedor(''); }}
+                                        className="text-xs text-brand-400 hover:text-brand-300 font-bold underline ml-2"
+                                    >
+                                        Limpar Filtros
+                                    </button>
+                                )}
                             </div>
                             
                             {/* Abas Superiores */}
@@ -3339,8 +3393,8 @@ var FaturasTIView = function() {
                                 </button>
                             </div>
 
-                            {/* Tabela com Layout Limpo e Moderno */}
-                            <div className="flex-1 overflow-auto bg-slate-900 rounded-xl shadow-md border border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full">
+                            {/* Tabela Alinhada à Direita e com Scroll Otimizado */}
+                            <div className="flex-1 overflow-auto bg-slate-900 rounded-xl shadow-lg border border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full mx-0">
                                 <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '2200px' }}>
                                     <thead className="sticky top-0 z-20">
                                         <tr>
@@ -3365,7 +3419,7 @@ var FaturasTIView = function() {
                                         {faturasDaAba.length === 0 && (
                                             <tr>
                                                 <td colSpan={colunas.length + 1} className="text-center py-12 text-slate-500 text-sm font-medium">
-                                                    Planilha vazia. Clique em "Adicionar Linha Avulsa" ou crie um novo mês.
+                                                    Nenhuma fatura encontrada com os filtros atuais.
                                                 </td>
                                             </tr>
                                         )}
@@ -3374,7 +3428,6 @@ var FaturasTIView = function() {
                                             var isFinalizado = obs.indexOf('FINALIZADO') !== -1;
                                             var isAguardando = obs.indexOf('AG.') !== -1;
 
-                                            // Cor de badge moderna para o Status
                                             var badgeClass = 'bg-slate-800 text-slate-300 border-slate-700';
                                             if (isFinalizado) badgeClass = 'bg-emerald-950 text-emerald-400 border-emerald-800/60';
                                             if (isAguardando) badgeClass = 'bg-red-950 text-red-400 border-red-800/60';
