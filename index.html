@@ -3173,7 +3173,6 @@ var FaturasTIView = function() {
                 };
 
                 var faturasIniciais = [];
-                // 1. Gera os dados de OUTUBRO completos
                 templateBase.forEach(function(tb, i) {
                     var out = overridesOutubro[tb.descricaoConta] || {};
                     faturasIniciais.push({
@@ -3182,7 +3181,6 @@ var FaturasTIView = function() {
                         lancada: out.lancada || '', dataEnvio: out.dataEnvio || '', salvaPasta: out.salvaPasta || '', tipoEmail: out.tipoEmail || '', repReceb: out.repReceb || '', obsStatus: out.obsStatus || ''
                     });
                 });
-                // 2. Gera os dados de NOVEMBRO (Somente máscara)
                 templateBase.forEach(function(tb, i) {
                     faturasIniciais.push({
                         id: 'nov_' + i, mes: 'NOVEMBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
@@ -3190,9 +3188,28 @@ var FaturasTIView = function() {
                     });
                 });
 
-                var [meses, setMeses] = useState(['OUTUBRO', 'NOVEMBRO']);
-                var [abaAtiva, setAbaAtiva] = useState('OUTUBRO');
-                var [faturas, setFaturas] = useState(faturasIniciais);
+                // ==========================================
+                // LÓGICA DE SALVAMENTO AUTOMÁTICO (LocalStorage)
+                // ==========================================
+                var [meses, setMeses] = useState(function() {
+                    var saved = localStorage.getItem('faturas_ti_meses_v2');
+                    return saved ? JSON.parse(saved) : ['OUTUBRO', 'NOVEMBRO'];
+                });
+                
+                var [abaAtiva, setAbaAtiva] = useState(function() {
+                    var saved = localStorage.getItem('faturas_ti_aba_v2');
+                    return saved ? saved : 'OUTUBRO';
+                });
+                
+                var [faturas, setFaturas] = useState(function() {
+                    var saved = localStorage.getItem('faturas_ti_faturas_v2');
+                    return saved ? JSON.parse(saved) : faturasIniciais;
+                });
+
+                useEffect(function() { localStorage.setItem('faturas_ti_meses_v2', JSON.stringify(meses)); }, [meses]);
+                useEffect(function() { localStorage.setItem('faturas_ti_aba_v2', abaAtiva); }, [abaAtiva]);
+                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v2', JSON.stringify(faturas)); }, [faturas]);
+                // ==========================================
 
                 var faturasDaAba = faturas.filter(function(f) { return f.mes === abaAtiva; });
 
@@ -3273,7 +3290,7 @@ var FaturasTIView = function() {
                                 salvaPasta: '',
                                 tipoEmail: '',
                                 repReceb: '',
-                                obsStatus: '' // Limpa o status para o novo mês
+                                obsStatus: ''
                             };
                         });
                     }
@@ -3297,8 +3314,9 @@ var FaturasTIView = function() {
                 };
 
                 return (
-                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-6 fade-in overflow-hidden">
-                        <div className="flex flex-col h-full w-full space-y-4">
+                    // Alterado flex, w-full e inserido min-w-0 para proteger a responsividade da barra lateral
+                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-6 fade-in overflow-hidden min-w-0">
+                        <div className="flex flex-col h-full w-full space-y-4 min-w-0 min-h-0">
                             
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
                                 <div>
@@ -3313,7 +3331,7 @@ var FaturasTIView = function() {
                             </div>
                             
                             {/* Abas Superiores */}
-                            <div className="flex items-center gap-2 border-b border-slate-300 dark:border-slate-800 overflow-x-auto pb-px custom-scrollbar shrink-0">
+                            <div className="flex items-center gap-2 border-b border-slate-300 dark:border-slate-800 overflow-x-auto pb-px custom-scrollbar shrink-0 w-full">
                                 {meses.map(function(m) {
                                     var isActive = abaAtiva === m;
                                     return (
@@ -3328,8 +3346,8 @@ var FaturasTIView = function() {
                                 </button>
                             </div>
 
-                            {/* Planilha */}
-                            <div className="flex-1 overflow-auto bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 relative custom-scrollbar">
+                            {/* Planilha com min-w-0 e min-h-0 resolvendo o erro de invadir o menu */}
+                            <div className="flex-1 overflow-auto bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full">
                                 <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '2400px' }}>
                                     <thead className="sticky top-0 z-10">
                                         <tr>
@@ -3359,7 +3377,6 @@ var FaturasTIView = function() {
                                             </tr>
                                         )}
                                         {faturasDaAba.map(function(fat) {
-                                            // Lógica de Cores da Planilha Original
                                             var obs = (fat.obsStatus || '').toUpperCase();
                                             var isGreen = obs.indexOf('FINALIZADO') !== -1;
                                             var isRed = obs.indexOf('AG.') !== -1;
