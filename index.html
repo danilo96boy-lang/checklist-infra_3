@@ -3098,34 +3098,45 @@ var AnalyticsView = function(props) {
             };
 
 var FaturasTIView = function() {
-                var [meses, setMeses] = useState(['OUTUBRO', 'NOVEMBRO']);
-                var [abaAtiva, setAbaAtiva] = useState('OUTUBRO');
+                var [meses, setMeses] = useState(['FEVEREIRO', 'MARÇO']);
+                var [abaAtiva, setAbaAtiva] = useState('FEVEREIRO');
                 var [faturas, setFaturas] = useState([
-                    { id: 'f1', mes: 'OUTUBRO', fornecedor: 'VIVO', servico: 'LINK DEDICADO FIBRA', vencimento: '10/10/2026', valor: 'R$ 1.450,00', status: 'PAGO' },
-                    { id: 'f2', mes: 'OUTUBRO', fornecedor: 'MICROSOFT', servico: 'OFFICE 365 CORPORATIVO', vencimento: '15/10/2026', valor: 'R$ 3.200,00', status: 'PAGO' },
-                    { id: 'f3', mes: 'OUTUBRO', fornecedor: 'SKYMAIL', servico: 'HOSPEDAGEM E-MAILS', vencimento: '20/10/2026', valor: 'R$ 850,00', status: 'PAGO' },
-                    { id: 'f4', mes: 'NOVEMBRO', fornecedor: 'VIVO', servico: 'LINK DEDICADO FIBRA', vencimento: '10/11/2026', valor: 'R$ 1.450,00', status: 'PENDENTE' },
-                    { id: 'f5', mes: 'NOVEMBRO', fornecedor: 'MICROSOFT', servico: 'OFFICE 365 CORPORATIVO', vencimento: '15/11/2026', valor: 'R$ 3.200,00', status: 'PENDENTE' },
-                    { id: 'f6', mes: 'NOVEMBRO', fornecedor: 'SKYMAIL', servico: 'HOSPEDAGEM E-MAILS', vencimento: '20/11/2026', valor: 'R$ 850,00', status: 'PENDENTE' }
+                    { id: 'f1', mes: 'FEVEREIRO', diaVencimento: 'Dia 03', descricaoConta: 'PLANOS E REPAROS DE APARELHOS', codigoSv: 'SV05000309', dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', fornecedor: 'CLARO', codForn: 'V0080J', lancada: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: 'DANILO', obsStatus: 'FINALIZADO' },
+                    { id: 'f2', mes: 'FEVEREIRO', diaVencimento: 'Dia 05', descricaoConta: 'GBS ASSESSORIA E SERVICOS', codigoSv: 'SV05000312', dataVencimento: '05/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052675', nf: '2', fornecedor: 'GBS', codForn: '', lancada: '', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+                    { id: 'f3', mes: 'FEVEREIRO', diaVencimento: 'Dia 22', descricaoConta: 'CHIPS E MODEMS 4G ITU', codigoSv: 'SV04007469', dataVencimento: '22/10/2026', scPagfor: 'SC-2026-6221', scTotvs: '173085', pedido: '', nf: '38875678', fornecedor: 'CLARO', codForn: '', lancada: '', dataEnvio: '', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: '', obsStatus: 'AG. REGULARIZAÇÃO' },
+                    { id: 'f4', mes: 'FEVEREIRO', diaVencimento: 'Dia 25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF ITU', codigoSv: '', dataVencimento: '25/10/2026', scPagfor: 'SC-2026-6399', scTotvs: '', pedido: '', nf: '017413865', fornecedor: 'EMBRATEL', codForn: '', lancada: '', dataEnvio: '', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: '', obsStatus: 'AG. AP. SC' }
                 ]);
 
                 var faturasDaAba = faturas.filter(function(f) { return f.mes === abaAtiva; });
 
+                var colunas = [
+                    { key: 'diaVencimento', label: 'VENCIMENTO', width: 'w-24' },
+                    { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-72' },
+                    { key: 'codigoSv', label: 'CÓDIGO SV', width: 'w-32' },
+                    { key: 'dataVencimento', label: 'VENCIMENTO', width: 'w-28' },
+                    { key: 'scPagfor', label: 'SC PAGFOR', width: 'w-32' },
+                    { key: 'scTotvs', label: 'SC TOTVS', width: 'w-28' },
+                    { key: 'pedido', label: 'PEDIDO', width: 'w-28' },
+                    { key: 'nf', label: 'NF', width: 'w-32' },
+                    { key: 'fornecedor', label: 'FORNECEDOR', width: 'w-48' },
+                    { key: 'codForn', label: 'CÓD FORN', width: 'w-28' },
+                    { key: 'lancada', label: 'LANÇADA', width: 'w-24' },
+                    { key: 'dataEnvio', label: 'DATA DE ENVIO', width: 'w-32' },
+                    { key: 'salvaPasta', label: 'SALVA NA PASTA', width: 'w-32' },
+                    { key: 'tipoEmail', label: 'E-MAIL', width: 'w-24' },
+                    { key: 'repReceb', label: 'REP. RECEB:', width: 'w-32' },
+                    { key: 'obsStatus', label: 'OBS', width: 'w-48' }
+                ];
+
                 var handleAddLinha = function() {
                     var novaLinha = {
-                        id: 'fat_' + Date.now(),
-                        mes: abaAtiva,
-                        fornecedor: '',
-                        servico: '',
-                        vencimento: '',
-                        valor: '',
-                        status: 'PENDENTE'
+                        id: 'fat_' + Date.now(), mes: abaAtiva, diaVencimento: '', descricaoConta: '', codigoSv: '', dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', fornecedor: '', codForn: '', lancada: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
                     };
                     setFaturas(faturas.concat([novaLinha]));
                 };
 
                 var handleRemoverLinha = function(id) {
-                    if(confirm("Remover esta linha de fatura?")) {
+                    if(confirm("Remover esta linha?")) {
                         setFaturas(faturas.filter(function(f) { return f.id !== id; }));
                     }
                 };
@@ -3142,7 +3153,7 @@ var FaturasTIView = function() {
                 };
 
                 var handleAddMes = function() {
-                    var novoMes = prompt("Digite o nome do novo mês (ex: DEZEMBRO):");
+                    var novoMes = prompt("Digite o nome do novo mês (ex: ABRIL):");
                     if (!novoMes || !novoMes.trim()) return;
                     novoMes = novoMes.trim().toUpperCase();
 
@@ -3152,7 +3163,7 @@ var FaturasTIView = function() {
                         return;
                     }
 
-                    var copiar = confirm("Deseja importar automaticamente as faturas recorrentes de " + abaAtiva + " para " + novoMes + "?");
+                    var copiar = confirm("Deseja importar automaticamente todas as contas de " + abaAtiva + " para " + novoMes + "?");
                     var novasLinhas = [];
 
                     if (copiar) {
@@ -3161,8 +3172,10 @@ var FaturasTIView = function() {
                             return Object.assign({}, f, {
                                 id: 'fat_' + Date.now() + '_' + index,
                                 mes: novoMes,
-                                status: 'PENDENTE',
-                                vencimento: '' 
+                                nf: '',
+                                dataEnvio: '',
+                                salvaPasta: '',
+                                obsStatus: '' // Limpa o status para o novo mês
                             });
                         });
                     }
@@ -3185,30 +3198,24 @@ var FaturasTIView = function() {
                     }
                 };
 
-                // Cálculo de totais
-                var totalPendente = 0;
-                var totalPago = 0;
-                faturasDaAba.forEach(function(f) {
-                    var num = parseFloat((f.valor || '').replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
-                    if (f.status === 'PAGO') totalPago += num;
-                    else totalPendente += num;
-                });
-                var formatMoeda = function(val) { return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); };
-
                 return (
-                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-10 fade-in overflow-auto">
-                        <div className="max-w-6xl mx-auto w-full space-y-4 pb-12">
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div className="h-full w-full bg-slate-100 dark:bg-slate-950 flex flex-col p-4 md:p-6 fade-in overflow-hidden">
+                        <div className="flex flex-col h-full w-full space-y-4">
+                            
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
                                 <div>
                                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 uppercase">
-                                        {Icons.File} Gestão de Faturas T.I
+                                        {Icons.File} Gestão de Contas T.I
                                     </h2>
-                                    <p className="text-slate-500 text-sm">Controle financeiro e estrutural de licenças e infraestrutura.</p>
+                                    <p className="text-slate-500 text-sm">Controle de pagamentos, licenças e infraestrutura.</p>
                                 </div>
+                                <Button onClick={handleAddLinha} variant="success" className="text-xs px-4 py-2 shadow-none whitespace-nowrap">
+                                    {Icons.Plus} Adicionar Linha
+                                </Button>
                             </div>
                             
-                            {/* Abas Superiores (Tabs) */}
-                            <div className="flex items-center gap-2 border-b border-slate-300 dark:border-slate-800 overflow-x-auto pb-px custom-scrollbar">
+                            {/* Abas Superiores */}
+                            <div className="flex items-center gap-2 border-b border-slate-300 dark:border-slate-800 overflow-x-auto pb-px custom-scrollbar shrink-0">
                                 {meses.map(function(m) {
                                     var isActive = abaAtiva === m;
                                     return (
@@ -3223,100 +3230,71 @@ var FaturasTIView = function() {
                                 </button>
                             </div>
 
-                            <Card noPadding className="overflow-hidden shadow-sm">
-                                <div className="p-4 md:px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center">
-                                    <div className="flex items-center gap-4">
-                                        <div className="text-xs font-bold text-slate-500 uppercase">
-                                            Total Pago: <span className="text-emerald-600 dark:text-emerald-400 text-sm ml-1">{formatMoeda(totalPago)}</span>
-                                        </div>
-                                        <div className="text-xs font-bold text-slate-500 uppercase border-l border-slate-300 dark:border-slate-700 pl-4">
-                                            A Pagar: <span className="text-amber-600 dark:text-amber-500 text-sm ml-1">{formatMoeda(totalPendente)}</span>
-                                        </div>
-                                    </div>
-                                    <Button onClick={handleAddLinha} variant="success" className="text-xs px-3 py-1.5 shadow-none">
-                                        {Icons.Plus} Adicionar Fatura
-                                    </Button>
-                                </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm text-left min-w-[800px]">
-                                        <thead className="bg-slate-50 dark:bg-slate-800/70 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-200 dark:border-slate-800">
-                                            <tr>
-                                                <th className="px-4 py-3 w-64">Fornecedor</th>
-                                                <th className="px-4 py-3 w-64">Serviço / Produto</th>
-                                                <th className="px-4 py-3 w-32">Vencimento</th>
-                                                <th className="px-4 py-3 w-40">Valor R$</th>
-                                                <th className="px-4 py-3 w-36 text-center">Status</th>
-                                                <th className="px-4 py-3 w-12 text-center"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                            {faturasDaAba.length === 0 && (
-                                                <tr>
-                                                    <td colSpan="6" className="text-center py-10 text-slate-400 text-xs font-semibold">Nenhuma fatura lançada em {abaAtiva}.</td>
-                                                </tr>
-                                            )}
-                                            {faturasDaAba.map(function(fat) {
+                            {/* Planilha */}
+                            <div className="flex-1 overflow-auto bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 relative custom-scrollbar">
+                                <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '2200px' }}>
+                                    <thead className="sticky top-0 z-10">
+                                        <tr>
+                                            <th colSpan={colunas.length + 1} className="bg-white dark:bg-slate-900 font-bold text-lg py-2 border-b-2 border-slate-300 dark:border-slate-700">
+                                                CONTAS DE {abaAtiva}
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            {colunas.map(function(col) {
                                                 return (
-                                                    <tr key={fat.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
-                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50">
-                                                            <input 
-                                                                type="text" 
-                                                                value={fat.fornecedor} 
-                                                                onChange={function(e){ handleChange(fat.id, 'fornecedor', e.target.value); }} 
-                                                                placeholder="Ex: MICROSOFT"
-                                                                className="w-full bg-transparent outline-none font-bold text-slate-800 dark:text-slate-200 uppercase placeholder-slate-300 dark:placeholder-slate-700" 
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50">
-                                                            <input 
-                                                                type="text" 
-                                                                value={fat.servico} 
-                                                                onChange={function(e){ handleChange(fat.id, 'servico', e.target.value); }} 
-                                                                placeholder="Descrição do serviço"
-                                                                className="w-full bg-transparent outline-none text-slate-600 dark:text-slate-400 uppercase placeholder-slate-300 dark:placeholder-slate-700" 
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50">
-                                                            <input 
-                                                                type="text" 
-                                                                value={fat.vencimento} 
-                                                                onChange={function(e){ handleChange(fat.id, 'vencimento', e.target.value); }} 
-                                                                placeholder="DD/MM/AAAA"
-                                                                className="w-full bg-transparent outline-none font-mono text-xs text-slate-600 dark:text-slate-400 placeholder-slate-300 dark:placeholder-slate-700" 
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50">
-                                                            <input 
-                                                                type="text" 
-                                                                value={fat.valor} 
-                                                                onChange={function(e){ handleChange(fat.id, 'valor', e.target.value); }} 
-                                                                placeholder="R$ 0,00"
-                                                                className="w-full bg-transparent outline-none font-mono font-bold text-brand-600 dark:text-brand-400 placeholder-slate-300 dark:placeholder-slate-700" 
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-2 border-r border-slate-100 dark:border-slate-800/50 text-center">
-                                                            <select 
-                                                                value={fat.status} 
-                                                                onChange={function(e){ handleChange(fat.id, 'status', e.target.value); }}
-                                                                className={"text-xs font-bold px-2 py-1 rounded outline-none cursor-pointer border border-transparent hover:border-slate-300 dark:hover:border-slate-600 " + (fat.status === 'PAGO' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400')}
-                                                            >
-                                                                <option value="PENDENTE">PENDENTE</option>
-                                                                <option value="PAGO">PAGO</option>
-                                                                <option value="CANCELADO">CANCELADO</option>
-                                                            </select>
-                                                        </td>
-                                                        <td className="px-4 py-2 text-center">
-                                                            <button onClick={function(){ handleRemoverLinha(fat.id); }} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1">
-                                                                {Icons.Trash}
-                                                            </button>
-                                                        </td>
-                                                    </tr>
+                                                    <th key={col.key} className={"bg-blue-600 text-white text-[11px] font-bold uppercase py-2 px-2 border border-blue-700 " + col.width}>
+                                                        {col.label}
+                                                    </th>
                                                 );
                                             })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </Card>
+                                            <th className="bg-blue-600 text-white text-[11px] font-bold uppercase py-2 px-2 border border-blue-700 w-12">
+                                                AÇÃO
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {faturasDaAba.length === 0 && (
+                                            <tr>
+                                                <td colSpan={colunas.length + 1} className="text-center py-10 text-slate-400 text-sm font-semibold border-b border-slate-200">
+                                                    Planilha vazia. Adicione uma nova linha.
+                                                </td>
+                                            </tr>
+                                        )}
+                                        {faturasDaAba.map(function(fat) {
+                                            // Lógica de Cores da Planilha Original
+                                            var obs = (fat.obsStatus || '').toUpperCase();
+                                            var isGreen = obs.indexOf('FINALIZADO') !== -1;
+                                            var isRed = obs.indexOf('AG.') !== -1;
+                                            
+                                            var rowBgClass = isGreen ? 'bg-emerald-500 border-emerald-600' : isRed ? 'bg-red-500 border-red-600' : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50';
+                                            var textClass = (isGreen || isRed) ? 'text-black placeholder-black/50 font-semibold' : 'text-slate-700 dark:text-slate-300 placeholder-slate-400 font-medium';
+                                            var cellBorderClass = (isGreen || isRed) ? 'border-black/20' : 'border-slate-200 dark:border-slate-700';
+
+                                            return (
+                                                <tr key={fat.id} className={"transition-colors " + rowBgClass}>
+                                                    {colunas.map(function(col) {
+                                                        return (
+                                                            <td key={col.key} className={"p-0 border " + cellBorderClass}>
+                                                                <input 
+                                                                    type="text" 
+                                                                    value={fat[col.key] || ''} 
+                                                                    onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
+                                                                    className={"w-full h-8 px-2 bg-transparent outline-none uppercase text-center " + textClass} 
+                                                                />
+                                                            </td>
+                                                        );
+                                                    })}
+                                                    <td className={"p-0 border text-center " + cellBorderClass}>
+                                                        <button onClick={function(){ handleRemoverLinha(fat.id); }} className={"p-1.5 rounded transition-colors " + ((isGreen || isRed) ? "text-black/50 hover:text-black hover:bg-black/10" : "text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30")} title="Remover Linha">
+                                                            {Icons.Trash}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 );
