@@ -3098,27 +3098,114 @@ var AnalyticsView = function(props) {
             };
 
 var FaturasTIView = function() {
-                var [meses, setMeses] = useState(['FEVEREIRO', 'MARÇO']);
-                var [abaAtiva, setAbaAtiva] = useState('FEVEREIRO');
-                var [faturas, setFaturas] = useState([
-                    { id: 'f1', mes: 'FEVEREIRO', diaVencimento: 'Dia 03', descricaoConta: 'PLANOS E REPAROS DE APARELHOS', codigoSv: 'SV05000309', dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', fornecedor: 'CLARO', codForn: 'V0080J', lancada: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: 'DANILO', obsStatus: 'FINALIZADO' },
-                    { id: 'f2', mes: 'FEVEREIRO', diaVencimento: 'Dia 05', descricaoConta: 'GBS ASSESSORIA E SERVICOS', codigoSv: 'SV05000312', dataVencimento: '05/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052675', nf: '2', fornecedor: 'GBS', codForn: '', lancada: '', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
-                    { id: 'f3', mes: 'FEVEREIRO', diaVencimento: 'Dia 22', descricaoConta: 'CHIPS E MODEMS 4G ITU', codigoSv: 'SV04007469', dataVencimento: '22/10/2026', scPagfor: 'SC-2026-6221', scTotvs: '173085', pedido: '', nf: '38875678', fornecedor: 'CLARO', codForn: '', lancada: '', dataEnvio: '', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: '', obsStatus: 'AG. REGULARIZAÇÃO' },
-                    { id: 'f4', mes: 'FEVEREIRO', diaVencimento: 'Dia 25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF ITU', codigoSv: '', dataVencimento: '25/10/2026', scPagfor: 'SC-2026-6399', scTotvs: '', pedido: '', nf: '017413865', fornecedor: 'EMBRATEL', codForn: '', lancada: '', dataEnvio: '', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: '', obsStatus: 'AG. AP. SC' }
-                ]);
+                var templateBase = [
+                    { diaVencimento: 'Dia 03', descricaoConta: 'PLANOS E REPAROS DE APARELHOS', codigoSv: 'SV05000309', fornecedor: 'CLARO', codForn: 'V0080J' },
+                    { diaVencimento: 'Dia 05', descricaoConta: 'GBS ASSESSORIA E SERVICOS', codigoSv: 'SV05000312', fornecedor: 'GBS', codForn: '' },
+                    { diaVencimento: 'Dia 06', descricaoConta: 'POWER BI', codigoSv: 'SV05000311', fornecedor: 'SND', codForn: 'VOOYCP' },
+                    { diaVencimento: 'Dia 10', descricaoConta: 'INTERNET 100 MB ITU', codigoSv: 'SV05000033', fornecedor: 'SW TELECOM', codForn: 'V00ALH' },
+                    { diaVencimento: 'Dia 10', descricaoConta: 'INTERNET EXTREMA MG', codigoSv: 'SV05000033', fornecedor: 'ZAAZ', codForn: '' },
+                    { diaVencimento: 'Dia 10', descricaoConta: 'LOCAÇÃO DE EQUIPAMENTOS DE IMPRESSÃO/CÓPIA', codigoSv: 'SV01000003', fornecedor: 'DELTA TONERS', codForn: '' },
+                    { diaVencimento: 'Dia 10', descricaoConta: 'OPTI SOLUCOES EM IMPRESSAO EXTREMA', codigoSv: 'SV01000003', fornecedor: 'OPTI', codForn: '' },
+                    { diaVencimento: 'Dia 10', descricaoConta: 'STYLUS', codigoSv: 'SV01000003', fornecedor: 'STYLUS', codForn: '' },
+                    { diaVencimento: 'Dia 10', descricaoConta: 'INTERNET 3 LAGOAS 100MBPS', codigoSv: 'SV05000033', fornecedor: 'EMBRATEL', codForn: 'V0080J' },
+                    { diaVencimento: 'Dia 12', descricaoConta: 'DIALOG', codigoSv: '', fornecedor: 'DIALOG', codForn: '' },
+                    { diaVencimento: 'Dia 13', descricaoConta: 'QIVE 13', codigoSv: '', fornecedor: 'ARQUIVEI', codForn: '' },
+                    { diaVencimento: 'Dia 14', descricaoConta: 'CONTRATO DE MANUTENCAO TOTVS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+                    { diaVencimento: 'Dia 15', descricaoConta: 'TELEFONIA (0800)', codigoSv: 'SV04007469', fornecedor: 'EMBRATEL', codForn: '' },
+                    { diaVencimento: 'Dia 15', descricaoConta: 'INTERNET 20MBPS + TELEFONIA ITU', codigoSv: 'SV05000033', fornecedor: 'EMBRATEL', codForn: '' },
+                    { diaVencimento: 'Dia 15', descricaoConta: 'PLANOS E REPAROS DE APARELHOS 1 ITU', codigoSv: 'SV04007469', fornecedor: 'CLARO', codForn: '' },
+                    { diaVencimento: 'Dia 15', descricaoConta: 'PLANOS E REPAROS DE APARELHOS 2 ITU', codigoSv: 'SV04007469', fornecedor: 'CLARO', codForn: '' },
+                    { diaVencimento: 'Dia 17', descricaoConta: 'VIVO MOVEL (CHIPS NOVOS)', codigoSv: 'SV04007469', fornecedor: 'VIVO', codForn: '' },
+                    { diaVencimento: 'Dia 17', descricaoConta: 'VIVO TL', codigoSv: 'SV04007469', fornecedor: 'VIVO', codForn: '' },
+                    { diaVencimento: 'Dia 20', descricaoConta: 'JOY INTERNET FIBRA 500MBPS', codigoSv: 'SV05000033', fornecedor: 'JOY INTERNET', codForn: '' },
+                    { diaVencimento: 'Dia 20', descricaoConta: 'INTERNET 3 LAGOAS 200MBPS', codigoSv: 'SV05000033', fornecedor: 'TELLIUS', codForn: '' },
+                    { diaVencimento: 'Dia 20', descricaoConta: 'HOSPEDAGEM DE E-MAILS', codigoSv: '', fornecedor: 'SKYMAIL', codForn: 'VOOFK5' },
+                    { diaVencimento: 'Dia 20', descricaoConta: 'PABX ITU, TL', codigoSv: 'SV05000313', fornecedor: 'TALKON', codForn: 'V00A0X' },
+                    { diaVencimento: 'Dia 20', descricaoConta: 'CERTIFICADO DIGITAL TOTVS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+                    { diaVencimento: 'Dia 20', descricaoConta: 'INTERNET DTC TELECOM EXTREMA', codigoSv: 'SV05000033', fornecedor: 'DTC TELECOM', codForn: '' },
+                    { diaVencimento: 'Dia 22', descricaoConta: 'CHIPS E MODEMS 4G ITU', codigoSv: 'SV04007469', fornecedor: 'CLARO', codForn: '' },
+                    { diaVencimento: 'DIA 24', descricaoConta: 'TELEFONIA FIXA TRES LAGOAS', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+                    { diaVencimento: 'DIA 25', descricaoConta: 'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS "I"', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+                    { diaVencimento: 'DIA 25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF ITU', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+                    { diaVencimento: 'DIA 25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF GERENCIA REDE ITU', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+                    { diaVencimento: 'DIA 25', descricaoConta: 'MPLS ITU+TRÊS LAGOAS NF TRES LAGOAS', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+                    { diaVencimento: 'DIA 25', descricaoConta: 'EMBRATEL REDE TL 25', codigoSv: '', fornecedor: 'EMBRATEL', codForn: '' },
+                    { diaVencimento: 'Dia 30', descricaoConta: 'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+                    { diaVencimento: 'Dia 30', descricaoConta: 'CONTRATO INTELIGENCIA TRIBUTARIA TOTVS', codigoSv: '', fornecedor: 'TOTVS', codForn: 'V00247' },
+                    { diaVencimento: 'Dia 30', descricaoConta: 'HORAS EXTRAS GBS ASSESSORIA E SERVICOS', codigoSv: 'SV05000312', fornecedor: 'GBS', codForn: '' }
+                ];
+
+                var overridesOutubro = {
+                    'PLANOS E REPAROS DE APARELHOS': { repReceb: 'DANILO', obsStatus: 'FINALIZADO' },
+                    'GBS ASSESSORIA E SERVICOS': { dataVencimento: '05/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052675', nf: '2', lancada: '', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+                    'POWER BI': { dataVencimento: '06/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051732', nf: '04177646', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
+                    'INTERNET 100 MB ITU': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052673', nf: '7148', dataEnvio: '08/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
+                    'INTERNET EXTREMA MG': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044855', nf: '500974', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
+                    'LOCAÇÃO DE EQUIPAMENTOS DE IMPRESSÃO/CÓPIA': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+                    'OPTI SOLUCOES EM IMPRESSAO EXTREMA': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046607', nf: '119', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
+                    'STYLUS': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052655', nf: '61', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+                    'INTERNET 3 LAGOAS 100MBPS': { dataVencimento: '10/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052674', nf: '000555642', dataEnvio: '07/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
+                    'DIALOG': { dataVencimento: '19/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044926', nf: '00010609', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+                    'QIVE 13': { dataVencimento: '13/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052730', nf: '112741', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+                    'CONTRATO DE MANUTENCAO TOTVS': { dataVencimento: '14/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051773', nf: '04593732', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
+                    'TELEFONIA (0800)': { dataVencimento: '15/10/2026', scPagfor: 'SC-2026-6215', scTotvs: '173086', pedido: '53236', nf: '017404097', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+                    'INTERNET 20MBPS + TELEFONIA ITU': { dataVencimento: '15/10/2026', scPagfor: 'SC-2026-6222', scTotvs: '173084', nf: '017388515', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+                    'PLANOS E REPAROS DE APARELHOS 1 ITU': { dataVencimento: '15/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', nf: '44671628', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+                    'PLANOS E REPAROS DE APARELHOS 2 ITU': { dataVencimento: '15/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', nf: '37140474', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+                    'VIVO MOVEL (CHIPS NOVOS)': { dataVencimento: '17/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '052676', nf: '5231211', dataEnvio: '08/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
+                    'VIVO TL': { dataVencimento: '17/10/2026', scPagfor: 'SC-2026-6318', scTotvs: 'CONTRATO', pedido: '053218', nf: '204457', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+                    'JOY INTERNET FIBRA 500MBPS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '044548', nf: '233', dataEnvio: '15/10/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+                    'INTERNET 3 LAGOAS 200MBPS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046607', nf: '12129', dataEnvio: '14/10/26', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+                    'HOSPEDAGEM DE E-MAILS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', nf: '00488301', dataEnvio: '23/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: '-', obsStatus: 'FINALIZADO' },
+                    'PABX ITU, TL': { dataVencimento: '20/10/2026', scPagfor: 'SC-2026-4675', scTotvs: '172140', pedido: '051876', nf: '6096', dataEnvio: '18/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'FINALIZADO' },
+                    'CERTIFICADO DIGITAL TOTVS': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046634', nf: '04597593', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'ANGELO', obsStatus: 'FINALIZADO' },
+                    'INTERNET DTC TELECOM EXTREMA': { dataVencimento: '20/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '046620', nf: '16404', dataEnvio: '06/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', repReceb: '-', obsStatus: 'FINALIZADO' },
+                    'CHIPS E MODEMS 4G ITU': { dataVencimento: '22/10/2026', scPagfor: 'SC-2026-6221', scTotvs: '173085', nf: '38675678', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'AG. REGULARIZAÇÃO' },
+                    'TELEFONIA FIXA TRES LAGOAS': { dataVencimento: '24/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '053190', nf: '000557939', dataEnvio: '19/10/2026', salvaPasta: 'OK', tipoEmail: 'E-MAIL', obsStatus: 'FINALIZADO' },
+                    'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS "I"': { dataVencimento: '26/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051776', nf: '04582139', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
+                    'MPLS ITU+TRÊS LAGOAS NF ITU': { dataVencimento: '25/10/2026', scPagfor: 'SC-2026-6399', nf: '017413865', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'AG. AP. SC' },
+                    'MPLS ITU+TRÊS LAGOAS NF GERENCIA REDE ITU': {},
+                    'MPLS ITU+TRÊS LAGOAS NF TRES LAGOAS': { dataVencimento: '25/10/2026', scPagfor: 'SC-2026-6401', nf: '000556619', salvaPasta: 'OK', tipoEmail: 'FISICO', obsStatus: 'AG. AP. SC' },
+                    'EMBRATEL REDE TL 25': {},
+                    'CONTRATO MANUTENÇÃO LICENÇAS PROTHEUS': { dataVencimento: '30/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051233', nf: '04566265', dataEnvio: '08/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CARLOS', obsStatus: 'FINALIZADO' },
+                    'CONTRATO INTELIGENCIA TRIBUTARIA TOTVS': { dataVencimento: '30/10/2026', scPagfor: 'CONTRATO', scTotvs: 'CONTRATO', pedido: '051775', nf: '04582378', dataEnvio: '17/09/2026', salvaPasta: 'OK', tipoEmail: 'FISICO', repReceb: 'CAIO', obsStatus: 'FINALIZADO' },
+                    'HORAS EXTRAS GBS ASSESSORIA E SERVICOS': {}
+                };
+
+                var faturasIniciais = [];
+                // 1. Gera os dados de OUTUBRO completos
+                templateBase.forEach(function(tb, i) {
+                    var out = overridesOutubro[tb.descricaoConta] || {};
+                    faturasIniciais.push({
+                        id: 'out_' + i, mes: 'OUTUBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
+                        dataVencimento: out.dataVencimento || '', scPagfor: out.scPagfor || '', scTotvs: out.scTotvs || '', pedido: out.pedido || '', nf: out.nf || '',
+                        lancada: out.lancada || '', dataEnvio: out.dataEnvio || '', salvaPasta: out.salvaPasta || '', tipoEmail: out.tipoEmail || '', repReceb: out.repReceb || '', obsStatus: out.obsStatus || ''
+                    });
+                });
+                // 2. Gera os dados de NOVEMBRO (Somente máscara)
+                templateBase.forEach(function(tb, i) {
+                    faturasIniciais.push({
+                        id: 'nov_' + i, mes: 'NOVEMBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
+                        dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', lancada: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
+                    });
+                });
+
+                var [meses, setMeses] = useState(['OUTUBRO', 'NOVEMBRO']);
+                var [abaAtiva, setAbaAtiva] = useState('OUTUBRO');
+                var [faturas, setFaturas] = useState(faturasIniciais);
 
                 var faturasDaAba = faturas.filter(function(f) { return f.mes === abaAtiva; });
 
                 var colunas = [
                     { key: 'diaVencimento', label: 'VENCIMENTO', width: 'w-24' },
-                    { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-72' },
+                    { key: 'descricaoConta', label: 'DESCRIÇÃO DA CONTA', width: 'w-80' },
                     { key: 'codigoSv', label: 'CÓDIGO SV', width: 'w-32' },
                     { key: 'dataVencimento', label: 'VENCIMENTO', width: 'w-28' },
                     { key: 'scPagfor', label: 'SC PAGFOR', width: 'w-32' },
                     { key: 'scTotvs', label: 'SC TOTVS', width: 'w-28' },
                     { key: 'pedido', label: 'PEDIDO', width: 'w-28' },
                     { key: 'nf', label: 'NF', width: 'w-32' },
-                    { key: 'fornecedor', label: 'FORNECEDOR', width: 'w-48' },
+                    { key: 'fornecedor', label: 'FORNECEDOR', width: 'w-40' },
                     { key: 'codForn', label: 'CÓD FORN', width: 'w-28' },
                     { key: 'lancada', label: 'LANÇADA', width: 'w-24' },
                     { key: 'dataEnvio', label: 'DATA DE ENVIO', width: 'w-32' },
@@ -3153,7 +3240,7 @@ var FaturasTIView = function() {
                 };
 
                 var handleAddMes = function() {
-                    var novoMes = prompt("Digite o nome do novo mês (ex: ABRIL):");
+                    var novoMes = prompt("Digite o nome do novo mês (ex: DEZEMBRO):");
                     if (!novoMes || !novoMes.trim()) return;
                     novoMes = novoMes.trim().toUpperCase();
 
@@ -3163,20 +3250,31 @@ var FaturasTIView = function() {
                         return;
                     }
 
-                    var copiar = confirm("Deseja importar automaticamente todas as contas de " + abaAtiva + " para " + novoMes + "?");
+                    var copiar = confirm("Deseja importar a MÁSCARA BASE de contas para " + novoMes + "?\n\nIsso criará a estrutura preenchida de Vencimentos, Descrições, Cód SV e Fornecedores padrão.");
                     var novasLinhas = [];
 
                     if (copiar) {
-                        var linhasAtuais = faturas.filter(function(f) { return f.mes === abaAtiva; });
-                        novasLinhas = linhasAtuais.map(function(f, index) {
-                            return Object.assign({}, f, {
+                        novasLinhas = templateBase.map(function(tb, index) {
+                            return {
                                 id: 'fat_' + Date.now() + '_' + index,
                                 mes: novoMes,
+                                diaVencimento: tb.diaVencimento,
+                                descricaoConta: tb.descricaoConta,
+                                codigoSv: tb.codigoSv,
+                                dataVencimento: '',
+                                scPagfor: '',
+                                scTotvs: '',
+                                pedido: '',
                                 nf: '',
+                                fornecedor: tb.fornecedor,
+                                codForn: tb.codForn,
+                                lancada: '',
                                 dataEnvio: '',
                                 salvaPasta: '',
+                                tipoEmail: '',
+                                repReceb: '',
                                 obsStatus: '' // Limpa o status para o novo mês
-                            });
+                            };
                         });
                     }
 
@@ -3210,7 +3308,7 @@ var FaturasTIView = function() {
                                     <p className="text-slate-500 text-sm">Controle de pagamentos, licenças e infraestrutura.</p>
                                 </div>
                                 <Button onClick={handleAddLinha} variant="success" className="text-xs px-4 py-2 shadow-none whitespace-nowrap">
-                                    {Icons.Plus} Adicionar Linha
+                                    {Icons.Plus} Adicionar Linha Avulsa
                                 </Button>
                             </div>
                             
@@ -3232,22 +3330,22 @@ var FaturasTIView = function() {
 
                             {/* Planilha */}
                             <div className="flex-1 overflow-auto bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 relative custom-scrollbar">
-                                <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '2200px' }}>
+                                <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '2400px' }}>
                                     <thead className="sticky top-0 z-10">
                                         <tr>
-                                            <th colSpan={colunas.length + 1} className="bg-white dark:bg-slate-900 font-bold text-lg py-2 border-b-2 border-slate-300 dark:border-slate-700">
+                                            <th colSpan={colunas.length + 1} className="bg-white dark:bg-slate-900 font-bold text-lg py-2 border-b-2 border-slate-300 dark:border-slate-700 uppercase tracking-widest text-slate-800 dark:text-slate-200">
                                                 CONTAS DE {abaAtiva}
                                             </th>
                                         </tr>
                                         <tr>
                                             {colunas.map(function(col) {
                                                 return (
-                                                    <th key={col.key} className={"bg-blue-600 text-white text-[11px] font-bold uppercase py-2 px-2 border border-blue-700 " + col.width}>
+                                                    <th key={col.key} className={"bg-blue-600 text-white text-[10px] font-bold uppercase py-2 px-2 border border-blue-700 " + col.width}>
                                                         {col.label}
                                                     </th>
                                                 );
                                             })}
-                                            <th className="bg-blue-600 text-white text-[11px] font-bold uppercase py-2 px-2 border border-blue-700 w-12">
+                                            <th className="bg-blue-600 text-white text-[10px] font-bold uppercase py-2 px-2 border border-blue-700 w-12">
                                                 AÇÃO
                                             </th>
                                         </tr>
@@ -3256,7 +3354,7 @@ var FaturasTIView = function() {
                                         {faturasDaAba.length === 0 && (
                                             <tr>
                                                 <td colSpan={colunas.length + 1} className="text-center py-10 text-slate-400 text-sm font-semibold border-b border-slate-200">
-                                                    Planilha vazia. Adicione uma nova linha.
+                                                    Planilha vazia. Clique em "Adicionar Linha Avulsa" ou crie um novo mês para importar a máscara.
                                                 </td>
                                             </tr>
                                         )}
@@ -3279,7 +3377,7 @@ var FaturasTIView = function() {
                                                                     type="text" 
                                                                     value={fat[col.key] || ''} 
                                                                     onChange={function(e){ handleChange(fat.id, col.key, e.target.value); }} 
-                                                                    className={"w-full h-8 px-2 bg-transparent outline-none uppercase text-center " + textClass} 
+                                                                    className={"w-full h-8 px-2 bg-transparent outline-none uppercase text-center text-[11px] " + textClass} 
                                                                 />
                                                             </td>
                                                         );
