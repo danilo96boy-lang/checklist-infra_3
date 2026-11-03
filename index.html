@@ -3172,44 +3172,92 @@ var FaturasTIView = function() {
                     'HORAS EXTRAS GBS ASSESSORIA E SERVICOS': {}
                 };
 
-                var faturasIniciais = [];
-                templateBase.forEach(function(tb, i) {
-                    var out = overridesOutubro[tb.descricaoConta] || {};
-                    faturasIniciais.push({
-                        id: 'out_' + i, mes: 'OUTUBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
-                        dataVencimento: out.dataVencimento || '', scPagfor: out.scPagfor || '', scTotvs: out.scTotvs || '', pedido: out.pedido || '', nf: out.nf || '',
-                        dataEnvio: out.dataEnvio || '', salvaPasta: out.salvaPasta || '', tipoEmail: out.tipoEmail || '', repReceb: out.repReceb || '', obsStatus: out.obsStatus || ''
+                var buildDefaultFaturas = function() {
+                    var list = [];
+                    templateBase.forEach(function(tb, i) {
+                        var out = overridesOutubro[tb.descricaoConta] || {};
+                        list.push({
+                            id: 'out_' + i, mes: 'OUTUBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
+                            dataVencimento: out.dataVencimento || '', scPagfor: out.scPagfor || '', scTotvs: out.scTotvs || '', pedido: out.pedido || '', nf: out.nf || '',
+                            dataEnvio: out.dataEnvio || '', salvaPasta: out.salvaPasta || '', tipoEmail: out.tipoEmail || '', repReceb: out.repReceb || '', obsStatus: out.obsStatus || ''
+                        });
                     });
-                });
-                templateBase.forEach(function(tb, i) {
-                    faturasIniciais.push({
-                        id: 'nov_' + i, mes: 'NOVEMBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
-                        dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
+                    templateBase.forEach(function(tb, i) {
+                        list.push({
+                            id: 'nov_' + i, mes: 'NOVEMBRO', diaVencimento: tb.diaVencimento, descricaoConta: tb.descricaoConta, codigoSv: tb.codigoSv, fornecedor: tb.fornecedor, codForn: tb.codForn,
+                            dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
+                        });
                     });
-                });
+                    return list;
+                };
 
-                var [meses, setMeses] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_meses_v9');
-                    return saved ? JSON.parse(saved) : ['OUTUBRO', 'NOVEMBRO'];
-                });
-                
+                var [meses, setMeses] = useState(['OUTUBRO', 'NOVEMBRO']);
                 var [abaAtiva, setAbaAtiva] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_aba_v9');
-                    return saved ? saved : 'OUTUBRO';
+                    return localStorage.getItem('faturas_ti_aba_v9') || 'OUTUBRO';
                 });
-                
-                var [faturas, setFaturas] = useState(function() {
-                    var saved = localStorage.getItem('faturas_ti_faturas_v9');
-                    return saved ? JSON.parse(saved) : faturasIniciais;
-                });
-
+                var [faturas, setFaturas] = useState([]);
+                var [syncStatus, setSyncStatus] = useState('SINCRONIZANDO...');
                 var [filtroVencimento, setFiltroVencimento] = useState('');
                 var [filtroFornecedor, setFiltroFornecedor] = useState('');
-                var [modoVisualizacao, setModoVisualizacao] = useState('tabela'); // 'tabela' ou 'foco'
+                var [modoVisualizacao, setModoVisualizacao] = useState('tabela');
 
-                useEffect(function() { localStorage.setItem('faturas_ti_meses_v9', JSON.stringify(meses)); }, [meses]);
-                useEffect(function() { localStorage.setItem('faturas_ti_aba_v9', abaAtiva); }, [abaAtiva]);
-                useEffect(function() { localStorage.setItem('faturas_ti_faturas_v9', JSON.stringify(faturas)); }, [faturas]);
+                // Referência na coleção 'settings' (que já possui permissão liberada nas regras do Firestore)
+                var docRef = db.collection('settings').doc('faturas_ti_realtime');
+
+                // Escuta em tempo real (qualquer operador que alterar atualiza na tela de todos na hora)
+                useEffect(function() {
+                    var unsub = docRef.onSnapshot(function(snap) {
+                        if (snap.exists && snap.data()) {
+                            var data = snap.data();
+                            var loadedMeses = Array.isArray(data.meses) && data.meses.length > 0 ? data.meses : ['OUTUBRO', 'NOVEMBRO'];
+                            var loadedFaturas = Array.isArray(data.faturas) ? data.faturas : [];
+                            setMeses(loadedMeses);
+                            setFaturas(loadedFaturas);
+                            setSyncStatus('ONLINE • TEMPO REAL');
+                        } else {
+                            // Primeira execução: aproveita o que estiver salvo no navegador local ou usa a máscara inicial
+                            var localMesesRaw = localStorage.getItem('faturas_ti_meses_v9');
+                            var localFaturasRaw = localStorage.getItem('faturas_ti_faturas_v9');
+                            var initMeses = localMesesRaw ? JSON.parse(localMesesRaw) : ['OUTUBRO', 'NOVEMBRO'];
+                            var initFaturas = localFaturasRaw ? JSON.parse(localFaturasRaw) : buildDefaultFaturas();
+
+                            docRef.set({
+                                meses: initMeses,
+                                faturas: initFaturas,
+                                updatedAt: new Date().toISOString()
+                            }).then(function() {
+                                setSyncStatus('ONLINE • TEMPO REAL');
+                            }).catch(function(err) {
+                                console.error("Erro ao inicializar faturas no Firestore:", err);
+                                setSyncStatus('ERRO DE PERMISSÃO');
+                            });
+                        }
+                    }, function(err) {
+                        console.error("Erro no listener de faturas:", err);
+                        setSyncStatus('ERRO DE CONEXÃO');
+                    });
+
+                    return function() { unsub(); };
+                }, []);
+
+                useEffect(function() {
+                    localStorage.setItem('faturas_ti_aba_v9', abaAtiva);
+                }, [abaAtiva]);
+
+                // Função centralizada que grava no Firestore e atualiza todos os usuários
+                var salvarNoFirebase = function(novosMeses, novasFaturas) {
+                    setSyncStatus('SALVANDO...');
+                    docRef.set({
+                        meses: novosMeses,
+                        faturas: novasFaturas,
+                        updatedAt: new Date().toISOString()
+                    }, { merge: true }).then(function() {
+                        setSyncStatus('ONLINE • TEMPO REAL');
+                    }).catch(function(err) {
+                        alert("Erro ao sincronizar no Firebase: " + err.message);
+                        setSyncStatus('ERRO AO SALVAR');
+                    });
+                };
 
                 var faturasDaAba = faturas.filter(function(f) {
                     if (f.mes !== abaAtiva) return false;
@@ -3220,7 +3268,6 @@ var FaturasTIView = function() {
                         var diaV = (f.diaVencimento || '').toUpperCase();
                         var dataV = (f.dataVencimento || '').toUpperCase();
                         
-                        // Busca exata ou parcial inteligente (ex: "10" casa com "10" ou "10/10/2026")
                         if (/^\d+$/.test(termoVenc)) {
                             var padDia = termoVenc.length === 1 ? '0' + termoVenc : termoVenc;
                             matchVenc = (diaV === termoVenc || diaV === padDia || dataV.indexOf('/' + padDia + '/') === 0 || dataV.indexOf(padDia + '/') === 0);
@@ -3270,24 +3317,30 @@ var FaturasTIView = function() {
                     var novaLinha = {
                         id: 'fat_' + Date.now(), mes: abaAtiva, diaVencimento: '', descricaoConta: '', codigoSv: '', dataVencimento: '', scPagfor: '', scTotvs: '', pedido: '', nf: '', fornecedor: '', codForn: '', dataEnvio: '', salvaPasta: '', tipoEmail: '', repReceb: '', obsStatus: ''
                     };
-                    setFaturas(faturas.concat([novaLinha]));
+                    var atualizadas = faturas.concat([novaLinha]);
+                    setFaturas(atualizadas);
+                    salvarNoFirebase(meses, atualizadas);
                 };
 
                 var handleRemoverLinha = function(id) {
-                    if(confirm("Remover esta linha?")) {
-                        setFaturas(faturas.filter(function(f) { return f.id !== id; }));
+                    if (confirm("Remover esta linha para todos os usuários?")) {
+                        var atualizadas = faturas.filter(function(f) { return f.id !== id; });
+                        setFaturas(atualizadas);
+                        salvarNoFirebase(meses, atualizadas);
                     }
                 };
 
                 var handleChange = function(id, campo, valor) {
-                    setFaturas(faturas.map(function(f) {
+                    var atualizadas = faturas.map(function(f) {
                         if (f.id === id) {
                             var obj = Object.assign({}, f);
                             obj[campo] = valor.toUpperCase();
                             return obj;
                         }
                         return f;
-                    }));
+                    });
+                    setFaturas(atualizadas);
+                    salvarNoFirebase(meses, atualizadas);
                 };
 
                 var handleAddMes = function() {
@@ -3328,21 +3381,25 @@ var FaturasTIView = function() {
                         });
                     }
 
-                    setMeses(meses.concat([novoMes]));
-                    if (novasLinhas.length > 0) {
-                        setFaturas(faturas.concat(novasLinhas));
-                    }
+                    var novosMeses = meses.concat([novoMes]);
+                    var novasFaturas = novasLinhas.length > 0 ? faturas.concat(novasLinhas) : faturas;
+                    
+                    setMeses(novosMeses);
+                    setFaturas(novasFaturas);
                     setAbaAtiva(novoMes);
+                    salvarNoFirebase(novosMeses, novasFaturas);
                 };
 
                 var handleRemoverMes = function(mesParaRemover) {
-                    if(confirm("Atenção: Isto excluirá a aba " + mesParaRemover + " e TODOS os seus registros. Deseja continuar?")) {
+                    if (confirm("Atenção: Isto excluirá a aba " + mesParaRemover + " e TODOS os seus registros para toda a equipe. Deseja continuar?")) {
                         var novosMeses = meses.filter(function(m) { return m !== mesParaRemover; });
+                        var novasFaturas = faturas.filter(function(f) { return f.mes !== mesParaRemover; });
                         setMeses(novosMeses);
-                        setFaturas(faturas.filter(function(f) { return f.mes !== mesParaRemover; }));
+                        setFaturas(novasFaturas);
                         if (abaAtiva === mesParaRemover) {
                             setAbaAtiva(novosMeses.length > 0 ? novosMeses[0] : '');
                         }
+                        salvarNoFirebase(novosMeses, novasFaturas);
                     }
                 };
 
@@ -3350,13 +3407,19 @@ var FaturasTIView = function() {
                     <div className="h-full w-full bg-slate-950 flex flex-col p-2 md:p-5 fade-in overflow-hidden min-w-0">
                         <div className="flex flex-col h-full w-full space-y-3 min-w-0 min-h-0">
                             
-                            {/* Cabeçalho, Ações e Alternância de Visualização */}
+                            {/* Cabeçalho, Status Realtime e Alternância de Visualização */}
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 shrink-0 px-1">
                                 <div>
-                                    <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2 uppercase tracking-wide">
-                                        {Icons.File} Gestão de Faturas T.I
-                                    </h2>
-                                    <p className="text-slate-400 text-xs md:text-sm">Controle financeiro de contratos, faturas e NFs.</p>
+                                    <div className="flex items-center gap-3">
+                                        <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2 uppercase tracking-wide">
+                                            {Icons.File} Gestão de Faturas T.I
+                                        </h2>
+                                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800/60 flex items-center gap-1.5">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            {syncStatus}
+                                        </span>
+                                    </div>
+                                    <p className="text-slate-400 text-xs md:text-sm">Controle financeiro compartilhado em tempo real entre todos os operadores.</p>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
                                     <div className="flex items-center bg-slate-900 p-1 rounded-lg border border-slate-800">
@@ -3424,7 +3487,7 @@ var FaturasTIView = function() {
                                 </button>
                             </div>
 
-                            {/* Conteúdo: Tabela Otimizada ou Modo Foco em Cards (Ambos com filtro ativo) */}
+                            {/* Conteúdo: Tabela ou Modo Foco */}
                             {modoVisualizacao === 'tabela' ? (
                                 <div className="flex-1 overflow-auto bg-slate-900 rounded-xl shadow-lg border border-slate-800 relative custom-scrollbar min-h-0 min-w-0 w-full">
                                     <table className="w-full text-sm text-center border-collapse" style={{ minWidth: '1750px' }}>
@@ -3459,7 +3522,6 @@ var FaturasTIView = function() {
                                                 var obs = (fat.obsStatus || '').toUpperCase();
                                                 var isFinalizado = obs.indexOf('FINALIZADO') !== -1;
                                                 var isAguardando = obs.indexOf('AG.') !== -1;
-
                                                 var rowHover = idx % 2 === 0 ? 'bg-slate-900/60 hover:bg-slate-800/40' : 'bg-slate-900/90 hover:bg-slate-800/40';
 
                                                 return (
