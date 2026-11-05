@@ -2666,44 +2666,7 @@ var AnalyticsView = function(props) {
                             })}
                         </div>
 
-                        {isArchiveModalOpen && (
-                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
-                                <Card className="w-full max-w-4xl bg-jira-bg border-slate-700 flex flex-col max-h-[90vh]" noPadding>
-                                    <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-jira-col shrink-0">
-                                        <h3 className="font-bold text-slate-200 text-sm flex items-center gap-2">{Icons.Archive} Tarefas Arquivadas</h3>
-                                        <button onClick={function() { setIsArchiveModalOpen(false); }} className="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
-                                    </div>
-                                    <div className="flex-1 overflow-auto p-0 md:p-4 custom-scrollbar">
-                                        {archivedTasks.length === 0 ? (
-                                            <p className="text-slate-500 text-center py-8">Nenhuma tarefa arquivada.</p>
-                                        ) : (
-                                            <table className="w-full text-sm text-left text-slate-300 min-w-[500px]">
-                                                <thead className="text-xs uppercase bg-[#161A1D] text-slate-500 sticky top-0">
-                                                    <tr>
-                                                        <th className="px-4 py-3">Código</th>
-                                                        <th className="px-4 py-3">Título</th>
-                                                        <th className="px-4 py-3">Responsável</th>
-                                                        <th className="px-4 py-3">Arquivado em</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-800">
-                                                    {archivedTasks.sort(function(a, b) { return new Date(b.archivedAt || 0) - new Date(a.archivedAt || 0); }).map(function(t) {
-                                                        return (
-                                                            <tr key={t.id} className="hover:bg-slate-800/50">
-                                                                <td className="px-4 py-3 font-mono text-xs font-bold text-brand-400">{t.code}</td>
-                                                                <td className="px-4 py-3 font-semibold uppercase">{t.title}</td>
-                                                                <td className="px-4 py-3 uppercase">{t.assignee || 'N/A'}</td>
-                                                                <td className="px-4 py-3 text-xs text-slate-500">{new Date(t.archivedAt || t.createdAt).toLocaleDateString()}</td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        )}
-                                    </div>
-                                </Card>
-                            </div>
-                        )}
+              {isArchiveModalOpen && (
 
                         {isModalOpen && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
