@@ -2335,7 +2335,7 @@ var AnalyticsView = function(props) {
                 );
             };
 
-            var KanbanView = function(props) {
+           var KanbanView = function(props) {
                 var allTasks = props.tasks || [];
                 var users = [
                     { id: '1', name: 'DANILO INACIO' },
@@ -2678,20 +2678,29 @@ var AnalyticsView = function(props) {
                                             <p className="text-slate-500 text-center py-8">Nenhuma tarefa arquivada.</p>
                                         ) : (
                                             <table className="w-full text-sm text-left text-slate-300 min-w-[500px]">
-                                                <thead className="text-xs uppercase bg-[#161A1D] text-slate-500 sticky top-0">
+                                                <thead className="text-xs uppercase bg-[#161A1D] text-slate-500 sticky top-0 z-10">
                                                     <tr>
                                                         <th className="px-4 py-3">Código</th>
                                                         <th className="px-4 py-3">Título</th>
+                                                        <th className="px-4 py-3 text-center">Anexos</th>
                                                         <th className="px-4 py-3">Responsável</th>
                                                         <th className="px-4 py-3">Arquivado em</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-800">
                                                     {archivedTasks.sort(function(a, b) { return new Date(b.archivedAt || 0) - new Date(a.archivedAt || 0); }).map(function(t) {
+                                                        var hasAttachments = t.attachments && t.attachments.length > 0;
                                                         return (
-                                                            <tr key={t.id} className="hover:bg-slate-800/50">
+                                                            <tr key={t.id} onClick={function() { setEditingTask(t); }} className="hover:bg-slate-800/50 cursor-pointer group transition-colors">
                                                                 <td className="px-4 py-3 font-mono text-xs font-bold text-brand-400">{t.code}</td>
-                                                                <td className="px-4 py-3 font-semibold uppercase">{t.title}</td>
+                                                                <td className="px-4 py-3 font-semibold uppercase group-hover:text-brand-300">{t.title}</td>
+                                                                <td className="px-4 py-3 text-center">
+                                                                    {hasAttachments ? (
+                                                                        <span className="inline-flex items-center gap-1 text-slate-300 bg-slate-800 px-2 py-1 rounded text-[10px] font-bold shadow-sm" title={t.attachments.length + " anexo(s)"}>
+                                                                            {Icons.Paperclip} {t.attachments.length}
+                                                                        </span>
+                                                                    ) : <span className="text-slate-600">-</span>}
+                                                                </td>
                                                                 <td className="px-4 py-3 uppercase">{t.assignee || 'N/A'}</td>
                                                                 <td className="px-4 py-3 text-xs text-slate-500">{new Date(t.archivedAt || t.createdAt).toLocaleDateString()}</td>
                                                             </tr>
@@ -2763,157 +2772,180 @@ var AnalyticsView = function(props) {
 
                         {editingTask && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in">
-                                <Card className="w-full max-w-3xl bg-[#1D2125] border-slate-700 max-h-[90vh] flex flex-col shadow-2xl" noPadding>
-                                    <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-[#161A1D]">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-[10px] font-mono font-bold bg-blue-600 px-2 py-1 rounded text-white">{editingTask.code}</span>
-                                            <h3 className="font-bold text-slate-200 text-sm">Editar Cartão</h3>
-                                        </div>
-                                        <button onClick={function() { setEditingTask(null); }} className="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
-                                    </div>
-                                    
-                                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Título</label>
-                                                <Input value={editingTask.title || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {title: e.target.value.toUpperCase()})); }} className="bg-[#22272B] border-slate-700 text-white font-semibold uppercase" />
+                                {(function() {
+                                    var isReadOnly = editingTask.archived === true;
+                                    return (
+                                        <Card className="w-full max-w-3xl bg-[#1D2125] border-slate-700 max-h-[90vh] flex flex-col shadow-2xl" noPadding>
+                                            <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-[#161A1D]">
+                                                <div className="flex items-center gap-3">
+                                                    <span className={"text-[10px] font-mono font-bold px-2 py-1 rounded text-white " + (isReadOnly ? "bg-slate-700" : "bg-blue-600")}>{editingTask.code}</span>
+                                                    <h3 className="font-bold text-slate-200 text-sm">{isReadOnly ? 'Visualizar Cartão Arquivado' : 'Editar Cartão'}</h3>
+                                                </div>
+                                                <button onClick={function() { setEditingTask(null); }} className="text-2xl leading-none text-slate-400 hover:text-white">&times;</button>
                                             </div>
-                                            <div>
-                                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Descrição detalhada</label>
-                                                <textarea rows="3" value={editingTask.description || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {description: e.target.value.toUpperCase()})); }} className="w-full p-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 uppercase" placeholder="ADICIONE INSTRUÇÕES, LINKS OU CONTEXTO PARA ESTA TAREFA..."></textarea>
-                                            </div>
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Data Limite</label>
-                                                    <Input type="date" value={editingTask.dueDate || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {dueDate: e.target.value})); }} className="bg-[#22272B] border-slate-700 text-white text-xs uppercase" />
+                                            
+                                            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
+                                                {isReadOnly && (
+                                                    <div className="bg-brand-900/20 border border-brand-800/40 text-brand-400 text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 font-semibold">
+                                                        {Icons.Archive} Esta tarefa está arquivada. O modo de edição está desabilitado, mas você pode consultar o histórico e baixar anexos.
+                                                    </div>
+                                                )}
+                                                
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Título</label>
+                                                        <Input disabled={isReadOnly} value={editingTask.title || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {title: e.target.value.toUpperCase()})); }} className={"bg-[#22272B] border-slate-700 text-white font-semibold uppercase " + (isReadOnly ? "opacity-70 cursor-not-allowed border-transparent bg-slate-900" : "")} />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Descrição detalhada</label>
+                                                        <textarea disabled={isReadOnly} rows="3" value={editingTask.description || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {description: e.target.value.toUpperCase()})); }} className={"w-full p-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 uppercase " + (isReadOnly ? "opacity-70 cursor-not-allowed border-transparent bg-slate-900" : "")} placeholder="ADICIONE INSTRUÇÕES, LINKS OU CONTEXTO PARA ESTA TAREFA..."></textarea>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Data Limite</label>
+                                                            <Input disabled={isReadOnly} type="date" value={editingTask.dueDate || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {dueDate: e.target.value})); }} className={"bg-[#22272B] border-slate-700 text-white text-xs uppercase " + (isReadOnly ? "opacity-70 cursor-not-allowed border-transparent bg-slate-900" : "")} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Etiqueta</label>
+                                                            <select disabled={isReadOnly} value={editingTask.tag || 'INFRAESTRUTURA'} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {tag: e.target.value})); }} className={"w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none uppercase " + (isReadOnly ? "opacity-70 cursor-not-allowed border-transparent bg-slate-900 appearance-none" : "")}>
+                                                                {tagOptions.map(function(opt) { return <option key={opt} value={opt}>{opt}</option>; })}
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Status</label>
+                                                            <select disabled={isReadOnly} value={editingTask.status || 'a_fazer'} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {status: e.target.value})); }} className={"w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none " + (isReadOnly ? "opacity-70 cursor-not-allowed border-transparent bg-slate-900 appearance-none" : "")}>
+                                                                <option value="a_fazer">A Fazer</option>
+                                                                <option value="em_andamento">Em Andamento</option>
+                                                                <option value="impedimentos">Impedimentos</option>
+                                                                <option value="concluido">Concluído</option>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Prioridade</label>
+                                                            <select disabled={isReadOnly} value={editingTask.priority || 'Média'} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {priority: e.target.value})); }} className={"w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none " + (isReadOnly ? "opacity-70 cursor-not-allowed border-transparent bg-slate-900 appearance-none" : "")}>
+                                                                <option value="Baixa">Baixa</option>
+                                                                <option value="Média">Média</option>
+                                                                <option value="Alta">Alta</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 gap-4">
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Responsável</label>
+                                                            <select disabled={isReadOnly} value={editingTask.assignee || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {assignee: e.target.value})); }} className={"w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none uppercase " + (isReadOnly ? "opacity-70 cursor-not-allowed border-transparent bg-slate-900 appearance-none" : "")}>
+                                                                <option value="">NÃO ATRIBUÍDO</option>
+                                                                {users.map(function(u) { return <option key={u.id} value={u.name}>{u.name}</option>; })}
+                                                                {editingTask.assignee && !users.some(function(u) { return u.name === editingTask.assignee; }) && (
+                                                                    <option value={editingTask.assignee}>{editingTask.assignee}</option>
+                                                                )}
+                                                            </select>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Etiqueta</label>
-                                                    <select value={editingTask.tag || 'INFRAESTRUTURA'} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {tag: e.target.value})); }} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none uppercase">
-                                                        {tagOptions.map(function(opt) { return <option key={opt} value={opt}>{opt}</option>; })}
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Status</label>
-                                                    <select value={editingTask.status || 'a_fazer'} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {status: e.target.value})); }} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none">
-                                                        <option value="a_fazer">A Fazer</option>
-                                                        <option value="em_andamento">Em Andamento</option>
-                                                        <option value="impedimentos">Impedimentos</option>
-                                                        <option value="concluido">Concluído</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Prioridade</label>
-                                                    <select value={editingTask.priority || 'Média'} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {priority: e.target.value})); }} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none">
-                                                        <option value="Baixa">Baixa</option>
-                                                        <option value="Média">Média</option>
-                                                        <option value="Alta">Alta</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-1 gap-4">
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">Responsável</label>
-                                                    <select value={editingTask.assignee || ''} onChange={function(e) { setEditingTask(Object.assign({}, editingTask, {assignee: e.target.value})); }} className="w-full h-10 px-3 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none uppercase">
-                                                        <option value="">NÃO ATRIBUÍDO</option>
-                                                        {users.map(function(u) { return <option key={u.id} value={u.name}>{u.name}</option>; })}
-                                                        {editingTask.assignee && !users.some(function(u) { return u.name === editingTask.assignee; }) && (
-                                                            <option value={editingTask.assignee}>{editingTask.assignee}</option>
+
+                                                <div className="border-t border-slate-800 pt-6 mt-4">
+                                                    <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">{Icons.Paperclip} Anexos</h4>
+                                                    <div className="space-y-2 mb-4">
+                                                        {(editingTask.attachments || []).map(function(att, idx) {
+                                                            return (
+                                                                <div key={idx} className="flex justify-between items-center bg-[#161A1D] border border-slate-800 p-2.5 rounded-lg group">
+                                                                    <a href={att.url} download={att.name} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-brand-400 hover:text-brand-300 text-xs truncate max-w-[85%] uppercase font-semibold" title="Baixar / Visualizar arquivo">
+                                                                        {Icons.File} <span className="truncate">{att.name}</span>
+                                                                    </a>
+                                                                    {!isReadOnly && (
+                                                                        <button type="button" onClick={function() { handleRemoveAttachment(idx); }} className="text-slate-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                            {Icons.Trash}
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        {(!editingTask.attachments || editingTask.attachments.length === 0) && (
+                                                            <div className="text-center p-4 text-xs text-slate-500 italic bg-[#161A1D] rounded-lg">Nenhum anexo salvo na tarefa.</div>
                                                         )}
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="border-t border-slate-800 pt-6 mt-4">
-                                            <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">{Icons.Paperclip} Anexos</h4>
-                                            <div className="space-y-2 mb-4">
-                                                {(editingTask.attachments || []).map(function(att, idx) {
-                                                    return (
-                                                        <div key={idx} className="flex justify-between items-center bg-[#161A1D] border border-slate-800 p-2.5 rounded-lg group">
-                                                            <a href={att.url} download={att.name} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-brand-400 hover:text-brand-300 text-xs truncate max-w-[85%] uppercase font-semibold">
-                                                                {Icons.File} <span className="truncate">{att.name}</span>
-                                                            </a>
-                                                            <button type="button" onClick={function() { handleRemoveAttachment(idx); }} className="text-slate-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                {Icons.Trash}
-                                                            </button>
+                                                    </div>
+                                                    {!isReadOnly && (
+                                                        <div>
+                                                            <input type="file" id="upload-attachment" className="hidden" onChange={handleUploadAttachment} />
+                                                            <Button type="button" onClick={function() { document.getElementById('upload-attachment').click(); }} disabled={isUploading} variant="secondary" className="w-full sm:w-auto text-xs bg-[#22272B] border-slate-700 text-slate-300 hover:bg-slate-700">
+                                                                {isUploading ? 'Enviando aguarde...' : '+ Adicionar Arquivo'}
+                                                            </Button>
                                                         </div>
-                                                    );
-                                                })}
-                                                {(!editingTask.attachments || editingTask.attachments.length === 0) && (
-                                                    <div className="text-center p-4 text-xs text-slate-500 italic bg-[#161A1D] rounded-lg">Nenhum anexo adicionado.</div>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <input type="file" id="upload-attachment" className="hidden" onChange={handleUploadAttachment} />
-                                                <Button type="button" onClick={function() { document.getElementById('upload-attachment').click(); }} disabled={isUploading} variant="secondary" className="w-full sm:w-auto text-xs bg-[#22272B] border-slate-700 text-slate-300 hover:bg-slate-700">
-                                                    {isUploading ? 'Enviando aguarde...' : '+ Adicionar Arquivo'}
-                                                </Button>
-                                            </div>
-                                        </div>
+                                                    )}
+                                                </div>
 
-                                        <div className="border-t border-slate-800 pt-6 mt-4">
-                                            <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">{Icons.BookOpen} Comentários e Atividade</h4>
-                                            
-                                            <div className="space-y-3 mb-5">
-                                                {(editingTask.comments || []).map(function(c, i) {
-                                                    var isMe = currentUser && c.author === currentUser.name;
-                                                    return (
-                                                        <div key={i} className={"p-3 rounded-lg border flex flex-col gap-1 " + (isMe ? "bg-brand-900/10 border-brand-800/30 ml-4 md:ml-12" : "bg-[#22272B] border-slate-800 mr-4 md:mr-12")}>
-                                                            <div className="flex justify-between items-center">
-                                                                <span className={"text-xs font-bold " + (isMe ? "text-brand-400" : "text-slate-400")}>{c.author}</span>
-                                                                <span className="text-[10px] text-slate-500">{new Date(c.createdAt).toLocaleString()}</span>
+                                                <div className="border-t border-slate-800 pt-6 mt-4">
+                                                    <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">{Icons.BookOpen} Comentários e Atividade</h4>
+                                                    
+                                                    <div className="space-y-3 mb-5">
+                                                        {(editingTask.comments || []).map(function(c, i) {
+                                                            var isMe = currentUser && c.author === currentUser.name;
+                                                            return (
+                                                                <div key={i} className={"p-3 rounded-lg border flex flex-col gap-1 " + (isMe ? "bg-brand-900/10 border-brand-800/30 ml-4 md:ml-12" : "bg-[#22272B] border-slate-800 mr-4 md:mr-12")}>
+                                                                    <div className="flex justify-between items-center">
+                                                                        <span className={"text-xs font-bold " + (isMe ? "text-brand-400" : "text-slate-400")}>{c.author}</span>
+                                                                        <span className="text-[10px] text-slate-500">{new Date(c.createdAt).toLocaleString()}</span>
+                                                                    </div>
+                                                                    <p className="text-sm text-slate-300 whitespace-pre-wrap uppercase">{c.text}</p>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        {(!editingTask.comments || editingTask.comments.length === 0) && (
+                                                            <div className="text-center p-4 text-xs text-slate-500 italic bg-[#161A1D] rounded-lg">Nenhum comentário.</div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    {!isReadOnly && (
+                                                        <div className="flex flex-col sm:flex-row items-start gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-brand-600 text-white hidden sm:flex items-center justify-center text-xs font-bold shrink-0 mt-1 shadow-sm">
+                                                                {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                                                             </div>
-                                                            <p className="text-sm text-slate-300 whitespace-pre-wrap uppercase">{c.text}</p>
+                                                            <textarea value={newComment} onChange={function(e) { setNewComment(e.target.value.toUpperCase()); }} rows="2" className="w-full sm:flex-1 p-2.5 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none uppercase" placeholder="ESCREVA UM COMENTÁRIO..."></textarea>
+                                                            <Button onClick={function() {
+                                                                if(!newComment.trim()) return;
+                                                                var commentObj = {
+                                                                    id: 'c_' + Date.now(),
+                                                                    author: currentUser ? currentUser.name : 'Técnico',
+                                                                    text: newComment.trim().toUpperCase(),
+                                                                    createdAt: new Date().toISOString()
+                                                                };
+                                                                var updatedComments = (editingTask.comments || []).concat([commentObj]);
+                                                                var updatedTask = Object.assign({}, editingTask, { comments: updatedComments });
+                                                                setEditingTask(updatedTask);
+                                                                onUpdateTask(updatedTask.id, { comments: updatedComments });
+                                                                setNewComment('');
+                                                            }} className="shrink-0 h-10 w-full sm:w-auto mt-1 px-5">Enviar</Button>
                                                         </div>
-                                                    );
-                                                })}
-                                                {(!editingTask.comments || editingTask.comments.length === 0) && (
-                                                    <div className="text-center p-4 text-xs text-slate-500 italic bg-[#161A1D] rounded-lg">Nenhum comentário. Seja o primeiro a adicionar notas a esta tarefa.</div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="p-4 border-t border-slate-800 bg-[#161A1D] flex justify-end gap-2 shrink-0">
+                                                {isReadOnly ? (
+                                                    <Button onClick={function() { setEditingTask(null); }} className="bg-slate-700 hover:bg-slate-600 text-white">Fechar Visualização</Button>
+                                                ) : (
+                                                    <React.Fragment>
+                                                        <Button variant="secondary" onClick={function() { setEditingTask(null); }} className="bg-transparent border-none text-slate-400 hover:bg-slate-800">Cancelar</Button>
+                                                        <Button onClick={function() {
+                                                            var updates = {
+                                                                title: (editingTask.title || '').toUpperCase(),
+                                                                description: (editingTask.description || '').toUpperCase(),
+                                                                status: editingTask.status || 'a_fazer',
+                                                                assignee: (editingTask.assignee || '').toUpperCase(),
+                                                                priority: editingTask.priority || 'Média',
+                                                                dueDate: editingTask.dueDate || '',
+                                                                tag: editingTask.tag || 'INFRAESTRUTURA',
+                                                                attachments: editingTask.attachments || []
+                                                            };
+                                                            onUpdateTask(editingTask.id, updates);
+                                                            setEditingTask(null);
+                                                        }} className="bg-brand-600 hover:bg-brand-500">Salvar Cartão</Button>
+                                                    </React.Fragment>
                                                 )}
                                             </div>
-                                            
-                                            <div className="flex flex-col sm:flex-row items-start gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-brand-600 text-white hidden sm:flex items-center justify-center text-xs font-bold shrink-0 mt-1 shadow-sm">
-                                                    {currentUser && currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
-                                                </div>
-                                                <textarea value={newComment} onChange={function(e) { setNewComment(e.target.value.toUpperCase()); }} rows="2" className="w-full sm:flex-1 p-2.5 bg-[#22272B] border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-brand-500 placeholder-slate-500 resize-none uppercase" placeholder="ESCREVA UM COMENTÁRIO..."></textarea>
-                                                <Button onClick={function() {
-                                                    if(!newComment.trim()) return;
-                                                    var commentObj = {
-                                                        id: 'c_' + Date.now(),
-                                                        author: currentUser ? currentUser.name : 'Técnico',
-                                                        text: newComment.trim().toUpperCase(),
-                                                        createdAt: new Date().toISOString()
-                                                    };
-                                                    var updatedComments = (editingTask.comments || []).concat([commentObj]);
-                                                    var updatedTask = Object.assign({}, editingTask, { comments: updatedComments });
-                                                    setEditingTask(updatedTask);
-                                                    onUpdateTask(updatedTask.id, { comments: updatedComments });
-                                                    setNewComment('');
-                                                }} className="shrink-0 h-10 w-full sm:w-auto mt-1 px-5">Enviar</Button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 border-t border-slate-800 bg-[#161A1D] flex justify-end gap-2 shrink-0">
-                                        <Button variant="secondary" onClick={function() { setEditingTask(null); }} className="bg-transparent border-none text-slate-400 hover:bg-slate-800">Cancelar</Button>
-                                        <Button onClick={function() {
-                                            var updates = {
-                                                title: (editingTask.title || '').toUpperCase(),
-                                                description: (editingTask.description || '').toUpperCase(),
-                                                status: editingTask.status || 'a_fazer',
-                                                assignee: (editingTask.assignee || '').toUpperCase(),
-                                                priority: editingTask.priority || 'Média',
-                                                dueDate: editingTask.dueDate || '',
-                                                tag: editingTask.tag || 'INFRAESTRUTURA',
-                                                attachments: editingTask.attachments || []
-                                            };
-                                            onUpdateTask(editingTask.id, updates);
-                                            setEditingTask(null);
-                                        }} className="bg-brand-600 hover:bg-brand-500">Salvar Cartão</Button>
-                                    </div>
-                                </Card>
+                                        </Card>
+                                    );
+                                })()}
                             </div>
                         )}
                     </div>
