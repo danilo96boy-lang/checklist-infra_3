@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="antialiased">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <!-- WCAG SC 1.4.4 (Resize Text): Removido o user-scalable=no para garantir acessibilidade de zoom -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,7 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <script>
         // Limpa qualquer Service Worker antigo que esteja travando o cache
@@ -55,22 +54,15 @@
     </script>
 
     <style>
-        /* Melhorias de acessibilidade e performance visual */
         body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: #020617; }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Scrollbars UI Modernas e Acessíveis */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        .fade-in { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #64748b; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; border: 2px solid transparent; background-clip: padding-box; }
-        ::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
 
-        /* Focus visível global para navegação via teclado (WCAG) */
-        *:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
-        
         #zebra-print-root { display: none; }
 
         @media print {
@@ -111,56 +103,51 @@
     </style>
     <style id="dynamic-print-page-style"></style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300 overscroll-none selection:bg-brand-500 selection:text-white">
-    <div id="zebra-print-root" aria-hidden="true"></div>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased font-sans transition-colors duration-300 overscroll-none">
+    <div id="zebra-print-root"></div>
 
-    <!-- Tela de Carregamento com Semântica ARIA para leitores de tela -->
-    <main id="root" aria-live="polite" aria-busy="true">
-        <div style="display:flex;height:100vh;align-items:center;justify-content:center;color:#94a3b8;font-family:monospace;flex-direction:column;gap:16px;" role="status">
-            <div style="width: 48px; height: 48px; border: 4px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;" aria-hidden="true"></div>
-            <span class="font-medium text-sm tracking-wide">Iniciando Infra Hub Cobrecom...</span>
-            <span class="sr-only">Carregando a aplicação, por favor aguarde.</span>
+    <div id="root">
+        <div style="display:flex;height:100vh;align-items:center;justify-content:center;color:#94a3b8;font-family:monospace;flex-direction:column;gap:10px;">
+            <div style="width: 40px; height: 40px; border: 4px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <span>Iniciando Infra Hub Cobrecom...</span>
             <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
         </div>
-    </main>
+    </div>
 
     <script type="text/babel">
         try {
-            // INTERCEPTADOR DE LEITURA DE QR CODE (Semântica + UI UX Refinada)
+            // INTERCEPTADOR DE LEITURA DE QR CODE:
+            // Se abrir o link do QR Code pelo celular, mostra um cartão limpo na tela com os 3 campos!
             var urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('qr_ativo')) {
                 var qAtivo = urlParams.get('qr_ativo') || '-';
                 var qNome = urlParams.get('qr_nome') || '-';
                 var qSetor = urlParams.get('qr_setor') || '-';
                 document.getElementById('root').innerHTML = `
-                    <main style="min-height:100vh;background:#020617;color:#f8fafc;display:flex;align-items:center;justify-content:center;padding:20px;font-family:'Inter',sans-serif;">
-                        <article style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:32px;width:100%;max-width:380px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);">
-                            <header style="display:flex;align-items:center;gap:12px;border-bottom:1px solid #1e293b;padding-bottom:20px;margin-bottom:24px;">
-                                <div style="background:#2563eb;color:white;font-weight:900;padding:10px 14px;border-radius:10px;font-size:16px;" aria-hidden="true">TI</div>
+                    <div style="min-height:100vh;background:#020617;color:#f8fafc;display:flex;align-items:center;justify-content:center;padding:20px;font-family:'Inter',sans-serif;">
+                        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:28px;width:100%;max-width:360px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+                            <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e293b;padding-bottom:16px;margin-bottom:20px;">
+                                <div style="background:#2563eb;color:white;font-weight:900;padding:8px 10px;border-radius:8px;font-size:14px;">TI</div>
                                 <div>
-                                    <h1 style="font-weight:800;font-size:18px;letter-spacing:0.5px;margin:0;">COBRECOM TI</h1>
-                                    <p style="font-size:12px;color:#94a3b8;margin:2px 0 0 0;">Ficha de Patrimônio / Ativo</p>
+                                    <div style="font-weight:800;font-size:16px;letter-spacing:0.5px;">COBRECOM TI</div>
+                                    <div style="font-size:11px;color:#64748b;">FICHA DE PATRIMÔNIO / ATIVO</div>
                                 </div>
-                            </header>
-                            <section style="margin-bottom:20px;">
-                                <h2 style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0;">Ativo / Patrimônio</h2>
-                                <p style="font-size:24px;font-weight:900;color:#38bdf8;font-family:'JetBrains Mono',monospace;margin:4px 0 0 0;" aria-label="Código do ativo: ${qAtivo}">${qAtivo}</p>
-                            </section>
-                            <section style="margin-bottom:20px;">
-                                <h2 style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0;">Nome / Hostname</h2>
-                                <p style="font-size:18px;font-weight:700;color:#f1f5f9;margin:4px 0 0 0;">${qNome}</p>
-                            </section>
-                            <section style="margin-bottom:32px;">
-                                <h2 style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0;">Setor</h2>
-                                <span style="display:inline-block;background:#1e3a8a;color:#93c5fd;font-weight:700;font-size:13px;padding:6px 12px;border-radius:8px;margin-top:6px;">${qSetor}</span>
-                            </section>
-                            <footer>
-                                <a href="${window.location.pathname}" style="display:flex;align-items:center;justify-content:center;background:#1e293b;color:#cbd5e1;text-decoration:none;padding:14px;border-radius:10px;font-size:14px;font-weight:600;transition:background 0.2s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1e293b'">
-                                    Abrir Painel Infra Hub
-                                </a>
-                            </footer>
-                        </article>
-                    </main>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Ativo / Patrimônio</div>
+                                <div style="font-size:22px;font-weight:900;color:#38bdf8;font-family:'JetBrains Mono',monospace;margin-top:2px;">${qAtivo}</div>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Nome / Hostname</div>
+                                <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-top:2px;">${qNome}</div>
+                            </div>
+                            <div style="margin-bottom:24px;">
+                                <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Setor</div>
+                                <div style="display:inline-block;background:#1e3a8a;color:#93c5fd;font-weight:700;font-size:12px;padding:4px 10px;border-radius:6px;margin-top:4px;">${qSetor}</div>
+                            </div>
+                            <a href="${window.location.pathname}" style="display:block;text-align:center;background:#1e293b;color:#cbd5e1;text-decoration:none;padding:12px;border-radius:10px;font-size:12px;font-weight:600;">Abrir Painel Infra Hub</a>
+                        </div>
+                    </div>
                 `;
                 throw new Error("Modo Leitura QR Ativo");
             }
@@ -188,7 +175,6 @@
             var useState = React.useState;
             var useEffect = React.useEffect;
             var useRef = React.useRef;
-            var Fragment = React.Fragment;
 
             var EMAIL_DESTINO = "infra@cobrecom.com.br";
             var ALLOWED_GMAILS = ["cobrechkti@gmail.com", "danilo96boy@gmail.com", "kauan.cobrecom@gmail.com"];
@@ -200,7 +186,6 @@
                 { id: '4', name: 'EQUIPE INFRA' }
             ];
 
-            // SVG Icons - Mantidos intactos para garantir o não-quebramento das regras de negócio visual
             var Icons = {
                 Menu: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>,
                 Layout: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>,
@@ -243,44 +228,473 @@
                 Download: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             };
 
-            // BASE UI COMPONENTS - Acessibilidade aprimorada (WCAG)
+            // Usa o protocolo MECARD: é super compacto (poucos pontos na etiqueta térmica)
+            // e faz a câmera nativa do iPhone e Android abrir na hora um cartão na tela mostrando ATIVO, NOME e SETOR!
+            var buildDesktopQRPayload = function(item) {
+                if (!item) return 'MECARD:N:S/ATIVO;ORG:COBRECOM;;';
+                var ativo = (item.ativo || 'S/ATIVO').toString().trim().toUpperCase().replace(/[;:]/g, '');
+                var nome = (item.nome || '-').toString().trim().toUpperCase().replace(/[;:]/g, '');
+                var setor = (item.setor || '-').toString().trim().toUpperCase().replace(/[;:]/g, '');
+                return "MECARD:N:" + ativo + " - " + nome + ";ORG:SETOR " + setor + ";NOTE:ATIVO " + ativo + ";;";
+            };
+
+            var generateQRDataURL = function(text) {
+                try {
+                    if (typeof qrcode === 'undefined') return '';
+                    var qr = qrcode(0, 'L');
+                    qr.addData(text || 'COBRECOM');
+                    qr.make();
+                    return qr.createDataURL(8, 2);
+                } catch (e) {
+                    return '';
+                }
+            };
+
+            var generateQRSVG = function(text) {
+                try {
+                    if (typeof qrcode === 'undefined') return '';
+                    var qr = qrcode(0, 'L');
+                    qr.addData(text || 'COBRECOM');
+                    qr.make();
+                    return '<img src="' + qr.createDataURL(8, 2) + '" style="width:11mm !important; height:11mm !important; display:block !important; image-rendering:pixelated !important;" />';
+                } catch (e) {
+                    return '';
+                }
+            };
+
+            // Gerador de código ZPL Nativo para Zebra ZD220 (203 DPI = 8 dots/mm)
+            var generateZPLCode = function(itemsArray, offsetTopMm, offsetLeftMm) {
+                var rowItems = [];
+                if (itemsArray.length === 1) {
+                    rowItems = [itemsArray[0], itemsArray[0], itemsArray[0]];
+                } else {
+                    rowItems = [itemsArray[0] || null, itemsArray[1] || null, itemsArray[2] || null];
+                }
+
+                var dpmm = 8;
+                var shiftY = Math.round(parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0') * dpmm);
+                var shiftX = Math.round(parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '4') * dpmm);
+                var colX = [16 + shiftX, 280 + shiftX, 544 + shiftX];
+
+                var zpl = "^XA\n^CI28\n^PW800\n^LL160\n^LH0,0\n";
+
+                rowItems.forEach(function(item, idx) {
+                    if (!item) return;
+                    var x = Math.max(0, colX[idx]);
+                    var y = Math.max(0, 8 + shiftY);
+
+                    var ativo = (item.ativo || 'S/ ATIVO').substring(0, 14);
+                    var nome = (item.nome || '-').substring(0, 32);
+                    var setor = (item.setor || '-').substring(0, 18);
+                    var qrPayload = buildDesktopQRPayload(item);
+
+                    zpl += "^FO" + x + "," + y + "^A0N,16,16^FB240,1,0,C^FDCOBRECOM TI^FS\n";
+                    zpl += "^FO" + (x + 10) + "," + (y + 19) + "^GB220,2,2^FS\n";
+                    zpl += "^FO" + (x + 10) + "," + (y + 24) + "^BQN,2,3^FDLA," + qrPayload + "^FS\n";
+                    zpl += "^FO" + (x + 98) + "," + (y + 25) + "^A0N,18,18^FD" + ativo + "^FS\n";
+                    zpl += "^FO" + (x + 98) + "," + (y + 44) + "^A0N,13,13^FB142,2,0,L^FD" + nome + "^FS\n";
+                    zpl += "^FO" + (x + 98) + "," + (y + 78) + "^A0N,13,13^FB142,1,0,L^FD" + setor + "^FS\n";
+                });
+
+                zpl += "^XZ";
+                return zpl;
+            };
+
+            var printZebraZD220Labels = function(itemsArray, labelHeightCm, offsetTopMm, offsetLeftMm) {
+                var heightMm = Math.round(parseFloat(labelHeightCm || '2.0') * 10);
+                var topMm = parseFloat(offsetTopMm !== undefined ? offsetTopMm : '0');
+                var leftShiftMm = parseFloat(offsetLeftMm !== undefined ? offsetLeftMm : '4');
+
+                var rowItems = [];
+                if (itemsArray.length === 1) {
+                    rowItems = [itemsArray[0], itemsArray[0], itemsArray[0]];
+                } else {
+                    rowItems = [
+                        itemsArray[0] || null,
+                        itemsArray[1] || null,
+                        itemsArray[2] || null
+                    ];
+                }
+
+                var labelsHtml = rowItems.map(function(item) {
+                    if (!item) {
+                        return '<div class="zd-box"></div>';
+                    }
+                    var qrPayload = buildDesktopQRPayload(item);
+                    var svgQr = generateQRSVG(qrPayload);
+
+                    return (
+                        '<div class="zd-box">' +
+                            '<div class="zd-head">COBRECOM TI</div>' +
+                            '<div class="zd-content">' +
+                                '<div class="zd-qr">' + svgQr + '</div>' +
+                                '<div class="zd-texts">' +
+                                    '<div class="zd-t-ativo">' + (item.ativo || 'S/ ATIVO') + '</div>' +
+                                    '<div class="zd-t-nome">' + (item.nome || '-') + '</div>' +
+                                    '<div class="zd-t-setor">' + (item.setor || '-') + '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>'
+                    );
+                }).join('');
+
+                var styleEl = document.getElementById('dynamic-print-page-style');
+                styleEl.innerHTML = `
+                    @media print {
+                        @page {
+                            size: 100mm 45mm !important;
+                            margin: 0mm !important;
+                        }
+                        html, body {
+                            width: 100mm !important;
+                            height: 45mm !important;
+                            margin: 0mm !important;
+                            padding: 0mm !important;
+                            overflow: visible !important;
+                        }
+                        #zebra-print-root {
+                            position: fixed !important;
+                            top: 0mm !important;
+                            left: 0mm !important;
+                            width: 100mm !important;
+                            overflow: visible !important;
+                        }
+                        .zd-row {
+                            display: flex !important;
+                            flex-direction: row !important;
+                            flex-wrap: nowrap !important;
+                            align-items: flex-start !important;
+                            justify-content: flex-start !important;
+                            width: 100mm !important;
+                            min-width: 100mm !important;
+                            margin-left: ${leftShiftMm}mm !important;
+                            margin-top: ${topMm}mm !important;
+                            column-gap: 3mm !important;
+                            box-sizing: border-box !important;
+                            background: transparent !important;
+                            overflow: visible !important;
+                        }
+                        .zd-box {
+                            width: 30mm !important;
+                            min-width: 30mm !important;
+                            max-width: 30mm !important;
+                            height: ${heightMm}mm !important;
+                            flex: 0 0 30mm !important;
+                            display: flex !important;
+                            flex-direction: column !important;
+                            justify-content: flex-start !important;
+                            padding: 0.4mm 1mm !important;
+                            box-sizing: border-box !important;
+                            overflow: visible !important;
+                            color: #000000 !important;
+                            font-family: Arial, Helvetica, sans-serif !important;
+                        }
+                        .zd-head {
+                            font-size: 5.5pt !important;
+                            font-weight: 900 !important;
+                            text-align: center !important;
+                            letter-spacing: 0.3px !important;
+                            border-bottom: 0.3mm solid #000000 !important;
+                            padding-bottom: 0.3mm !important;
+                            margin-bottom: 0.6mm !important;
+                            line-height: 1 !important;
+                        }
+                        .zd-content {
+                            display: flex !important;
+                            flex-direction: row !important;
+                            align-items: center !important;
+                            gap: 1.2mm !important;
+                        }
+                        .zd-qr {
+                            width: 11mm !important;
+                            height: 11mm !important;
+                            flex: 0 0 11mm !important;
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                        }
+                        .zd-qr img {
+                            width: 11mm !important;
+                            height: 11mm !important;
+                            display: block !important;
+                            image-rendering: pixelated !important;
+                        }
+                        .zd-texts {
+                            flex: 1 !important;
+                            min-width: 0 !important;
+                            display: flex !important;
+                            flex-direction: column !important;
+                            justify-content: center !important;
+                            gap: 0.25mm !important;
+                        }
+                        .zd-t-ativo {
+                            font-size: 6.5pt !important;
+                            font-weight: 900 !important;
+                            font-family: 'Courier New', monospace !important;
+                            line-height: 1 !important;
+                            white-space: nowrap !important;
+                            overflow: hidden !important;
+                        }
+                        .zd-t-nome {
+                            font-size: 4.5pt !important;
+                            font-weight: 800 !important;
+                            line-height: 1.05 !important;
+                            white-space: normal !important;
+                            word-break: break-all !important;
+                            overflow: hidden !important;
+                            display: -webkit-box !important;
+                            -webkit-line-clamp: 2 !important;
+                            -webkit-box-orient: vertical !important;
+                            text-transform: uppercase !important;
+                        }
+                        .zd-t-setor {
+                            font-size: 4.5pt !important;
+                            font-weight: 700 !important;
+                            line-height: 1 !important;
+                            white-space: nowrap !important;
+                            overflow: hidden !important;
+                            text-overflow: ellipsis !important;
+                            text-transform: uppercase !important;
+                        }
+                    }
+                `;
+
+                var printRoot = document.getElementById('zebra-print-root');
+                printRoot.innerHTML = '<div class="zd-row">' + labelsHtml + '</div>';
+
+                var originalTitle = document.title;
+                document.title = " ";
+                document.body.classList.add('printing-zebra');
+
+                setTimeout(function() {
+                    window.print();
+                    setTimeout(function() {
+                        document.body.classList.remove('printing-zebra');
+                        document.title = originalTitle;
+                        styleEl.innerHTML = '';
+                        printRoot.innerHTML = '';
+                    }, 500);
+                }, 150);
+            };
+
+            var getTemplate = function(type, tecnicoName, customTitulos) {
+                var tmpl = {
+                    meta: { 
+                        tecnico: (type === 'diario' ? 'EQUIPE TI' : (tecnicoName ? tecnicoName.toUpperCase() : '')), 
+                        data: new Date().toISOString().split('T')[0], 
+                        ativo: (type === 'diario' ? 'INFRAESTRUTURA' : (type === 'rack' ? 'RACK FÁBRICA' : '')).toUpperCase(), 
+                        maquina: (type === 'diario' ? 'ROTINA DIÁRIA' : (type === 'rack' ? 'SWITCHES' : '')).toUpperCase() 
+                    },
+                    items: {}
+                };
+
+                if (type === 'formatacao') {
+                    tmpl.items = {
+                        preventivas: {
+                            title: "1. PREVENTIVAS & FÍSICA",
+                            icon: "Server",
+                            tasks: [
+                                { id: 'f_prev_1', label: 'LIMPEZA INTERNA', checked: false, manual: 'ABRIR O GABINETE, TRAVAR AS VENTOINHAS DO COOLER COM O DEDO/PINCEL PARA EVITAR QUE GIREM EM FALSO E REMOVER TODO O PÓ COM AR COMPRIMIDO/PINCEL ANTIESTÁTICO.' },
+                                { id: 'f_prev_2', label: 'PASTA TÉRMICA', checked: false, manual: 'REMOVER O DISSIPADOR DE CALOR, LIMPAR A PASTA RESSECADA ANTIGA DO PROCESSADOR COM ÁLCOOL ISOPROPÍLICO E APLICAR UMA GOTA/CAMADA FINA UNIFORME NO CENTRO DO IHS.' },
+                                { id: 'f_prev_3', label: 'LIMPEZA MEMÓRIAS', checked: false, manual: 'REMOVER OS PENTES DE MEMÓRIA RAM E PASSAR BORRACHA PLÁSTICA BRANCA SOBRE OS CONTATOS DOURADOS PARA DESOXIDAR. TIRAR OS RESÍDUOS COM PINCEL SECO.' },
+                                { id: 'f_prev_4', label: 'LIMPA CONTATO', checked: false, manual: 'APLICAR SPRAY LIMPA CONTATO DIRETAMENTE NOS SLOTS DIMM E CONECTORES DA PLACA-MÃE. AGUARDAR CERCA DE 2 MINUTOS PARA SECAGEM TOTAL ANTES DE REINSTALAR AS PEÇAS.' }
+                            ]
+                        },
+                        root: {
+                            title: "2. ROOT",
+                            icon: "Settings",
+                            tasks: [
+                                { id: 'f_r_1', label: 'FORMATAR A MÁQUINA', checked: false, manual: '1. REINICIAR O PC E FAZER A FORMATAÇÃO PELA BIOS.\n2. CREDENCIAIS: UTILIZAR CONTA DE ADMINISTRAÇÃO LOCAL (CONSULTAR COFRE DE SENHAS DA TI).', copyText: null },
+                                { id: 'f_r_2', label: 'CONFIGURAR GPEDIT (PERFIS DE USUARIO/UPDATE)', checked: false, manual: 'EDITAR POLÍTICA DE GRUPO:\nMODELOS ADMINISTRATIVOS > SISTEMAS > PERFIS DE USUÁRIOS: SÓ PERMITIR PERFIS DE USUÁRIOS (HABILITAR).\n\nMODELOS ADMINISTRATIVOS > COMPONENTES DO WINDOWS > WINDOWS UPDATE:\nCONFIGURAÇÃO AUTOMÁTICA, PERMITIR INSTALAÇÃO, ATIVAR ATUALIZAÇÕES (DESATIVAR AS 3).', copyText: 'gpedit.msc' },
+                                { id: 'f_r_3', label: 'PAUSAR AS ATUALIZAÇÕES NO WINDOWS UPDATE', checked: false, manual: 'WINDOWS UPDATE > PAUSAR ATUALIZAÇÕES.' },
+                                { id: 'f_r_4', label: 'CONFIGURAR ÁREA DE TRABALHO REMOTA', checked: false, manual: 'WIN + R > SYSDM.CPL > ABA REMOTO > PERMITIR CONEXÕES REMOTAS.', copyText: 'sysdm.cpl' },
+                                { id: 'f_r_5', label: 'ATIVAR SMB 1.0', checked: false, manual: 'PAINEL DE CONTROLE > PROGRAMAS > ATIVAR OU DESATIVAR RECURSOS DO WINDOWS > ATIVAR A OPÇÃO SMB 1.0/CIFS.', copyText: 'optionalfeatures' },
+                                { id: 'f_r_6', label: 'CONFIGURAR WINS', checked: false, manual: 'CONFIGURAR WINS NA PLACA DE REDE (TCP/IPv4 > AVANÇADO > WINS) CASO O DEPARTAMENTO UTILIZE RESOLUÇÃO LEGADA DE NETBIOS.' },
+                                { id: 'f_r_7', label: 'COLOCAR NO DOMÍNIO', checked: false, manual: 'SOBRE > CONFIGURAÇÃO AVANÇADA > NOME DE COMPUTADOR > ALTERAR > DOMÍNIO: INSERIR O DOMÍNIO CORPORATIVO PADRÃO DA REDE.', copyText: null },
+                                { id: 'f_r_8', label: 'CONFIGURAR PROXY (PRIMEIRO IP, DEPOIS DNS)', checked: false, manual: 'ABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nINSERIR IP E PORTA DO PROXY PADRÃO DA REDE.', copyText: null },
+                                { id: 'f_r_9', label: 'CONFIGURAÇÃO DE ENERGIA', checked: false, manual: 'ENERGIA E SUSPENSÃO: NUNCA EM TUDO.' },
+                                { id: 'f_r_10', label: 'CONFIGURAR (HOSTS)', checked: false, manual: 'EDITAR O ARQUIVO DE HOSTS DO WINDOWS EM: C:\\WINDOWS\\SYSTEM32\\DRIVERS\\ETC\\HOSTS PARA ADICIONAR APONTAMENTOS MANUAIS NECESSÁRIOS DE SISTEMAS INTERNOS.', copyText: 'notepad C:\\Windows\\System32\\drivers\\etc\\hosts' },
+                                { id: 'f_r_11', label: 'ATUALIZAR DRIVERS NO SITE DO FABRICANTE', checked: false, manual: 'ABRIR O GERENCIADOR DE DISPOSITIVOS E GARANTIR A INSTALAÇÃO DE TODOS OS DRIVERS DE CHIPSET, ÁUDIO, REDE GIGABIT E PLACA GRÁFICA OFICIAL.', copyText: 'devmgmt.msc' },
+                                { id: 'f_r_12', label: 'INSTALAR PROGRAMAS PADRÕES DE FORMATAÇÃO', checked: false, manual: 'ACESSAR O DIRETÓRIO DE REDE DE MANUTENÇÃO E EXECUTAR OS SCRIPTS E INSTALADORES PADRÕES DE FORMATAÇÃO DO DEPARTAMENTO DE TI.', copyText: null },
+                                { id: 'f_r_13', label: 'ATIVAR ESET E SUAS ATUALIZAÇÕES', checked: false },
+                                { id: 'f_r_14', label: 'CONFIGURAR ACESSO REMOTO ESET', checked: false, manual: 'CONFIGURAÇÃO > CONFIGURAÇÃO AVANÇADA > PROTEÇÃO DE ACESSO À REDE > FIREWALL: HABILITAR "AVALIAR TAMBÉM AS REGRAS DO WINDOWS".\nREGRAS (EDITAR) > ADICIONAR > NOME: ACESSO REMOTO | AÇÃO: PERMITIR | APLICATIVO > CAMINHO: SVCHOST.EXE | SERVIÇO: ÁREA DE TRABALHO REMOTO.', copyText: 'svchost.exe' },
+                                { id: 'f_r_15', label: 'ATIVAR WINDOWS', checked: false, manual: 'CONFERIR O STATUS DE ATIVAÇÃO DO WINDOWS EM CONFIGURAÇÕES > ATIVAÇÃO.' },
+                                { id: 'f_r_16', label: 'ATIVAR OFFICE', checked: false, manual: 'ABRIR O WORD/EXCEL, AUTENTICAR COM A CONTA VINCULADA OU INSERIR CHAVE DE ATIVAÇÃO PARA LICENCIAR O OFFICE.' },
+                                { id: 'f_r_17', label: 'CONFIGURAR ULTRA VNC', checked: false, manual: 'CONFIGURAÇÕES WINVNC:\n- PROPERTIES: MAX CPU: 90\n- ADMIN PROPERTIES: "REMOVE WALLPAPER FOR VIEWERS" E "ENABLE BLANK MONITOR ON VIEWERS REQUEST" (DESABILITAR).' },
+                                { id: 'f_r_18', label: 'CONFIGURAR REGRA FIREWALL ULTRA VNC', checked: false },
+                                { id: 'f_r_19', label: 'CONFIGURAR FIREWALL SPARK', checked: false },
+                                { id: 'f_r_20', label: 'CONFIGURAR MELHOR DESEMPENHO (SE NECESSÁRIO)', checked: false, manual: 'WIN + R > "MSCONFIG" > INICIALIZAÇÃO DO SISTEMA > OPÇÕES AVANÇADAS > AUMENTAR NÚCLEOS DO PROCESSADOR ATÉ O MÁXIMO.\nDESATIVAR APLICATIVOS DE INICIALIZAÇÃO (QUE NÃO SÃO IMPORTANTES).', copyText: 'msconfig' },
+                                { id: 'f_r_21', label: 'CONFIGURAR IP', checked: false, manual: 'VERIFICAR O ENDEREÇO MAC DA PLACA DE REDE EXECUTANDO "GETMAC" NO PROMPT DE COMANDO E REALIZAR A RESERVA DE ENDEREÇO NO SERVIDOR DHCP CASO O SETOR EXIJA IP FIXO.', copyText: 'getmac' },
+                                { id: 'f_r_22', label: 'INSTALAR E CONFIGURAR WAZUH', checked: false, manual: 'INSTALAR O AGENTE WAZUH, CONFIGURAR O IP/HOSTNAME DO SERVIDOR SIEM NO ARQUIVO OSSEC.CONF E INICIAR O SERVIÇO.', copyText: 'services.msc' },
+                                { id: 'f_r_23', label: 'CONFIGURAR USUÁRIO COM PERMISSÕES DE USUÁRIO', checked: false, manual: 'PAINEL DE CONTROLE > CONTAS DE USUÁRIO > GERENCIAR CONTAS DE USUÁRIO > ADICIONAR O USUÁRIO DOMÍNIO.\nTROCAR DE USUÁRIO E FAZER O PROCESSO DE INICIALIZAR.', copyText: 'control userpasswords2' },
+                                { id: 'f_r_24', label: 'CONFIGURAR PERMISSÃO DE ACESSO REMOTO USER', checked: false }
+                            ]
+                        },
+                        usuario: {
+                            title: "3. USUÁRIO",
+                            icon: "User",
+                            tasks: [
+                                { id: 'f_u_1', label: 'SPARK E VNC NO INICIALIZAR', checked: false, manual: 'ADICIONAR ATALHO DO MENSAGEIRO E VNC NA PASTA DE INICIALIZAÇÃO DO WINDOWS.', copyText: 'shell:startup' },
+                                { id: 'f_u_2', label: 'CONFIGURAR MICROSIP (SE HOUVER)', checked: false },
+                                { id: 'f_u_3', label: 'CONFIGURAR E-MAIL (COLOCAR PST)', checked: false, manual: 'ABRIR O CLIENTE DE E-MAIL, ADICIONAR A CONTA CORPORATIVA DO USUÁRIO, CONFIGURAR O PROTOCOLO PADRÃO E IMPORTAR O BACKUP PST.' },
+                                { id: 'f_u_4', label: 'CONFIGURAR SPARK', checked: false, manual: 'ABRIR O MENSAGEIRO, AUTENTICAR COM O USUÁRIO DO DOMÍNIO E COLAR A PASTA DE HISTÓRICO SALVA.' },
+                                { id: 'f_u_5', label: 'CONFIGURAR IMPRESSORAS', checked: false, manual: 'INSTALAR DRIVERS DAS IMPRESSORAS DEPARTAMENTAIS PADRÕES DO SETOR E IMPRIMIR PÁGINA DE TESTE.', copyText: 'control printers' },
+                                { id: 'f_u_6', label: 'CONFIGURAR SCANNER', checked: false },
+                                { id: 'f_u_7', label: 'MAPEAR PASTAS DA REDE', checked: false, manual: 'MAPEAR UNIDADES DE REDE NECESSÁRIAS PARA O DEPARTAMENTO DO USUÁRIO CONFORME POLÍTICA DE ACESSOS.' },
+                                { id: 'f_u_8', label: 'INSTALAR TOTVS', checked: false, manual: 'INSTALAR O CLIENTE ERP PADRÃO E FIXAR O ATALHO NO MENU INICIAR/ÁREA DE TRABALHO.' },
+                                { id: 'f_u_9', label: 'CONFIGURAR PROXY', checked: false, manual: 'ABA DE PESQUISA, PESQUISAR POR PROXY > DESATIVAR A CONFIGURAÇÃO AUTOMÁTICA > USAR SERVIDOR PROXY\nINSERIR DADOS DO PROXY PADRÃO.' },
+                                { id: 'f_u_10', label: 'IMPORTAR DADOS (CASO FEITO BKP)', checked: false, manual: 'RESTAURAR AS PASTAS DOCUMENTOS, DESKTOP E OUTROS ARQUIVOS DO BACKUP PARA O PERFIL DO USUÁRIO.' },
+                                { id: 'f_u_11', label: 'IMPORTAR SENHAS PARA O NAVEGADOR', checked: false },
+                                { id: 'f_u_12', label: 'IMPORTAR FAVORITOS PARA O NAVEGADOR', checked: false, manual: 'IMPORTAR ARQUIVO DE FAVORITOS HTML SALVO PREVIAMENTE E RESTAURAR AS EXTENSÕES UTILIZADAS.' },
+                                { id: 'f_u_13', label: 'IMPORTAR REGRAS OUTLOOK', checked: false },
+                                { id: 'f_u_14', label: 'IMPORTAR HISTÓRICO SPARK', checked: false, manual: 'COPIAR A PASTA DE BACKUP DO MENSAGEIRO PARA O DIRETÓRIO APPDATA LOCAL DO USUÁRIO.', copyText: '%appdata%' },
+                                { id: 'f_u_15', label: 'COLOCAR ATIVO (NOVO PC)', checked: false, manual: 'FIXAR E CONFERIR SE A ETIQUETA PATRIMONIAL FÍSICA ESTÁ COLADA NO GABINETE E COM CÓDIGO 100% LEGÍVEL.' }
+                            ]
+                        }
+                    };
+                } else if (type === 'zebra') {
+                    tmpl.items = {
+                        inspecao: {
+                            title: "1. INSPEÇÃO FÍSICA",
+                            icon: "Check",
+                            tasks: [
+                                { id: 'z_1', label: 'ROLETE', checked: false, manual: 'VERIFICAR ALINHAMENTO E DESGASTES MECÂNICOS NO ROLETE DE BORRACHA DE TRAÇÃO.' },
+                                { id: 'z_2', label: 'CABEÇA IMPRESSÃO', checked: false, manual: 'INSPECIONAR VISUALMENTE SE HÁ RISCOS OU PONTOS QUEIMADOS NA LINHA TÉRMICA.' },
+                                { id: 'z_3', label: 'SUPORTE ETIQUETA', checked: false, manual: 'VERIFICAR O TRAVAMENTO DO SUPORTE DO ROLO DE ETIQUETA E TENSÃO DO RIBBON.' },
+                                { id: 'z_4', label: 'QUALIDADE INICIAL', checked: false, manual: 'IMPRIMIR PÁGINA INICIAL DE DIAGNÓSTICO PARA ANÁLISE DE FALHAS DE QUEIMA.' }
+                            ]
+                        },
+                        manutencao: {
+                            title: "2. MANUTENÇÃO",
+                            icon: "Server",
+                            tasks: [
+                                { id: 'z_5', label: 'LIMPEZA ROLETE', checked: false, manual: 'DESCONTAMINAR ROLETE COM ÁLCOOL ISOPROPÍLICO GIRANDO MANUALMENTE PARA RETIRAR RESÍDUOS DE COLA.' },
+                                { id: 'z_6', label: 'LIMPEZA CABEÇA', checked: false, manual: 'LIMPAR A CABEÇA DE IMPRESSÃO UTILIZANDO CANETA TÉRMICA APROPRIADA OU SWAB COM ÁLCOOL.' },
+                                { id: 'z_7', label: 'LIMPEZA SUPORTE', checked: false, manual: 'REMOVER POEIRAS INTERNAS, COLA RESIDUAL E FIAPOS DE PAPEL DOS EIXOS DE SUSTENTAÇÃO.' },
+                                { id: 'z_8', label: 'LIMPEZA GERAL', checked: false, manual: 'HIGIENIZAÇÃO GERAL DA CARCAÇA E REMOÇÃO DE POEIRA ÓTICA NA ÁREA DO SENSOR DE MÍDIA/GAP.' }
+                            ]
+                        },
+                        teste: {
+                            title: "3. VALIDAÇÃO",
+                            icon: "Printer",
+                            tasks: [
+                                { id: 'z_9', label: 'TESTE FINAL', checked: false, manual: 'EFETUAR CALIBRAÇÃO DE GAP E IMPRIMIR ETIQUETAS PARA CONFERÊNCIA DE CÓDIGO DE BARRAS COM LEITOR LASER.' }
+                            ]
+                        }
+                    };
+                } else if (type === 'diario') {
+                    var t = customTitulos || {
+                        col1: "1. FÍSICO E ACESSOS",
+                        col2: "2. DADOS E CONECTIVIDADE",
+                        col3: "3. SEGURANÇA E ENDPOINTS"
+                    };
+                    tmpl.items = {
+                        coluna1: {
+                            title: t.col1.toUpperCase(),
+                            icon: "Check",
+                            tasks: [
+                                { id: 'd_aux_1', label: 'VERIFICAÇÃO VISUAL NO-BREAKS', checked: false, manual: 'INSPEÇÃO VISUAL DIRETA NO DISPLAY DOS NO-BREAKS DO CPD PARA CERTIFICAR AUSÊNCIA DE FALHAS ATIVAS.' },
+                                { id: 'd_aux_2', label: 'VERIFICAÇÃO LOG NO-BREAKS (WEB INTERFACE)', checked: false, manual: 'ACESSO À INTERFACE WEB DE GERÊNCIA PARA CHECAR ALERTAS DE BATERIA E REDE ELÉTRICA.' },
+                                { id: 'd_aux_3', label: 'VERIFICAÇÃO VISUAL MIKROTIKS', checked: false, manual: 'CHECAR CONECTIVIDADE FÍSICA E STATUS DAS LUZES (LEDS) NAS PORTAS WAN/LAN ATIVAS.' },
+                                { id: 'd_aux_4', label: 'VERIFICAÇÃO SERVER PORTAL ( 15.3 )', checked: false, manual: 'CONFIRMAR DISPONIBILIDADE E LATÊNCIA DO PORTAL PRINCIPAL NO IP LOCAL DA REDE.' },
+                                { id: 'd_aux_5', label: 'VERIFICAÇÃO STATUS PORTAL WEB (15.3:8200)', checked: false, manual: 'TESTAR ACESSO E LOGIN NA PORTA 8200.' },
+                                { id: 'd_aux_6', label: 'VERIFICAÇÃO CONSUMO SMTP (SKYMAIL)', checked: false, manual: 'ACESSAR PAINEL DO SKYMAIL PARA CERTIFICAR LIMITE E VOLUME DE DISPAROS TRANSACIONAIS.' }
+                            ]
+                        },
+                        coluna2: {
+                            title: t.col2.toUpperCase(),
+                            icon: "Server",
+                            tasks: [
+                                { id: 'd_ple_1', label: 'VERIFICAÇÃO BACKUPS VEEAM', checked: false, manual: 'VALIDAR JOBS DE BACKUP NOTURNOS NO VEEAM. GARANTIR QUE NÃO EXISTEM ROTINAS FALHAS OU PENDENTES.' },
+                                { id: 'd_ple_baculum', label: 'VERIFICAR BACKUPS BACULUM', checked: false, manual: 'ACESSAR O PAINEL DO BACULUM (BACULA) PARA CERTIFICAR QUE OS JOBS DE BACKUP AGENDADOS EXECUTARAM COM SUCESSO E SEM ERROS CRÍTICOS.' },
+                                { id: 'd_ple_2', label: 'STATUS POOL STORAGE (FREENAS 7TB E 13TB)', checked: false, manual: 'ACESSAR A INTERFACE DO FREENAS/FREENAS PARA CHECAR INTEGRIDADE DO ARRAY ZFS E LIMITES DE CAPACIDADE.' },
+                                { id: 'd_ple_3', label: 'VERIFICAÇÃO MPLS / VPN (TL E POUSO ALEGRE)', checked: false, manual: 'PING E TESTE DE ACESSO DIRETO PARA VALIDAR ESTABILIDADE DA MALHA DE REDE COM AS FILIAIS.' },
+                                { id: 'd_ple_4', label: 'VERIFICAÇÃO LOG OPENVPN', checked: false, manual: 'REVISAR TENTATIVAS ANORMAIS DE LOGIN OU QUEDAS PERSISTENTES NOS CLIENTES DE VPN EXTERNA.' },
+                                { id: 'd_ple_5', label: 'VERIFICAÇÃO UNIFI SERVER', checked: false, manual: 'CHECAR STATUS DE ADOÇÃO DOS ACCESS POINTS E INTEGRIDADE GERAL DO MAPA DO WIFI NO CONTROLLER.' },
+                                { id: 'd_ple_6', label: 'VERIFICAÇÃO PABX (ITU, TL E POUSO ALEGRE)', checked: false, manual: 'CERTIFICAR REGISTROS SIP E DISPONIBILIDADE DE TRONCOS ENTRE AS PLANTAS.' }
+                            ]
+                        },
+                        coluna3: {
+                            title: t.col3.toUpperCase(),
+                            icon: "Search",
+                            tasks: [
+                                { id: 'd_sen_1', label: 'VERIFICAÇÃO LOG WAZUH', checked: false, manual: 'ANALISAR EVENTOS CRÍTICOS (NÍVEL 12+) DE CORRELAÇÃO NO DASHBOARD SIEM. ANALISAR FALHAS DE INTEGRIDADE EM SERVIDORES.' },
+                                { id: 'd_sen_2', label: 'VERIFICAÇÃO LOG PFSENSE', checked: false, manual: 'CHECAR CONSUMO EXCESSIVO DE LINKS, BLOQUEIOS MASSIVOS NO SURICATA/PFBLOCKER OU ANOMALIAS NO GATEWAY.' },
+                                { id: 'd_sen_3', label: 'VERIFICAÇÃO ECA ESET', checked: false, manual: 'VALIDAR MÁQUINAS DESATUALIZADAS, MÓDULOS INATIVOS OU INFECÇÕES DETECTADAS VIA CONSOLE DE GERÊNCIA ESET.' },
+                                { id: 'd_sen_4', label: 'VERIFICAÇÃO CROWDSTRIKE', checked: false, manual: 'REVISAR PAINEL DA PLATAFORMA FALCON PARA IDENTIFICAÇÃO DE AMEAÇAS OU SENSORES DESCONECTADOS NO PARQUE ATIVO.' }
+                            ]
+                        }
+                    };
+                } else if (type === 'rack') {
+                    tmpl.items = {
+                        fisica: {
+                            title: "1. LIMPEZA E ESTRUTURA",
+                            icon: "Server",
+                            tasks: [
+                                { id: 'r_1', label: 'LIMPEZA EXTERNA E FILTROS', checked: false, manual: 'REMOVER ACÚMULO DE POEIRA DA PORTA PERFURADA E LIMPAR FILTROS DE AR DO RACK (PINCEL OU PANO SECO). A POEIRA DE COBRE/PLÁSTICO CAUSA SUPERAQUECIMENTO.' },
+                                { id: 'r_2', label: 'VENTILAÇÃO (EXAUSTORES)', checked: false, manual: 'VERIFICAR SE O KIT DE VENTILAÇÃO NO TETO ESTÁ LIGADO E OPERANTE. ESCUTAR RUÍDOS DE ROLAMENTO GASTO.' },
+                                { id: 'r_3', label: 'VEDAÇÃO E TRANCAS', checked: false, manual: 'GARANTIR QUE AS PORTAS E PAINÉIS LATERAIS ESTÃO DEVIDAMENTE FECHADOS E TRANCADOS PARA EVITAR OXIDAÇÃO PRECOCE.' }
+                            ]
+                        },
+                        energia: {
+                            title: "2. ENERGIA E CLIMATIZAÇÃO",
+                            icon: "Check",
+                            tasks: [
+                                { id: 'r_4', label: 'STATUS NO-BREAK (UPS)', checked: false, manual: 'INSPECIONAR PAINEL DO NO-BREAK INTERNO. VERIFICAR SE HÁ LED VERMELHO DE BATERIA VICIADA OU ALARME SONORO.' },
+                                { id: 'r_5', label: 'RÉGUA DE TOMADAS (PDU)', checked: false, manual: 'GARANTIR QUE AS FONTES DOS SWITCHES E CONVERSORES DE MÍDIA ESTÃO BEM FIXADAS, SEM CABOS ELÉTRICOS TENSIONADOS.' },
+                                { id: 'r_6', label: 'TEMPERATURA INTERNA', checked: false, manual: 'VERIFICAR A SENSAÇÃO TÉRMICA DENTRO DO RACK. GARANTIR A AUSÊNCIA DE BOLSÕES DE AR QUENTE PRESOS NO TOPO.' }
+                            ]
+                        },
+                        ativos: {
+                            title: "3. CABEAMENTO E SWITCHES",
+                            icon: "Layout",
+                            tasks: [
+                                { id: 'r_7', label: 'LEDS DE ERRO (SWITCHES)', checked: false, manual: 'INSPECIONAR PAINEL FRONTAL. VALIDAR ALERTAS DE FALHA DE HARDWARE (SYS/ALM) E PORTAS PISCANDO LARANJA DE FORMA CONSTANTE (ERRO DE NEGOCIAÇÃO).' },
+                                { id: 'r_8', label: 'PROTEÇÃO DE PORTAS OCIOSAS', checked: false, manual: 'VERIFICAR SE AS PORTAS RJ45 NÃO UTILIZADAS ESTÃO COBERTAS COM DUST COVERS (TAMPÕES) PARA NÃO OXIDAR COM OS VAPORES DA FÁBRICA.' },
+                                { id: 'r_9', label: 'GUIAS E PATCH CORDS', checked: false, manual: 'VERIFICAR PATCH CORDS SOLTOS, FORÇADOS NAS PONTAS OU OBSTRUINDO A SAÍDA DE AR FRONTAL DOS EQUIPAMENTOS. REACOMODAR NOS GUIAS DE CABOS.' },
+                                { id: 'r_10', label: 'FIBRAS E UPLINKS', checked: false, manual: 'INSPECIONAR CORDÕES ÓPTICOS E CORDÕES DE MANOBRA PARA GARANTIR QUE NÃO HÁ ESTRANGULAMENTO OU CURVATURA EXCESSIVA.' }
+                            ]
+                        }
+                    };
+                }
+                return tmpl;
+            };
 
             var Button = function(props) {
                 var variant = props.variant || 'primary';
                 var variants = {
-                    primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm border border-transparent focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900',
-                    secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900',
-                    success: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border border-transparent focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900',
-                    danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/40 dark:text-red-400 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900',
-                    ghost: 'bg-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-brand-500',
-                    google: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2'
+                    primary: 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm hover:shadow border border-transparent',
+                    secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700',
+                    success: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border border-transparent',
+                    danger: 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:border-red-900/40 dark:text-red-400',
+                    ghost: 'bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
+                    google: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-sm'
                 };
-                var cls = "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98] outline-none " + (variants[variant] || variants.primary) + " " + (props.className || '');
+                var cls = "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 " + (variants[variant] || variants.primary) + " " + (props.className || '');
                 return <button {...props} className={cls}>{props.children}</button>;
             };
 
             var Card = function(props) {
                 var pad = props.noPadding ? '' : 'p-6';
-                var Component = props.as || 'div';
                 var cls = "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex flex-col " + pad + " " + (props.className || '');
-                return React.createElement(Component, { className: cls, ...props }, props.children);
+                return <div className={cls}>{props.children}</div>;
             };
 
             var Input = function(props) {
-                var cls = "w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all " + (props.className || '');
-                return <input {...props} className={cls} aria-invalid={props['aria-invalid']} aria-required={props.required} />;
+                var cls = "w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all " + (props.className || '');
+                return <input {...props} className={cls} />;
             };
 
             var Badge = function(props) {
                 var color = props.color || 'slate';
                 var colors = {
-                    slate: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-                    blue: 'bg-blue-100 text-blue-800 dark:bg-brand-900/40 dark:text-brand-300 border border-transparent dark:border-brand-800/50',
-                    green: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border border-transparent dark:border-emerald-800/50',
-                    amber: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-transparent dark:border-amber-800/50',
-                    indigo: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300 border border-transparent dark:border-indigo-800/50'
+                    slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+                    blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+                    green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+                    amber: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+                    indigo: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
                 };
-                return <span className={"px-2.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider " + (colors[color] || colors.slate)} role="status">{props.children}</span>;
+                return <span className={"px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider " + (colors[color] || colors.slate)}>{props.children}</span>;
             };
 
             var calcProgress = function(items) {
@@ -308,9 +722,8 @@
                         value={val}
                         onChange={function(e) { setVal(e.target.value.toUpperCase()); }}
                         onBlur={function() { if(val !== props.value) props.onSave(val.toUpperCase()); }}
-                        className={"bg-transparent focus:outline-none w-full text-ellipsis uppercase focus-visible:ring-2 focus-visible:ring-brand-500 rounded px-1 -ml-1 transition-all " + (props.className || '')}
+                        className={"bg-transparent focus:outline-none w-full text-ellipsis uppercase " + (props.className || '')}
                         title="Clique para editar este título"
-                        aria-label="Editar título da seção"
                     />
                 );
             };
