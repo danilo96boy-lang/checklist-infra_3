@@ -1544,7 +1544,7 @@
                 );
             };
 
-            var ActiveChecklist = function(props) {
+           var ActiveChecklist = function(props) {
                 var ticket = props.ticket;
                 var onUpdate = props.onUpdate;
                 var onBack = props.onBack;
@@ -1587,6 +1587,26 @@
                         return t.id === taskId ? Object.assign({}, t, { obs: text }) : t;
                     });
                     onUpdate(newData);
+                };
+
+                var handleAddTask = function(sectionKey) {
+                    var nome = prompt("NOME DO NOVO ITEM:");
+                    if (nome && nome.trim() !== '') {
+                        var manual = prompt("MANUAL / PROCEDIMENTO (OPCIONAL):");
+                        var newTask = {
+                            id: 'custom_' + Date.now(),
+                            label: nome.trim().toUpperCase(),
+                            checked: false,
+                            manual: manual && manual.trim() !== '' ? manual.trim().toUpperCase() : null
+                        };
+
+                        var newData = Object.assign({}, data);
+                        if (newData.items && newData.items[sectionKey]) {
+                            var sec = newData.items[sectionKey];
+                            sec.tasks = Array.isArray(sec.tasks) ? sec.tasks.concat([newTask]) : [newTask];
+                            onUpdate(newData);
+                        }
+                    }
                 };
 
                 var progress = calcProgress(items);
@@ -1649,6 +1669,15 @@
                                         />
                                     );
                                 })}
+                            </div>
+                            <div className="p-2 border-t border-slate-100 dark:border-slate-800/60 flex justify-center bg-slate-50/50 dark:bg-slate-900/30">
+                                <button 
+                                    type="button" 
+                                    onClick={function() { handleAddTask(key); }}
+                                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded text-[11px] font-bold text-slate-400 hover:text-brand-500 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
+                                >
+                                    {Icons.Plus} Adicionar Item
+                                </button>
                             </div>
                         </Card>
                     );
